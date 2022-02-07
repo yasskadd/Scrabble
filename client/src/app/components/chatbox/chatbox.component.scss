@@ -1,0 +1,27 @@
+.container-wrapper {
+    height: 87%;
+    width: 300px;
+}
+.message-container {
+    height: 100%;
+    width: 100%;
+    word-wrap: break-word;
+    overflow-y: auto;
+}
+.current-user {
+    color: rgb(12, 56, 200);
+}
+.opponent-user {
+    color: blueviolet;
+}
+
+.system-message {
+    color: red;
+}
+
+.user-input {
+    height: auto;
+    width: 100%;
+    word-wrap: break-word;
+    overflow-y: auto;
+}

@@ -1,17 +1,19 @@
 <div class="container justified">
-    <h1 class="header-item">Bienvenue au cours {{ title }}</h1>
     <img src="https://bit.ly/3m206ss" width="400" height="80" alt="Logo Scrabble" />
-    <section id="server-message">
-        <p>Petit message du serveur : {{ message.getValue() }}</p>
-        <div class="justified">
-            <button class="button" (click)="getMessagesFromServer()">Récupérer un message du serveur</button>
-            <button class="button" (click)="sendTimeToServer()">Envoyer un message au serveur</button>
-            <button class="button" routerLink="/material">Voir la page démo Angular Material</button>
-        </div>
-    </section>
-
-    <button class="button" routerLink="/game">Jouer!</button>
-
+    <mat-card>
+        <mat-card-title class="header-item">{{ title }}</mat-card-title>
+        <mat-card-content class="container-buttons">
+            <button id="classique" mat-raised-button color="primary" class="button game" (click)="openDialog('classique')">
+                Scrabble Classique <mat-icon class="button-icon">grid_view</mat-icon>
+            </button>
+            <button id="LOG2990" mat-raised-button disabled color="primary" class="button game" (click)="openDialog('LOG2990')">
+                Scrabble LOG2990 <mat-icon class="button-icon">checklist</mat-icon>
+            </button>
+            <button mat-raised-button disabled color="accent" class="button score">
+                Meilleur scores <mat-icon class="button-icon">emoji_events</mat-icon>
+            </button>
+        </mat-card-content>
+    </mat-card>
     <div class="footer-item">
         <h4 class="team-name">Équipe Poly</h4>
         <p>

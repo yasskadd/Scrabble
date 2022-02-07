@@ -1,0 +1,16 @@
+<div class="rack-info">
+    <!-- <li><button mat-raised-button>augmenter taille (+)</button></li> -->
+    <!-- <li><button mat-raised-button>réduire taille (-)</button></li> -->
+    <!-- <link rel="stylesheet" type="text/css" href="player-rack.component.scss" /> -->
+    <!-- <h1 mat-dialog-title id="rack-title">Votre chevalet</h1> -->
+
+    <div mat-dialog-title id="player-letters">
+        <p>Chevalet</p>
+        <canvas id="canvas" #rackCanvas [attr.width]="width" [attr.height]="height"></canvas>
+    </div>
+    <div id="actions-list" class="player-actions">
+        <p><button mat-raised-button>valider le mot</button></p>
+        <p><button mat-raised-button>passer</button></p>
+        <p><button mat-raised-button>abandonner</button></p>
+    </div>
+</div>

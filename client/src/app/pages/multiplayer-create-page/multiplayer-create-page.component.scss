@@ -1,0 +1,29 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    margin: auto;
+}
+
+.containerButton {
+    display: flex;
+    justify-content: space-between;
+    padding: 1%;
+}
+
+.startButton {
+    border-radius: 10px;
+    width: 20%;
+    font-size: 25px;
+    padding: 2px;
+    color: honeydew;
+    background-color: green;
+}
+
+.returnButton {
+    transform: scale(1.5);
+}
+
+.wrapper {
+    text-align: center;
+}

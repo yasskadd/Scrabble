@@ -1,0 +1,34 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    margin: auto;
+    text-align: center;
+}
+
+.waitingOpponentContainer {
+    border: 2px solid grey;
+    margin: 5%;
+    padding: 80px;
+}
+#soloModeButtonContainer {
+    text-align: end;
+    padding: 2%;
+}
+.soloModeButton {
+    border-radius: 10px;
+}
+.textWaitingOpponent {
+    font-size: 200%;
+}
+#containerPlayerDecision {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 30px;
+}
+.containerButton {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    justify-content: space-between;
+    padding: 0 2%;
+}

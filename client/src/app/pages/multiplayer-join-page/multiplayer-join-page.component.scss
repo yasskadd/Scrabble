@@ -1,0 +1,58 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    margin: auto;
+}
+
+.containerButton {
+    display: flex;
+    justify-content: space-between;
+    padding: 1%;
+    margin-left: 10px;
+}
+
+.joinRandomGameButton {
+    border-radius: 10px;
+    width: 20%;
+    font-size: 25px;
+    padding: 2px;
+    margin: 10px;
+    color: honeydew;
+    background-color: green;
+}
+
+.returnButton {
+    transform: scale(1.5);
+}
+
+.wrapper {
+    text-align: center;
+}
+
+.list-container {
+    background-color: rgba(204, 203, 203, 0.233);
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+}
+
+.list-item {
+    display: flex;
+    justify-content: space-around;
+    flex-direction: row;
+}
+
+table {
+    justify-content: space-evenly;
+}
+
+th {
+    padding: 10px;
+}
+
+.joinGameButton {
+    margin: 0px 0px 0px 10px;
+}

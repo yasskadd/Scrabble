@@ -1,0 +1,25 @@
+.info-panel {
+    position: absolute;
+    bottom: 0;
+    margin-bottom: 25px;
+    border: 1px solid #999999;
+    list-style-type: none;
+    padding: 5px 25px;
+}
+
+#panel-title {
+    color: cadetblue;
+}
+
+#player-properties {
+    border: 1px solid #c3c3c3;
+    display: flexbox;
+}
+
+#properties-row {
+    display: grid;
+}
+
+#properties-row div {
+    border: 1px solid #5a4848;
+}

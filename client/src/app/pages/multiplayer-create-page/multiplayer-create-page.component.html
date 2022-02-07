@@ -1,0 +1,31 @@
+<mat-card class="container">
+    <mat-card-title>Parametres</mat-card-title>
+    <div class="wrapper">
+        <mat-card-title>Nom</mat-card-title>
+        <mat-form-field appearance="fill">
+            <mat-label>Entrez votre Nom</mat-label>
+            <input matInput type="text" [(ngModel)]="playerName" placeholder="Ex. Robert" />
+        </mat-form-field>
+
+        <mat-card-title>Minuterie</mat-card-title>
+        <mat-form-field appearance="fill">
+            <mat-label>Temps</mat-label>
+            <mat-select disabled required> </mat-select>
+            <mat-option value="1" disabled>1 minute</mat-option>
+        </mat-form-field>
+
+        <mat-card-title>Dictionnaire</mat-card-title>
+        <mat-form-field appearance="fill">
+            <mat-label>Dictionnaire</mat-label>
+            <mat-select disabled required> </mat-select>
+            <mat-option value="francais" disabled>Francais</mat-option>
+        </mat-form-field>
+
+        <div class="containerButton">
+            <button class="returnButton" mat-icon-button routerLink="/home">
+                <mat-icon>navigate_before</mat-icon>
+            </button>
+            <button class="startButton" (click)="createGame()" mat-raised-button [disabled]="!playerName">Commencer</button>
+        </div>
+    </div>
+</mat-card>

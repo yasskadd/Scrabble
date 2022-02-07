@@ -5,6 +5,7 @@
         "types": ["reflect-metadata", "@types/mocha", "mocha"],
         "module": "commonjs",
         "moduleResolution": "node",
+        "resolveJsonModule": true,
         "sourceMap": true,
         "outDir": "out",
         "emitDecoratorMetadata": true,
@@ -17,7 +18,8 @@
         "suppressImplicitAnyIndexErrors": true,
         "strictNullChecks": true,
         "paths": {
-            "@app/*": ["./app/*"]
+            "@app/*": ["./app/*"],
+            "@common/*": ["../common/*"]
         }
     }
 }

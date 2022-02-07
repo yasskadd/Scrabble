@@ -1,0 +1,10 @@
+<mat-card class="container-wrapper">
+    <div #container class="message-container">
+        <div *ngFor="let message of messages" [class]="'message ' + message.type">{{ message.data }}</div>
+    </div>
+</mat-card>
+<mat-form-field appearance="outline" (keydown.enter)="submit()" class="user-input">
+    <mat-label>Entrez une message</mat-label>
+    <input id="input" matInput type="text" [formControl]="input" placeholder="Ex. Salut!" #chatbox />
+    <mat-error *ngIf="input.invalid" class="error"> Vous dépassez <strong>512 caractères</strong> </mat-error>
+</mat-form-field>

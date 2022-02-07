@@ -1,0 +1,20 @@
+.rack-info {
+    display: grid;
+    position: absolute;
+    bottom: 0%;
+}
+
+#player-letters {
+    background-color: #f5f5dc;
+    border: 1px solid #999999;
+    border-radius: 5px;
+}
+
+#actions-list {
+    display: flex;
+    width: 100%;
+    padding-top:5px;
+    flex-direction: row;
+    justify-content: space-between;
+    list-style-type: none;
+}

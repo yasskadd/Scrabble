@@ -1,25 +1,33 @@
-import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { RouterTestingModule } from '@angular/router/testing';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
-import { CommunicationService } from '@app/services/communication.service';
 import { of } from 'rxjs';
-import SpyObj = jasmine.SpyObj;
+
+export class MatDialogMock {
+    open() {
+        return {
+            afterClosed: () => of({}),
+        };
+    }
+}
 
 describe('MainPageComponent', () => {
     let component: MainPageComponent;
     let fixture: ComponentFixture<MainPageComponent>;
-    let communicationServiceSpy: SpyObj<CommunicationService>;
-
     beforeEach(async () => {
-        communicationServiceSpy = jasmine.createSpyObj('ExampleService', ['basicGet', 'basicPost']);
-        communicationServiceSpy.basicGet.and.returnValue(of({ title: '', body: '' }));
-        communicationServiceSpy.basicPost.and.returnValue(of());
-
         await TestBed.configureTestingModule({
-            imports: [RouterTestingModule, HttpClientModule],
+            imports: [RouterTestingModule, MatButtonModule, MatCardModule, MatIconModule],
             declarations: [MainPageComponent],
-            providers: [{ provide: CommunicationService, useValue: communicationServiceSpy }],
+            providers: [
+                {
+                    provide: MatDialog,
+                    useClass: MatDialogMock,
+                },
+            ],
         }).compileComponents();
     });
 
@@ -33,17 +41,21 @@ describe('MainPageComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it("should have as title 'LOG2990'", () => {
-        expect(component.title).toEqual('LOG2990');
+    it('openDialog() should open the dialog', () => {
+        const stubParameter = '';
+        const dialogSpy = spyOn(component.dialog, 'open');
+        component.openDialog(stubParameter);
+        expect(dialogSpy).toHaveBeenCalled();
     });
+    it('The Classic button should pass the Classique game mode', () => {
+        const CLASSIC_GAME_MODE = 'classique';
+        const openDialogSpy = spyOn(component, 'openDialog');
 
-    it('should call basicGet when calling getMessagesFromServer', () => {
-        component.getMessagesFromServer();
-        expect(communicationServiceSpy.basicGet).toHaveBeenCalled();
+        const button = fixture.debugElement.nativeElement.querySelector('#classique');
+        button.click();
+        expect(openDialogSpy).toHaveBeenCalledWith(CLASSIC_GAME_MODE);
     });
-
-    it('should call basicPost when calling sendTimeToServer', () => {
-        component.sendTimeToServer();
-        expect(communicationServiceSpy.basicPost).toHaveBeenCalled();
+    it('A title should exist', () => {
+        expect(component.title).toBeTruthy();
     });
 });

@@ -1,6 +1,7 @@
 .container {
     height: 100%;
     display: flex;
+    justify-content: space-between;
 }
 
 .play-area-container {
@@ -9,7 +10,9 @@
 }
 
 .play-area {
-    display: grid;
-    width: min-content;
-    outline: none;
+    display: flex;
+    // display: grid;
+    // width: min-content;
+    // outline: none;
+    justify-content: center;
 }

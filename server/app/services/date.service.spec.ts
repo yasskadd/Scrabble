@@ -1,7 +1,7 @@
-import { DateService } from '@app/services/date.service';
 import { expect } from 'chai';
 import { SinonFakeTimers, useFakeTimers } from 'sinon';
 import { Container } from 'typedi';
+import { DateService } from './date.service';
 
 describe('Date Service', () => {
     let dateService: DateService;

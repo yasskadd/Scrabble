@@ -1,0 +1,37 @@
+<mat-card class="container">
+    <mat-card-title>{{ this.gameConfiguration.statusGame }}</mat-card-title>
+    <div id="soloModeButtonContainer">
+        <button *ngIf="this.gameConfiguration.isCreator" class="soloModeButton" mat-raised-button disabled>Rejoindre Partie Solo</button>
+    </div>
+    <mat-card class="waitingOpponentContainer">
+        <a class="textWaitingOpponent">{{ this.gameConfiguration.playerName[0] }} vs {{ this.gameConfiguration.playerName[1] }} </a>
+    </mat-card>
+    <div class="containerButton">
+        <button class="returnButton" mat-icon-button (click)="exitRoom()">
+            <mat-icon>navigate_before</mat-icon>
+        </button>
+        <div id="containerPlayerDecision">
+            <button
+                *ngIf="this.gameConfiguration.isCreator"
+                class="rejectButton"
+                (click)="rejectOpponent()"
+                mat-raised-button
+                [disabled]="!this.gameConfiguration.playerName[1]"
+            >
+                Rejeter
+            </button>
+            <button
+                *ngIf="this.gameConfiguration.isCreator"
+                class="startButton"
+                (click)="startGame()"
+                mat-raised-button
+                [disabled]="!this.gameConfiguration.playerName[1]"
+            >
+                Démarrer
+            </button>
+        </div>
+    </div>
+    <mat-card-footer>
+        <mat-progress-bar mode="indeterminate" *ngIf="!this.gameConfiguration.playerName[1] || !this.gameConfiguration.isCreator"></mat-progress-bar>
+    </mat-card-footer>
+</mat-card>

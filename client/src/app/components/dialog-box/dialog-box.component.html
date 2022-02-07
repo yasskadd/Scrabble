@@ -1,0 +1,27 @@
+<div class="action-container" mat-dialog-actions>
+    <button class="button" mat-button mat-dialog-close>
+        <mat-icon>navigate_before</mat-icon>
+        retourner
+    </button>
+</div>
+<h1 mat-dialog-title>Scrabble {{ gameMode }}</h1>
+<div class="container" mat-dialog-content>
+    <button [routerLink]="singleplayerLink" id="solo" class="button" mat-raised-button color="primary" mat-dialog-close disabled>
+        Jouer une partie solo<mat-icon class="button-icon">smart_toy</mat-icon>
+    </button>
+
+    <button
+        [routerLink]="[multiplayerCreateLink]"
+        id="multiplayer-create"
+        class="button multiplayer"
+        mat-raised-button
+        color="primary"
+        mat-dialog-close
+    >
+        Creer une partie multijoueur<mat-icon class="button-icon">create</mat-icon>
+    </button>
+
+    <button [routerLink]="multiplayerjoinLink" id="multiplayer-join" class="button multiplayer" mat-raised-button color="primary" mat-dialog-close>
+        Rejoindre une partie multijoueur<mat-icon class="button-icon">leak_add</mat-icon>
+    </button>
+</div>
