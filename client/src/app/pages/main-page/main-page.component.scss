@@ -13,7 +13,6 @@
 .button {
     margin-top: 10px;
     text-align: center;
-    width: 50%;
 }
 
 .team-name {
@@ -25,7 +24,6 @@
 .header-item {
     justify-content: center;
     text-align: center;
-    margin-bottom: 5%;
 }
 
 .footer-item {
@@ -39,19 +37,8 @@
     color: blue;
 }
 
-.container-buttons {
-    display: flex;
+.server-message {
     justify-content: center;
-    align-items: center;
-    flex-direction: column;
+    width: 20%;
     min-width: min-content;
-    flex-shrink: 0;
-}
-
-.button-icon {
-    margin-left: 5%;
-}
-
-.score {
-    margin-top: 15%;
 }

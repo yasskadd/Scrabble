@@ -1,47 +1,46 @@
-// import { Message } from '@app/message';
-// import { DateService } from '@app/services/date.service';
-// // import { Events } from '@common/events';
-// import { Service } from 'typedi';
-// @Service()
-// export class ExampleService {
-//     clientMessages: Message[];
-//     constructor(private readonly dateService: DateService) {
-//         this.clientMessages = [];
-//         //    console.log(Events.Event1);
-//     }
+import { Message } from '@app/message';
+import { DateService } from '@app/services/date.service';
+import { Service } from 'typedi';
 
-//     // //     about(): Message {
-//     // //         return {
-//     // //             title: 'Basic Server About Page',
-//     // //             body: 'Try calling /api/docs to get the documentation',
-//     // //         };
-//     // //     }
+@Service()
+export class ExampleService {
+    clientMessages: Message[];
+    constructor(private readonly dateService: DateService) {
+        this.clientMessages = [];
+    }
 
-//     // //     async helloWorld(): Promise<Message> {
-//     // //         return this.dateService
-//     // //             .currentTime()
-//     // //             .then((timeMessage: Message) => {
-//     // //                 return {
-//     // //                     title: 'Hello world',
-//     // //                     body: 'Time is ' + timeMessage.body,
-//     // //                 };
-//     // //             })
-//     // //             .catch((error: unknown) => {
-//     // //                 return {
-//     // //                     title: 'Error',
-//     // //                     body: error as string,
-//     // //                 };
-//     // //             });
-//     // //     }
+    about(): Message {
+        return {
+            title: 'Basic Server About Page',
+            body: 'Try calling /api/docs to get the documentation',
+        };
+    }
 
-//     // //     // TODO : ceci est à titre d'exemple. À enlever pour la remise
-//     // //     storeMessage(message: Message): void {
-//     // //         // eslint-disable-next-line no-console
-//     // //         console.log(message);
-//     // //         this.clientMessages.push(message);
-//     // //     }
+    async helloWorld(): Promise<Message> {
+        return this.dateService
+            .currentTime()
+            .then((timeMessage: Message) => {
+                return {
+                    title: 'Hello world',
+                    body: 'Time is ' + timeMessage.body,
+                };
+            })
+            .catch((error: unknown) => {
+                return {
+                    title: 'Error',
+                    body: error as string,
+                };
+            });
+    }
 
-//     // //     getAllMessages(): Message[] {
-//     // //         return this.clientMessages;
-//     // //     }
-// }
+    // TODO : ceci est à titre d'exemple. À enlever pour la remise
+    storeMessage(message: Message): void {
+        // eslint-disable-next-line no-console
+        console.log(message);
+        this.clientMessages.push(message);
+    }
+
+    getAllMessages(): Message[] {
+        return this.clientMessages;
+    }
+}
