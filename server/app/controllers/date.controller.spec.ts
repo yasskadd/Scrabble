@@ -1,37 +1,46 @@
-// const HTTP_STATUS_OK = StatusCodes.OK;
+import { Application } from '@app/app';
+import { Message } from '@app/message';
+import { DateService } from '@app/services/date.service';
+import * as chai from 'chai';
+import { StatusCodes } from 'http-status-codes';
+import { createStubInstance, SinonStubbedInstance } from 'sinon';
+import * as supertest from 'supertest';
+import { Container } from 'typedi';
 
-// describe('DateController', () => {
-//     let dateService: SinonStubbedInstance<DateService>;
-//     let expressApp: Express.Application;
+const HTTP_STATUS_OK = StatusCodes.OK;
 
-//     beforeEach(async () => {
-//         dateService = createStubInstance(DateService);
-//         const app = Container.get(Application);
-//         // eslint-disable-next-line dot-notation
-//         Object.defineProperty(app['dateController'], 'dateService', { value: dateService, writable: true });
-//         expressApp = app.app;
-//     });
+describe('DateController', () => {
+    let dateService: SinonStubbedInstance<DateService>;
+    let expressApp: Express.Application;
 
-//     it('should return time from DateService on get request', async () => {
-//         const expectedMessage: Message = { title: 'Time', body: new Date().toString() };
-//         dateService.currentTime.resolves(expectedMessage);
+    beforeEach(async () => {
+        dateService = createStubInstance(DateService);
+        const app = Container.get(Application);
+        // eslint-disable-next-line dot-notation
+        Object.defineProperty(app['dateController'], 'dateService', { value: dateService, writable: true });
+        expressApp = app.app;
+    });
 
-//         return supertest(expressApp)
-//             .get('/api/date')
-//             .expect(HTTP_STATUS_OK)
-//             .then((response) => {
-//                 chai.expect(response.body).to.deep.equal(expectedMessage);
-//             });
-//     });
+    it('should return time from DateService on get request', async () => {
+        const expectedMessage: Message = { title: 'Time', body: new Date().toString() };
+        dateService.currentTime.resolves(expectedMessage);
 
-//     it('should return an error as a message on service fail', async () => {
-//         dateService.currentTime.rejects(new Error('service error'));
+        return supertest(expressApp)
+            .get('/api/date')
+            .expect(HTTP_STATUS_OK)
+            .then((response) => {
+                chai.expect(response.body).to.deep.equal(expectedMessage);
+            });
+    });
 
-//         return supertest(expressApp)
-//             .get('/api/date')
-//             .expect(HTTP_STATUS_OK)
-//             .then((response) => {
-//                 chai.expect(response.body.title).to.equal('Error');
-//             });
-//     });
-// });
+    it('should return an error as a message on service fail', async () => {
+        dateService.currentTime.rejects(new Error('service error'));
+
+        return supertest(expressApp)
+            .get('/api/date')
+            .expect(HTTP_STATUS_OK)
+            .then((response) => {
+                chai.expect(response.body.title).to.equal('Error');
+            });
+    });
+});
