@@ -1,43 +1,60 @@
-const { app, BrowserWindow } = require('electron');
+const { app, dialog, BrowserWindow } = require('electron');
 
 let appWindow;
 
 function initWindow() {
-    appWindow = new BrowserWindow({
-        // fullscreen: true,
-        height: 800,
-        width: 1000,
-        webPreferences: {
-            nodeIntegration: true,
-        },
-    });
+  appWindow = new BrowserWindow({
+    // fullscreen: true,
+    height: 800,
+    width: 1000,
+    webPreferences: {
+      nodeIntegration: true,
+    },
+  });
 
-    // Electron Build Path
-    const path = `file://${__dirname}/dist/desktop/index.html`;
-    appWindow.loadURL(path);
+  // Electron Build Path
+  const path = `file://${__dirname}/dist/desktop/index.html`;
+  appWindow.loadURL(path);
 
-    appWindow.setMenuBarVisibility(false)
+  appWindow.setMenuBarVisibility(false);
 
-    // Initialize the DevTools.
-    // appWindow.webContents.openDevTools()
+  // Initialize the DevTools.
+  // appWindow.webContents.openDevTools()
 
-    appWindow.on('closed', function () {
-        appWindow = null;
-    });
+  appWindow.on('closed', function() {
+    appWindow = null;
+  });
 }
 
 app.on('ready', initWindow);
 
 // Close when all windows are closed.
-app.on('window-all-closed', function () {
-    // On macOS specific close process
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
+app.on('window-all-closed', function() {
+  // On macOS specific close process
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
 });
 
-app.on('activate', function () {
-    if (appWindow === null) {
-        initWindow();
+app.on('activate', function() {
+  if (appWindow === null) {
+    initWindow();
+  }
+});
+
+app.on('window-all-closed', (closeEvent) => {
+  closeEvent.preventDefault();
+  dialog.showMessageBox({
+    type: 'info',
+    buttons: ['Quitter', 'Annuler'],
+    cancelId: 1,
+    defaultId: 0,
+    title: 'Attention',
+    detail: 'Vous êtes sur le point de quitter l\'application',
+  }).then(({ response, checkboxChecked }) => {
+    console.log(`response: ${response}`);
+    if (!response) {
+      app.quit();
     }
+  });
 });
