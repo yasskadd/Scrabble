@@ -13,7 +13,7 @@ function initWindow() {
     });
 
     // Electron Build Path
-    const path = `file://${__dirname}/dist/client/index.html`;
+    const path = `file://${__dirname}/dist/desktop/index.html`;
     appWindow.loadURL(path);
 
     appWindow.setMenuBarVisibility(false)
