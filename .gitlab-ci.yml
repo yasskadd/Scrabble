@@ -101,7 +101,7 @@ build:server:
     artifacts:
         paths:
             - server/out/
-m
+
 test:desktop:
     stage: test
     <<: *only-desktop
