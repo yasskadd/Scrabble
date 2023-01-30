@@ -1,13 +1,13 @@
 image: xwiillz/node-chromium-mongo:lts-bionic
 
 cache:
-    key: '${CI_COMMIT_REF_SLUG}-desktop'
+    key: '${CI_COMMIT_REF_SLUG}-client'
     paths:
         - desktop/node_modules/
         - server/node_modules/
     policy: pull
 
-.only-desktop: &only-desktop
+.only-client: &only-client
     only:
         refs:
             - master
@@ -15,7 +15,7 @@ cache:
         changes:
             - desktop/**/*
     cache:
-        key: '${CI_COMMIT_REF_SLUG}-desktop'
+        key: '${CI_COMMIT_REF_SLUG}-client'
         paths:
             - desktop/node_modules/
         policy: pull
@@ -40,14 +40,14 @@ stages:
     - test
     - deploy
 
-install:desktop:
+install:client:
     stage: install
-    <<: *only-desktop
+    <<: *only-client
     script:
-        - cd desktop
+        - cd client
         - npm ci --cache .npm --prefer-offline
     cache:
-        key: '${CI_COMMIT_REF_SLUG}-desktop'
+        key: '${CI_COMMIT_REF_SLUG}-client'
         paths:
             - desktop/node_modules/
             - desktop/.npm/
@@ -66,12 +66,12 @@ install:server:
             - server/.npm/
         policy: pull-push
 
-lint:desktop:
+lint:client:
     stage: lint
     allow_failure: true
-    <<: *only-desktop
+    <<: *only-client
     script:
-        - cd desktop
+        - cd client
         - npm run lint
 
 lint:server:
@@ -82,11 +82,11 @@ lint:server:
         - cd server
         - npm run lint
 
-build:desktop:
+build:client:
     stage: build
-    <<: *only-desktop
+    <<: *only-client
     script:
-        - cd desktop
+        - cd client
         - npm run build
     artifacts:
         paths:
@@ -102,15 +102,15 @@ build:server:
         paths:
             - server/out/
 m
-test:desktop:
+test:client:
     stage: test
-    <<: *only-desktop
+    <<: *only-client
     script:
         - Xvfb :99 -ac -screen 0 1920x1080x24 &
-        - cd desktop
+        - cd client
         - npm run coverage -- --browsers=ChromeHeadlessNoSandbox --watch=false
     dependencies:
-        - build:desktop
+        - build:client
     artifacts:
         paths:
             - desktop/coverage/
@@ -134,7 +134,7 @@ pages:
         - if: '$CI_COMMIT_TAG =~ /deploy/'
           when: manual
     script:
-        - cd desktop
+        - cd client
         - npm ci --cache .npm --prefer-offline
         - npm run deploy -- --base-href $BASE_HREF
         - mkdir ../public
