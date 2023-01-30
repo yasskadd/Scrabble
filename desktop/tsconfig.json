@@ -19,9 +19,11 @@
         "emitDecoratorMetadata": true,
         "moduleResolution": "node",
         "allowSyntheticDefaultImports": true,
+        "allowJs": true,
+        "skipLibCheck": true,
         "importHelpers": true,
-        "target": "es2017",
-        "module": "es2020",
+        "target": "es2020",
+        "module": "es2015",
         "lib": ["es2018", "dom"],
         "paths": {
             "@app/*": ["./src/app/*"],

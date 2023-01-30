@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, HashLocationStrategy, LocationStrategy } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -42,6 +42,7 @@ import { MainPageComponent } from './pages/main-page/main-page.component';
 import { MultiplayerCreatePageComponent } from './pages/multiplayer-create-page/multiplayer-create-page.component';
 import { MultiplayerJoinPageComponent } from './pages/multiplayer-join-page/multiplayer-join-page.component';
 import { WaitingOpponentPageComponent } from './pages/waiting-opponent-page/waiting-opponent-page.component';
+import { NgxElectronModule } from 'ngx-electron';
 
 /**
  * Main module that is used in main.ts.
@@ -88,6 +89,7 @@ import { WaitingOpponentPageComponent } from './pages/waiting-opponent-page/wait
         MatFormFieldModule,
         MatListModule,
         MatSelectModule,
+        NgxElectronModule,
         ReactiveFormsModule,
         BrowserAnimationsModule,
         BrowserModule,
@@ -98,7 +100,13 @@ import { WaitingOpponentPageComponent } from './pages/waiting-opponent-page/wait
         MatStepperModule,
         MatAutocompleteModule,
     ],
-    providers: [ImportDictionaryComponent],
+    providers: [
+        ImportDictionaryComponent,
+        {
+            provide: LocationStrategy,
+            useClass: HashLocationStrategy,
+        },
+    ],
     bootstrap: [AppComponent],
 })
 export class AppModule {}

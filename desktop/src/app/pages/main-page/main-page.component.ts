@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogBoxGameTypeComponent } from '@app/components/dialog-box-game-type/dialog-box-game-type.component';
 import { DialogBoxHighScoresComponent } from '@app/components/dialog-box-high-scores/dialog-box-high-scores.component';
 import { DialogGameHelpComponent } from '@app/components/dialog-game-help/dialog-game-help.component';
+// import { ElectronService } from 'ngx-electron';
 
 @Component({
     selector: 'app-main-page',
@@ -36,4 +37,8 @@ export class MainPageComponent {
     openHelpDialog() {
         this.dialog.open(DialogGameHelpComponent, { width: '50%' });
     }
+
+    // isMac(): boolean {
+    //     return this.electronService.isMacOS;
+    // }
 }
