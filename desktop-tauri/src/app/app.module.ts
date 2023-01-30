@@ -6,7 +6,6 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -41,7 +40,6 @@ import { MainPageComponent } from './pages/main-page/main-page.component';
 import { MultiplayerCreatePageComponent } from './pages/multiplayer-create-page/multiplayer-create-page.component';
 import { MultiplayerJoinPageComponent } from './pages/multiplayer-join-page/multiplayer-join-page.component';
 import { WaitingOpponentPageComponent } from './pages/waiting-opponent-page/waiting-opponent-page.component';
-import { NgxElectronModule } from 'ngx-electron';
 
 /**
  * Main module that is used in main.ts.
@@ -82,13 +80,11 @@ import { NgxElectronModule } from 'ngx-electron';
         AppMaterialModule,
         AppRoutingModule,
         MatSnackBarModule,
-        MatProgressBarModule,
         MatInputModule,
         MatTabsModule,
         MatFormFieldModule,
         MatListModule,
         MatSelectModule,
-        NgxElectronModule,
         ReactiveFormsModule,
         BrowserAnimationsModule,
         BrowserModule,
