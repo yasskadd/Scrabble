@@ -1,0 +1,18 @@
+<div mat-dialog-content>
+    <p>Nom a remplacer</p>
+    <mat-form-field appearance="fill">
+        <mat-label>nouveau Nom</mat-label>
+        <input matInput maxlength="20" [(ngModel)]="data.newName" />
+        <mat-hint
+            [ngClass]="{
+                max: data.newName?.length === 20
+            }"
+            align="end"
+            >{{ data.newName?.length || 0 }}/20</mat-hint
+        >
+    </mat-form-field>
+</div>
+<div mat-dialog-actions>
+    <button mat-button (click)="onNoClick()">No Thanks</button>
+    <button mat-button [mat-dialog-close]="data.newName" cdkFocusInitial>Ok</button>
+</div>

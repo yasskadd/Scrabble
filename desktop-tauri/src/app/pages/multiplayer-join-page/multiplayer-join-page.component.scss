@@ -1,0 +1,99 @@
+body {
+    margin: auto;
+    height: 100%;
+    background-color: #c2e5da;
+}
+
+.justified {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.wrapper {
+    width: 50%;
+    min-width: 500px;
+    background-color: #7fa99b;
+    color: #23501f;
+    padding: 30px;
+}
+
+.main-title {
+    text-align: left;
+    padding-bottom: 20px;
+}
+
+.mat-card-title {
+    font-size: 23px;
+}
+
+.mat-form-field {
+    margin-bottom: 20px;
+}
+
+::ng-deep .mat-form-field-appearance-fill .mat-form-field-flex {
+    background-color: rgb(255 255 255 / 36%);
+}
+
+.container-button {
+    display: flex;
+    justify-content: space-between;
+    padding: 1%;
+}
+
+button .join-random-game {
+    border-radius: 10px;
+    width: 20%;
+    font-size: 25px;
+    padding: 2px;
+    margin: 10px;
+    color: honeydew;
+    background-color: green;
+}
+
+button .join-game {
+    margin: 0px 0px 0px 10px;
+    background-color: greenyellow;
+}
+
+.return-button {
+    transform: scale(1.01);
+}
+
+.wrapper {
+    text-align: center;
+}
+
+.max {
+    color: red;
+}
+
+.list-container {
+    background-color: rgb(255 255 255 / 36%);
+    margin: 2% auto;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+}
+
+.list-item {
+    display: flex;
+    justify-content: space-around;
+    flex-direction: row;
+}
+
+table {
+    justify-content: space-evenly;
+    margin: 0 auto;
+}
+
+th {
+    padding: 0px 20px 20px 20px;
+}
+
+td {
+    padding: 2% 0;
+}

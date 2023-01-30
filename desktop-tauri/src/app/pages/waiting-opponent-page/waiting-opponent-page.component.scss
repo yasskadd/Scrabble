@@ -1,0 +1,68 @@
+body {
+    margin: auto;
+    height: 100%;
+    background-color: #c2e5da;
+}
+
+.justified {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.wrapper {
+    width: 50%;
+    min-width: 500px;
+    background-color: #7fa99b;
+    color: #23501f;
+    padding: 30px;
+}
+
+#title-and-solo-button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.solo-mode-button {
+    text-align: end;
+}
+.solo-mode-button:hover {
+    transform: scale(1.01);
+}
+
+.waiting-opponent-container {
+    display: flex;
+    padding: 80px;
+}
+
+.waiting-opponent-container > * {
+    flex: 1;
+    text-align: center;
+    font-size: 20px;
+}
+
+.textWaitingOpponent {
+    font-size: 200%;
+}
+
+::ng-deep .mat-card {
+    background-color: #c2e5da;
+}
+
+.container-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+#player-decision {
+    display: flex;
+    justify-content: space-between;
+}
+
+#player-decision > button {
+    margin-left: 10px;
+}
