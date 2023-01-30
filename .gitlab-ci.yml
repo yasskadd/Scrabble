@@ -101,7 +101,7 @@ build:server:
     artifacts:
         paths:
             - server/out/
-m
+            
 test:client:
     stage: test
     <<: *only-client
