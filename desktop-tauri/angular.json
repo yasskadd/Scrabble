@@ -31,15 +31,22 @@
                         "inlineStyleLanguage": "scss",
                         "assets": ["src/favicon.ico", "src/assets"],
                         "styles": ["src/styles.scss"],
-                        "scripts": []
+                        "scripts": [],
+                        "allowedCommonJsDependencies": ["file-saver"]
                     },
                     "configurations": {
                         "production": {
+                            "buildOptimizer": true,
+                            "optimization": true,
+                            "vendorChunk": false,
+                            "extractLicenses": false,
+                            "sourceMap": true,
+                            "namedChunks": false,
                             "budgets": [
                                 {
                                     "type": "initial",
-                                    "maximumWarning": "500kb",
-                                    "maximumError": "1mb"
+                                    "maximumWarning": "1mb",
+                                    "maximumError": "2mb"
                                 },
                                 {
                                     "type": "anyComponentStyle",
@@ -60,8 +67,12 @@
                             "optimization": false,
                             "vendorChunk": true,
                             "extractLicenses": false,
-                            "sourceMap": true,
-                            "namedChunks": true
+                            "sourceMap": false,
+                            "outputHashing": "none",
+                            "aot": true,
+                            "namedChunks": false,
+                            "statsJson": false,
+                            "progress": false
                         }
                     },
                     "defaultConfiguration": "production"
@@ -76,7 +87,7 @@
                             "browserTarget": "desktop:build:development"
                         }
                     },
-                    "defaultConfiguration": "development"
+                    "defaultConfiguration": "production"
                 },
                 "extract-i18n": {
                     "builder": "@angular-devkit/build-angular:extract-i18n",

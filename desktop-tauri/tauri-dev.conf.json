@@ -1,7 +1,7 @@
 {
     "build": {
-        "beforeDevCommand": "npm run dev",
-        "beforeBuildCommand": "npm run build",
+        "beforeDevCommand": "npm run dev --configuration development",
+        "beforeBuildCommand": "npm run build --configuration development",
         "devPath": "http://localhost:1420",
         "distDir": "../dist",
         "withGlobalTauri": false
@@ -14,6 +14,9 @@
         "allowlist": {
             "all": false,
             "window": {
+                "all": true
+            },
+            "dialog": {
                 "all": true
             },
             "shell": {
@@ -60,7 +63,9 @@
                 "height": 600,
                 "resizable": true,
                 "title": "desktop",
-                "width": 800
+                "width": 800,
+                "visible": false,
+                "focus": false
             }
         ]
     }
