@@ -37,7 +37,9 @@
                 matTooltipClass="toolMainPage"
             >
                 <div *ngFor="let letter of ['S', 'C', 'O', 'R', 'E', 'S']">{{ letter }}</div>
-                <div id="icon"><mat-icon>emoji_events</mat-icon></div>
+                <div id="icon">
+                    <mat-icon>emoji_events</mat-icon>
+                </div>
             </div>
             <button
                 mat-fab
@@ -51,6 +53,12 @@
             </button>
         </mat-card-content>
     </mat-card>
+
+    <button mat-raised-button (click)="openWindow()">Ouvrir!</button>
+
+    {{ label }}
+
+    <app-chatbox class="chatbox"></app-chatbox>
 
     <app-footer style="width: 100%"></app-footer>
 </body>
