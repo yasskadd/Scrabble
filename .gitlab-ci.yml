@@ -24,6 +24,7 @@ cache:
 .only-server: &only-server
     only:
         refs:
+            - dev
             - master
             - merge_requests
         changes:
