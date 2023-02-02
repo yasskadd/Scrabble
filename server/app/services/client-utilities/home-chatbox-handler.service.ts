@@ -5,7 +5,7 @@ import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import * as uuid from 'uuid';
 
-type MessageParameters = { username: string; message: string };
+type MessageParameters = { socketID: string; message: string };
 type HomeRoom = Pick<GameRoom, 'id' | 'isAvailable'> & { userMap: Map<string, string> };
 const ROOM_LIMIT = 4;
 
@@ -23,7 +23,7 @@ export class HomeChatBoxHandlerService {
         });
 
         this.socketManager.on(SocketEvents.SendHomeMessage, (socket, message: MessageParameters) => {
-            if (!this.homeRoom.userMap.has(message.username)) return; // Maybe not the best way to verify
+            if (!this.homeRoom.userMap.has(message.socketID)) return; // Maybe not the best way to verify
             this.messageList.push(message);
             this.broadCastMessage(socket, message);
         });
@@ -47,7 +47,8 @@ export class HomeChatBoxHandlerService {
     }
 
     private joinHomeRoom(sio: Server, socket: Socket, username: string) {
-        if (this.homeRoom.isAvailable && !this.homeRoom.userMap.has(username)) {
+        // TODO: Solve problem where 2 users can have the same username
+        if (this.homeRoom.isAvailable && !this.homeRoom.userMap.has(socket.id)) {
             this.homeRoom.userMap.set(socket.id, username);
             socket.join(this.homeRoom.id);
             this.userJoinedRoom(sio, username, this.homeRoom.id);
@@ -69,14 +70,16 @@ export class HomeChatBoxHandlerService {
     }
 
     private broadCastMessage(socket: Socket, message: MessageParameters) {
-        socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.BroadCastMessageHome, message.username);
+        // TODO: Send message with username (need to decide which format)
+        socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.BroadCastMessageHome, this.homeRoom.userMap.get(message.socketID));
     }
 
     private leaveRoom(socket: Socket) {
-        delete this.homeRoom.userMap[socket.id];
+        const username = this.homeRoom.userMap.get(socket.id);
+        this.homeRoom.userMap.delete(socket.id);
         this.setIsAvailable();
         socket.leave(this.homeRoom.id);
-        socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.userLeftHomeRoom, this.homeRoom.userMap.get(socket.id));
+        socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.userLeftHomeRoom, username);
     }
 
     private setIsAvailable() {
