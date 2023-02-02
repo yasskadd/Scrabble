@@ -27,6 +27,14 @@ export class HomeChatBoxHandlerService {
             this.messageList.push(message);
             this.broadCastMessage(socket, message);
         });
+
+        this.socketManager.on(SocketEvents.LeaveHomeRoom, (socket: Socket, username: string) => {
+            this.leaveRoom(socket, username);
+        });
+
+        this.socketManager.on(SocketEvents.Disconnect, (socket: Socket, username: string) => {
+            this.leaveRoom(socket, username);
+        });
     }
 
     private initGameRoom() {
@@ -45,11 +53,12 @@ export class HomeChatBoxHandlerService {
             this.homeRoom.socketID.push(socket.id);
             socket.join(this.homeRoom.id);
             this.userJoinedRoom(sio, username, this.homeRoom.id);
-            if (this.homeRoom.userSet.size === ROOM_LIMIT) this.homeRoom.isAvailable = false;
+            this.setIsAvailable();
             return;
         }
         // Implement sockets to give feedback of full room to client
         this.notifyClientFullRoom(socket);
+        // TODO: Notify client username is already taken if username is already connected in room
     }
 
     // Method to notify clients that someone joined the room
@@ -63,5 +72,16 @@ export class HomeChatBoxHandlerService {
 
     private broadCastMessage(socket: Socket, message: MessageParameters) {
         socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.BroadCastMessageHome, message.username);
+    }
+
+    private leaveRoom(socket: Socket, username: string) {
+        this.homeRoom.userSet.delete(username);
+        this.setIsAvailable();
+        socket.leave(this.homeRoom.id);
+        socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.userLeftHomeRoom, username);
+    }
+
+    private setIsAvailable() {
+        this.homeRoom.isAvailable = this.homeRoom.userSet.size < ROOM_LIMIT;
     }
 }
