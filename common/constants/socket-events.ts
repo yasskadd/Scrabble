@@ -43,4 +43,5 @@ export enum SocketEvents {
     ImportDictionary = 'ImportDictionary',
     JoinHomeRoom = 'joinHomeRoom',
     JoinedHomeRoom = 'joinedHomeRoom',
+    RoomIsFull = 'roomIsFull',
 }
