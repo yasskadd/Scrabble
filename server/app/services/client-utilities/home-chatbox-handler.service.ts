@@ -1,5 +1,7 @@
 import { GameRoom } from "@app/interfaces/game-room";
+import * as uuid from 'uuid';
 import { SocketManager } from "../socket/socket-manager.service";
+
 
 type HomeRoom = Pick<GameRoom, 'id' | 'users' | 'socketID' | 'isAvailable'>;
 export class HomeChatBoxHandler {
@@ -7,11 +9,14 @@ export class HomeChatBoxHandler {
     private messageList:
 
     constructor(public socketManager: SocketManager) {
+
     }
 
     private initSocketEvents()
 
-    private createHomeRoom()
+    private initGameRoom() {
+        const roomID = uuid.v4();
+    }
 
     private joinHomeRoom()
 }
