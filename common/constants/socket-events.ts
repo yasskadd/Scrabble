@@ -41,4 +41,5 @@ export enum SocketEvents {
     AllReserveLetters = 'allReserveLetters',
     ClueCommand = 'clueCommand',
     ImportDictionary = 'ImportDictionary',
+    JoinHomeRoom = 'joinHomeRoom',
 }
