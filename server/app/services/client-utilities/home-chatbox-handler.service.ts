@@ -6,7 +6,7 @@ import { Service } from 'typedi';
 import * as uuid from 'uuid';
 
 type MessageParameters = { username: string; message: string };
-type HomeRoom = Pick<GameRoom, 'id' | 'socketID' | 'isAvailable'> & { userSet: Set<string> };
+type HomeRoom = Pick<GameRoom, 'id' | 'isAvailable'> & { userMap: Map<string, string> };
 const ROOM_LIMIT = 4;
 
 @Service()
@@ -23,17 +23,17 @@ export class HomeChatBoxHandlerService {
         });
 
         this.socketManager.on(SocketEvents.SendHomeMessage, (socket, message: MessageParameters) => {
-            if (!this.homeRoom.userSet.has(message.username)) return; // Maybe not the best way to verify
+            if (!this.homeRoom.userMap.has(message.username)) return; // Maybe not the best way to verify
             this.messageList.push(message);
             this.broadCastMessage(socket, message);
         });
 
-        this.socketManager.on(SocketEvents.LeaveHomeRoom, (socket: Socket, username: string) => {
-            this.leaveRoom(socket, username);
+        this.socketManager.on(SocketEvents.LeaveHomeRoom, (socket: Socket) => {
+            this.leaveRoom(socket);
         });
 
-        this.socketManager.on(SocketEvents.Disconnect, (socket: Socket, username: string) => {
-            this.leaveRoom(socket, username);
+        this.socketManager.on(SocketEvents.Disconnect, (socket: Socket) => {
+            this.leaveRoom(socket);
         });
     }
 
@@ -41,16 +41,14 @@ export class HomeChatBoxHandlerService {
         const roomID = uuid.v4();
         this.homeRoom = {
             id: roomID,
-            userSet: new Set<string>() as Set<string>,
-            socketID: [],
+            userMap: new Map<string, string>(),
             isAvailable: true,
         } as HomeRoom;
     }
 
     private joinHomeRoom(sio: Server, socket: Socket, username: string) {
-        if (this.homeRoom.isAvailable && !this.homeRoom.userSet.has(username)) {
-            this.homeRoom.userSet.add(username);
-            this.homeRoom.socketID.push(socket.id);
+        if (this.homeRoom.isAvailable && !this.homeRoom.userMap.has(username)) {
+            this.homeRoom.userMap.set(socket.id, username);
             socket.join(this.homeRoom.id);
             this.userJoinedRoom(sio, username, this.homeRoom.id);
             this.setIsAvailable();
@@ -74,14 +72,14 @@ export class HomeChatBoxHandlerService {
         socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.BroadCastMessageHome, message.username);
     }
 
-    private leaveRoom(socket: Socket, username: string) {
-        this.homeRoom.userSet.delete(username);
+    private leaveRoom(socket: Socket) {
+        delete this.homeRoom.userMap[socket.id];
         this.setIsAvailable();
         socket.leave(this.homeRoom.id);
-        socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.userLeftHomeRoom, username);
+        socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.userLeftHomeRoom, this.homeRoom.userMap.get(socket.id));
     }
 
     private setIsAvailable() {
-        this.homeRoom.isAvailable = this.homeRoom.userSet.size < ROOM_LIMIT;
+        this.homeRoom.isAvailable = this.homeRoom.userMap.size < ROOM_LIMIT;
     }
 }
