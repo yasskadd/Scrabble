@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { GameRoom } from '@app/interfaces/game-room';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
@@ -25,10 +24,7 @@ export class HomeChatBoxHandlerService {
 
         this.socketManager.on(SocketEvents.SendHomeMessage, (socket, message: MessageParameters) => {
             if (!this.homeRoom.userSet.has(message.username)) return; // Maybe not the best way to verify
-            console.log(`Message sent from ${message.username} : ${message.message}`);
             this.messageList.push(message);
-            console.log(socket.rooms);
-            console.log(this.homeRoom.id);
             this.broadCastMessage(socket, message);
         });
     }
@@ -50,10 +46,6 @@ export class HomeChatBoxHandlerService {
             socket.join(this.homeRoom.id);
             this.userJoinedRoom(sio, username, this.homeRoom.id);
             if (this.homeRoom.userSet.size === ROOM_LIMIT) this.homeRoom.isAvailable = false;
-            console.log(`${username} joined the room: ${this.homeRoom.id}`);
-            console.log(`There is ${this.homeRoom.userSet.size} / 4 users connected`);
-            console.log('Here are the connected users:');
-            console.log(this.homeRoom.userSet);
             return;
         }
         // Implement sockets to give feedback of full room to client
@@ -66,7 +58,6 @@ export class HomeChatBoxHandlerService {
     }
 
     private notifyClientFullRoom(socket: Socket) {
-        console.log('Room is FULL');
         socket.emit(SocketEvents.RoomIsFull);
     }
 
