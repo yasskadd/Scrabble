@@ -10,7 +10,7 @@ type HomeRoom = Pick<GameRoom, 'id' | 'users' | 'socketID' | 'isAvailable'>;
 const ROOM_LIMIT = 4;
 
 @Service()
-export class HomeChatBoxHandler {
+export class HomeChatBoxHandlerService {
     private homeRoom: HomeRoom;
     private messageList = [];
     constructor(public socketManager: SocketManager) {
@@ -36,7 +36,7 @@ export class HomeChatBoxHandler {
     private joinHomeRoom(socket: Socket, username: string) {
         if (this.homeRoom.isAvailable) {
             this.homeRoom.users.push(username);
-            this.homeRoom.socketID.push(socket);
+            this.homeRoom.socketID.push(socket.id);
             if (this.homeRoom.users.length === ROOM_LIMIT) this.homeRoom.isAvailable = false;
         }
         // Implement sockets to give feedback of full room to client
