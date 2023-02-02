@@ -41,12 +41,22 @@ export class HomeChatBoxHandlerService {
             this.userJoinedRoom(sio, username, this.homeRoom.id);
             if (this.homeRoom.users.length === ROOM_LIMIT) this.homeRoom.isAvailable = false;
             console.log(`${username} joined the room: ${this.homeRoom.id}`);
+            console.log(`There is ${this.homeRoom.users.length} / 4 users connected`);
+            console.log('Here is the connected users:');
+            console.log(this.homeRoom.users);
+            return;
         }
         // Implement sockets to give feedback of full room to client
+        this.notifyClientFullRoom(socket);
     }
 
     // Method to notify clients that someone joined the room
     private userJoinedRoom(sio: Server, username: string, roomID: string) {
         sio.sockets.to(roomID).emit(SocketEvents.JoinedHomeRoom, username);
+    }
+
+    private notifyClientFullRoom(socket: Socket) {
+        console.log('Room is FULL');
+        socket.emit(SocketEvents.RoomIsFull);
     }
 }
