@@ -1,28 +1,30 @@
 image: xwiillz/node-chromium-mongo:lts-bionic
 
 cache:
-    key: '${CI_COMMIT_REF_SLUG}-client'
+    key: '${CI_COMMIT_REF_SLUG}-desktop'
     paths:
-        - client/node_modules/
+        - desktop/node_modules/
         - server/node_modules/
     policy: pull
 
-.only-client: &only-client
+.only-desktop: &only-desktop
     only:
         refs:
+            - dev
             - master
             - merge_requests
         changes:
-            - client/**/*
+            - desktop/**/*
     cache:
-        key: '${CI_COMMIT_REF_SLUG}-client'
+        key: '${CI_COMMIT_REF_SLUG}-desktop'
         paths:
-            - client/node_modules/
+            - desktop/node_modules/
         policy: pull
 
 .only-server: &only-server
     only:
         refs:
+            - dev
             - master
             - merge_requests
         changes:
@@ -40,17 +42,17 @@ stages:
     - test
     - deploy
 
-install:client:
+install:desktop:
     stage: install
-    <<: *only-client
+    <<: *only-desktop
     script:
-        - cd client
+        - cd desktop
         - npm ci --cache .npm --prefer-offline
     cache:
-        key: '${CI_COMMIT_REF_SLUG}-client'
+        key: '${CI_COMMIT_REF_SLUG}-desktop'
         paths:
-            - client/node_modules/
-            - client/.npm/
+            - desktop/node_modules/
+            - desktop/.npm/
         policy: pull-push
 
 install:server:
@@ -66,12 +68,12 @@ install:server:
             - server/.npm/
         policy: pull-push
 
-lint:client:
+lint:desktop:
     stage: lint
     allow_failure: true
-    <<: *only-client
+    <<: *only-desktop
     script:
-        - cd client
+        - cd desktop
         - npm run lint
 
 lint:server:
@@ -82,15 +84,15 @@ lint:server:
         - cd server
         - npm run lint
 
-build:client:
+build:desktop:
     stage: build
-    <<: *only-client
+    <<: *only-desktop
     script:
-        - cd client
+        - cd desktop
         - npm run build
     artifacts:
         paths:
-            - client/dist/
+            - desktop/dist/
 
 build:server:
     stage: build
@@ -102,18 +104,18 @@ build:server:
         paths:
             - server/out/
 
-test:client:
+test:desktop:
     stage: test
-    <<: *only-client
+    <<: *only-desktop
     script:
         - Xvfb :99 -ac -screen 0 1920x1080x24 &
-        - cd client
+        - cd desktop
         - npm run coverage -- --browsers=ChromeHeadlessNoSandbox --watch=false
     dependencies:
-        - build:client
+        - build:desktop
     artifacts:
         paths:
-            - client/coverage/
+            - desktop/coverage/
 
 test:server:
     stage: test
@@ -126,7 +128,6 @@ test:server:
     artifacts:
         paths:
             - server/coverage/
-
 pages:
     image: node:14.15.0
     stage: deploy
@@ -134,11 +135,11 @@ pages:
         - if: '$CI_COMMIT_TAG =~ /deploy/'
           when: manual
     script:
-        - cd client
+        - cd desktop
         - npm ci --cache .npm --prefer-offline
         - npm run deploy -- --base-href $BASE_HREF
         - mkdir ../public
-        - mv dist/client/* ../public/
+        - mv dist/desktop/* ../public/
     artifacts:
         paths:
             - public
@@ -174,7 +175,7 @@ deploy:server:
                 git remote remove origin
                 git remote add origin ${ORIGIN}
 
-                # Checkout to the targeted commit 
+                # Checkout to the targeted commit
                 git fetch --all
                 git checkout ${CI_COMMIT_SHA}
 
@@ -182,7 +183,6 @@ deploy:server:
                 cd server
                 npm ci
                 npm run build
-
 
                 # Launch the server in background and append output to /var/log/messages for CloudWatch
                 PORT=${SERVER_PORT} forever start -a -l /var/log/messages out/server/app/index.js
