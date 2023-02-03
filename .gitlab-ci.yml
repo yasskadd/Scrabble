@@ -1,4 +1,4 @@
-image: xwiillz/node-chromium-mongo:lts-bionic
+image: node
 
 cache:
     key: '${CI_COMMIT_REF_SLUG}-desktop'
@@ -133,7 +133,7 @@ test:server:
         paths:
             - server/coverage/
 pages:
-    image: node:14.15.0
+    image: node:19.6.0
     stage: deploy
     rules:
         - if: '$CI_COMMIT_TAG =~ /deploy/'
