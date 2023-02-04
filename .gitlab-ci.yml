@@ -70,6 +70,7 @@ install:server:
 
 lint:desktop:
     stage: lint
+    needs: [ 'install:desktop' ]
     allow_failure: true
     <<: *only-desktop
     script:
@@ -78,6 +79,7 @@ lint:desktop:
 
 lint:server:
     stage: lint
+    needs: [ 'install:server' ]
     allow_failure: true
     <<: *only-server
     script:
@@ -86,6 +88,7 @@ lint:server:
 
 build:desktop:
     stage: build
+    needs: [ 'install:desktop' ]
     <<: *only-desktop
     script:
         - cd desktop
@@ -96,6 +99,7 @@ build:desktop:
 
 build:server:
     stage: build
+    needs: [ 'install:server' ]
     <<: *only-server
     script:
         - cd server
@@ -106,6 +110,7 @@ build:server:
 
 test:desktop:
     stage: test
+    needs: [ 'install:desktop' ]
     <<: *only-desktop
     before_script:
         - npm install chromium
@@ -121,6 +126,7 @@ test:desktop:
 
 test:server:
     stage: test
+    needs: [ 'install:server' ]
     <<: *only-server
     script:
         - cd server
