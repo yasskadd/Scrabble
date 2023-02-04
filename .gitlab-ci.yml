@@ -118,8 +118,6 @@ test:desktop:
         - Xvfb :99 -ac -screen 0 1920x1080x24 &
         - cd desktop
         - npm run coverage -- --browsers=ChromeHeadlessNoSandbox --watch=false
-    dependencies:
-        - build:desktop
     artifacts:
         paths:
             - desktop/coverage/
@@ -131,8 +129,6 @@ test:server:
     script:
         - cd server
         - npm run coverage
-    dependencies:
-        - build:server
     artifacts:
         paths:
             - server/coverage/
