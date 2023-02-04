@@ -41,4 +41,6 @@ export enum SocketEvents {
     AllReserveLetters = 'allReserveLetters',
     ClueCommand = 'clueCommand',
     ImportDictionary = 'ImportDictionary',
+    SignIn = 'signIn',
+    SignOut = 'signOut',
 }
