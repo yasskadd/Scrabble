@@ -41,4 +41,11 @@ export enum SocketEvents {
     AllReserveLetters = 'allReserveLetters',
     ClueCommand = 'clueCommand',
     ImportDictionary = 'ImportDictionary',
+    JoinHomeRoom = 'joinHomeRoom',
+    JoinedHomeRoom = 'joinedHomeRoom',
+    RoomIsFull = 'roomIsFull',
+    SendHomeMessage = 'sendHomeMessage',
+    BroadCastMessageHome = 'broadcastMessageHome',
+    LeaveHomeRoom = 'leaveHomeROOM',
+    userLeftHomeRoom = 'userLeftHomeRoom',
 }
