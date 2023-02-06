@@ -6,8 +6,8 @@ import { Service } from 'typedi';
 import * as uuid from 'uuid';
 
 type MessageParameters = { username: string; type: string; message: string; timeStamp: Date };
-type HomeRoom = Pick<GameRoom, 'id' | 'isAvailable'> & { userMap: Map<string, string> };
-const ROOM_LIMIT = 4;
+type HomeRoom = Pick<GameRoom, 'id' | 'isAvailable'> & { userMap: Map<string, string>; usernameSet: Set<string> };
+const ROOM_LIMIT = 3;
 
 @Service()
 export class HomeChatBoxHandlerService {
@@ -40,11 +40,13 @@ export class HomeChatBoxHandlerService {
             id: roomID,
             userMap: new Map<string, string>(),
             isAvailable: true,
+            usernameSet: new Set(),
         } as HomeRoom;
     }
 
     private joinHomeRoom(sio: Server, socket: Socket, username: string): void {
-        if (this.userMap.has(socket.id)) {
+        if (this.userMap.has(socket.id)) return; // Because already connected
+        if (this.usernameSet.has(username)) {
             this.notifyInvalidUsername(socket, username);
             return;
         }
@@ -53,6 +55,7 @@ export class HomeChatBoxHandlerService {
             return;
         }
         this.userMap.set(socket.id, username);
+        this.usernameSet.add(username);
         socket.join(this.homeRoom.id);
         this.notifyUserJoinedRoom(sio, username, this.homeRoom.id);
         this.setIsAvailable();
@@ -80,6 +83,7 @@ export class HomeChatBoxHandlerService {
         const username = this.userMap.get(socket.id);
         socket.leave(this.homeRoom.id);
         this.userMap.delete(socket.id);
+        this.usernameSet.delete(username as string);
         this.setIsAvailable();
         socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.userLeftHomeRoom, username);
     }
@@ -92,5 +96,9 @@ export class HomeChatBoxHandlerService {
     // Getters and setters
     get userMap(): Map<string, string> {
         return this.homeRoom.userMap;
+    }
+
+    get usernameSet(): Set<string> {
+        return this.homeRoom.usernameSet;
     }
 }
