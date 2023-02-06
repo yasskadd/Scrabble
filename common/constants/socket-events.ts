@@ -48,4 +48,6 @@ export enum SocketEvents {
     BroadCastMessageHome = 'broadcastMessageHome',
     LeaveHomeRoom = 'leaveHomeROOM',
     userLeftHomeRoom = 'userLeftHomeRoom',
+    SignIn = 'signIn',
+    SignOut = 'signOut',
 }
