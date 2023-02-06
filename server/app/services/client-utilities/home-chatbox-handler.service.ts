@@ -21,7 +21,7 @@ export class HomeChatBoxHandlerService {
         this.socketManager.io(SocketEvents.JoinHomeRoom, (sio: Server, socket: Socket, username: string) => {
             this.joinHomeRoom(sio, socket, username);
         });
-        this.socketManager.on(SocketEvents.SendHomeMessage, (socket, message: MessageParameters) => {
+        this.socketManager.on(SocketEvents.SendMessageHome, (socket, message: MessageParameters) => {
             if (!this.userMap.has(socket.id)) return; // Maybe not the best way to verify
             this.messageList.push(message);
             this.broadCastMessage(socket, message);
@@ -90,7 +90,7 @@ export class HomeChatBoxHandlerService {
 
     // Notify everyone
     private notifyUserJoinedRoom(sio: Server, username: string, roomID: string): void {
-        sio.sockets.to(roomID).emit(SocketEvents.JoinedHomeRoom, username);
+        sio.sockets.to(roomID).emit(SocketEvents.UserJoinedRoom, username);
     }
 
     // Getters and setters
