@@ -5,7 +5,7 @@ import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import * as uuid from 'uuid';
 
-type MessageParameters = { socketID: string; message: string };
+type MessageParameters = { username: string; type: string; message: string; timeStamp: Date };
 type HomeRoom = Pick<GameRoom, 'id' | 'isAvailable'> & { userMap: Map<string, string> };
 const ROOM_LIMIT = 4;
 
