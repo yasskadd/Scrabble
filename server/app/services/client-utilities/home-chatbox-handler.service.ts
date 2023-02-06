@@ -22,7 +22,7 @@ export class HomeChatBoxHandlerService {
             this.joinHomeRoom(sio, socket, username);
         });
         this.socketManager.on(SocketEvents.SendHomeMessage, (socket, message: MessageParameters) => {
-            if (!this.homeRoom.userMap.has(socket.id)) return; // Maybe not the best way to verify
+            if (!this.userMap.has(socket.id)) return; // Maybe not the best way to verify
             this.messageList.push(message);
             this.broadCastMessage(socket, message);
         });
@@ -59,7 +59,7 @@ export class HomeChatBoxHandlerService {
     }
 
     private setIsAvailable(): void {
-        this.homeRoom.isAvailable = this.homeRoom.userMap.size < ROOM_LIMIT;
+        this.homeRoom.isAvailable = this.userMap.size < ROOM_LIMIT;
     }
 
     // Notify sender
@@ -73,8 +73,7 @@ export class HomeChatBoxHandlerService {
 
     // Notify everyone except sender
     private broadCastMessage(socket: Socket, message: MessageParameters): void {
-        // TODO: Send message with username (need to decide which format)
-        socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.BroadCastMessageHome, this.homeRoom.userMap.get(socket.id));
+        socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.BroadCastMessageHome, message);
     }
 
     private leaveRoom(socket: Socket): void {
