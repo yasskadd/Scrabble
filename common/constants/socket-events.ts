@@ -46,6 +46,6 @@ export enum SocketEvents {
     RoomIsFull = 'roomIsFull',
     SendHomeMessage = 'sendHomeMessage',
     BroadCastMessageHome = 'broadcastMessageHome',
-    LeaveHomeRoom = 'leaveHomeROOM',
+    LeaveHomeRoom = 'leaveHomeRoom',
     userLeftHomeRoom = 'userLeftHomeRoom',
 }
