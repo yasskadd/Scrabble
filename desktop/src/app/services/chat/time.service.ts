@@ -4,12 +4,14 @@ import { Injectable } from '@angular/core';
     providedIn: 'root',
 })
 export class TimeService {
-    // constructor() {}
-
     getTimeStamp(): string {
-        // TODO : À faire
-        const now = Date.now();
-
-        return '';
+        const now = new Date();
+        return (
+            now.getHours().toLocaleString('en-us', { minimumIntegerDigits: 2 }) +
+            ':' +
+            now.getMinutes().toLocaleString('en-us', { minimumIntegerDigits: 2 }) +
+            ':' +
+            now.getSeconds().toLocaleString('en-us', { minimumIntegerDigits: 2 })
+        );
     }
 }
