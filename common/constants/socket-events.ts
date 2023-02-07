@@ -1,11 +1,11 @@
 export enum SocketEvents {
     SendMessage = 'sendMessage',
+    ReceiveHomeMessage = 'broadcastMessageHome',
     JoinHomeRoom = 'joinHomeRoom',
+    JoinedHomeRoom = 'joinedHomeRoom',
     SendHomeMessage = 'sendHomeMessage',
     LeaveHomeRoom = 'leaveHomeRoom',
     Disconnect = 'disconnect',
-
-    JoinedHomeRoom = 'joinedHomeRoom', // TODO : Existe tu ?
 
     GameMessage = 'gameMessage',
     GameCommand = 'command',
@@ -48,7 +48,6 @@ export enum SocketEvents {
     ClueCommand = 'clueCommand',
     ImportDictionary = 'ImportDictionary',
     RoomIsFull = 'roomIsFull',
-    BroadCastMessageHome = 'broadcastMessageHome',
     UserJoinedRoom = 'userJoinedRoom',
     SendMessageHome = 'sendMessageHome',
     userLeftHomeRoom = 'userLeftHomeRoom',
