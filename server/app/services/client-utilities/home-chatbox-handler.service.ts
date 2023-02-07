@@ -4,17 +4,18 @@ import { SocketEvents } from '@common/constants/socket-events';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import * as uuid from 'uuid';
+import { ChatboxMessage } from '@common/interfaces/chatbox-message';
 
-type MessageParameters = { username: string; type: string; message: string; timeStamp: Date };
 type HomeRoom = Pick<GameRoom, 'id' | 'isAvailable'> & { userMap: Map<string, string>; usernameSet: Set<string> };
 const ROOM_LIMIT = 3;
 
 @Service()
 export class HomeChatBoxHandlerService {
     private homeRoom: HomeRoom;
-    private messageList: MessageParameters[] = [];
+    private messageList: ChatboxMessage[];
 
     constructor(public socketManager: SocketManager) {
+        this.messageList = [];
         this.initGameRoom();
     }
 
@@ -22,7 +23,7 @@ export class HomeChatBoxHandlerService {
         this.socketManager.io(SocketEvents.JoinHomeRoom, (sio: Server, socket: Socket, username: string) => {
             this.joinHomeRoom(sio, socket, username);
         });
-        this.socketManager.on(SocketEvents.SendMessageHome, (socket, message: MessageParameters) => {
+        this.socketManager.on(SocketEvents.SendMessageHome, (socket, message: ChatboxMessage) => {
             if (!this.userMap.has(socket.id)) return; // Maybe not the best way to verify
             this.messageList.push(message);
             this.broadCastMessage(socket, message);
@@ -68,7 +69,7 @@ export class HomeChatBoxHandlerService {
 
     // Notify sender
     private notifyInvalidUsername(socket: Socket, username: string): void {
-        socket.emit(SocketEvents.usernameTaken, username);
+        socket.emit(SocketEvents.UsernameTaken, username);
     }
 
     private notifyClientFullRoom(socket: Socket): void {
@@ -76,9 +77,9 @@ export class HomeChatBoxHandlerService {
     }
 
     // Notify everyone except sender
-    private broadCastMessage(socket: Socket, message: MessageParameters) {
+    private broadCastMessage(socket: Socket, message: ChatboxMessage) {
         // TODO: Send message with username (need to decide which format)
-        socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.SendHomeMessage, this.homeRoom.userMap.get(socket.id));
+        socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.SendHomeMessage, message);
     }
 
     private leaveRoom(socket: Socket): void {

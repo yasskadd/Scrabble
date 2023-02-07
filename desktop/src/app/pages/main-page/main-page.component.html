@@ -54,5 +54,10 @@
     </mat-card-content>
 </mat-card>
 
+<button mat-raised-button (click)='sendMessage()'>Send</button>
+<div *ngFor='let message of chatSocketService.messages'>
+    <div>{{message.userName}} {{message.timeStamp}} {{message.message}}</div>
+</div>
+
 <app-footer style='width: 100%'></app-footer>
 </body>

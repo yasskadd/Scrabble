@@ -1,6 +1,6 @@
 import { AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { ChatboxMessage } from '@app/interfaces/chatbox-message';
+import { ChatboxMessage } from '@common/interfaces/chatbox-message';
 import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
 import { GameClientService } from '@app/services/game-client.service';
 

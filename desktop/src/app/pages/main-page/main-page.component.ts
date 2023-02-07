@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogBoxGameTypeComponent } from '@app/components/dialog-box-game-type/dialog-box-game-type.component';
 import { DialogBoxHighScoresComponent } from '@app/components/dialog-box-high-scores/dialog-box-high-scores.component';
 import { DialogGameHelpComponent } from '@app/components/dialog-game-help/dialog-game-help.component';
-// import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
+import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
 import { ClientSocketService } from '@app/services/communication/client-socket.service';
 
 @Component({
@@ -20,8 +20,8 @@ export class MainPageComponent {
     private readonly dialogWidthHighScore: string = '750px';
 
     constructor(
-        // private chatSocketService: ChatboxHandlerService,
-        protected clientSockerService: ClientSocketService,
+        protected chatSocketService: ChatboxHandlerService,
+        protected clientSocketService: ClientSocketService,
         private dialog: MatDialog,
         private highScore: MatDialog,
     ) {}
@@ -41,7 +41,12 @@ export class MainPageComponent {
         });
     }
 
-    openHelpDialog() {
+    openHelpDialog(): void {
         this.dialog.open(DialogGameHelpComponent, { width: '50%' });
+    }
+
+    sendMessage(): void {
+        this.chatSocketService.submitMessage('test');
+        console.log(this.chatSocketService.messages);
     }
 }

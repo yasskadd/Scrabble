@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
-import { ChatboxMessage } from '@app/interfaces/chatbox-message';
+import { ChatboxMessage } from '@common/interfaces/chatbox-message';
 import { SocketEvents } from '@common/constants/socket-events';
 // import { CommandInfo } from '@common/interfaces/command-info';
 import { Letter } from '@common/interfaces/letter';
 import { CommandHandlerService } from '@app/services/command-handler.service';
 import { ClientSocketService } from '@app/services/communication/client-socket.service';
 import { GameClientService } from '@app/services/game-client.service';
-import { GameConfigurationService } from '@app/services/game-configuration.service';
+// import { GameConfigurationService } from '@app/services/game-configuration.service';
 import { TimeService } from '@app/services/chat/time.service';
+import { Subject } from 'rxjs';
 
 const EXCHANGE_ALLOWED_MINIMUM = 7;
 // const CHAR_ASCII = 96;
@@ -23,18 +24,19 @@ const IS_COMMAND_REGEX = new RegExp(IS_COMMAND_REGEX_STRING);
     providedIn: 'root',
 })
 export class ChatboxHandlerService {
-    connected: boolean;
+    connectedToHome: boolean;
     messages: ChatboxMessage[];
     private static readonly syntaxRegexString = '^!r(é|e)serve|^!aide|^!placer|^!(é|e)changer|^!passer|^!indice';
     private readonly validSyntaxRegex = RegExp(ChatboxHandlerService.syntaxRegexString);
 
     constructor(
         private clientSocket: ClientSocketService,
-        private gameConfiguration: GameConfigurationService,
+        // private gameConfiguration: GameConfigurationService,
         private gameClient: GameClientService,
         private commandHandler: CommandHandlerService,
         private timeService: TimeService,
     ) {
+        this.messages = [];
         // TODO : Check si toujours utile
         // this.addWelcomeMessages();
         this.configureBaseSocketFeatures();
@@ -48,14 +50,14 @@ export class ChatboxHandlerService {
             if (this.isMessageACommand(userInput)) {
                 this.sendCommand(userInput);
             } else {
+                console.log('test');
                 this.sendMessage(userInput);
             }
         }
     }
 
-    connectHomeRoom(userName: string): void {
+    joinHomeRoom(userName: string): void {
         this.clientSocket.send(SocketEvents.JoinHomeRoom, userName);
-        this.connected = true;
     }
 
     leaveHomeRoom(): void {
@@ -88,13 +90,28 @@ export class ChatboxHandlerService {
         // this.addWelcomeMessages();
     }
 
+    subscribeToUserConnection(): Subject<void> {
+        const roomJoinedSubject: Subject<void> = new Subject<void>();
+        this.clientSocket.on(SocketEvents.UserJoinedRoom, (userName: string) => {
+            // TODO : Replace test with real username
+            if (userName === 'test') {
+                roomJoinedSubject.next();
+            }
+        });
+        return roomJoinedSubject;
+    }
+
     private configureBaseSocketFeatures(): void {
         this.clientSocket.on(SocketEvents.GameMessage, (messageObject: string) => {
             this.messages.push(JSON.parse(messageObject) as ChatboxMessage);
         });
 
-        // TODO
-        // this.clientSocket.on(SocketEvents.UserJoinedRoom, (userName: string) => {});
+        this.clientSocket.on(SocketEvents.UserJoinedRoom, (userName: string) => {
+            // TODO : Replace test with real username
+            if (userName === 'test') {
+                this.connectedToHome = true;
+            }
+        });
 
         this.clientSocket.on(SocketEvents.ReceiveHomeMessage, (messageObject: string) => {
             this.messages.push(JSON.parse(messageObject) as ChatboxMessage);
@@ -177,10 +194,12 @@ export class ChatboxHandlerService {
     // }
 
     private sendMessage(message: string): void {
-        this.clientSocket.send(SocketEvents.SendMessage, {
-            roomId: this.gameConfiguration.roomInformation.roomId,
+        const messageObj: ChatboxMessage = {
+            userName: 'Test',
+            type: 'client',
             message,
-        });
+        };
+        this.clientSocket.send(SocketEvents.SendMessageHome, messageObj);
     }
 
     private sendCommand(command: string): void {
