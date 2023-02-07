@@ -52,6 +52,10 @@ export class ChatboxHandlerService {
         }
     }
 
+    connectHomeRoom(userName: string): void {
+        this.clientSocket.send(SocketEvents.JoinHomeRoom, userName);
+    }
+
     endGameMessage(): void {
         setTimeout(() => {
             const myLetterLeft = this.getAllLetter(this.gameClient.playerOne.rack as never);
