@@ -49,5 +49,8 @@ export enum SocketEvents {
     ImportDictionary = 'ImportDictionary',
     RoomIsFull = 'roomIsFull',
     BroadCastMessageHome = 'broadcastMessageHome',
+    UserJoinedRoom = 'userJoinedRoom',
+    SendMessageHome = 'sendMessageHome',
     userLeftHomeRoom = 'userLeftHomeRoom',
+    usernameTaken = 'usernameTaken',
 }

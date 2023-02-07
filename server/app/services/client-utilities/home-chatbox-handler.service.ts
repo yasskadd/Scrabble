@@ -5,9 +5,9 @@ import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import * as uuid from 'uuid';
 
-type MessageParameters = { socketID: string; message: string };
-type HomeRoom = Pick<GameRoom, 'id' | 'isAvailable'> & { userMap: Map<string, string> };
-const ROOM_LIMIT = 4;
+type MessageParameters = { username: string; type: string; message: string; timeStamp: Date };
+type HomeRoom = Pick<GameRoom, 'id' | 'isAvailable'> & { userMap: Map<string, string>; usernameSet: Set<string> };
+const ROOM_LIMIT = 3;
 
 @Service()
 export class HomeChatBoxHandlerService {
@@ -17,72 +17,88 @@ export class HomeChatBoxHandlerService {
         this.initGameRoom();
     }
 
-    initSocketEvents() {
+    initSocketEvents(): void {
         this.socketManager.io(SocketEvents.JoinHomeRoom, (sio: Server, socket: Socket, username: string) => {
             this.joinHomeRoom(sio, socket, username);
         });
-
-        this.socketManager.on(SocketEvents.SendHomeMessage, (socket, message: MessageParameters) => {
-            if (!this.homeRoom.userMap.has(message.socketID)) return; // Maybe not the best way to verify
+        this.socketManager.on(SocketEvents.SendMessageHome, (socket, message: MessageParameters) => {
+            if (!this.userMap.has(socket.id)) return; // Maybe not the best way to verify
             this.messageList.push(message);
             this.broadCastMessage(socket, message);
         });
-
         this.socketManager.on(SocketEvents.LeaveHomeRoom, (socket: Socket) => {
             this.leaveRoom(socket);
         });
-
         this.socketManager.on(SocketEvents.Disconnect, (socket: Socket) => {
             this.leaveRoom(socket);
         });
     }
 
-    private initGameRoom() {
+    private initGameRoom(): void {
         const roomID = uuid.v4();
         this.homeRoom = {
             id: roomID,
             userMap: new Map<string, string>(),
             isAvailable: true,
+            usernameSet: new Set(),
         } as HomeRoom;
     }
 
-    private joinHomeRoom(sio: Server, socket: Socket, username: string) {
-        // TODO: Solve problem where 2 users can have the same username
-        if (this.homeRoom.isAvailable && !this.homeRoom.userMap.has(socket.id)) {
-            this.homeRoom.userMap.set(socket.id, username);
-            socket.join(this.homeRoom.id);
-            this.userJoinedRoom(sio, username, this.homeRoom.id);
-            this.setIsAvailable();
+    private joinHomeRoom(sio: Server, socket: Socket, username: string): void {
+        if (this.userMap.has(socket.id)) return; // Because already connected
+        if (this.usernameSet.has(username)) {
+            this.notifyInvalidUsername(socket, username);
             return;
         }
-        // Implement sockets to give feedback of full room to client
-        this.notifyClientFullRoom(socket);
-        // TODO: Notify client username is already taken if username is already connected in room
+        if (!this.homeRoom.isAvailable) {
+            this.notifyClientFullRoom(socket);
+            return;
+        }
+        this.userMap.set(socket.id, username);
+        this.usernameSet.add(username);
+        socket.join(this.homeRoom.id);
+        this.notifyUserJoinedRoom(sio, username, this.homeRoom.id);
+        this.setIsAvailable();
     }
 
-    // Method to notify clients that someone joined the room
-    private userJoinedRoom(sio: Server, username: string, roomID: string) {
-        sio.sockets.to(roomID).emit(SocketEvents.JoinedHomeRoom, username);
+    private setIsAvailable(): void {
+        this.homeRoom.isAvailable = this.userMap.size < ROOM_LIMIT;
     }
 
-    private notifyClientFullRoom(socket: Socket) {
+    // Notify sender
+    private notifyInvalidUsername(socket: Socket, username: string): void {
+        socket.emit(SocketEvents.usernameTaken, username);
+    }
+
+    private notifyClientFullRoom(socket: Socket): void {
         socket.emit(SocketEvents.RoomIsFull);
     }
 
-    private broadCastMessage(socket: Socket, message: MessageParameters) {
-        // TODO: Send message with username (need to decide which format)
-        socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.BroadCastMessageHome, this.homeRoom.userMap.get(message.socketID));
+    // Notify everyone except sender
+    private broadCastMessage(socket: Socket, message: MessageParameters): void {
+        socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.BroadCastMessageHome, message);
     }
 
-    private leaveRoom(socket: Socket) {
-        const username = this.homeRoom.userMap.get(socket.id);
-        this.homeRoom.userMap.delete(socket.id);
-        this.setIsAvailable();
+    private leaveRoom(socket: Socket): void {
+        const username = this.userMap.get(socket.id);
         socket.leave(this.homeRoom.id);
+        this.userMap.delete(socket.id);
+        this.usernameSet.delete(username as string);
+        this.setIsAvailable();
         socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.userLeftHomeRoom, username);
     }
 
-    private setIsAvailable() {
-        this.homeRoom.isAvailable = this.homeRoom.userMap.size < ROOM_LIMIT;
+    // Notify everyone
+    private notifyUserJoinedRoom(sio: Server, username: string, roomID: string): void {
+        sio.sockets.to(roomID).emit(SocketEvents.UserJoinedRoom, username);
+    }
+
+    // Getters and setters
+    get userMap(): Map<string, string> {
+        return this.homeRoom.userMap;
+    }
+
+    get usernameSet(): Set<string> {
+        return this.homeRoom.usernameSet;
     }
 }
