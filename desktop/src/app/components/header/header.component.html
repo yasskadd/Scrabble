@@ -1,11 +1,9 @@
-<header class="sticky">
-    <div id="home" (click)="redirectHome()">
-        <div *ngFor="let letter of homePage">{{ letter }}</div>
-    </div>
+<div id="home" (click)="redirectHome()">
+    <div *ngFor="let letter of homePage">{{ letter }}</div>
+</div>
 
-    <img src="https://bit.ly/3m206ss" width="300" height="60" alt="Logo Scrabble" (click)="redirectHome()" />
+<img src="https://bit.ly/3m206ss" width="300" height="60" alt="Logo Scrabble" (click)="redirectHome()" />
 
-    <div id="admin" (click)="redirectAdmin()">
-        <div *ngFor="let letter of adminPage">{{ letter }}</div>
-    </div>
-</header>
+<div id="admin" (click)="redirectAdmin()">
+    <div *ngFor="let letter of adminPage">{{ letter }}</div>
+</div>

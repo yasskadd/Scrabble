@@ -37,6 +37,14 @@ export class PlayAreaComponent implements AfterViewInit {
         this.buttonPressed = '';
     }
 
+    get width(): number {
+        return constants.GRID_CANVAS_WIDTH;
+    }
+
+    get height(): number {
+        return constants.GRID_CANVAS_HEIGHT;
+    }
+
     @HostListener('keydown', ['$event'])
     buttonDetect(event: KeyboardEvent) {
         this.buttonPressed = event.key;
@@ -76,14 +84,6 @@ export class PlayAreaComponent implements AfterViewInit {
 
     ngAfterViewInit(): void {
         this.gridService.gridContext = this.gridCanvas.nativeElement.getContext('2d') as CanvasRenderingContext2D;
-    }
-
-    get width(): number {
-        return constants.GRID_CANVAS_WIDTH;
-    }
-
-    get height(): number {
-        return constants.GRID_CANVAS_HEIGHT;
     }
 
     updateFontSize(event: MatSliderChange): void {

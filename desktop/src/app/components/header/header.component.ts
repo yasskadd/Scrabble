@@ -7,15 +7,18 @@ import { Router } from '@angular/router';
     styleUrls: ['./header.component.scss'],
 })
 export class HeaderComponent {
-    readonly buttonText: string[];
+    buttonText: string[];
     readonly homePage: string[] = ['A', 'C', 'C', 'U', 'E', 'I', 'L'];
     readonly adminPage: string[] = ['A', 'D', 'M', 'I', 'N'];
     constructor(private router: Router) {}
 
     redirectHome() {
         this.router.navigate(['/home']);
+        this.buttonText = this.adminPage;
     }
+
     redirectAdmin() {
         this.router.navigate(['/admin']);
+        this.buttonText = this.homePage;
     }
 }

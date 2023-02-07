@@ -1,3 +1,17 @@
+app-header {
+    padding-top: 5px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    background-color: #7fa99b;
+}
+
+.sticky {
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+
 body {
     height: 100%;
     display: flex;
@@ -95,4 +109,15 @@ body {
 
 ::ng-deep .mat-button-wrapper {
     padding: 0px !important;
+}
+
+.chatbox {
+    max-width: 300px;
+    padding: 7px 10px 0px 11px;
+    background-color: #7fa99b;
+    position: absolute;
+    right: 0px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
 }

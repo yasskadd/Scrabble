@@ -69,7 +69,7 @@ describe('ClientSocketService', () => {
 
     it('should call emit without data when using send if data is undefined', () => {
         const event = 'helloWorld';
-        const data = undefined;
+        const data: any = undefined;
         const spy = spyOn(service['socket'], 'emit');
         service.send(event, data);
         expect(spy).toHaveBeenCalled();

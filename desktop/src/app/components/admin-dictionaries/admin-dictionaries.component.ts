@@ -5,7 +5,7 @@ import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
 import { DictionaryService } from '@app/services/dictionary.service';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
-import { saveAs } from 'file-saver';
+import saveAs from 'file-saver';
 
 @Component({
     selector: 'app-admin-dictionaries',

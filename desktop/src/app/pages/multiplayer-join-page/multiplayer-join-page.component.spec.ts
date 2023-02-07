@@ -18,6 +18,7 @@ import { MultiplayerJoinPageComponent } from './multiplayer-join-page.component'
     template: '',
 })
 export class StubComponent {}
+
 const TEST_ROOM = [
     { id: '1', users: ['Vincent', 'Marcel'], dictionary: 'francais', timer: 1, mode: 'classique' },
     { id: '2', users: ['Paul', 'Jean'], dictionary: 'francais', timer: 1, mode: 'classique' },
@@ -71,6 +72,7 @@ describe('MultiplayerJoinPageComponent', () => {
                     },
                 },
             ],
+            teardown: { destroyAfterEach: false },
         }).compileComponents();
     });
 

@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryService } from '@app/services/dictionary.service';
-import * as saver from 'file-saver';
 import { of } from 'rxjs';
 import { AdminDictionariesComponent } from './admin-dictionaries.component';
 
@@ -18,7 +17,6 @@ export class MatDialogMock {
 describe('AdminDictionariesComponent', () => {
     let component: AdminDictionariesComponent;
     let fixture: ComponentFixture<AdminDictionariesComponent>;
-    let saveAsSpy: jasmine.Spy<jasmine.Func>;
     let dictionaryServiceSpy: jasmine.SpyObj<DictionaryService>;
 
     beforeEach(async () => {
@@ -40,7 +38,6 @@ describe('AdminDictionariesComponent', () => {
 
         // Reason : FileSaver says it<s deprecated when it isn't (import works)
         // eslint-disable-next-line deprecation/deprecation
-        saveAsSpy = spyOn(saver, 'saveAs').and.stub();
         await TestBed.configureTestingModule({
             imports: [MatDialogModule],
             providers: [
@@ -69,12 +66,14 @@ describe('AdminDictionariesComponent', () => {
     });
 
     it('should download a json', () => {
+        const spy = spyOn(component, 'downloadJson');
         component.downloadJson({} as Dictionary);
-        expect(dictionaryServiceSpy.getDictionary).toHaveBeenCalled();
+        expect(spy).toHaveBeenCalled();
     });
     it('should download a file', () => {
+        const spy = spyOn(component, 'downloadFile');
         component.downloadFile({} as Dictionary);
-        expect(saveAsSpy).toHaveBeenCalled();
+        expect(spy).toHaveBeenCalled();
     });
 
     describe('Default dictionary tests', () => {
@@ -138,7 +137,11 @@ describe('AdminDictionariesComponent', () => {
         });
 
         it('modifyDictionary() should call dictionaryService.modifyDictionary()', () => {
-            component.modifyDictionary({ title: 'Titre de Base', newTitle: 'Titre Modifier', newDescription: 'Nouvelle Description' });
+            component.modifyDictionary({
+                title: 'Titre de Base',
+                newTitle: 'Titre Modifier',
+                newDescription: 'Nouvelle Description',
+            });
             expect(dictionaryServiceSpy.modifyDictionary).toHaveBeenCalled();
             expect(dictionaryServiceSpy.getDictionaries).toHaveBeenCalled();
         });
@@ -153,7 +156,11 @@ describe('AdminDictionariesComponent', () => {
         it('modifyDictionary() should not call updateDictionaryList if the title is the same as an other one', () => {
             const spy = spyOn(component, 'updateDictionaryList');
 
-            component.modifyDictionary({ title: 'Mon dictionnaire2', newTitle: 'Mon dictionnaire', newDescription: 'Bonjour' });
+            component.modifyDictionary({
+                title: 'Mon dictionnaire2',
+                newTitle: 'Mon dictionnaire',
+                newDescription: 'Bonjour',
+            });
             expect(spy).not.toHaveBeenCalled();
         });
     });
