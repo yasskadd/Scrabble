@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ChatboxMessage } from '@app/interfaces/chatbox-message';
 import { SocketEvents } from '@common/constants/socket-events';
-import { CommandInfo } from '@common/interfaces/command-info';
+// import { CommandInfo } from '@common/interfaces/command-info';
 import { Letter } from '@common/interfaces/letter';
 import { CommandHandlerService } from '@app/services/command-handler.service';
 import { ClientSocketService } from '@app/services/communication/client-socket.service';
@@ -10,7 +10,7 @@ import { GameConfigurationService } from '@app/services/game-configuration.servi
 import { TimeService } from '@app/services/chat/time.service';
 
 const EXCHANGE_ALLOWED_MINIMUM = 7;
-const CHAR_ASCII = 96;
+// const CHAR_ASCII = 96;
 const TIMEOUT = 15;
 const VALID_COMMAND_REGEX_STRING =
     '^!r(é|e)serve$|^!indice$|^!aide$|^!placer [a-o][0-9]{1,2}(v|h){0,1} [a-zA-Z]$' +
@@ -23,8 +23,9 @@ const IS_COMMAND_REGEX = new RegExp(IS_COMMAND_REGEX_STRING);
     providedIn: 'root',
 })
 export class ChatboxHandlerService {
-    private static readonly syntaxRegexString = '^!r(é|e)serve|^!aide|^!placer|^!(é|e)changer|^!passer|^!indice';
+    connected: boolean;
     messages: ChatboxMessage[];
+    private static readonly syntaxRegexString = '^!r(é|e)serve|^!aide|^!placer|^!(é|e)changer|^!passer|^!indice';
     private readonly validSyntaxRegex = RegExp(ChatboxHandlerService.syntaxRegexString);
 
     constructor(
@@ -54,6 +55,11 @@ export class ChatboxHandlerService {
 
     connectHomeRoom(userName: string): void {
         this.clientSocket.send(SocketEvents.JoinHomeRoom, userName);
+        this.connected = true;
+    }
+
+    leaveHomeRoom(): void {
+        this.clientSocket.send(SocketEvents.LeaveHomeRoom);
     }
 
     endGameMessage(): void {
@@ -83,8 +89,15 @@ export class ChatboxHandlerService {
     }
 
     private configureBaseSocketFeatures(): void {
-        this.clientSocket.on(SocketEvents.GameMessage, (messageObjet: string) => {
-            this.messages.push(JSON.parse(messageObjet) as ChatboxMessage);
+        this.clientSocket.on(SocketEvents.GameMessage, (messageObject: string) => {
+            this.messages.push(JSON.parse(messageObject) as ChatboxMessage);
+        });
+
+        // TODO
+        // this.clientSocket.on(SocketEvents.UserJoinedRoom, (userName: string) => {});
+
+        this.clientSocket.on(SocketEvents.ReceiveHomeMessage, (messageObject: string) => {
+            this.messages.push(JSON.parse(messageObject) as ChatboxMessage);
         });
 
         this.clientSocket.on(SocketEvents.ImpossibleCommandError, (error: string) => {
@@ -95,17 +108,18 @@ export class ChatboxHandlerService {
             this.addDisconnect();
         });
 
-        this.clientSocket.on(SocketEvents.GameEnd, () => {
-            this.endGameMessage();
-        });
+        //
+        // this.clientSocket.on(SocketEvents.GameEnd, () => {
+        //     this.endGameMessage();
+        // });
 
-        this.clientSocket.on(SocketEvents.AllReserveLetters, (letterReserveUpdated: Letter[]) => {
-            this.configureReserveLetterCommand(letterReserveUpdated);
-        });
+        // this.clientSocket.on(SocketEvents.AllReserveLetters, (letterReserveUpdated: Letter[]) => {
+        //     this.configureReserveLetterCommand(letterReserveUpdated);
+        // });
 
-        this.clientSocket.on(SocketEvents.ClueCommand, (clueCommand: CommandInfo[]) => {
-            this.configureClueCommand(clueCommand);
-        });
+        // this.clientSocket.on(SocketEvents.ClueCommand, (clueCommand: CommandInfo[]) => {
+        //     this.configureClueCommand(clueCommand);
+        // });
     }
 
     // private listenToObserver(): void {
@@ -131,36 +145,36 @@ export class ChatboxHandlerService {
         return this.isCommand(userInput.normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
     }
 
-    private configureClueCommand(clueCommand: CommandInfo[]): void {
-        if (clueCommand.length !== 0) {
-            this.addClueCommand(clueCommand);
-            return;
-        }
-        this.messages.push({
-            type: 'system',
-            message: "Il n'y a pas de possibilité de formation de mot possible",
-            timeStamp: this.timeService.getTimeStamp(),
-        });
-    }
+    // private configureClueCommand(clueCommand: CommandInfo[]): void {
+    //     if (clueCommand.length !== 0) {
+    //         this.addClueCommand(clueCommand);
+    //         return;
+    //     }
+    //     this.messages.push({
+    //         type: 'system',
+    //         message: "Il n'y a pas de possibilité de formation de mot possible",
+    //         timeStamp: this.timeService.getTimeStamp(),
+    //     });
+    // }
 
-    private addClueCommand(clueCommand: CommandInfo[]): void {
-        clueCommand.forEach((clue) => {
-            this.messages.push({
-                userName: undefined,
-                type: 'system',
-                message: `!placer ${String.fromCharCode(CHAR_ASCII + clue.firstCoordinate.y)}${clue.firstCoordinate.x}${
-                    clue.isHorizontal ? 'h' : 'v'
-                } ${clue.letters.join('')}`,
-                timeStamp: this.timeService.getTimeStamp(),
-            });
-        });
-        if (clueCommand.length < 3)
-            this.messages.push({
-                type: 'system-message',
-                message: 'Aucune autre possibilité possible',
-                timeStamp: this.timeService.getTimeStamp(),
-            });
-    }
+    // private addClueCommand(clueCommand: CommandInfo[]): void {
+    //     clueCommand.forEach((clue) => {
+    //         this.messages.push({
+    //             userName: undefined,
+    //             type: 'system',
+    //             message: `!placer ${String.fromCharCode(CHAR_ASCII + clue.firstCoordinate.y)}${clue.firstCoordinate.x}${
+    //                 clue.isHorizontal ? 'h' : 'v'
+    //             } ${clue.letters.join('')}`,
+    //             timeStamp: this.timeService.getTimeStamp(),
+    //         });
+    //     });
+    //     if (clueCommand.length < 3)
+    //         this.messages.push({
+    //             type: 'system-message',
+    //             message: 'Aucune autre possibilité possible',
+    //             timeStamp: this.timeService.getTimeStamp(),
+    //         });
+    // }
 
     private sendMessage(message: string): void {
         this.clientSocket.send(SocketEvents.SendMessage, {
@@ -331,13 +345,13 @@ export class ChatboxHandlerService {
         return letterString;
     }
 
-    private configureReserveLetterCommand(letterReserve: Letter[]): void {
-        letterReserve.forEach((letter) => {
-            this.messages.push({
-                type: 'system-message',
-                message: `${letter.value}: ${letter.quantity}`,
-                timeStamp: this.timeService.getTimeStamp(),
-            });
-        });
-    }
+    // private configureReserveLetterCommand(letterReserve: Letter[]): void {
+    //     letterReserve.forEach((letter) => {
+    //         this.messages.push({
+    //             type: 'system-message',
+    //             message: `${letter.value}: ${letter.quantity}`,
+    //             timeStamp: this.timeService.getTimeStamp(),
+    //         });
+    //     });
+    // }
 }

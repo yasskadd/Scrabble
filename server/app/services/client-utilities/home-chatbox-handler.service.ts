@@ -13,6 +13,7 @@ const ROOM_LIMIT = 3;
 export class HomeChatBoxHandlerService {
     private homeRoom: HomeRoom;
     private messageList: MessageParameters[] = [];
+
     constructor(public socketManager: SocketManager) {
         this.initGameRoom();
     }
@@ -75,8 +76,9 @@ export class HomeChatBoxHandlerService {
     }
 
     // Notify everyone except sender
-    private broadCastMessage(socket: Socket, message: MessageParameters): void {
-        socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.BroadCastMessageHome, message);
+    private broadCastMessage(socket: Socket, message: MessageParameters) {
+        // TODO: Send message with username (need to decide which format)
+        socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.SendHomeMessage, this.homeRoom.userMap.get(socket.id));
     }
 
     private leaveRoom(socket: Socket): void {

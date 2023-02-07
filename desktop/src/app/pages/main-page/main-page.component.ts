@@ -3,6 +3,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogBoxGameTypeComponent } from '@app/components/dialog-box-game-type/dialog-box-game-type.component';
 import { DialogBoxHighScoresComponent } from '@app/components/dialog-box-high-scores/dialog-box-high-scores.component';
 import { DialogGameHelpComponent } from '@app/components/dialog-game-help/dialog-game-help.component';
+// import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
+import { ClientSocketService } from '@app/services/communication/client-socket.service';
 
 @Component({
     selector: 'app-main-page',
@@ -16,7 +18,13 @@ export class MainPageComponent {
         "Un mode qui regroupe toutes les beautés du Scrabble Classique avec l'ajout d'objectifs afin de rajouter une difficulté supplémentaire";
     private readonly dialogWidth: string = '500px';
     private readonly dialogWidthHighScore: string = '750px';
-    constructor(private dialog: MatDialog, private highScore: MatDialog) {}
+
+    constructor(
+        // private chatSocketService: ChatboxHandlerService,
+        protected clientSockerService: ClientSocketService,
+        private dialog: MatDialog,
+        private highScore: MatDialog,
+    ) {}
 
     openDialog(gameModeValue: string): void {
         this.dialog.open(DialogBoxGameTypeComponent, {
