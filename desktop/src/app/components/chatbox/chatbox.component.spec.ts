@@ -6,7 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ChatboxMessage } from '@app/interfaces/chatbox-message';
-import { ChatboxHandlerService } from '@app/services/chatbox-handler.service';
+import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
 import { ChatboxComponent } from './chatbox.component';
 
 const TEST_MESSAGE: ChatboxMessage = { type: 'WorldHello', data: 'WeBigProjectBoisNow' };

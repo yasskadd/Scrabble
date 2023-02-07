@@ -7,18 +7,20 @@ import { Letter } from '@common/interfaces/letter';
 import { ReplaySubject } from 'rxjs';
 import { Socket } from 'socket.io-client';
 import { ChatboxHandlerService } from './chatbox-handler.service';
-import { CommandHandlerService } from './command-handler.service';
-import { ClientSocketService } from './communication/client-socket.service';
-import { GameClientService } from './game-client.service';
-import { GameConfigurationService } from './game-configuration.service';
+import { CommandHandlerService } from '../command-handler.service';
+import { ClientSocketService } from '../communication/client-socket.service';
+import { GameClientService } from '../game-client.service';
+import { GameConfigurationService } from '../game-configuration.service';
 
 type Player = { name: string; score: number; rack?: Letter[]; room: string };
+
 interface RoomInformation {
     playerName: string[];
     roomId: string;
     isCreator: boolean;
     statusGame: string;
 }
+
 const TIMEOUT = 15;
 const ROOM_INFORMATION: RoomInformation = {
     playerName: ['Vincent', 'RICHARD'],
@@ -47,11 +49,13 @@ const SECOND_PLAYER_INFORMATION: Player = {
     ],
     room: '1',
 };
+
 export class SocketClientServiceMock extends ClientSocketService {
     // Reason : connect shouldn't actually connect
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     override connect() {}
 }
+
 describe('ChatboxHandlerService', () => {
     let service: ChatboxHandlerService;
     let socketServiceMock: SocketClientServiceMock;
@@ -548,7 +552,10 @@ describe('ChatboxHandlerService', () => {
 
     it('should add a message emit from the server when gameMessage event is emit', () => {
         const messageReceive = '!passer';
-        const messageShow = { type: 'opponent-user', data: `${gameClientServiceSpy.secondPlayer.name} : ${messageReceive}` };
+        const messageShow = {
+            type: 'opponent-user',
+            data: `${gameClientServiceSpy.secondPlayer.name} : ${messageReceive}`,
+        };
         socketEmulator.peerSideEmit(SocketEvents.GameMessage, messageReceive);
         expect(service.messages.pop()).toEqual(messageShow);
     });
