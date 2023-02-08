@@ -1,6 +1,6 @@
-<body class="justified">
-    <app-header style="width: 100%"></app-header>
+<app-header style="width: 100%" class="sticky"></app-header>
 
+<body class="justified">
     <!-- <mat-card-title>{{ title }}</mat-card-title> -->
     <mat-card class="justified">
         <mat-card-content class="container-buttons justified">
@@ -37,7 +37,9 @@
                 matTooltipClass="toolMainPage"
             >
                 <div *ngFor="let letter of ['S', 'C', 'O', 'R', 'E', 'S']">{{ letter }}</div>
-                <div id="icon"><mat-icon>emoji_events</mat-icon></div>
+                <div id="icon">
+                    <mat-icon>emoji_events</mat-icon>
+                </div>
             </div>
             <button
                 mat-fab

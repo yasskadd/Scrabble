@@ -41,6 +41,26 @@ export class PlayerRackComponent implements OnInit {
         this.duplicates = [];
     }
 
+    get letterSize(): number {
+        return this.gridService.letterSize;
+    }
+
+    get pointsSize(): number {
+        return this.gridService.letterSize * constants.LETTER_WEIGHT_RATIO;
+    }
+
+    get rack(): Letter[] {
+        return this.gameClient.playerOne.rack;
+    }
+
+    get rackIndices(): number {
+        return this.gameClient.playerOne.rack.length - 1;
+    }
+
+    get noPlacedLetters(): boolean {
+        return this.letterPlacementService.noLettersPlaced();
+    }
+
     @HostListener('mousewheel', ['$event'])
     onScrollEvent(event: WheelEvent) {
         this.buttonPressed = event.deltaY < 0 ? 'ArrowLeft' : 'ArrowRight';
@@ -63,24 +83,6 @@ export class PlayerRackComponent implements OnInit {
         });
     }
 
-    get letterSize(): number {
-        return this.gridService.letterSize;
-    }
-    get pointsSize(): number {
-        return this.gridService.letterSize * constants.LETTER_WEIGHT_RATIO;
-    }
-    get rack(): Letter[] {
-        return this.gameClient.playerOne.rack;
-    }
-
-    get rackIndices(): number {
-        return this.gameClient.playerOne.rack.length - 1;
-    }
-
-    get noPlacedLetters(): boolean {
-        return this.letterPlacementService.noLettersPlaced();
-    }
-
     dispatchAction() {
         if (this.currentSelection !== board.INVALID_INDEX) {
             this.cancel();
@@ -101,6 +103,7 @@ export class PlayerRackComponent implements OnInit {
             }
         }
     }
+
     selectManipulation() {
         this.findDuplicates();
         if (!this.duplicates.length) {

@@ -14,6 +14,7 @@ const TIMEOUT = 3000;
 export class MultiplayerJoinPageComponent implements OnInit {
     playerName: string;
     gameMode: string;
+
     constructor(
         public timer: TimerService,
         private gameConfiguration: GameConfigurationService,
@@ -25,20 +26,21 @@ export class MultiplayerJoinPageComponent implements OnInit {
         this.playerName = '';
     }
 
+    get availableRooms() {
+        return this.gameConfiguration.availableRooms;
+    }
+
     ngOnInit(): void {
         this.listenToServerResponse();
         this.gameConfiguration.resetRoomInformation();
         this.gameConfiguration.joinPage(this.gameMode);
     }
 
-    get availableRooms() {
-        return this.gameConfiguration.availableRooms;
-    }
-
     joinRoom(roomId: string) {
         this.gameConfiguration.joinGame(roomId, this.playerName);
         this.playerName = '';
     }
+
     joinRandomGame() {
         this.gameConfiguration.joinRandomRoom(this.playerName);
         this.playerName = '';
@@ -58,6 +60,7 @@ export class MultiplayerJoinPageComponent implements OnInit {
     navigatePage() {
         this.router.navigate([`/multijoueur/salleAttente/${this.gameMode}`]);
     }
+
     openSnackBar(reason: string): void {
         this.snackBar.open(reason, 'fermer', {
             duration: TIMEOUT,
