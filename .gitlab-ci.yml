@@ -159,7 +159,7 @@ deploy:server:
     script:
         - 'which ssh-agent || (apt-get update -qq && apt-get install -qq openssh-client )'
         - eval $(ssh-agent -s)
-        - ssh-add <(echo "$EC2_PEM_FILE_CONTENT" | base64 -d)
+        - ssh-add < (echo "$EC2_PEM_FILE_CONTENT" | base64 -d)
         - mkdir -p ~/.ssh
         - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
         - |
@@ -188,5 +188,5 @@ deploy:server:
                 npm run build
 
                 # Launch the server in background and append output to /var/log/messages for CloudWatch
-                PORT=${SERVER_PORT} forever start -a -l /var/log/messages out/server/app/index.js
+                PORT=${SERVER_PORT} forever start -a -l /home/ec2-user/logs/server out/server/app/index.js
             "
