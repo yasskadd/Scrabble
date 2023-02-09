@@ -1,3 +1,4 @@
+import { AuthenticationService } from '@app/services/authentication/authentication.service';
 import { ChatboxHandlerService } from '@app/services/client-utilities/chatbox-handler.service';
 import { GameSessions } from '@app/services/client-utilities/game-sessions.service';
 import { HomeChatBoxHandlerService } from '@app/services/client-utilities/home-chatbox-handler.service';
@@ -13,6 +14,7 @@ export class SocketSubscribeHandler {
         private gameSessions: GameSessions,
         private gameActions: GamesActionsService,
         private gamesState: GamesStateService,
+        private authentication: AuthenticationService,
     ) {}
 
     initSocketsEvents() {
@@ -21,5 +23,6 @@ export class SocketSubscribeHandler {
         this.homeChatBoxHandler.initSocketEvents();
         this.gameActions.initSocketsEvents();
         this.gamesState.initSocketsEvents();
+        this.authentication.initSocketsEvents();
     }
 }
