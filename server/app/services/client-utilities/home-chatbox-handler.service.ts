@@ -55,7 +55,7 @@ export class HomeChatBoxHandlerService {
             this.notifyClientFullRoom(socket);
             return;
         }
-	console.log(username + " has joined.");
+        console.log(`${username} has joined`);
         this.userMap.set(socket.id, username);
         this.usernameSet.add(username);
         socket.join(this.homeRoom.id);
@@ -79,13 +79,13 @@ export class HomeChatBoxHandlerService {
 
     // Notify everyone except sender
     private broadCastMessage(socket: Socket, message: MessageParameters): void {
-	console.log("Message received : " + message.message);
+        console.log('Message received : ' + message.message);
         socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.BroadCastMessageHome, message);
     }
 
     private leaveRoom(socket: Socket): void {
         const username = this.userMap.get(socket.id);
-	console.log(username + " left the room");
+        console.log(username + ' left the room');
         socket.leave(this.homeRoom.id);
         this.userMap.delete(socket.id);
         this.usernameSet.delete(username as string);
