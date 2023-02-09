@@ -7,7 +7,7 @@ import * as uuid from 'uuid';
 
 type MessageParameters = { username: string; type: string; message: string; timeStamp: Date };
 type HomeRoom = Pick<GameRoom, 'id' | 'isAvailable'> & { userMap: Map<string, string>; usernameSet: Set<string> };
-const ROOM_LIMIT = 3;
+const ROOM_LIMIT = 1000;
 
 @Service()
 export class HomeChatBoxHandlerService {
