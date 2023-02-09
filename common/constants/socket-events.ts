@@ -8,6 +8,8 @@ export enum SocketEvents {
     RoomIsFull = 'roomIsFull',
     UsernameTaken = 'usernameTaken',
     Disconnect = 'disconnect',
+    SignIn = 'signIn',
+    SignOut = 'signOut',
 
     GameMessage = 'gameMessage',
     GameCommand = 'command',
