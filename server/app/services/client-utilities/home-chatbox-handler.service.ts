@@ -57,6 +57,7 @@ export class HomeChatBoxHandlerService {
         this.userMap.set(socket.id, username);
         this.usernameSet.add(username);
         socket.join(this.homeRoom.id);
+        this.notifyUserConnected(socket);
         this.notifyUserJoinedRoom(sio, username, this.homeRoom.id);
         this.setIsAvailable();
     }
@@ -86,6 +87,11 @@ export class HomeChatBoxHandlerService {
         this.usernameSet.delete(username as string);
         this.setIsAvailable();
         socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.userLeftHomeRoom, username);
+    }
+
+    // Notify user
+    private notifyUserConnected(socket: Socket): void {
+        socket.emit(SocketEvents.UserConnected);
     }
 
     // Notify everyone

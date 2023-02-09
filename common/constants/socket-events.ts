@@ -42,6 +42,7 @@ export enum SocketEvents {
     ClueCommand = 'clueCommand',
     ImportDictionary = 'ImportDictionary',
     JoinHomeRoom = 'joinHomeRoom',
+    UserConnected = 'userConnected',
     UserJoinedRoom = 'userJoinedRoom',
     RoomIsFull = 'roomIsFull',
     SendMessageHome = 'sendMessageHome',
