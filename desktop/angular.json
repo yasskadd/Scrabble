@@ -80,6 +80,24 @@
                             "namedChunks": false,
                             "statsJson": false,
                             "progress": false
+                        },
+                        "live-development": {
+                            "buildOptimizer": false,
+                            "optimization": false,
+                            "vendorChunk": true,
+                            "extractLicenses": false,
+                            "sourceMap": false,
+                            "outputHashing": "none",
+                            "aot": true,
+                            "namedChunks": false,
+                            "statsJson": false,
+                            "progress": false,
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.live.ts"
+                                }
+                            ]
                         }
                     },
                     "defaultConfiguration": "production"
@@ -92,6 +110,9 @@
                         },
                         "development": {
                             "browserTarget": "desktop:build:development"
+                        },
+                        "live-development": {
+                            "browserTarget": "desktop:build:live-development"
                         }
                     },
                     "defaultConfiguration": "production"
