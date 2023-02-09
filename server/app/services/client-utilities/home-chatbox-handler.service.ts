@@ -7,6 +7,7 @@ import * as uuid from 'uuid';
 
 type MessageParameters = { username: string; type: string; message: string; timeStamp: Date };
 type HomeRoom = Pick<GameRoom, 'id' | 'isAvailable'> & { userMap: Map<string, string>; usernameSet: Set<string> };
+
 const ROOM_LIMIT = 1000;
 
 @Service()
@@ -54,10 +55,11 @@ export class HomeChatBoxHandlerService {
             this.notifyClientFullRoom(socket);
             return;
         }
+	console.log(username + " has joined.");
         this.userMap.set(socket.id, username);
         this.usernameSet.add(username);
         socket.join(this.homeRoom.id);
-        this.notifyUserConnected(socket);
+        this.notifyUserConnected(socket, username);
         this.notifyUserJoinedRoom(sio, username, this.homeRoom.id);
         this.setIsAvailable();
     }
@@ -77,11 +79,13 @@ export class HomeChatBoxHandlerService {
 
     // Notify everyone except sender
     private broadCastMessage(socket: Socket, message: MessageParameters): void {
+	console.log("Message received : " + message.message);
         socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.BroadCastMessageHome, message);
     }
 
     private leaveRoom(socket: Socket): void {
         const username = this.userMap.get(socket.id);
+	console.log(username + " left the room");
         socket.leave(this.homeRoom.id);
         this.userMap.delete(socket.id);
         this.usernameSet.delete(username as string);
@@ -90,8 +94,8 @@ export class HomeChatBoxHandlerService {
     }
 
     // Notify user
-    private notifyUserConnected(socket: Socket): void {
-        socket.emit(SocketEvents.UserConnected);
+    private notifyUserConnected(socket: Socket, username: string): void {
+        socket.emit(SocketEvents.UserConnected, username);
     }
 
     // Notify everyone
