@@ -53,6 +53,13 @@
             </button>
         </mat-card-content>
     </mat-card>
-
-    <app-footer style="width: 100%"></app-footer>
+    <div class="open-chat">
+        <button type="open-chat-button" (click)="drawer.toggle()">Toggle sidenav</button>
+    </div>
+    <mat-drawer-container class="chat-container" autosize>
+        <mat-drawer #drawer class="chat-sidenav" mode="side">
+            <app-chatbox></app-chatbox>
+        </mat-drawer>
+    </mat-drawer-container>
 </body>
+<app-footer style="width: 100%"></app-footer>
