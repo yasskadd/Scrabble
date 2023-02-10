@@ -1,0 +1,16 @@
+<mat-card class="container-wrapper">
+    <div #container class="message-container">
+        <div *ngFor="let message of messages" [class]="'message ' + message.type"></div>
+    </div>
+</mat-card>
+<mat-form-field appearance="outline" (keydown.enter)="submit()" class="user-input">
+    <mat-label>Entrez un message</mat-label>
+    <input id="input" matInput maxlength="512" type="text" [formControl]="input" placeholder="Ex. Salut!" #chatbox />
+    <mat-hint
+        [ngClass]="{
+            max: input.value?.length === 512
+        }"
+        align="end"
+        >{{ input.value?.length || 0 }}/512</mat-hint
+    >
+</mat-form-field>
