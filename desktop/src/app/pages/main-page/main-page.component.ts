@@ -97,11 +97,11 @@ export class MainPageComponent implements OnDestroy {
             case SocketEvents.RoomIsFull:
                 return 'Impossible de se connecter à la salle';
             default:
-                return 'Erreur';
-        }
-
-        if (this.userNameForm.invalid) {
-            return 'Le nom ne peut pas être vide';
+                if (this.userNameForm.invalid) {
+                    return 'Le nom ne peut pas être vide';
+                } else {
+                    return '';
+                }
         }
     }
 }
