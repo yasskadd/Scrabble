@@ -1,13 +1,13 @@
 <mat-card>
-    <div #container class="message-container">
-        <div *ngFor="let message of messages" [class]="'message ' + message.type">
-            <span *ngIf="message.username">{{ message.username }} : </span>
+    <div #container class='message-container'>
+        <div *ngFor='let message of messages' [class]="'message ' + message.type">
+            <span *ngIf='message.username'><b>{{ message.username }}</b> : </span>
             <span>{{ message.message }}</span>
         </div>
     </div>
 </mat-card>
 
-<mat-form-field appearance="outline" (keydown.enter)="submit()" class="user-input">
+<mat-form-field appearance='outline' (keydown.enter)='submit()' class='user-input'>
     <mat-label>Entrez un message</mat-label>
-    <input id="input" matInput maxlength="512" type="text" [formControl]="input" placeholder="Ex. Salut!" #chatbox />
+    <input id='input' matInput maxlength='512' type='text' [formControl]='input' placeholder='Ex. Salut!' #chatbox />
 </mat-form-field>
