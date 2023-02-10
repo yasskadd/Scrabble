@@ -10,6 +10,7 @@ import { ChatboxMessage } from '@common/interfaces/chatbox-message';
 })
 export class GenericChatComponent implements AfterViewInit, AfterViewChecked {
     static readonly inputInitialState = '';
+    loggedIn: boolean = false;
 
     @ViewChild('chatbox', { static: false }) chatbox: ElementRef;
     @ViewChild('container') private scrollBox: ElementRef;

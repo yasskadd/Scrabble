@@ -1,79 +1,82 @@
-<div class='encapsulating-div'>
+<div class="encapsulating-div">
     <app-header></app-header>
     <mat-drawer-container>
-        <div class='always-visible-content'>
-            <button class='open-chat-button' mat-button (click)='drawer.toggle()'>Open chat</button>
-            <mat-card class='justified'>
-                <mat-card-content class='justified'>
+        <div class="always-visible-content">
+            <button class="open-chat-button" mat-button (click)="drawer.toggle()">Open chat</button>
+            <mat-card class="justified">
+                <mat-card-content class="justified">
                     <button
-                        id='classique'
+                        id="classique"
                         mat-raised-button
-                        color='primary'
-                        class='button game'
+                        color="primary"
+                        class="button game"
                         (click)="openDialog('classique')"
                         [matTooltip]="'Mode classique de Scrabble'"
-                        matTooltipPosition='right'
-                        matTooltipClass='toolMainPage'
-                        disabled='true'
+                        matTooltipPosition="right"
+                        matTooltipClass="toolMainPage"
+                        disabled="true"
+                        hidden
                     >
                         Scrabble Classique
                     </button>
                     <button
-                        id='LOG2990'
+                        id="LOG2990"
                         mat-raised-button
-                        color='primary'
-                        class='button game'
+                        color="primary"
+                        class="button game"
                         (click)="openDialog('LOG2990')"
-                        matTooltipPosition='right'
-                        matTooltipClass='toolMainPage'
-                        disabled='true'
+                        matTooltipPosition="right"
+                        matTooltipClass="toolMainPage"
+                        disabled="true"
+                        hidden
                     >
                         Scrabble LOG2990
                     </button>
-
-                    <div
-                        id='scores'
-                        (click)='openHighScoreDialog()'
+                    <!-- TODO : DO NOT DELETE!!! -->
+                    <!-- <div
+                        id="scores"
+                        (click)="openHighScoreDialog()"
                         [matTooltip]="'Classement des meilleurs scores pour chacun des modes de jeu'"
-                        matTooltipPosition='right'
-                        matTooltipClass='toolMainPage'
-                        disabled='true'
+                        matTooltipPosition="right"
+                        matTooltipClass="toolMainPage"
+                        disabled="true"
                     >
                         <div *ngFor="let letter of ['S', 'C', 'O', 'R', 'E', 'S']">{{ letter }}</div>
-                        <div id='icon'>
+                        <div id="icon">
                             <mat-icon>emoji_events</mat-icon>
                         </div>
-                    </div>
+                    </div> -->
                     <button
                         mat-fab
-                        (click)='openHelpDialog()'
-                        class='help-button'
-                        matTooltip='Des instructions pour le jeu'
-                        matTooltipPosition='right'
-                        matTooltipClass='toolMainPage'
-                        disabled='true'
+                        (click)="openHelpDialog()"
+                        class="help-button"
+                        matTooltip="Des instructions pour le jeu"
+                        matTooltipPosition="right"
+                        matTooltipClass="toolMainPage"
+                        disabled="true"
+                        hidden
                     >
                         <mat-icon>help_outline</mat-icon>
                     </button>
+
+                    <mat-icon>person</mat-icon>
                     <mat-form-field>
-                        <mat-label>Entrez votre nom d'utilisateur</mat-label>
-                        <mat-icon>person</mat-icon>
-                        <input matInput [formControl]='userNameForm'>
-                        <mat-error
-                            *ngIf='(!homeConnectionResponse.validity || userNameForm.invalid) && !connected'>{{getErrorMessage()}}</mat-error>
+                        <mat-label>Veuillez entrer un nom d'utilisateur</mat-label>
+                        <input matInput [formControl]="userNameForm" />
+                        <mat-error *ngIf="(!homeConnectionResponse.validity || userNameForm.invalid) && !loggedIn">{{ getErrorMessage() }}</mat-error>
                     </mat-form-field>
-                    <div *ngIf='connected'>Connecté en tant que : {{userService.userName}}</div>
-                    <button mat-raised-button *ngIf='!connected' (click)='connectToHome()'>Se connecter</button>
-                    <button mat-raised-button *ngIf='connected' disabled>Se connecter</button>
-                    <button mat-raised-button *ngIf='connected' (click)='disconnectFromHome()'>Se déconnecter
-                    </button>
-                    <button mat-raised-button *ngIf='!connected' disabled>Se déconnecter</button>
+                    <div *ngIf="loggedIn">Connecté en tant que : {{ userService.userName }}</div>
+                    <button mat-raised-button *ngIf="!loggedIn" (click)="logIn()">Se connecter</button>
+                    <button mat-raised-button *ngIf="loggedIn" disabled>Se connecter</button>
+                    <button mat-raised-button *ngIf="loggedIn" (click)="logOut()">Se déconnecter</button>
+                    <button mat-raised-button *ngIf="!loggedIn" disabled>Se déconnecter</button>
                 </mat-card-content>
             </mat-card>
         </div>
 
-        <mat-drawer #drawer class='chat-sidenav' mode='side'>
-            <app-generic-chat></app-generic-chat>
+        <mat-drawer #drawer class="chat-sidenav" mode="side">
+            <div *ngIf="!loggedIn" class="message-container">SVP vous connecter avec un nom d'utilisateur afin de pouvoir clavarder</div>
+            <app-generic-chat *ngIf="loggedIn"></app-generic-chat>
         </mat-drawer>
     </mat-drawer-container>
 

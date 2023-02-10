@@ -1,13 +1,13 @@
 import { Component, OnDestroy } from '@angular/core';
+import { FormControl, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogBoxGameTypeComponent } from '@app/components/dialog-box-game-type/dialog-box-game-type.component';
 import { DialogBoxHighScoresComponent } from '@app/components/dialog-box-high-scores/dialog-box-high-scores.component';
 import { DialogGameHelpComponent } from '@app/components/dialog-game-help/dialog-game-help.component';
-import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
-import { FormControl, Validators } from '@angular/forms';
 import { SocketResponse } from '@app/interfaces/server-responses';
-import { SocketEvents } from '@common/constants/socket-events';
+import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
 import { UserService } from '@app/services/user.service';
+import { SocketEvents } from '@common/constants/socket-events';
 import { Subject } from 'rxjs';
 
 @Component({
@@ -19,7 +19,7 @@ export class MainPageComponent implements OnDestroy {
     readonly title: string = "Bienvenue au Scrabble de l'équipe 107!";
 
     protected userNameForm: FormControl;
-    protected connected: boolean;
+    protected loggedIn: boolean;
     protected homeConnectionResponse: SocketResponse;
     protected connectionSubject: Subject<SocketResponse>;
     protected disconnectionSubject: Subject<void>;
@@ -34,18 +34,18 @@ export class MainPageComponent implements OnDestroy {
         private highScore: MatDialog,
     ) {
         this.homeConnectionResponse = { validity: false };
-        this.connected = false;
+        this.loggedIn = false;
         this.userNameForm = new FormControl('', Validators.required);
 
         this.connectionSubject = this.chatBoxHandlerService.subscribeToUserConnection();
         this.connectionSubject.subscribe((res: SocketResponse) => {
             this.homeConnectionResponse = res;
-            this.connected = res.validity;
+            this.loggedIn = res.validity;
         });
 
         this.disconnectionSubject = this.chatBoxHandlerService.subscribeToUserDisconnecting();
         this.disconnectionSubject.subscribe(() => {
-            this.connected = false;
+            this.loggedIn = false;
             this.userService.userName = '';
             this.userNameForm.setValue('');
         });
@@ -80,13 +80,13 @@ export class MainPageComponent implements OnDestroy {
         console.log(this.chatBoxHandlerService.messages);
     }
 
-    connectToHome(): void {
+    logIn(): void {
         this.userService.userName = this.userNameForm.value;
         this.userNameForm.setValue('');
         this.chatBoxHandlerService.joinHomeRoom(this.userService.userName);
     }
 
-    disconnectFromHome(): void {
+    logOut(): void {
         this.chatBoxHandlerService.leaveHomeRoom(this.userService.userName);
     }
 
