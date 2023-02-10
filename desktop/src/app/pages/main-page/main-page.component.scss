@@ -18,6 +18,14 @@ mat-drawer-container {
     align-items: center;
 }
 
+.always-visible-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
 mat-drawer {
     left: 0;
     height: 100%;
