@@ -1,14 +1,22 @@
 {
-  "folders": [
-	{
-		"path": "."
-	},
-	{
-		"path": "src"
-	},
-	{
-		"path": "src-tauri"
-	}
-],
-  "settings": {}
+    "folders": [
+        {
+            "path": "."
+        },
+        {
+            "path": "src"
+        },
+        {
+            "path": "src-tauri"
+        },
+        {
+            "path": ".."
+        }
+    ],
+    "settings": {
+        "files.associations": {
+            "*.md": "plantuml"
+        },
+        "plantuml.render": "Local"
+    }
 }

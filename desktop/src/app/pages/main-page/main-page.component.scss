@@ -1,21 +1,66 @@
-app-header {
-    padding-top: 5px;
+.encapsulating-div {
     display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    background-color: #7fa99b;
-}
-
-.sticky {
-    position: fixed;
-    top: 0;
-    width: 100%;
-}
-
-body {
+    flex-direction: column;
     height: 100%;
+}
+
+app-header {
     display: flex;
+    background-color: #7fa99b;
+    height: 10%;
+}
+
+mat-drawer-container {
+    height: 75%;
     background-color: #c2e5da;
+    display: flex;
+    justify-content: center; // for horizontal
+    align-items: center;
+}
+
+.chat-sidenav {
+    display: flex;
+    width: 25%;
+
+    ::ng-deep div {
+        overflow-x: hidden !important;
+    }
+
+    app-generic-chat {
+        display: grid;
+        height: 100%;
+        grid-template-rows: 1fr max-content;
+        align-content: space-between;
+    }
+}
+
+.always-visible-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.open-chat-button {
+    position: absolute;
+    left: 5px;
+    top: 5px;
+    background-color: #fff;
+}
+
+mat-drawer {
+    left: 0;
+    height: 100%;
+    width: 20%;
+    padding: 10px;
+}
+
+app-footer {
+    height: 15%;
+    text-align: center;
+    color: #23501f;
+    background-color: #7fa99b;
 }
 
 .justified {
@@ -25,11 +70,6 @@ body {
     justify-content: center;
 }
 
-.mat-card-title {
-    padding-bottom: 30px;
-    font-family: system-ui;
-}
-
 ::ng-deep .toolMainPage {
     font-size: 14px;
     background-color: #23501f;
@@ -37,13 +77,9 @@ body {
 
 .mat-card {
     padding: 30px;
-    width: 450px;
+    width: 40%;
     box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
     background-color: #7fa99b;
-}
-
-.mat-card-content {
-    width: 100%;
 }
 
 .mat-raised-button:hover {
@@ -62,6 +98,22 @@ body {
 
     color: #cff3e8;
     background-color: #23501f;
+}
+
+.buttons-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 8px;
+    padding-top: 16px;
+    justify-self: center;
+
+    button {
+        justify-self: center;
+    }
+}
+
+.text-input {
+    padding: 16px;
 }
 
 #scores {
@@ -99,7 +151,7 @@ body {
     position: absolute;
     margin-right: -460px;
     margin-bottom: -190px !important;
-    background-color: #23501f;
+    // background-color: #23501f;
 }
 
 ::ng-deep .mat-fab {
@@ -111,13 +163,6 @@ body {
     padding: 0px !important;
 }
 
-.chatbox {
-    max-width: 300px;
-    padding: 7px 10px 0px 11px;
-    background-color: #7fa99b;
-    position: absolute;
-    right: 0px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
+::ng-deep .mat-drawer-content {
+    width: 100%;
 }

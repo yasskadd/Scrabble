@@ -12,6 +12,7 @@ export class SocketManager {
     private onEvents: Map<string, CallbackSignature[]>;
     private onAndSioEvents: Map<string, OnSioCallbackSignature[]>;
     private sio: io.Server;
+
     constructor() {
         this.onEvents = new Map<string, CallbackSignature[]>();
         this.onAndSioEvents = new Map<string, OnSioCallbackSignature[]>();
@@ -28,6 +29,7 @@ export class SocketManager {
         const onElement = this.onEvents.get(event) as CallbackSignature[];
         onElement.push(callback);
     }
+
     io(event: string, callback: OnSioCallbackSignature) {
         if (!this.onAndSioEvents.has(event)) {
             this.onAndSioEvents.set(event, []);
@@ -42,6 +44,7 @@ export class SocketManager {
 
     handleSockets(): void {
         this.sio.on('connection', (socket) => {
+            console.log('Connection of client with id = ' + socket.id + ' from : ' + socket.handshake.headers.origin);
             for (const [event, callbacks] of this.onEvents.entries()) {
                 for (const callback of callbacks) {
                     socket.on(event, (...args: unknown[]) => callback(socket, ...args));

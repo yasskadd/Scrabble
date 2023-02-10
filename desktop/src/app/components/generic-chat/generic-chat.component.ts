@@ -1,27 +1,23 @@
 import { AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { ChatboxMessage } from '@common/interfaces/chatbox-message';
 import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
-import { GameClientService } from '@app/services/game-client.service';
-
-const PLACEMENT_COMMAND = '^!placer [a-o][0-9]{1,2}(v|h){0,1} [a-zA-Z]{1,7}$';
+import { ChatboxMessage } from '@common/interfaces/chatbox-message';
 
 @Component({
-    selector: 'app-chatbox',
-    templateUrl: './chatbox.component.html',
-    styleUrls: ['./chatbox.component.scss'],
+    selector: 'app-generic-chat',
+    templateUrl: './generic-chat.component.html',
+    styleUrls: ['./generic-chat.component.scss'],
 })
-export class ChatboxComponent implements AfterViewInit, AfterViewChecked {
-    static readonly inputInitialState = '';
-    static readonly placementRegex = new RegExp(PLACEMENT_COMMAND);
-
+export class GenericChatComponent implements AfterViewInit, AfterViewChecked {
     @ViewChild('chatbox', { static: false }) chatbox: ElementRef;
     @ViewChild('container') private scrollBox: ElementRef;
 
-    input = new FormControl(ChatboxComponent.inputInitialState);
+    inputForm: FormControl;
     private lastMessage: ChatboxMessage;
 
-    constructor(public gameClientService: GameClientService, private chatboxHandler: ChatboxHandlerService) {}
+    constructor(private chatboxHandler: ChatboxHandlerService) {
+        this.inputForm = new FormControl('');
+    }
 
     get messages() {
         return this.chatboxHandler.messages;
@@ -33,23 +29,19 @@ export class ChatboxComponent implements AfterViewInit, AfterViewChecked {
     }
 
     ngAfterViewInit() {
-        // setTimeout(() => {
-        //     this.chatboxHandler.resetMessage();
-        //     this.chatbox.nativeElement.focus();
-        // }, 0);
+        setTimeout(() => {
+            // this.chatboxHandler.resetMessage();
+            this.chatbox.nativeElement.focus();
+        }, 0);
     }
 
     submit() {
-        this.chatboxHandler.submitMessage(this.input.value);
+        this.chatboxHandler.submitMessage(this.inputForm.value);
         this.resetInput();
     }
 
-    isPlacementCommand(message: string): boolean {
-        return ChatboxComponent.placementRegex.test(message);
-    }
-
     submitMessage(message: string) {
-        this.input.setValue(message);
+        this.inputForm.setValue(message);
         this.submit();
     }
 
@@ -62,7 +54,7 @@ export class ChatboxComponent implements AfterViewInit, AfterViewChecked {
     }
 
     private resetInput() {
-        this.input.setValue('');
+        this.inputForm.setValue('');
     }
 
     private scrollToBottom(): void {
