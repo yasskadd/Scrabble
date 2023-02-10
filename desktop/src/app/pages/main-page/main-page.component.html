@@ -58,24 +58,25 @@
                     >
                         <mat-icon>help_outline</mat-icon>
                     </button>
-
-                    <mat-icon>person</mat-icon>
+                    <div *ngIf="loggedIn">Connecté en tant que : {{ userService.userName }}</div>
                     <mat-form-field>
-                        <mat-label>Veuillez entrer un nom d'utilisateur</mat-label>
-                        <input matInput [formControl]="userNameForm" />
+                        <mat-label>Nom d'utilisateur</mat-label>
+                        <input matInput (keydown.enter)="logIn()" [formControl]="userNameForm" />
+                        <mat-icon matSuffix>person</mat-icon>
                         <mat-error *ngIf="(!homeConnectionResponse.validity || userNameForm.invalid) && !loggedIn">{{ getErrorMessage() }}</mat-error>
                     </mat-form-field>
-                    <div *ngIf="loggedIn">Connecté en tant que : {{ userService.userName }}</div>
-                    <button mat-raised-button *ngIf="!loggedIn" (click)="logIn()">Se connecter</button>
-                    <button mat-raised-button *ngIf="loggedIn" disabled>Se connecter</button>
-                    <button mat-raised-button *ngIf="loggedIn" (click)="logOut()">Se déconnecter</button>
-                    <button mat-raised-button *ngIf="!loggedIn" disabled>Se déconnecter</button>
+                    <div class="buttons-columns">
+                        <button mat-raised-button *ngIf="!loggedIn" (click)="logIn()">Se connecter</button>
+                        <button mat-raised-button *ngIf="loggedIn" disabled>Se connecter</button>
+                        <button mat-raised-button *ngIf="loggedIn" (click)="logOut()">Se déconnecter</button>
+                        <button mat-raised-button *ngIf="!loggedIn" disabled>Se déconnecter</button>
+                    </div>
                 </mat-card-content>
             </mat-card>
         </div>
 
         <mat-drawer #drawer class="chat-sidenav" mode="side">
-            <div *ngIf="!loggedIn" class="message-container">SVP vous connecter avec un nom d'utilisateur afin de pouvoir clavarder</div>
+            <div *ngIf="!loggedIn">SVP vous connecter avec un nom d'utilisateur afin de pouvoir clavarder</div>
             <app-generic-chat *ngIf="loggedIn"></app-generic-chat>
         </mat-drawer>
     </mat-drawer-container>

@@ -82,6 +82,15 @@ app-footer {
     background-color: #23501f;
 }
 
+.buttons-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    button {
+        margin: 16px 16px 0 16px;
+    }
+}
+
 #scores {
     display: flex;
     flex-direction: row;
