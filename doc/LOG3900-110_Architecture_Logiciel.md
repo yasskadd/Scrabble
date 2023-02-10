@@ -1,20 +1,17 @@
 
 # Cas d'utilisation
 
-## Clavardage
+## Cas d'utilisation pour le clavardage
 @startuml
-
-title "Cas d'utilisation pour le clavardage"
 
 left to right direction
 
 actor Utilisateur as user
 
-rectangle "Polyscrabble clavardage" {
+rectangle "PolyScrabble - Clavardage" {
     usecase "Envoyer un message" as UC1
     usecase "Rejoindre une salle de clavardage" as UC2
     usecase "Quitter une salle de clavardage" as UC3
-    usecase "Joindre plusieurs salles\ndifférentes en même temps" as UC11
     usecase "Consulter l'historique d'une\nsalle de clavardage" as UC4
     usecase "Créer une salle de clavardage" as UC6
     usecase "Supprimer une salle de clavardage" as UC7
@@ -28,19 +25,86 @@ rectangle "Polyscrabble clavardage" {
     }
 }
 
-user --> UC1
-user --> UC2
-user --> UC3
-user --> UC4
-user --> UC5
-user --> UC6
-user --> UC7
-user --> UC8
-user --> UC9
-user --> UC10
-user --> UC11
+user -- UC1
+user -- UC2
+user -- UC3
+user -- UC4
+UC10 .> UC5 : includes
+user -- UC6
+user -- UC7
+user -- UC8
+user -- UC9
+user -- UC10
+UC9 .> UC8 : extends
 
 @enduml
+
+## Cas d'utilisation pour la gestion de compte
+
+@startuml
+
+left to right direction
+
+actor Utilisateur as user
+actor Serveur as server
+actor "Google reCAPTCHA Service" as recaptcha
+
+rectangle "PolyScrabble - Gestion de compte" {
+    usecase "Créer un compte" as UC1
+    usecase "Entrer ses informations" as UC1.1
+    usecase "Choisir un avatar" as UC1.2
+    usecase "Remplir un captcha" as UC1.3
+    usecase "Se connecter à un compte" as UC2
+    usecase "Modifier le psoeudonyme\nou l'avatar du compte" as UC3
+    usecase "Modifier le mot de passe\ndu compte" as UC7
+    usecase "Consulter les statistiques\ndu compte" as UC4
+    usecase "Consulter l'historique d'activité\ndu compte" as UC5
+    usecase "Réinitialiser un mot de passe oublié" as UC6
+    usecase "Envoyer un courriel de récupération" as UC6.1
+    usecase "Se déconnecter du compte" as UC8
+    usecase "Déconnecter tous les instances\nd'un utilisateur" as UC9
+
+    note top of UC1.1 : Courriel, psoeudonyme\net mot de passe
+    
+    note "Tous ces cas d'utilisation necessite\nd'être connecté à un compte*" as Note2
+}
+
+
+
+
+user -- UC1
+UC1 ..> UC1.1 : includes
+UC1 ..> UC1.2 : includes
+UC1 ..> UC1.3 : includes
+UC1.3 -- recaptcha
+
+UC3 .. Note2
+UC4 .. Note2
+UC7 .. Note2
+UC5 .. Note2
+UC8 .. Note2
+
+user - UC2
+user -- UC3
+user -- UC4
+user -- UC5
+user -- UC6
+UC6 ..> UC6.1 : includes
+UC6 .> UC7 : includes
+user -- UC7
+UC7 ..> UC9 : includes
+user -- UC8
+
+UC1 -- server
+UC2 -- server
+UC3 -- server
+UC6.1 -- server
+UC9 -- server
+
+
+
+@enduml
+
 
 # Vue de déploiement
 @startuml
