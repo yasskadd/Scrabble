@@ -94,7 +94,6 @@ export class ChatboxHandlerService {
     subscribeToUserDisconnecting(): Subject<void> {
         const roomLeftSubject: Subject<void> = new Subject<void>();
         this.clientSocket.on(SocketEvents.UserLeftHomeRoom, (userName: string) => {
-            console.log('received');
             if (userName === this.userService.userName) {
                 roomLeftSubject.next();
                 this.loggedIn = false;
@@ -105,16 +104,16 @@ export class ChatboxHandlerService {
     }
 
     private configureBaseSocketFeatures(): void {
-        this.clientSocket.on(SocketEvents.GameMessage, (messageObject: string) => {
-            this.messages.push(JSON.parse(messageObject) as ChatboxMessage);
+        this.clientSocket.on(SocketEvents.GameMessage, (message: ChatboxMessage) => {
+            this.messages.push(message);
         });
 
         this.clientSocket.on(SocketEvents.UserJoinedRoom, (userName: string) => {
             this.messages.push(this.createConnectedUserMessage(userName));
         });
 
-        this.clientSocket.on(SocketEvents.ReceiveHomeMessage, (messageObject: string) => {
-            this.messages.push(JSON.parse(messageObject) as ChatboxMessage);
+        this.clientSocket.on(SocketEvents.ReceiveHomeMessage, (message: ChatboxMessage) => {
+            this.messages.push(message);
         });
 
         this.clientSocket.on(SocketEvents.UserLeftHomeRoom, (userName: string) => {

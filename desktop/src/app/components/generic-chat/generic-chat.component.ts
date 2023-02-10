@@ -38,8 +38,6 @@ export class GenericChatComponent implements AfterViewInit, AfterViewChecked {
 
     submit() {
         this.chatboxHandler.submitMessage(this.input.value);
-        console.log(this.input.value);
-        console.log(this.messages);
         this.resetInput();
     }
 

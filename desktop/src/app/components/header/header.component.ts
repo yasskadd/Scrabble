@@ -16,18 +16,16 @@ export class HeaderComponent {
     }
 
     checkIfHomePage() {
-        return this.router.url === `/home`;
+        return this.router.url === '/home';
     }
 
     redirectHome() {
         this.isHomePage = true;
-        this.router.navigate(['/home']);
-        console.log(this.isHomePage);
+        this.router.navigate(['/home']).then();
     }
 
     redirectAdmin() {
         this.isHomePage = false;
-        this.router.navigate(['/admin']);
-        console.log(this.isHomePage);
+        this.router.navigate(['/admin']).then();
     }
 }

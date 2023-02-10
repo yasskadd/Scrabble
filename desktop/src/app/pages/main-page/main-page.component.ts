@@ -82,6 +82,9 @@ export class MainPageComponent implements OnDestroy {
     }
 
     logIn(): void {
+        if (this.chatBoxHandlerService.loggedIn) return;
+        this.userNameForm.markAsTouched();
+
         this.userService.userName = this.userNameForm.value;
         this.chatBoxHandlerService.joinHomeRoom(this.userService.userName);
     }
