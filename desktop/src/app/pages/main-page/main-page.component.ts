@@ -24,6 +24,8 @@ export class MainPageComponent implements OnDestroy {
     protected connectionSubject: Subject<SocketResponse>;
     protected disconnectionSubject: Subject<void>;
 
+    protected chatIsOpen: boolean;
+
     private readonly dialogWidth: string = '500px';
     private readonly dialogWidthHighScore: string = '750px';
 
@@ -36,6 +38,7 @@ export class MainPageComponent implements OnDestroy {
         this.homeConnectionResponse = { validity: false };
         this.loggedIn = false;
         this.userNameForm = new FormControl('', Validators.required);
+        this.chatIsOpen = false;
 
         this.connectionSubject = this.chatBoxHandlerService.subscribeToUserConnection();
         this.connectionSubject.subscribe((res: SocketResponse) => {
@@ -101,5 +104,13 @@ export class MainPageComponent implements OnDestroy {
                     return '';
                 }
         }
+    }
+
+    openChat() {
+        this.chatIsOpen = true;
+    }
+
+    closeChat() {
+        this.chatIsOpen = false;
     }
 }
