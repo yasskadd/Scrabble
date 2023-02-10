@@ -22,8 +22,9 @@ mat-drawer-container {
     display: flex;
     width: 25%;
 
-    ::ng-deep div {
+    ::ng-deep + div {
         overflow-x: hidden !important;
+        width: -webkit-fill-available;
     }
 
     app-generic-chat {
@@ -31,6 +32,11 @@ mat-drawer-container {
         height: 100%;
         grid-template-rows: 1fr max-content;
         align-content: space-between;
+
+        ::ng-deep label {
+            overflow: unset;
+            left: auto;
+        }
     }
 }
 

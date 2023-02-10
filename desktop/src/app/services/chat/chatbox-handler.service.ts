@@ -97,6 +97,7 @@ export class ChatboxHandlerService {
             if (userName === this.userService.userName) {
                 roomLeftSubject.next();
                 this.loggedIn = false;
+                this.messages = [];
             }
         });
 
@@ -159,7 +160,7 @@ export class ChatboxHandlerService {
     private createDisconnectedUserMessage(userName: string): ChatboxMessage {
         return {
             type: 'system',
-            message: `${userName} a quitté le salon.`,
+            message: `'${userName}' a quitté le salon.`,
             timeStamp: this.timeService.getTimeStamp(),
         };
 
