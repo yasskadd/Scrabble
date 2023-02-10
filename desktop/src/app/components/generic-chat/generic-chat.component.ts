@@ -1,7 +1,7 @@
 import { AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { ChatboxMessage } from '@app/interfaces/chatbox-message';
-import { ChatboxHandlerService } from '@app/services/chatbox-handler.service';
+import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
+import { ChatboxMessage } from '@common/interfaces/chatbox-message';
 
 @Component({
     selector: 'app-generic-chat',
@@ -30,7 +30,7 @@ export class GenericChatComponent implements AfterViewInit, AfterViewChecked {
 
     ngAfterViewInit() {
         setTimeout(() => {
-            this.chatboxHandler.resetMessage();
+            // this.chatboxHandler.resetMessage();
             this.chatbox.nativeElement.focus();
         }, 0);
     }

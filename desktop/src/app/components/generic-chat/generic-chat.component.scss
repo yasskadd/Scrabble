@@ -1,6 +1,10 @@
-.container-wrapper {
-    height: 80%;
-    margin-bottom: 5px;
+mat-card {
+    height: 85%;
+    background: rgb(255 255 255 / 70%);
+}
+
+mat-form-field {
+    height: 15%;
 }
 
 #reserve {
@@ -9,30 +13,11 @@
     color: #23501f;
 }
 
-#number-letters {
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #fbd7a3;
-    border-radius: 3px;
-    margin: 10px;
-    width: 30px;
-    height: 30px;
-    box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
-    text-align: center;
-}
-
 .message-container {
     height: 100%;
     width: 100%;
     word-wrap: break-word;
     overflow-y: auto;
-    padding-right: 8px;
-}
-
-::ng-deep .mat-form-field-wrapper {
-    padding-bottom: 0;
 }
 
 .message {
@@ -78,11 +63,6 @@
 
 .max {
     color: red;
-}
-
-.mat-card {
-    background: rgb(255 255 255 / 70%);
-    padding-left: 8px;
 }
 
 ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
