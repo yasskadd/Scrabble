@@ -77,12 +77,10 @@ export class MainPageComponent implements OnDestroy {
 
     sendMessage(): void {
         this.chatBoxHandlerService.submitMessage('test');
-        console.log(this.chatBoxHandlerService.messages);
     }
 
     connectToHome(): void {
         this.userService.userName = this.userNameForm.value;
-        this.userNameForm.setValue('');
         this.chatBoxHandlerService.joinHomeRoom(this.userService.userName);
     }
 
