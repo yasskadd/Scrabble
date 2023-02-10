@@ -19,7 +19,6 @@ export class MainPageComponent implements OnDestroy {
     readonly title: string = "Bienvenue au Scrabble de l'équipe 107!";
 
     protected userNameForm: FormControl;
-    protected loggedIn: boolean;
     protected homeConnectionResponse: SocketResponse;
     protected connectionSubject: Subject<SocketResponse>;
     protected disconnectionSubject: Subject<void>;
@@ -36,19 +35,19 @@ export class MainPageComponent implements OnDestroy {
         private highScore: MatDialog,
     ) {
         this.homeConnectionResponse = { validity: false };
-        this.loggedIn = false;
         this.userNameForm = new FormControl('', Validators.required);
         this.chatIsOpen = false;
 
         this.connectionSubject = this.chatBoxHandlerService.subscribeToUserConnection();
         this.connectionSubject.subscribe((res: SocketResponse) => {
             this.homeConnectionResponse = res;
-            this.loggedIn = res.validity;
+            if (!res.validity) {
+                this.userNameForm.setErrors({ notMatched: true });
+            }
         });
 
         this.disconnectionSubject = this.chatBoxHandlerService.subscribeToUserDisconnecting();
         this.disconnectionSubject.subscribe(() => {
-            this.loggedIn = false;
             this.userService.userName = '';
             this.userNameForm.setValue('');
         });
@@ -92,18 +91,23 @@ export class MainPageComponent implements OnDestroy {
     }
 
     getErrorMessage(): string {
+        let message = '';
         switch (this.homeConnectionResponse.socketMessage) {
-            case SocketEvents.UsernameTaken:
-                return "Le nom d'utilisateur existe déjà";
-            case SocketEvents.RoomIsFull:
-                return 'Impossible de se connecter à la salle';
-            default:
-                if (this.userNameForm.invalid) {
-                    return 'Le nom ne peut pas être vide';
-                } else {
-                    return '';
-                }
+            case SocketEvents.UsernameTaken: {
+                message = "Le nom d'utilisateur existe déjà";
+                break;
+            }
+            case SocketEvents.RoomIsFull: {
+                message = 'Impossible de se connecter à la salle';
+                break;
+            }
         }
+
+        if (this.userNameForm.hasError('required')) {
+            message = 'Le nom ne peut pas être vide';
+        }
+
+        return message;
     }
 
     openChat() {
