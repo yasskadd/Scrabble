@@ -1,9 +1,13 @@
-<div *ngIf="!isHomePage" id="home" (click)="redirectHome()">
+<!-- <div *ngIf="!isHomePage" id="home" (click)="redirectHome()">
     <div *ngFor="let letter of homePage">{{ letter }}</div>
 </div>
 
 <div *ngIf="isHomePage" id="admin" (click)="redirectAdmin()">
     <div *ngFor="let letter of adminPage">{{ letter }}</div>
+</div> -->
+
+<div id="admin">
+    <div *ngFor="let letter of ['B', 'I', 'E', 'N', 'V', 'E', 'N', 'U', 'E']">{{ letter }}</div>
 </div>
 
 <div id="image">
