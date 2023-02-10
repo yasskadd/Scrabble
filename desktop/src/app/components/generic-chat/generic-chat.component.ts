@@ -9,16 +9,15 @@ import { ChatboxMessage } from '@common/interfaces/chatbox-message';
     styleUrls: ['./generic-chat.component.scss'],
 })
 export class GenericChatComponent implements AfterViewInit, AfterViewChecked {
-    static readonly inputInitialState = '';
-    loggedIn: boolean = false;
-
     @ViewChild('chatbox', { static: false }) chatbox: ElementRef;
     @ViewChild('container') private scrollBox: ElementRef;
 
-    input = new FormControl(GenericChatComponent.inputInitialState);
+    inputForm: FormControl;
     private lastMessage: ChatboxMessage;
 
-    constructor(private chatboxHandler: ChatboxHandlerService) {}
+    constructor(private chatboxHandler: ChatboxHandlerService) {
+        this.inputForm = new FormControl('');
+    }
 
     get messages() {
         return this.chatboxHandler.messages;
@@ -37,12 +36,12 @@ export class GenericChatComponent implements AfterViewInit, AfterViewChecked {
     }
 
     submit() {
-        this.chatboxHandler.submitMessage(this.input.value);
+        this.chatboxHandler.submitMessage(this.inputForm.value);
         this.resetInput();
     }
 
     submitMessage(message: string) {
-        this.input.setValue(message);
+        this.inputForm.setValue(message);
         this.submit();
     }
 
@@ -55,7 +54,7 @@ export class GenericChatComponent implements AfterViewInit, AfterViewChecked {
     }
 
     private resetInput() {
-        this.input.setValue('');
+        this.inputForm.setValue('');
     }
 
     private scrollToBottom(): void {

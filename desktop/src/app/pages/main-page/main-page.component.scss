@@ -18,6 +18,11 @@ mat-drawer-container {
     align-items: center;
 }
 
+.chat-sidenav {
+    display: flex;
+    width: fit-content;
+}
+
 .always-visible-content {
     display: flex;
     flex-direction: column;

@@ -7,7 +7,13 @@
     </div>
 </mat-card>
 
-<mat-form-field appearance='outline' (keydown.enter)='submit()' class='user-input'>
-    <mat-label>Entrez un message</mat-label>
-    <input id='input' matInput maxlength='512' type='text' [formControl]='input' placeholder='Ex. Salut!' #chatbox />
-</mat-form-field>
+<div class='chat-input'>
+    <mat-form-field appearance='outline' (keydown.enter)='submit()' class='user-input'>
+        <mat-label>Entrez un message</mat-label>
+        <input matInput maxlength='512' type='text' [formControl]='inputForm' placeholder='Ex. Salut!'
+               #chatbox />
+    </mat-form-field>
+    <button mat-mini-fab color='primary' (click)='submit()'>
+        <mat-icon>send</mat-icon>
+    </button>
+</div>
