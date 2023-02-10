@@ -26,6 +26,12 @@ mat-drawer-container {
     height: 100%;
 }
 
+.open-chat-button {
+    position: absolute;
+    left: 5px;
+    top: 5px;
+}
+
 mat-drawer {
     left: 0;
     height: 100%;
