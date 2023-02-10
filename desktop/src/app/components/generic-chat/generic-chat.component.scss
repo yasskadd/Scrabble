@@ -16,16 +16,33 @@ mat-form-field {
 }
 
 .message {
-    margin: 10px 0px;
+    margin: 12px 0px;
     font-family: sans-serif;
 }
 
 .chat-input {
     display: flex;
+    height: fit-content;
+    padding: 8px;
     gap: 8px;
 
     button {
         align-self: center;
+    }
+}
+
+.chat-metadata {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+
+    strong {
+        padding-right: 4px;
+    }
+
+    p {
+        font-size: 0.6em;
+        margin-bottom: 0px;
     }
 }
 

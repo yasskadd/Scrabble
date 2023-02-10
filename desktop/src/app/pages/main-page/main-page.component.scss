@@ -21,6 +21,17 @@ mat-drawer-container {
 .chat-sidenav {
     display: flex;
     width: fit-content;
+
+    ::ng-deep div {
+        overflow-x: hidden !important;
+    }
+
+    app-generic-chat {
+        display: grid;
+        height: 100%;
+        grid-template-rows: 1fr max-content;
+        align-content: space-between;
+    }
 }
 
 .always-visible-content {

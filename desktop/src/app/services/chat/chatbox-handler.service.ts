@@ -151,7 +151,7 @@ export class ChatboxHandlerService {
     private createConnectedUserMessage(userName: string): ChatboxMessage {
         return {
             type: 'system',
-            message: `${userName} a join le salon!`,
+            message: `'${userName}' a join le salon!`,
             timeStamp: this.timeService.getTimeStamp(),
         };
     }
