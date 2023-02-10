@@ -49,6 +49,7 @@ left to right direction
 actor Utilisateur as user
 actor Serveur as server
 actor "Google reCAPTCHA Service" as recaptcha
+actor "Serveur MongoDB" as mongodb
 
 rectangle "PolyScrabble - Gestion de compte" {
 usecase "Créer un compte" as UC1
@@ -95,7 +96,6 @@ UC7 ..> UC9 : includes
 user -- UC8
 
 UC1 -- server
-UC2 -- server
 UC3 -- server
 UC6.1 -- server
 UC9 -- server
@@ -111,7 +111,7 @@ left to right direction
 actor Utilisateur as user
 actor Serveur as server
 
-rectangle "PolyScrabble - Salle de jeu" {
+rectangle "PolyScrabble - Choix d'un avatar " {
 usecase "Se connecter à son compte utilisateur" as UC1
 usecase "Créer un compte utilisateur" as UC2
 usecase "Choisir un avatar" as UC3
@@ -125,18 +125,17 @@ user -- UC2
 user -- UC3
 user -- UC6
 
-server -- UC1
-server -- UC2
-server -- UC4
-server -- UC5
-server -- UC6
+UC2 -- server
+UC5 -- server
+UC6 -- server
 
 UC3 ..> UC4 : includes
 UC3 ..> UC5 : includes
+UC6 .> UC1 : includes
 
 @enduml
 
-## Cas d'utilisation des modes de jeu ------------------------------------------------------------------------
+## Cas d'utilisation des salles d'attente ------------------------------------------------------------------------
 
 @startuml
 
@@ -145,17 +144,15 @@ left to right direction
 actor Utilisateur as user
 actor Serveur as server
 
-rectangle "PolyScrabble - Partie de jeu" {
-usecase "Rejoindre une partie" as UC1
-usecase "Créer une partie" as UC2
+rectangle "PolyScrabble - Salle d'attente" {
+usecase "Rejoindre une salle" as UC1
+usecase "Créer une salle" as UC2
 usecase "Rejoindre la salle de\nclavardage d'une partie" as UC9
-usecase "Ajouter un joueur virtuel\ndans une partie" as UC5
+usecase "Ajouter un joueur virtuel\ndans une salle" as UC5
 usecase "Choisir un mode de jeu" as UC3
-usecase "Consulter la liste des\njoueurs dans une partie" as UC4
+usecase "Consulter la liste des\njoueurs dans une salle" as UC4
 usecase "Démarrer une partie" as UC6
-usecase "Quitter une partie" as UC7
-usecase "Abandonner une partie" as UC8
-
+usecase "Quitter une salle" as UC7
 }
 
 user -- UC1
@@ -169,12 +166,45 @@ user -- UC4
 user -- UC5
 user -- UC6
 user -- UC7
-user -- UC8
 user -- UC9
-UC8 .> UC5 : includes
-UC7 .u.> UC8 : includes
 
-UC
+UC5 -- server
+
+@enduml
+
+## Cas d'utilisation de la partie ------------------------------------------------------------------------
+
+@startuml
+
+left to right direction
+
+actor Utilisateur as user
+actor Serveur as server
+
+rectangle "PolyScrabble - Partie" {
+usecase "Entrer dans la partie" as UC1
+usecase "Placer des lettres sur le plateau" as UC2
+usecase "Jouer une commande indice" as UC3
+usecase "Clavarder avec les autres joueurs" as UC4
+usecase "Comptabiliser les points" as UC5
+usecase "Abandonner une partie" as UC6
+usecase "Demander un indice" as UC7
+usecase "Donner un indice" as UC8
+usecase "Faire un mot valide" as UC9
+usecase "Faire un mot invalide" as UC10
+}
+
+user -- UC1
+user -- UC2
+user -- UC3
+user -- UC4
+user -- UC6
+user -- UC7
+
+UC7 .> UC8 : extends
+
+UC8 -- server
+UC5 -- server
 
 @enduml
 
@@ -206,15 +236,60 @@ component client_leger as "<<Application Flutter>>\nClient Léger\nPolyScrabble"
 
 }
 
-serveur*express "1" -0)- "1" serveur_mongoDB
-serveur_express "1" -u- "0..*" client*leger : http, socketIO:3000
-serveur_express "1" -- "0..*" client_lourd : http, socketIO:3000
+serveur_express "1" -0)- "1" serveur_mongoDB
+serveur_express "1" -u- "0.._" client_leger : http, socketIO:3000
+serveur_express "1" -- "0.._" client_lourd : http, socketIO:3000
 @enduml
 
 # Vue des processus
 
+## Diagramme de processus pour la gestion de compte
+
+### Création de compte
+
 @startuml
 
-title "Vue des processus"
+actor Utilisateur as user
+participant "Système" as system
+participant "Service reCAPTCHA" as rechapta
+
+user -> system: Créer un compte
+system -> user: Afficher le formulaire de création de compte
+
+user -> rechapta: Remplir un captcha
+rechapta -> user: Valider le captcha
+
+user -> system: Saisir ses informations et son choix d'avatar
+system -> system: Créer un compte
+system -> user: Compte créé avec succès
+
+@enduml
+
+### Mot de passe oublié
+
+@startuml
+
+actor Utilisateur as user
+participant "Système" as system
+participant "MongoDB" as mongodb
+participant "Système de courriel" as mail_system
+
+user -> system: Signaler mot de passe oublié
+user <- system: Afficher le formulaire de réinitialisation de mot de passe oublié
+user -> system: Saisir son courriel
+system -> mongodb: Vérifier l'existance d'un compte avec le courriel
+
+group "Compte inexistant"
+system <- mongodb: Le compte avec le courriel n'existe pas
+user <- system: Afficher message d'erreur
+end
+
+group "Compte inexistant"
+system <- mongodb: Le compte avec le courriel existe
+system -> system: Générer un mot de passe temporaire
+system -> mail_system: Envoyer un courriel de récupération
+system <- mail_system: Courriel envoyé avec succès
+user <- system: Informer qu'un courriel est envoyé
+end
 
 @enduml
