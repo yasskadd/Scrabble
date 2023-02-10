@@ -1,7 +1,7 @@
 <mat-card>
     <div #container class="message-container">
         <div *ngFor="let message of messages" [class]="'message ' + message.type">
-            <span *ngIf="message.userName">{{ message.userName }} : </span>
+            <span *ngIf="message.username">{{ message.username }} : </span>
             <span>{{ message.message }}</span>
         </div>
     </div>

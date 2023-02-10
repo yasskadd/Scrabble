@@ -1,5 +1,5 @@
 export interface ChatboxMessage {
-    userName?: string;
+    username?: string;
     type: string;
     message: string;
     timeStamp?: string;

@@ -1,16 +1,16 @@
 import { Injectable } from '@angular/core';
-import { ChatboxMessage } from '@common/interfaces/chatbox-message';
 import { SocketEvents } from '@common/constants/socket-events';
+import { ChatboxMessage } from '@common/interfaces/chatbox-message';
 // import { CommandInfo } from '@common/interfaces/command-info';
 // import { Letter } from '@common/interfaces/letter';
 // import { CommandHandlerService } from '@app/services/command-handler.service';
 import { ClientSocketService } from '@app/services/communication/client-socket.service';
 // import { GameClientService } from '@app/services/game-client.service';
 // import { GameConfigurationService } from '@app/services/game-configuration.service';
-import { TimeService } from '@app/services/chat/time.service';
-import { Subject } from 'rxjs';
 import { SocketResponse } from '@app/interfaces/server-responses';
+import { TimeService } from '@app/services/chat/time.service';
 import { UserService } from '@app/services/user.service';
+import { Subject } from 'rxjs';
 
 // const EXCHANGE_ALLOWED_MINIMUM = 7;
 // const CHAR_ASCII = 96;
@@ -176,7 +176,7 @@ export class ChatboxHandlerService {
 
     private configureUserMessage(userInput: string): ChatboxMessage {
         return {
-            userName: this.userService.userName,
+            username: this.userService.userName,
             type: 'user',
             message: userInput,
             timeStamp: this.timeService.getTimeStamp(),
