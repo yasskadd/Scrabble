@@ -66,12 +66,12 @@ export class ChatboxHandlerService {
     }
 
     leaveHomeRoom(userName: string): void {
-        this.clientSocket.send(SocketEvents.LeaveHomeRoom, userName);
+        this.clientSocket.send(SocketEvents.UserLeftRoom, userName);
     }
 
     subscribeToUserConnection(): Subject<SocketResponse> {
         const roomJoinedSubject: Subject<SocketResponse> = new Subject<SocketResponse>();
-        this.clientSocket.on(SocketEvents.JoinedHomeRoom, (userName: string) => {
+        this.clientSocket.on(SocketEvents.UserJoinedRoom, (userName: string) => {
             if (userName === this.userService.userName) {
                 roomJoinedSubject.next({ validity: true });
                 this.connectedToHome = true;
@@ -87,7 +87,20 @@ export class ChatboxHandlerService {
                 roomJoinedSubject.next({ validity: false, socketMessage: SocketEvents.UsernameTaken });
             }
         });
+
         return roomJoinedSubject;
+    }
+
+    subscribeToUserDisconnecting(): Subject<void> {
+        const roomLeftSubject: Subject<void> = new Subject<void>();
+        this.clientSocket.on(SocketEvents.UserLeftHomeRoom, (userName: string) => {
+            console.log('received');
+            if (userName === this.userService.userName) {
+                roomLeftSubject.next();
+            }
+        });
+
+        return roomLeftSubject;
     }
 
     private configureBaseSocketFeatures(): void {
@@ -95,7 +108,7 @@ export class ChatboxHandlerService {
             this.messages.push(JSON.parse(messageObject) as ChatboxMessage);
         });
 
-        this.clientSocket.on(SocketEvents.JoinedHomeRoom, (userName: string) => {
+        this.clientSocket.on(SocketEvents.UserJoinedRoom, (userName: string) => {
             this.messages.push(this.createConnectedUserMessage(userName));
         });
 
@@ -103,13 +116,13 @@ export class ChatboxHandlerService {
             this.messages.push(JSON.parse(messageObject) as ChatboxMessage);
         });
 
+        this.clientSocket.on(SocketEvents.UserLeftHomeRoom, (userName: string) => {
+            this.messages.push(this.createDisconnectedUserMessage(userName));
+        });
+
         // this.clientSocket.on(SocketEvents.ImpossibleCommandError, (error: string) => {
         //     this.messages.push(this.createImpossibleCommandMessage(error));
         // });
-
-        this.clientSocket.on(SocketEvents.UserDisconnect, (userName: string) => {
-            this.messages.push(this.createDisconnectedUserMessage(userName));
-        });
 
         //
         // this.clientSocket.on(SocketEvents.GameEnd, () => {
@@ -126,8 +139,7 @@ export class ChatboxHandlerService {
     }
 
     private sendMessage(message: ChatboxMessage): void {
-        this.clientSocket.send(SocketEvents.SendMessageHome, JSON.stringify(message));
-        console.log(JSON.stringify(message));
+        this.clientSocket.send(SocketEvents.SendMessageHome, message);
     }
 
     // private sendCommand(command: string): void {
@@ -162,7 +174,6 @@ export class ChatboxHandlerService {
     }
 
     private configureUserMessage(userInput: string): ChatboxMessage {
-        // TODO : Add real user name
         return {
             userName: this.userService.userName,
             type: 'user',

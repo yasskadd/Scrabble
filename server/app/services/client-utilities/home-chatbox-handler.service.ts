@@ -28,11 +28,11 @@ export class HomeChatBoxHandlerService {
             this.messageList.push(message);
             this.broadCastMessage(socket, message);
         });
-        this.socketManager.on(SocketEvents.LeaveHomeRoom, (socket: Socket) => {
-            this.leaveRoom(socket);
+        this.socketManager.io(SocketEvents.UserLeftRoom, (sio: Server, socket: Socket) => {
+            this.leaveRoom(sio, socket);
         });
-        this.socketManager.on(SocketEvents.Disconnect, (socket: Socket) => {
-            this.leaveRoom(socket);
+        this.socketManager.io(SocketEvents.Disconnect, (sio: Server, socket: Socket) => {
+            this.leaveRoom(sio, socket);
         });
     }
 
@@ -82,18 +82,23 @@ export class HomeChatBoxHandlerService {
         socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.SendHomeMessage, message);
     }
 
-    private leaveRoom(socket: Socket): void {
-        const username = this.userMap.get(socket.id);
-        socket.leave(this.homeRoom.id);
+    private leaveRoom(sio: Server, socket: Socket): void {
+        const username: string = this.userMap.get(socket.id) as string;
         this.userMap.delete(socket.id);
-        this.usernameSet.delete(username as string);
+        this.usernameSet.delete(username);
         this.setIsAvailable();
-        socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.userLeftHomeRoom, username);
+        this.notifyUserQuittedRoom(sio, username, this.homeRoom.id);
+        // socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.UserLeftHomeRoom, username);
+        socket.leave(this.homeRoom.id);
     }
 
     // Notify everyone
     private notifyUserJoinedRoom(sio: Server, username: string, roomID: string): void {
         sio.sockets.to(roomID).emit(SocketEvents.UserJoinedRoom, username);
+    }
+
+    private notifyUserQuittedRoom(sio: Server, username: string, roomID: string): void {
+        sio.sockets.to(roomID).emit(SocketEvents.UserLeftHomeRoom, username);
     }
 
     // Getters and setters
