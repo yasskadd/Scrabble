@@ -97,6 +97,7 @@ export class ChatboxHandlerService {
             if (userName === this.userService.userName) {
                 roomLeftSubject.next();
                 this.loggedIn = false;
+                this.messages = [];
             }
         });
 
