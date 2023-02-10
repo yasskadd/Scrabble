@@ -7,7 +7,6 @@ skinparam noteTextAlignment center
 
 node serveur as "<<Appareil>>\nServeur (AWS)\n{OS=Linux}" {
     component serveur_express as "<<Serveur Web>>\nInterface web"
-    component serveur_postgres as "<<Base de données>>\nBase de donnée des comptes\n{Vendeur=Postgres}"
 }
 
 node mongoDB as "<<Appareil>>\nServeur MongoDB\n{OS=Linux}" {
@@ -24,7 +23,6 @@ together {
     }
 }
 
-serveur_express "1" -d0)- "1" serveur_postgres
 serveur_express "1" -0)- "1" serveur_mongoDB
 serveur_express "1" -u- "0..*" client_leger : http, socketIO:3000
 serveur_express "1" -- "0..*" client_lourd : http, socketIO:3000
