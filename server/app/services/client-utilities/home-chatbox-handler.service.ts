@@ -1,10 +1,10 @@
 import { GameRoom } from '@app/interfaces/game-room';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
+import { ChatboxMessage } from '@common/interfaces/chatbox-message';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import * as uuid from 'uuid';
-import { ChatboxMessage } from '@common/interfaces/chatbox-message';
 
 type HomeRoom = Pick<GameRoom, 'id' | 'isAvailable'> & { userMap: Map<string, string>; usernameSet: Set<string> };
 const ROOM_LIMIT = 3;
@@ -79,7 +79,7 @@ export class HomeChatBoxHandlerService {
     // Notify everyone except sender
     private broadCastMessage(socket: Socket, message: ChatboxMessage) {
         // TODO: Send message with username (need to decide which format)
-        socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.SendHomeMessage, message);
+        socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.ReceiveHomeMessage, message);
     }
 
     private leaveRoom(sio: Server, socket: Socket): void {
