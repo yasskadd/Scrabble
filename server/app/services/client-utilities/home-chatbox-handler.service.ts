@@ -1,19 +1,21 @@
 import { GameRoom } from '@app/interfaces/game-room';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
+import { ChatboxMessage } from '@common/interfaces/chatbox-message';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import * as uuid from 'uuid';
 
-type MessageParameters = { username: string; type: string; message: string; timeStamp: Date };
 type HomeRoom = Pick<GameRoom, 'id' | 'isAvailable'> & { userMap: Map<string, string>; usernameSet: Set<string> };
 const ROOM_LIMIT = 3;
 
 @Service()
 export class HomeChatBoxHandlerService {
     private homeRoom: HomeRoom;
-    private messageList: MessageParameters[] = [];
+    private messageList: ChatboxMessage[];
+
     constructor(public socketManager: SocketManager) {
+        this.messageList = [];
         this.initGameRoom();
     }
 
@@ -21,16 +23,16 @@ export class HomeChatBoxHandlerService {
         this.socketManager.io(SocketEvents.JoinHomeRoom, (sio: Server, socket: Socket, username: string) => {
             this.joinHomeRoom(sio, socket, username);
         });
-        this.socketManager.on(SocketEvents.SendMessageHome, (socket, message: MessageParameters) => {
+        this.socketManager.on(SocketEvents.SendMessageHome, (socket, message: ChatboxMessage) => {
             if (!this.userMap.has(socket.id)) return; // Maybe not the best way to verify
             this.messageList.push(message);
             this.broadCastMessage(socket, message);
         });
-        this.socketManager.on(SocketEvents.LeaveHomeRoom, (socket: Socket) => {
-            this.leaveRoom(socket);
+        this.socketManager.io(SocketEvents.UserLeftRoom, (sio: Server, socket: Socket) => {
+            this.leaveRoom(sio, socket);
         });
-        this.socketManager.on(SocketEvents.Disconnect, (socket: Socket) => {
-            this.leaveRoom(socket);
+        this.socketManager.io(SocketEvents.Disconnect, (sio: Server, socket: Socket) => {
+            this.leaveRoom(sio, socket);
         });
     }
 
@@ -67,7 +69,7 @@ export class HomeChatBoxHandlerService {
 
     // Notify sender
     private notifyInvalidUsername(socket: Socket, username: string): void {
-        socket.emit(SocketEvents.usernameTaken, username);
+        socket.emit(SocketEvents.UsernameTaken, username);
     }
 
     private notifyClientFullRoom(socket: Socket): void {
@@ -75,22 +77,28 @@ export class HomeChatBoxHandlerService {
     }
 
     // Notify everyone except sender
-    private broadCastMessage(socket: Socket, message: MessageParameters): void {
-        socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.BroadCastMessageHome, message);
+    private broadCastMessage(socket: Socket, message: ChatboxMessage) {
+        // TODO: Send message with username (need to decide which format)
+        socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.ReceiveHomeMessage, message);
     }
 
-    private leaveRoom(socket: Socket): void {
-        const username = this.userMap.get(socket.id);
-        socket.leave(this.homeRoom.id);
+    private leaveRoom(sio: Server, socket: Socket): void {
+        const username: string = this.userMap.get(socket.id) as string;
         this.userMap.delete(socket.id);
-        this.usernameSet.delete(username as string);
+        this.usernameSet.delete(username);
         this.setIsAvailable();
-        socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.userLeftHomeRoom, username);
+        this.notifyUserQuittedRoom(sio, username, this.homeRoom.id);
+        // socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.UserLeftHomeRoom, username);
+        socket.leave(this.homeRoom.id);
     }
 
     // Notify everyone
     private notifyUserJoinedRoom(sio: Server, username: string, roomID: string): void {
         sio.sockets.to(roomID).emit(SocketEvents.UserJoinedRoom, username);
+    }
+
+    private notifyUserQuittedRoom(sio: Server, username: string, roomID: string): void {
+        sio.sockets.to(roomID).emit(SocketEvents.UserLeftHomeRoom, username);
     }
 
     // Getters and setters

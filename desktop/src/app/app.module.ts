@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -31,6 +32,7 @@ import { DialogBoxHighScoresComponent } from './components/dialog-box-high-score
 import { DialogBoxModifyBotNamesComponent } from './components/dialog-box-modify-bot-names/dialog-box-modify-bot-names.component';
 import { DialogBoxModifyDictionaryComponent } from './components/dialog-box-modify-dictionary/dialog-box-modify-dictionary.component';
 import { FooterComponent } from './components/footer/footer.component';
+import { GenericChatComponent } from './components/generic-chat/generic-chat.component';
 import { HeaderComponent } from './components/header/header.component';
 import { ImportDictionaryComponent } from './components/import-dictionary/import-dictionary.component';
 import { InformationPanelComponent } from './components/information-panel/information-panel.component';
@@ -74,6 +76,7 @@ import { WaitingOpponentPageComponent } from './pages/waiting-opponent-page/wait
         DialogGameHelpComponent,
         HighScoresComponent,
         ImportDictionaryComponent,
+        GenericChatComponent,
     ],
     imports: [
         CommonModule,
@@ -93,6 +96,7 @@ import { WaitingOpponentPageComponent } from './pages/waiting-opponent-page/wait
         MatProgressSpinnerModule,
         MatStepperModule,
         MatAutocompleteModule,
+        MatSidenavModule,
     ],
     providers: [ImportDictionaryComponent],
     bootstrap: [AppComponent],

@@ -1,0 +1,113 @@
+mat-card {
+    height: 86%;
+    background: rgb(255 255 255 / 70%);
+    margin-bottom: 4%;
+}
+
+mat-form-field {
+    height: 10%;
+}
+
+.message-container {
+    height: 100%;
+    width: 100%;
+    word-wrap: break-word;
+    overflow-y: auto;
+}
+
+.message {
+    margin: 12px 0px;
+    font-family: sans-serif;
+}
+
+.chat-input {
+    display: flex;
+    height: fit-content;
+    padding: 8px;
+    gap: 8px;
+
+    button {
+        align-self: center;
+    }
+}
+
+.chat-metadata {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    margin-bottom: 4px;
+
+    strong {
+        padding-right: 4px;
+    }
+
+    p {
+        font-size: 0.6em;
+        margin-bottom: 0px;
+    }
+}
+
+.current-user {
+    color: #ffffff;
+    text-align: right;
+}
+
+.current-user > span {
+    background: #23501f;
+    border-radius: 6px;
+    padding: 5px 10px;
+}
+
+.opponent-user {
+    color: #ffffff;
+    text-align: left;
+}
+
+.opponent-user > span {
+    background: #7fa99b;
+    border-radius: 6px;
+    padding: 5px 10px;
+}
+
+::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
+    background-color: #fff;
+    border-radius: 5px;
+}
+
+.system-message {
+    color: #23501f;
+    text-align: center;
+}
+
+.user-input {
+    width: 100%;
+}
+
+.max {
+    color: red;
+}
+
+::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
+    background: rgba(255, 255, 255, 0.889);
+}
+
+::ng-deep .mat-mdc-form-field-bottom-align {
+    height: 0px;
+}
+
+.placement {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #7fa99b !important;
+}
+
+::-webkit-scrollbar {
+    width: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: rgb(255, 255, 255) !important;
+}

@@ -1,0 +1,19 @@
+<div #container class='message-container'>
+    <div *ngFor='let message of messages' [class]="'message ' + message.type">
+        <span *ngIf='message.username' class='chat-metadata'>
+            <strong>{{ message.username }}</strong> <p>{{message.timeStamp}}</p>
+        </span>
+        <span>{{ message.message }}</span>
+    </div>
+</div>
+
+<div class='chat-input'>
+    <mat-form-field appearance='outline' (keydown.enter)='submit()' class='user-input'>
+        <mat-label>Entrez un message</mat-label>
+        <input matInput maxlength='512' type='text' [formControl]='inputForm' placeholder='Ex. Salut!'
+               #chatbox />
+    </mat-form-field>
+    <button mat-mini-fab color='primary' (click)='submit()'>
+        <mat-icon>send</mat-icon>
+    </button>
+</div>

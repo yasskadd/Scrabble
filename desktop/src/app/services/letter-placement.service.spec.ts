@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { Letter } from '@common/interfaces/letter';
 import { LetterTileInterface } from '@common/interfaces/letter-tile-interface';
 import { of } from 'rxjs';
-import { ChatboxHandlerService } from './chatbox-handler.service';
+import { ChatboxHandlerService } from './chat/chatbox-handler.service';
 import { GameClientService } from './game-client.service';
 import { GridService } from './grid.service';
 import { LetterPlacementService } from './letter-placement.service';
