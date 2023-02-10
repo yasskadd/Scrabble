@@ -2,42 +2,46 @@ import { Injectable } from '@angular/core';
 import { ChatboxMessage } from '@common/interfaces/chatbox-message';
 import { SocketEvents } from '@common/constants/socket-events';
 // import { CommandInfo } from '@common/interfaces/command-info';
-import { Letter } from '@common/interfaces/letter';
-import { CommandHandlerService } from '@app/services/command-handler.service';
+// import { Letter } from '@common/interfaces/letter';
+// import { CommandHandlerService } from '@app/services/command-handler.service';
 import { ClientSocketService } from '@app/services/communication/client-socket.service';
-import { GameClientService } from '@app/services/game-client.service';
+// import { GameClientService } from '@app/services/game-client.service';
 // import { GameConfigurationService } from '@app/services/game-configuration.service';
 import { TimeService } from '@app/services/chat/time.service';
 import { Subject } from 'rxjs';
 import { SocketResponse } from '@app/interfaces/server-responses';
+import { UserService } from '@app/services/user.service';
 
-const EXCHANGE_ALLOWED_MINIMUM = 7;
+// const EXCHANGE_ALLOWED_MINIMUM = 7;
 // const CHAR_ASCII = 96;
-const TIMEOUT = 15;
-const VALID_COMMAND_REGEX_STRING =
-    '^!r(é|e)serve$|^!indice$|^!aide$|^!placer [a-o][0-9]{1,2}(v|h){0,1} [a-zA-Z]$' +
-    '|^!placer [a-o][0-9]{1,2}(v|h) ([a-zA-Z]){1,7}$|^!(é|e)changer ([a-z]|[*]){1,7}$|^!passer$';
-const VALID_COMMAND_REGEX = new RegExp(VALID_COMMAND_REGEX_STRING);
-const IS_COMMAND_REGEX_STRING = '^!';
-const IS_COMMAND_REGEX = new RegExp(IS_COMMAND_REGEX_STRING);
+// const TIMEOUT = 15;
+// const VALID_COMMAND_REGEX_STRING =
+//     '^!r(é|e)serve$|^!indice$|^!aide$|^!placer [a-o][0-9]{1,2}(v|h){0,1} [a-zA-Z]$' +
+//     '|^!placer [a-o][0-9]{1,2}(v|h) ([a-zA-Z]){1,7}$|^!(é|e)changer ([a-z]|[*]){1,7}$|^!passer$';
+// const VALID_COMMAND_REGEX = new RegExp(VALID_COMMAND_REGEX_STRING);
+// const IS_COMMAND_REGEX_STRING = '^!';
+// const IS_COMMAND_REGEX = new RegExp(IS_COMMAND_REGEX_STRING);
 
 @Injectable({
     providedIn: 'root',
 })
 export class ChatboxHandlerService {
-    private static readonly syntaxRegexString = '^!r(é|e)serve|^!aide|^!placer|^!(é|e)changer|^!passer|^!indice';
-    connectedToHome: boolean;
+    // private static readonly syntaxRegexString = '^!r(é|e)serve|^!aide|^!placer|^!(é|e)changer|^!passer|^!indice';
     messages: ChatboxMessage[];
-    private readonly validSyntaxRegex = RegExp(ChatboxHandlerService.syntaxRegexString);
+    connectedToHome: boolean;
+
+    // private readonly validSyntaxRegex = RegExp(ChatboxHandlerService.syntaxRegexString);
 
     constructor(
         private clientSocket: ClientSocketService,
         // private gameConfiguration: GameConfigurationService,
-        private gameClient: GameClientService,
-        private commandHandler: CommandHandlerService,
+        // private gameClient: GameClientService,
+        // private commandHandler: CommandHandlerService,
         private timeService: TimeService,
+        private userService: UserService,
     ) {
         this.messages = [];
+        this.connectedToHome = false;
         // TODO : Check si toujours utile
         // this.addWelcomeMessages();
         this.configureBaseSocketFeatures();
@@ -49,12 +53,11 @@ export class ChatboxHandlerService {
         if (userInput !== '') {
             const message: ChatboxMessage = this.configureUserMessage(userInput);
             this.messages.push(message);
-            if (this.isMessageACommand(userInput)) {
-                this.sendCommand(userInput);
-            } else {
-                console.log('test');
-                this.sendMessage(message);
-            }
+            // if (this.isMessageACommand(userInput)) {
+            //     this.sendCommand(userInput);
+            // } else {
+            this.sendMessage(message);
+            // }
         }
     }
 
@@ -66,49 +69,21 @@ export class ChatboxHandlerService {
         this.clientSocket.send(SocketEvents.LeaveHomeRoom, userName);
     }
 
-    endGameMessage(): void {
-        setTimeout(() => {
-            const myLetterLeft = this.getAllLetter(this.gameClient.playerOne.rack as never);
-            const opponentLetterLeft = this.getAllLetter(this.gameClient.secondPlayer.rack as never);
-            this.messages.push({
-                type: 'system-message',
-                message: 'Fin de la partie : lettres restantes',
-                timeStamp: this.timeService.getTimeStamp(),
-            });
-            this.messages.push({
-                type: 'system-message',
-                message: `${this.gameClient.playerOne.name} : ${myLetterLeft}`,
-                timeStamp: this.timeService.getTimeStamp(),
-            });
-            this.messages.push({
-                type: 'system-message',
-                message: `${this.gameClient.secondPlayer.name} : ${opponentLetterLeft}`,
-                timeStamp: this.timeService.getTimeStamp(),
-            });
-        }, TIMEOUT);
-    }
-
-    resetMessage(): void {
-        // this.addWelcomeMessages();
-    }
-
     subscribeToUserConnection(): Subject<SocketResponse> {
         const roomJoinedSubject: Subject<SocketResponse> = new Subject<SocketResponse>();
         this.clientSocket.on(SocketEvents.JoinedHomeRoom, (userName: string) => {
-            // TODO : Replace test with real username
-            if (userName === 'test') {
+            if (userName === this.userService.userName) {
                 roomJoinedSubject.next({ validity: true });
+                this.connectedToHome = true;
             }
         });
         this.clientSocket.on(SocketEvents.RoomIsFull, (userName: string) => {
-            // TODO : Replace test with real username
-            if (userName === 'test') {
+            if (userName === this.userService.userName) {
                 roomJoinedSubject.next({ validity: false, socketMessage: SocketEvents.RoomIsFull });
             }
         });
         this.clientSocket.on(SocketEvents.UsernameTaken, (userName: string) => {
-            // TODO : Replace test with real username
-            if (userName === 'test') {
+            if (userName === this.userService.userName) {
                 roomJoinedSubject.next({ validity: false, socketMessage: SocketEvents.UsernameTaken });
             }
         });
@@ -121,7 +96,6 @@ export class ChatboxHandlerService {
         });
 
         this.clientSocket.on(SocketEvents.JoinedHomeRoom, (userName: string) => {
-            // TODO : Replace test with real username
             this.messages.push(this.createConnectedUserMessage(userName));
         });
 
@@ -151,6 +125,78 @@ export class ChatboxHandlerService {
         // });
     }
 
+    private sendMessage(message: ChatboxMessage): void {
+        this.clientSocket.send(SocketEvents.SendMessageHome, JSON.stringify(message));
+        console.log(JSON.stringify(message));
+    }
+
+    // private sendCommand(command: string): void {
+    //     if (this.isValidCommand(command)) {
+    //         this.commandHandler.sendCommand(command);
+    //     }
+    // }
+
+    private createConnectedUserMessage(userName: string): ChatboxMessage {
+        return {
+            type: 'system',
+            message: `${userName} a join le salon!`,
+            timeStamp: this.timeService.getTimeStamp(),
+        };
+    }
+
+    private createDisconnectedUserMessage(userName: string): ChatboxMessage {
+        return {
+            type: 'system',
+            message: `${userName} a quitté le jeu`,
+            timeStamp: this.timeService.getTimeStamp(),
+        };
+
+        // TODO : Send message when replacing player with virutal one
+        // if (!this.gameClient.isGameFinish) {
+        //     this.messages.push({
+        //         type: 'system-message',
+        //         message: "------L'adversaire à été remplacé par un joueur virtuel Débutant------",
+        //         timeStamp: this.timeService.getTimeStamp(),
+        //     });
+        // }
+    }
+
+    private configureUserMessage(userInput: string): ChatboxMessage {
+        // TODO : Add real user name
+        return {
+            userName: this.userService.userName,
+            type: 'user',
+            message: userInput,
+            timeStamp: this.timeService.getTimeStamp(),
+        };
+    }
+
+    // endGameMessage(): void {
+    //     setTimeout(() => {
+    //         const myLetterLeft = this.getAllLetter(this.gameClient.playerOne.rack as never);
+    //         const opponentLetterLeft = this.getAllLetter(this.gameClient.secondPlayer.rack as never);
+    //         this.messages.push({
+    //             type: 'system-message',
+    //             message: 'Fin de la partie : lettres restantes',
+    //             timeStamp: this.timeService.getTimeStamp(),
+    //         });
+    //         this.messages.push({
+    //             type: 'system-message',
+    //             message: `${this.gameClient.playerOne.name} : ${myLetterLeft}`,
+    //             timeStamp: this.timeService.getTimeStamp(),
+    //         });
+    //         this.messages.push({
+    //             type: 'system-message',
+    //             message: `${this.gameClient.secondPlayer.name} : ${opponentLetterLeft}`,
+    //             timeStamp: this.timeService.getTimeStamp(),
+    //         });
+    //     }, TIMEOUT);
+    // }
+
+    // resetMessage(): void {
+    // this.addWelcomeMessages();
+    // }
+
     // private listenToObserver(): void {
     //     this.gameClient.turnFinish.subscribe((value) => {
     //         if (value) {
@@ -170,9 +216,9 @@ export class ChatboxHandlerService {
     //     ];
     // }
 
-    private isMessageACommand(userInput: string): boolean {
-        return this.isCommand(userInput.normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
-    }
+    // private isMessageACommand(userInput: string): boolean {
+    //     return this.isCommand(userInput.normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
+    // }
 
     // private configureClueCommand(clueCommand: CommandInfo[]): void {
     //     if (clueCommand.length !== 0) {
@@ -205,184 +251,143 @@ export class ChatboxHandlerService {
     //         });
     // }
 
-    private sendMessage(message: ChatboxMessage): void {
-        this.clientSocket.send(SocketEvents.SendMessageHome, JSON.stringify(message));
-        console.log(JSON.stringify(message));
-    }
+    // private isCommand(userInput: string): boolean {
+    //     return IS_COMMAND_REGEX.test(userInput);
+    // }
 
-    private sendCommand(command: string): void {
-        if (this.isValidCommand(command)) {
-            this.commandHandler.sendCommand(command);
-        }
-    }
+    // private isValidCommand(userCommand: string): boolean {
+    //     if (this.isHelpCommand(userCommand) || this.isReserveCommand(userCommand)) return true;
+    //     return this.validCommandSyntax(userCommand);
+    // }
 
-    private createConnectedUserMessage(userName: string): ChatboxMessage {
-        return {
-            type: 'system',
-            message: `${userName} a join le salon!`,
-            timeStamp: this.timeService.getTimeStamp(),
-        };
-    }
+    // private isHelpCommand(userCommand: string): boolean {
+    //     const validReserveCommand = '^!aide$';
+    //     const validReserveCommandRegex = new RegExp(validReserveCommand);
+    //     if (validReserveCommandRegex.test(userCommand)) {
+    //         this.messages.push({
+    //             type: 'system-message',
+    //             message: 'VOICI LES COMMANDES VALIDES',
+    //             timeStamp: this.timeService.getTimeStamp(),
+    //         });
+    //         this.messages.push({
+    //             type: 'system-message',
+    //             message: '!passer  : Passer son tour',
+    //             timeStamp: this.timeService.getTimeStamp(),
+    //         });
+    //         this.messages.push({
+    //             type: 'system-message',
+    //             message: '!réserve : Affiche toutes les lettres disponibles dans la réserve',
+    //             timeStamp: this.timeService.getTimeStamp(),
+    //         });
+    //         this.messages.push({
+    //             type: 'system-message',
+    //             message: "!indice  : Envoie jusqu'à 3 possibilités de placement possible sur la planche de jeu",
+    //             timeStamp: this.timeService.getTimeStamp(),
+    //         });
+    //         this.messages.push({
+    //             type: 'system-message',
+    //             message:
+    //                 '!echanger <lettre>:  Échanger des lettres sur ton chevalet (celles-ci doivent être écritent en minuscule ou' +
+    //                 ' mettre " * " pour les lettres blanches (ex: !echanger e*a)',
+    //             timeStamp: this.timeService.getTimeStamp(),
+    //         });
+    //         this.messages.push({
+    //             userName: '',
+    //             type: 'system',
+    //             message:
+    //                 '!placer <ligne><colonne>[(h|v)] <lettres>:  Placer un mot en utilisant les lettres de notre chevalet' +
+    //                 '(Mettre la lettre en majuscule lorsque vous utilisez une lettre blanche) (ex: !placer g9h adanT)',
+    //             timeStamp: this.timeService.getTimeStamp(),
+    //         });
+    //         return true;
+    //     }
+    //     return false;
+    // }
 
-    private createDisconnectedUserMessage(userName: string): ChatboxMessage {
-        return {
-            type: 'system',
-            message: `${userName} a quitté le jeu`,
-            timeStamp: this.timeService.getTimeStamp(),
-        };
+    // private validCommandSyntax(userCommand: string): boolean {
+    //     if (this.validSyntax(userCommand)) return this.validCommandParameters(userCommand);
+    //     this.messages.push(this.configureSyntaxError());
+    //     return false;
+    // }
 
-        // TODO : Send message when replacing player with virutal one
-        // if (!this.gameClient.isGameFinish) {
-        //     this.messages.push({
-        //         type: 'system-message',
-        //         message: "------L'adversaire à été remplacé par un joueur virtuel Débutant------",
-        //         timeStamp: this.timeService.getTimeStamp(),
-        //     });
-        // }
-    }
+    // private validCommandParameters(userCommand: string): boolean {
+    //     if (this.validParameters(userCommand)) return this.isCommandExchangePossible(userCommand);
+    //
+    //     this.messages.push(this.configureInvalidError());
+    //     return false;
+    // }
 
-    private isCommand(userInput: string): boolean {
-        return IS_COMMAND_REGEX.test(userInput);
-    }
+    // private isCommandExchangePossible(userCommand: string): boolean {
+    //     if (this.exchangePossible(userCommand)) return this.isPlayerTurn();
+    //     this.messages.push(this.configureImpossibleToExchangeMessage());
+    //     return false;
+    // }
 
-    private isValidCommand(userCommand: string): boolean {
-        if (this.isHelpCommand(userCommand) || this.isReserveCommand(userCommand)) return true;
-        return this.validCommandSyntax(userCommand);
-    }
+    // private isPlayerTurn() {
+    //     if (this.gameClient.playerOneTurn) return true;
+    //     this.messages.push({
+    //         type: 'system-message',
+    //         message: "Ce n'est pas votre tour",
+    //         timeStamp: this.timeService.getTimeStamp(),
+    //     });
+    //     return false;
+    // }
 
-    private isHelpCommand(userCommand: string): boolean {
-        const validReserveCommand = '^!aide$';
-        const validReserveCommandRegex = new RegExp(validReserveCommand);
-        if (validReserveCommandRegex.test(userCommand)) {
-            this.messages.push({
-                type: 'system-message',
-                message: 'VOICI LES COMMANDES VALIDES',
-                timeStamp: this.timeService.getTimeStamp(),
-            });
-            this.messages.push({
-                type: 'system-message',
-                message: '!passer  : Passer son tour',
-                timeStamp: this.timeService.getTimeStamp(),
-            });
-            this.messages.push({
-                type: 'system-message',
-                message: '!réserve : Affiche toutes les lettres disponibles dans la réserve',
-                timeStamp: this.timeService.getTimeStamp(),
-            });
-            this.messages.push({
-                type: 'system-message',
-                message: "!indice  : Envoie jusqu'à 3 possibilités de placement possible sur la planche de jeu",
-                timeStamp: this.timeService.getTimeStamp(),
-            });
-            this.messages.push({
-                type: 'system-message',
-                message:
-                    '!echanger <lettre>:  Échanger des lettres sur ton chevalet (celles-ci doivent être écritent en minuscule ou' +
-                    ' mettre " * " pour les lettres blanches (ex: !echanger e*a)',
-                timeStamp: this.timeService.getTimeStamp(),
-            });
-            this.messages.push({
-                userName: '',
-                type: 'system',
-                message:
-                    '!placer <ligne><colonne>[(h|v)] <lettres>:  Placer un mot en utilisant les lettres de notre chevalet' +
-                    '(Mettre la lettre en majuscule lorsque vous utilisez une lettre blanche) (ex: !placer g9h adanT)',
-                timeStamp: this.timeService.getTimeStamp(),
-            });
-            return true;
-        }
-        return false;
-    }
+    // private isReserveCommand(userInput: string): boolean {
+    //     const validReserveCommand = '^!r(é|e)serve$';
+    //     const validReserveCommandRegex = new RegExp(validReserveCommand);
+    //     return validReserveCommandRegex.test(userInput);
+    // }
 
-    private validCommandSyntax(userCommand: string): boolean {
-        if (this.validSyntax(userCommand)) return this.validCommandParameters(userCommand);
-        this.messages.push(this.configureSyntaxError());
-        return false;
-    }
+    // private validSyntax(userInput: string): boolean {
+    //     return this.validSyntaxRegex.test(userInput);
+    // }
 
-    private validCommandParameters(userCommand: string): boolean {
-        if (this.validParameters(userCommand)) return this.isCommandExchangePossible(userCommand);
+    // private validParameters(userInput: string): boolean {
+    //     return VALID_COMMAND_REGEX.test(userInput);
+    // }
 
-        this.messages.push(this.configureInvalidError());
-        return false;
-    }
+    // private exchangePossible(userInput: string): boolean {
+    //     const validReserveCommand = '^!(é|e)changer';
+    //     const validReserveCommandRegex = new RegExp(validReserveCommand);
+    //     return !(this.gameClient.letterReserveLength < EXCHANGE_ALLOWED_MINIMUM && validReserveCommandRegex.test(userInput));
+    // }
 
-    private isCommandExchangePossible(userCommand: string): boolean {
-        if (this.exchangePossible(userCommand)) return this.isPlayerTurn();
-        this.messages.push(this.configureImpossibleToExchangeMessage());
-        return false;
-    }
+    // private configureImpossibleToExchangeMessage(): ChatboxMessage {
+    //     return {
+    //         type: 'system-message',
+    //         message: "[Erreur] Impossible d'échanger à cause qu'il reste moins de 7 lettres dans la réserve",
+    //         timeStamp: this.timeService.getTimeStamp(),
+    //     };
+    // }
 
-    private isPlayerTurn() {
-        if (this.gameClient.playerOneTurn) return true;
-        this.messages.push({
-            type: 'system-message',
-            message: "Ce n'est pas votre tour",
-            timeStamp: this.timeService.getTimeStamp(),
-        });
-        return false;
-    }
+    // private configureSyntaxError(): ChatboxMessage {
+    //     return {
+    //         type: 'system-message',
+    //         message: '[Erreur] Erreur de syntaxe',
+    //         timeStamp: this.timeService.getTimeStamp(),
+    //     };
+    // }
 
-    private isReserveCommand(userInput: string): boolean {
-        const validReserveCommand = '^!r(é|e)serve$';
-        const validReserveCommandRegex = new RegExp(validReserveCommand);
-        return validReserveCommandRegex.test(userInput);
-    }
-
-    private validSyntax(userInput: string): boolean {
-        return this.validSyntaxRegex.test(userInput);
-    }
-
-    private validParameters(userInput: string): boolean {
-        return VALID_COMMAND_REGEX.test(userInput);
-    }
-
-    private exchangePossible(userInput: string): boolean {
-        const validReserveCommand = '^!(é|e)changer';
-        const validReserveCommandRegex = new RegExp(validReserveCommand);
-        return !(this.gameClient.letterReserveLength < EXCHANGE_ALLOWED_MINIMUM && validReserveCommandRegex.test(userInput));
-    }
-
-    private configureImpossibleToExchangeMessage(): ChatboxMessage {
-        return {
-            type: 'system-message',
-            message: "[Erreur] Impossible d'échanger à cause qu'il reste moins de 7 lettres dans la réserve",
-            timeStamp: this.timeService.getTimeStamp(),
-        };
-    }
-
-    private configureUserMessage(userInput: string): ChatboxMessage {
-        // TODO : Add real user name
-        return { type: 'user', message: `Toi : ${userInput}`, timeStamp: this.timeService.getTimeStamp() };
-    }
-
-    private configureSyntaxError(): ChatboxMessage {
-        return {
-            type: 'system-message',
-            message: '[Erreur] Erreur de syntaxe',
-            timeStamp: this.timeService.getTimeStamp(),
-        };
-    }
-
-    private configureInvalidError(): ChatboxMessage {
-        return {
-            type: 'system-message',
-            message: '[Erreur] La commande saisie est invalide',
-            timeStamp: this.timeService.getTimeStamp(),
-        };
-    }
+    // private configureInvalidError(): ChatboxMessage {
+    //     return {
+    //         type: 'system-message',
+    //         message: '[Erreur] La commande saisie est invalide',
+    //         timeStamp: this.timeService.getTimeStamp(),
+    //     };
+    // }
 
     // private createImpossibleCommandMessage(error: string): ChatboxMessage {
     //     return { type: 'system-message', message: `[Erreur] ${error}`, timeStamp: this.timeService.getTimeStamp() };
     // }
 
-    private getAllLetter(letters: Letter[]): string {
-        let letterString = '';
-        letters.forEach((letter) => {
-            letterString = letterString + letter.value;
-        });
-        return letterString;
-    }
+    // private getAllLetter(letters: Letter[]): string {
+    //     let letterString = '';
+    //     letters.forEach((letter) => {
+    //         letterString = letterString + letter.value;
+    //     });
+    //     return letterString;
+    // }
 
     // private configureReserveLetterCommand(letterReserve: Letter[]): void {
     //     letterReserve.forEach((letter) => {
