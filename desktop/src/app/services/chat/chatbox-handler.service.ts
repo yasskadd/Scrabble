@@ -28,7 +28,7 @@ import { UserService } from '@app/services/user.service';
 export class ChatboxHandlerService {
     // private static readonly syntaxRegexString = '^!r(é|e)serve|^!aide|^!placer|^!(é|e)changer|^!passer|^!indice';
     messages: ChatboxMessage[];
-    connectedToHome: boolean;
+    loggedIn: boolean;
 
     // private readonly validSyntaxRegex = RegExp(ChatboxHandlerService.syntaxRegexString);
 
@@ -41,7 +41,7 @@ export class ChatboxHandlerService {
         private userService: UserService,
     ) {
         this.messages = [];
-        this.connectedToHome = false;
+        this.loggedIn = false;
         // TODO : Check si toujours utile
         // this.addWelcomeMessages();
         this.configureBaseSocketFeatures();
@@ -74,7 +74,7 @@ export class ChatboxHandlerService {
         this.clientSocket.on(SocketEvents.UserJoinedRoom, (userName: string) => {
             if (userName === this.userService.userName) {
                 roomJoinedSubject.next({ validity: true });
-                this.connectedToHome = true;
+                this.loggedIn = true;
             }
         });
         this.clientSocket.on(SocketEvents.RoomIsFull, (userName: string) => {
@@ -97,6 +97,7 @@ export class ChatboxHandlerService {
             console.log('received');
             if (userName === this.userService.userName) {
                 roomLeftSubject.next();
+                this.loggedIn = false;
             }
         });
 
