@@ -2,8 +2,7 @@
     <app-header></app-header>
     <mat-drawer-container>
         <div class='always-visible-content'>
-            <button class='open-chat-button' mat-button *ngIf='connected' (click)='drawer.toggle()'>Open chat</button>
-            <button class='open-chat-button' mat-button *ngIf='!connected' disabled>Open chat</button>
+            <button class='open-chat-button' mat-button (click)='drawer.toggle()'>Open chat</button>
             <mat-card class='justified'>
                 <mat-card-content class='justified'>
                     <button
