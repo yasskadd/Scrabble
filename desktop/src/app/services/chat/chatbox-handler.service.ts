@@ -176,7 +176,7 @@ export class ChatboxHandlerService {
     private configureUserMessage(userInput: string): ChatboxMessage {
         return {
             username: this.userService.userName,
-            type: 'user',
+            type: 'client',
             message: userInput,
             timeStamp: this.timeService.getTimeStamp(),
         };
