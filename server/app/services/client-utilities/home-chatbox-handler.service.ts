@@ -7,7 +7,8 @@ import { Service } from 'typedi';
 import * as uuid from 'uuid';
 
 type HomeRoom = Pick<GameRoom, 'id' | 'isAvailable'> & { userMap: Map<string, string>; usernameSet: Set<string> };
-const ROOM_LIMIT = 3;
+
+const ROOM_LIMIT = 1000;
 
 @Service()
 export class HomeChatBoxHandlerService {
@@ -56,6 +57,7 @@ export class HomeChatBoxHandlerService {
             this.notifyClientFullRoom(socket);
             return;
         }
+        console.log(`${username} has joined`);
         this.userMap.set(socket.id, username);
         this.usernameSet.add(username);
         socket.join(this.homeRoom.id);
@@ -83,13 +85,15 @@ export class HomeChatBoxHandlerService {
     }
 
     private leaveRoom(sio: Server, socket: Socket): void {
-        const username: string = this.userMap.get(socket.id) as string;
-        this.userMap.delete(socket.id);
-        this.usernameSet.delete(username);
-        this.setIsAvailable();
-        this.notifyUserQuittedRoom(sio, username, this.homeRoom.id);
-        // socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.UserLeftHomeRoom, username);
-        socket.leave(this.homeRoom.id);
+        if (this.userMap.has(socket.id)) {
+            const username: string = this.userMap.get(socket.id) as string;
+            this.userMap.delete(socket.id);
+            this.usernameSet.delete(username);
+            this.setIsAvailable();
+            this.notifyUserQuittedRoom(sio, username, this.homeRoom.id);
+            // socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.UserLeftHomeRoom, username);
+            socket.leave(this.homeRoom.id);
+        }
     }
 
     // Notify everyone

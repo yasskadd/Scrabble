@@ -20,10 +20,12 @@ mat-drawer-container {
 
 .chat-sidenav {
     display: flex;
-    width: 25%;
+    max-width: 25%;
+    min-width: min-content;
 
-    ::ng-deep div {
+    ::ng-deep + div {
         overflow-x: hidden !important;
+        width: -webkit-fill-available;
     }
 
     app-generic-chat {
@@ -31,6 +33,11 @@ mat-drawer-container {
         height: 100%;
         grid-template-rows: 1fr max-content;
         align-content: space-between;
+
+        ::ng-deep label {
+            overflow: unset;
+            left: auto;
+        }
     }
 }
 
