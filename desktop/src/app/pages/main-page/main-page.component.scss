@@ -20,8 +20,8 @@ mat-drawer-container {
 
 .chat-sidenav {
     display: flex;
-    width: 25%;
-    min-width: fit-content;
+    max-width: 25%;
+    min-width: min-content;
 
     ::ng-deep + div {
         overflow-x: hidden !important;
