@@ -134,6 +134,26 @@ UC6 .> UC1 : includes
 
 @enduml
 
+## Cas d'utilisation pour la personnalisation du compte ------------------------------------------------------------------------
+
+@startuml
+
+left to right direction
+
+actor Utilisateur as user
+actor Serveur as server
+
+rectangle "PolyScrabble - Personnalisation" {
+usecase "Configurer le thème visuel" as UC1
+usecase "Configurer la langue" as UC2
+usecase "Choisir un thème d'une liste" as UC3
+usecase " " as UC4
+usecase " " as UC5
+usecase " " as UC6
+}
+
+@enduml
+
 ## Cas d'utilisation des salles d'attente ------------------------------------------------------------------------
 
 @startuml
@@ -144,11 +164,12 @@ actor Utilisateur as user
 actor Serveur as server
 
 rectangle "PolyScrabble - Salle d'attente" {
-usecase "Rejoindre une salle" as UC1
-usecase "Créer une salle" as UC2
-usecase "Rejoindre la salle de\nclavardage d'une partie" as UC9
 usecase "Ajouter un joueur virtuel\ndans une salle" as UC5
+usecase "Choisir le niveau de difficulté du joueur virtuel" as UC8
 usecase "Choisir un mode de jeu" as UC3
+usecase "Rejoindre une salle" as UC1
+usecase "Rejoindre la salle de\nclavardage d'une partie" as UC9
+usecase "Créer une salle" as UC2
 usecase "Consulter la liste des\njoueurs dans une salle" as UC4
 usecase "Démarrer une partie" as UC6
 usecase "Quitter une salle" as UC7
@@ -158,14 +179,17 @@ user -- UC1
 user -- UC2
 UC1 ..> UC3 : includes
 UC2 ..> UC3 : includes
-UC9 .> UC1 : entends
-UC9 .> UC2 : extends
+UC9 .l.> UC1 : entends
+UC9 .l.> UC2 : extends
+UC8 .> UC5 : extends
 
+user - UC3
 user -- UC4
 user -- UC5
 user -- UC6
 user -- UC7
 user -- UC9
+user -- UC8
 
 UC5 -- server
 
@@ -177,7 +201,8 @@ UC5 -- server
 
 left to right direction
 
-actor Utilisateur as user
+actor Joueur as user
+actor Observateur as obs
 actor Serveur as server
 
 rectangle "PolyScrabble - Partie" {
@@ -185,33 +210,121 @@ usecase "Entrer dans la partie" as UC1
 usecase "Clavarder avec les autres joueurs" as UC4
 usecase "Jouer un tour" as UC10
 usecase "Placer des lettres sur le plateau" as UC2
-usecase "Comptabiliser les points" as UC5
+usecase "Placer un mot" as UC13
 usecase "Abandonner une partie" as UC6
 usecase "Demander un indice" as UC7
 usecase "Générer 5 indices" as UC8
-usecase "Valider les lettres placées sur le plateau" as UC9
-usecase "Imposer une limite de \ntemps par tour" as UC11
+usecase "Valider un mot" as UC9
+usecase "Imposer une limite de\ntemps par tour" as UC11
+usecase "Passer son tour" as UC12
+usecase "Comptabiliser les points" as UC5
+usecase "Synchroniser le plateau\nde tous les joueurs" as UC14
+usecase "Échanger des lettres" as UC15
+usecase "Observer le point de vue de tous les joueurs" as UC16
+note "Ne s'applique à tous les modes de jeu" as note1
+}
+
+note1 -u- UC11
+
+user - UC1
+user - UC6
+user - UC4
+user - UC10
+
+user - UC2
+user - UC7
+user - UC11
+user - UC12
+user - UC13
+user - UC15
+
+obs -- UC4
+obs -- UC16
+obs -- UC1
+
+UC10 <.. UC2 : extends
+UC10 <.. UC7 : extends
+UC10 <.. UC12 : extends
+UC10 <.. UC15 : enxtends
+UC10 ..> UC11 : includes
+
+UC7 ..> UC8 : includes
+UC13 ..> UC9 : includes
+UC13 ..> UC5 : includes
+UC2 ..> UC14 : includes
+
+UC4 -- server
+UC5 -- server
+UC8 -- server
+UC9 -- server
+UC11 -- server
+UC14 -- server
+
+@enduml
+
+@startuml
+
+left to right direction
+
+actor Utilisateur as user
+actor Serveur as server
+
+rectangle "PolyScrabble - Visibilité des parties" {
+usecase "Afficher les parties accessible" as UC1
+usecase "Rejoindre une partie\ncomme joueur" as UC2
+usecase "Rejoindre une partie\ncomme observateur" as UC3
+usecase "Prendre la place d'un joueur virtuel" as UC4
+usecase "Créer une partie privé" as UC5
+usecase "Partager une partie" as UC6
+usecase "Générer un lien de\nréférence d'une partie" as UC7
+usecase "Créer une partie publique" as UC8
+usecase "Protéger une partie\npar un mot de passe" as UC9
+usecase "Demander un mot de passe" as UC10
+usecase "Entrer dans un partie" as UC11
 }
 
 user -- UC1
+user -- UC2
 user -- UC6
-user -- UC4
-user -- UC10
+user -- UC9
+user -- UC11
+
+UC3 - user
+UC4 - user
+UC5 - user
+UC8 - user
+
+UC11 ..> UC2 : includes
+UC11 ..> UC3 : includes
+UC11 ..> UC5 : includes
+UC11 ..> UC8 : includes
+
+UC6 ..> UC11 : extends
+UC6 ..> UC11 : extends
+UC6 ..> UC7 : includes
+
+UC9 ..> UC8 : extends
 
 UC10 ..> UC2 : extends
-UC10 ..> UC7 : extends
-UC10 ..> UC11 : includes
-UC7 ..> UC8 : includes
-UC2 ..> UC9 : includes
-UC2 ..> UC5 : includes
+UC10 ..> UC3 : extends
 
-UC8 -- server
-UC5 -- server
-UC9 -- server
-UC4 -- server
-UC11 -- server
+UC4 ..> UC3 : includes
 
-note left of UC11 : Ne s'applique pas au mode \nde jeu classique à 4 joueur
+UC10 -l- server
+UC7 -u- server
+
+@enduml
+
+@startuml
+
+left to right direction
+
+actor Utilisateur as user
+actor Serveur as server
+
+rectangle "PolyScrabble - Personalisation de l'application" {
+
+}
 
 @enduml
 
@@ -225,7 +338,7 @@ package "Client Lourd" {
 package Serveur {
 
 }
-view "Client Léger" {
+package "Client Léger" {
 
 }
 package MongoDB {
@@ -234,30 +347,181 @@ package MongoDB {
 package EC2 {
 
 }
-"Client Lourd" -- Serveur : « uses »
-"Client Léger" -- Serveur : « uses »
-Serveur -- MongoDB : « uses »
-Serveur -- EC2 : « deploy on »
+"Client Lourd" --> Serveur : « uses »
+"Client Léger" --> Serveur : « uses »
+Serveur --> MongoDB : « uses »
+Serveur --> EC2 : « deploy on »
 }
 
 @enduml
 
 @startuml
+left to right direction
+
 package Serveur {
-package Controllers {
-class Routes
-class Sockets
+
+package Service {
+package Model {
+class DictionaryValidation
+class Game
+class Gameboard
+class GameHandler
+class LetterPlacement
+class LetterReserve
+class LetterTiles
+class ObjectivesHandler
+class Rack
+class Turn
+class Word
+class WordSolvwer
 }
-package Services {
+package Management {
+class AuthenticationService
+class DatabaseService
+}
+
+Service -[hidden]
 
 }
-package Assets {
-dictionary.json
+
+package Controller {
+package Route {
+class DictonaryController
+class HighScoreController
+class HistoryController
+class VirtualPlayerController
+class UserAccountController
+class ChatController
+class GameShareController
 }
-package Assets {
+package Socket {
+class ChatboxService
+class GameActionsService
+class GameSessionsService
+class GameStateService
+}
+}
+
+DictonaryController --> GameHandler : « uses »
 
 }
+@enduml
+
+@startuml
+
+left to right direction
+skinparam linetype polyline
+skinparam noteTextAlignment center
+
+package "Client lourd" {
+class Tauri
+class Angular
+package Component {
+class Chat
+class GameBoard
+class LeaderBoard
+class UserSettings
+class ShareMenu
+class PlayerBoard
+class ChatMenu
 }
+package Page {
+class MainPage
+class SettingsPage
+class GameSelection
+class BoardCustomizer
+class GamePage
+class ConnexionPage
+}
+package Module {
+class RoutingModule
+class MaterialModule
+
+}
+package Service {
+package Game {
+class DictionaryService
+class ConfigService
+class HighScoreService
+class LetterPlacementService
+class TimerService
+class VirtualPlayerService
+class SharingService
+class GameService
+}
+package Management {
+class ChatHandlerService
+class GameCreationService
+class RoomService
+class HistoryService
+class SocketService
+class HttpService
+package User {
+class SettingsService
+class AvatarService
+class LanguageService
+class ThemeService
+}
+}
+}
+
+}
+
+@enduml
+
+@startuml
+
+left to right direction
+skinparam linetype polyline
+skinparam noteTextAlignment center
+
+package "Client léger" {
+class Flutter
+package Component {
+class Chat
+class GameBoard
+class LeaderBoard
+class UserSettings
+class ShareMenu
+class PlayerBoard
+class ChatMenu
+}
+package Screen {
+class MainPage
+class SettingsPage
+class GameSelection
+class BoardCustomizer
+class GamePage
+class ConnexionPage
+}
+package Service {
+package Game {
+class DictionaryService
+class ConfigService
+class HighScoreService
+class LetterPlacementService
+class TimerService
+class VirtualPlayerService
+class SharingService
+class GameService
+class SoundService
+}
+package Management {
+class ChatHandlerService
+class GameCreationService
+class RoomService
+class HistoryService
+package User {
+class SettingsService
+class AvatarService
+class LanguageService
+class ThemeService
+}
+}
+}
+
+}
+
 @enduml
 
 ## VUE DEPLOIEMENT ------------------------------------------------------------------------------------------
@@ -378,15 +642,30 @@ alt "Placer un mot"
 user -> system ++: Placer des lettres sur le plateau
 system -> system: Vérifier que les lettres se trouve dans le chevalet
 user <-[#red]- system: Lettres ne se trouvent pas dans le chevalet
+system -> system: Synchroniser le plateau de tous les joueurs
 return Lettres placés avec succès
 
-user -> system ++: Valider le mot placé sur le plateau
-system -> system:
+user -> system ++: Placer un mot
+system -> system: Valider un mot
 user <-[#red]- system: Mot invalide
 
-    return Mot placé avec succès
+    return Mot placé avec succès. Fin du tour
 
 else "Demander un indices"
 user -> system ++: Demander un indice
+return Affiche 5 indices
+else "Échanger des lettres"
+user -> system ++: Échanger des lettres
+system -> system: Récupérer de nouvelles lettres dans la réserve
+user <-[#red]- system: Pas de lettres disponibles
+return Nouvelles lettres. Fin du tour
+else "Passer le tour"
+user -> system ++: Passer le tour
+return Fin du tour
 end
+
+system-> system ++: Passer au tour suivant par limite de temps
+user <- system: Fin du tour
+deactivate system
+
 @enduml
