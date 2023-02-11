@@ -49,7 +49,6 @@ left to right direction
 actor Utilisateur as user
 actor Serveur as server
 actor "Google reCAPTCHA Service" as recaptcha
-actor "Serveur MongoDB" as mongodb
 
 rectangle "PolyScrabble - Gestion de compte" {
 usecase "Créer un compte" as UC1
@@ -183,42 +182,95 @@ actor Serveur as server
 
 rectangle "PolyScrabble - Partie" {
 usecase "Entrer dans la partie" as UC1
-usecase "Placer des lettres sur le plateau" as UC2
-usecase "Jouer une commande indice" as UC3
 usecase "Clavarder avec les autres joueurs" as UC4
+usecase "Jouer un tour" as UC10
+usecase "Placer des lettres sur le plateau" as UC2
 usecase "Comptabiliser les points" as UC5
 usecase "Abandonner une partie" as UC6
 usecase "Demander un indice" as UC7
-usecase "Donner un indice" as UC8
-usecase "Faire un mot valide" as UC9
-usecase "Faire un mot invalide" as UC10
+usecase "Générer 5 indices" as UC8
+usecase "Valider les lettres placées sur le plateau" as UC9
+usecase "Imposer une limite de \ntemps par tour" as UC11
 }
 
 user -- UC1
-user -- UC2
-user -- UC3
-user -- UC4
 user -- UC6
-user -- UC7
+user -- UC4
+user -- UC10
 
-UC7 .> UC8 : extends
+UC10 ..> UC2 : extends
+UC10 ..> UC7 : extends
+UC10 ..> UC11 : includes
+UC7 ..> UC8 : includes
+UC2 ..> UC9 : includes
+UC2 ..> UC5 : includes
 
 UC8 -- server
 UC5 -- server
+UC9 -- server
+UC4 -- server
+UC11 -- server
 
+note left of UC11 : Ne s'applique pas au mode \nde jeu classique à 4 joueur
+
+@enduml
+
+## VUE LOGIQUE ------------------------------------------------------------------------------------------
+
+@startuml
+package PolyScrabble {
+package "Client Lourd" {
+
+}
+package Serveur {
+
+}
+view "Client Léger" {
+
+}
+package MongoDB {
+
+}
+package EC2 {
+
+}
+"Client Lourd" -- Serveur : « uses »
+"Client Léger" -- Serveur : « uses »
+Serveur -- MongoDB : « uses »
+Serveur -- EC2 : « deploy on »
+}
+
+@enduml
+
+@startuml
+package Serveur {
+package Controllers {
+class Routes
+class Sockets
+}
+package Services {
+
+}
+package Assets {
+dictionary.json
+}
+package Assets {
+
+}
+}
 @enduml
 
 ## VUE DEPLOIEMENT ------------------------------------------------------------------------------------------
 
 @startuml
 
-title "Vue de déploiement"
 left to right direction
 skinparam linetype polyline
 skinparam noteTextAlignment center
 
 node serveur as "<<Appareil>>\nServeur (AWS)\n{OS=Linux}" {
 component serveur_express as "<<Serveur Web>>\nInterface web"
+component serveur_courriel as "<<Serveur de courriel>>\nMTA"
 }
 
 node mongoDB as "<<Appareil>>\nServeur MongoDB\n{OS=Linux}" {
@@ -236,9 +288,10 @@ component client_leger as "<<Application Flutter>>\nClient Léger\nPolyScrabble"
 
 }
 
-serveur_express "1" -0)- "1" serveur_mongoDB
-serveur_express "1" -u- "0.._" client_leger : http, socketIO:3000
-serveur_express "1" -- "0.._" client_lourd : http, socketIO:3000
+serveur*express "1" -0)- "1" serveur_mongoDB
+serveur_express "1" -0)- "1" serveur_courriel
+serveur_express "1" -u- "0..*" client*leger : http, socketIO:3000
+serveur_express "1" - "0..*" client_lourd : http, socketIO:3000
 @enduml
 
 # Vue des processus
@@ -251,17 +304,24 @@ serveur_express "1" -- "0.._" client_lourd : http, socketIO:3000
 
 actor Utilisateur as user
 participant "Système" as system
+participant "MongoDB" as mongodb
 participant "Service reCAPTCHA" as rechapta
+participant "Serveur de courriel" as mail_server
 
-user -> system: Créer un compte
-system -> user: Afficher le formulaire de création de compte
+user -> system ++: Créer un compte
+return Afficher le formulaire de création de compte
 
-user -> rechapta: Remplir un captcha
-rechapta -> user: Valider le captcha
+user -> rechapta ++: Remplir un captcha
+return Captcha valide
 
-user -> system: Saisir ses informations et son choix d'avatar
-system -> system: Créer un compte
-system -> user: Compte créé avec succès
+user -> system ++: Saisir ses informations et son choix d'avatar
+system -> mongodb ++: Créer un compte
+return Compte créé avec succès
+
+    system -> mail_server++: Envoyer un courriel de confirmation
+        return Courriel envoyé avec succès
+
+    return Compte créé avec succès
 
 @enduml
 
@@ -272,24 +332,61 @@ system -> user: Compte créé avec succès
 actor Utilisateur as user
 participant "Système" as system
 participant "MongoDB" as mongodb
-participant "Système de courriel" as mail_system
+participant "Serveur de courriel" as mail_system
 
-user -> system: Signaler mot de passe oublié
-user <- system: Afficher le formulaire de réinitialisation de mot de passe oublié
-user -> system: Saisir son courriel
-system -> mongodb: Vérifier l'existance d'un compte avec le courriel
+user -> system ++: Signaler mot de passe oublié
+return Afficher le formulaire de réinitialisation de mot de passe oublié
+user -> system ++: Saisir son courriel
+system -> mongodb ++: Demander le compte avec le courriel saisie
 
-group "Compte inexistant"
-system <- mongodb: Le compte avec le courriel n'existe pas
-user <- system: Afficher message d'erreur
-end
-
-group "Compte inexistant"
-system <- mongodb: Le compte avec le courriel existe
+group
+alt #lightgreen "Compte existant"
+return Le compte possédant l'adresse courriel saisie
 system -> system: Générer un mot de passe temporaire
-system -> mail_system: Envoyer un courriel de récupération
-system <- mail_system: Courriel envoyé avec succès
-user <- system: Informer qu'un courriel est envoyé
+system -> system ++: Modifier le mot de passe du compte
+system -> mongodb ++: Modifier le mot de passe du compte en BD
+return Mot de passe modifié avec succès
+system -> system: Déconnecter tous les instances de l'utilisateur
+return Mot de passe modifié avec succès
+system -> mail_system ++: Envoyer un courriel de récupération
+return Courriel envoyé avec succès
+user <- system: Un courriel a été envoyé
+else #OrangeRed "Compte inexistant"
+activate mongodb
+system <-- mongodb: Aucun compte trouvé
+deactivate mongodb
+return Le compte avec le courriel n'existe pas
 end
 
+@enduml
+
+## Diagramme de processus pour jouer une partie
+
+### Jouer un tour
+
+@startuml
+
+actor Utilisateur as user
+participant "Système" as system
+
+activate system
+system -> system: Démarer la minuterie du tour
+user <- system: Démarer le tour
+deactivate system
+
+alt "Placer un mot"
+user -> system ++: Placer des lettres sur le plateau
+system -> system: Vérifier que les lettres se trouve dans le chevalet
+user <-[#red]- system: Lettres ne se trouvent pas dans le chevalet
+return Lettres placés avec succès
+
+user -> system ++: Valider le mot placé sur le plateau
+system -> system:
+user <-[#red]- system: Mot invalide
+
+    return Mot placé avec succès
+
+else "Demander un indices"
+user -> system ++: Demander un indice
+end
 @enduml
