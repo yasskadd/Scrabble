@@ -25,9 +25,17 @@
         "target": "es2020",
         "useDefineForClassFields": false,
         "module": "es2020",
-        "lib": ["es2020", "dom"],
+        "lib": [
+            "es2020",
+            "dom"
+        ],
         "paths": {
-            "@app/*": ["./src/app/*"]
+            "@app/*": [
+                "./src/app/*"
+            ],
+            "@common/*": [
+                "../common/*"
+            ]
         }
     },
     "angularCompilerOptions": {

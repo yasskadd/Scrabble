@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogBoxModifyBotNamesComponent } from '@app/components/dialog-box-modify-bot-names/dialog-box-modify-bot-names.component';
 import { Bot } from '@app/interfaces/bot';
 import { VirtualPlayer, VirtualPlayersService } from '@app/services/virtual-players.service';
-import * as constants from '@common/constants/bots';
+import { BOT_BEGINNER_NAME_LIST, BOT_EXPERT_NAME_LIST } from '@common/constants/bots';
 
 @Component({
     selector: 'app-admin-virtual-players',
@@ -15,6 +15,7 @@ export class AdminVirtualPlayersComponent {
     beginnerInput: string;
     playerType: VirtualPlayer;
     private readonly dialogWidth: string = '500px';
+
     constructor(public virtualPlayerService: VirtualPlayersService, public dialog: MatDialog) {
         this.updateBotList();
         this.expertInput = '';
@@ -74,7 +75,7 @@ export class AdminVirtualPlayersComponent {
     }
 
     isNameDefault(username: string): boolean {
-        if (constants.BOT_BEGINNER_NAME_LIST.includes(username) || constants.BOT_EXPERT_NAME_LIST.includes(username)) return true;
+        if (BOT_BEGINNER_NAME_LIST.includes(username) || BOT_EXPERT_NAME_LIST.includes(username)) return true;
         return false;
     }
 
