@@ -44,6 +44,7 @@ export class SocketManager {
 
     handleSockets(): void {
         this.sio.on('connection', (socket) => {
+            // eslint-disable-next-line no-console
             console.log('Connection of client with id = ' + socket.id + ' from : ' + socket.handshake.headers.origin);
             for (const [event, callbacks] of this.onEvents.entries()) {
                 for (const callback of callbacks) {

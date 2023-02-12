@@ -57,6 +57,7 @@ export class HomeChatBoxHandlerService {
             this.notifyClientFullRoom(socket);
             return;
         }
+        // eslint-disable-next-line no-console
         console.log(`${username} has joined`);
         this.userMap.set(socket.id, username);
         this.usernameSet.add(username);
