@@ -2,6 +2,7 @@ import { LetterTreeNode } from '@app/classes/trie/letter-tree-node.class';
 
 export class LetterTree {
     root: LetterTreeNode;
+
     constructor(words: string[]) {
         this.root = new LetterTreeNode(false);
         this.insertWords(words);
