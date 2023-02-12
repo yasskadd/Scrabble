@@ -48,6 +48,7 @@ export class Application {
         this.app.use('/history', this.historyController.router);
         this.app.use('/dictionary', this.dictionaryController.router);
         this.app.use('/virtualPlayer', this.virtualPlayerController.router);
+        this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerJSDoc(this.swaggerOptions)));
         this.app.use('/', (req, res) => {
             res.redirect('/docs');
         });
