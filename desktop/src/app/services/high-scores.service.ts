@@ -1,3 +1,5 @@
+/* eslint-disable deprecation/deprecation */
+// TODO : Handle deprecation
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { HighScores } from '@app/interfaces/high-score-parameters';
@@ -11,6 +13,7 @@ const TIMEOUT = 3000;
 export class HighScoresService {
     highScoreClassic: HighScores[] | undefined;
     highScoreLOG29990: HighScores[] | undefined;
+
     constructor(private readonly httpHandler: HttpHandlerService, private snackBar: MatSnackBar) {}
 
     getHighScores() {
@@ -27,6 +30,7 @@ export class HighScoresService {
             verticalPosition: 'top',
         });
     }
+
     resetHighScores() {
         this.httpHandler
             .resetHighScores()

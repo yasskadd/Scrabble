@@ -1,3 +1,4 @@
+/* eslint-disable import/no-deprecated,deprecation/deprecation */
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatSliderChange } from '@angular/material/slider';

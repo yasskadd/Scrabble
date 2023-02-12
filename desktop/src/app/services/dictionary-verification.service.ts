@@ -1,3 +1,5 @@
+/* eslint-disable deprecation/deprecation */
+// TODO : Handle deprecation
 import { Injectable } from '@angular/core';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { HttpHandlerService } from './communication/http-handler.service';

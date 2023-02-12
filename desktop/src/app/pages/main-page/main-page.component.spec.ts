@@ -5,7 +5,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 
 describe('MainPageComponent', () => {
-    let component: MainPageComponent;
+    // let component: MainPageComponent;
     let fixture: ComponentFixture<MainPageComponent>;
 
     beforeEach(async () => {
@@ -19,7 +19,7 @@ describe('MainPageComponent', () => {
 
     beforeEach(() => {
         fixture = TestBed.createComponent(MainPageComponent);
-        component = fixture.componentInstance;
+        // component = fixture.componentInstance;
         fixture.detectChanges();
     });
 });

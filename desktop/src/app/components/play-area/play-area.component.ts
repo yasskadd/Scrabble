@@ -1,4 +1,6 @@
+/* eslint-disable deprecation/deprecation,import/no-deprecated */
 import { AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+// TODO : Fix deprecated
 import { MatSliderChange } from '@angular/material/slider';
 import * as constants from '@app/constants/board-view';
 import { Vec2 } from '@app/interfaces/vec2';
@@ -9,10 +11,8 @@ import { Subject } from 'rxjs';
 
 export enum MouseButton {
     Left = 0,
-    Middle = 1,
     Right = 2,
     Back = 3,
-    Forward = 4,
 }
 
 @Component({

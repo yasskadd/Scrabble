@@ -1,3 +1,5 @@
+/* eslint-disable deprecation/deprecation */
+// TODO : Handle deprecation
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';

@@ -35,6 +35,9 @@
             ],
             "@common/*": [
                 "../common/*"
+            ],
+            "@services/*": [
+                "./src/app/services/*"
             ]
         }
     },

@@ -398,7 +398,7 @@ describe('MultiplayerCreatePageComponent', () => {
 
     it('createGame should call gameConfiguration.gameInitialization with the good Value', fakeAsync(() => {
         component.playerName = 'Vincent';
-        let TEST_PLAYER: {
+        const TEST_PLAYER: {
             mode: string;
             timer: number;
             dictionary: string;
@@ -406,9 +406,7 @@ describe('MultiplayerCreatePageComponent', () => {
             isMultiplayer: boolean;
             botDifficulty: undefined;
             username: string;
-        };
-
-        TEST_PLAYER = {
+        } = {
             username: component.playerName,
             timer: 60,
             dictionary: 'Mon dictionnaire',

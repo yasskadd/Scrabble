@@ -1,3 +1,5 @@
+/* eslint-disable deprecation/deprecation */
+// TODO : Handle deprecation
 import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -140,7 +142,7 @@ export class MultiplayerCreatePageComponent implements OnInit {
     }
 
     isSoloMode() {
-        //TODO
+        // TODO
         if (this.router.url === `/solo/${this.gameMode}`) return true;
         return false;
     }
@@ -162,6 +164,7 @@ export class MultiplayerCreatePageComponent implements OnInit {
             verticalPosition: 'top',
         });
     }
+
     private resetInput(): void {
         this.playerName = '';
     }

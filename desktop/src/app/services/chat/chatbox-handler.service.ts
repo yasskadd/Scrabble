@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { Injectable } from '@angular/core';
 import { SocketEvents } from '@common/constants/socket-events';
 import { ChatboxMessage } from '@common/interfaces/chatbox-message';

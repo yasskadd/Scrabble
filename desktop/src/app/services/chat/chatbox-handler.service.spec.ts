@@ -6,11 +6,11 @@ import { SocketEvents } from '@common/constants/socket-events';
 import { Letter } from '@common/interfaces/letter';
 import { ReplaySubject } from 'rxjs';
 import { Socket } from 'socket.io-client';
-import { ChatboxHandlerService } from './chatbox-handler.service';
-import { CommandHandlerService } from '../command-handler.service';
-import { ClientSocketService } from '../communication/client-socket.service';
-import { GameClientService } from '../game-client.service';
-import { GameConfigurationService } from '../game-configuration.service';
+import { ChatboxHandlerService } from '@services/chat/chatbox-handler.service';
+import { CommandHandlerService } from '@services/command-handler.service';
+import { ClientSocketService } from '@services/communication/client-socket.service';
+import { GameClientService } from '@services/game-client.service';
+import { GameConfigurationService } from '@services/game-configuration.service';
 
 type Player = { name: string; score: number; rack?: Letter[]; room: string };
 

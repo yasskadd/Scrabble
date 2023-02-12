@@ -1,3 +1,5 @@
+/* eslint-disable deprecation/deprecation */
+// TODO : Handle deprecation
 import { Injectable } from '@angular/core';
 import { Bot } from '@app/interfaces/bot';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
@@ -16,6 +18,7 @@ export class VirtualPlayersService {
     beginnerBotNames: Bot[];
     expertBotNames: Bot[];
     botType: VirtualPlayer;
+
     constructor(private readonly httpHandler: HttpHandlerService) {}
 
     addBotName(newName: string, type: VirtualPlayer) {
