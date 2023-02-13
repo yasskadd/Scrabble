@@ -1,0 +1,40 @@
+#home,
+#admin,
+#image {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    cursor: pointer;
+    flex: 1;
+}
+
+// #home:hover,
+// #admin:hover {
+//     transform: scale(1.01);
+// }
+
+#home,
+#admin {
+    margin-left: 30px;
+}
+
+#image {
+    margin-right: 30px;
+    justify-content: right;
+}
+
+#home > *,
+#admin > * {
+    color: #23501f;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fbd7a3;
+    border-radius: 3px;
+    margin: 2px;
+    width: 30px;
+    height: 30px;
+    box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+    text-align: center;
+}

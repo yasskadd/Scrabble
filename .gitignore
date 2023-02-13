@@ -2,11 +2,14 @@
 /.vscode/chrome
 /.vs/
 
-package-lock.json
 .DS_Store
 
 # Code Coverage Folder
 coverage/
+*.idea/
 
 #Node Modules
-/node_modules
+*/node_modules
+*/.angular
+*/dist
+*/build

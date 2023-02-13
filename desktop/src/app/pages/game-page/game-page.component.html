@@ -1,0 +1,11 @@
+<div class="load" *ngIf="isLoading">
+    <h1>Chargement en cours ...</h1>
+    <mat-spinner diameter="200"></mat-spinner>
+</div>
+<body *ngIf="!isLoading">
+    <app-information-panel class="information-panel justified"></app-information-panel>
+
+    <app-play-area class="play-area justified" tabindex="0"></app-play-area>
+
+    <app-chatbox class="chatbox"></app-chatbox>
+</body>

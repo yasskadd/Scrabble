@@ -1,0 +1,57 @@
+body {
+    height: 100%;
+    display: flex;
+}
+
+.load {
+    background-color: #7fa99b;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.load > h1 {
+    font-family: revert;
+}
+
+.justified {
+    display: flex;
+    flex-direction: column;
+}
+
+.information-panel {
+    flex-grow: 1;
+    max-width: 300px;
+    padding: 10px;
+    background-color: #7fa99b;
+    min-height: 760px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+.play-area {
+    overflow: auto;
+    flex-grow: 7;
+    align-items: center;
+    background-color: #c2e5da;
+    justify-content: center;
+    min-width: 620px;
+    min-height: 780px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chatbox {
+    flex-grow: 1;
+    max-width: 300px;
+    padding: 7px 10px 0px 11px;
+    background-color: #7fa99b;
+    min-height: 773px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}

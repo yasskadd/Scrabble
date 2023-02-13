@@ -1,0 +1,175 @@
+.encapsulating-div {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+app-header {
+    display: flex;
+    background-color: #7fa99b;
+    height: 10%;
+}
+
+mat-drawer-container {
+    height: 75%;
+    background-color: #c2e5da;
+    display: flex;
+    justify-content: center; // for horizontal
+    align-items: center;
+}
+
+.chat-sidenav {
+    display: flex;
+    max-width: 25%;
+    min-width: min-content;
+
+    ::ng-deep + div {
+        overflow-x: hidden !important;
+        width: -webkit-fill-available;
+    }
+
+    app-generic-chat {
+        display: grid;
+        height: 100%;
+        grid-template-rows: 1fr max-content;
+        align-content: space-between;
+
+        ::ng-deep label {
+            overflow: unset;
+            left: auto;
+        }
+    }
+}
+
+.always-visible-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.open-chat-button {
+    position: absolute;
+    left: 5px;
+    top: 5px;
+    background-color: #fff;
+}
+
+mat-drawer {
+    left: 0;
+    height: 100%;
+    width: 20%;
+    padding: 10px;
+}
+
+app-footer {
+    height: 15%;
+    text-align: center;
+    color: #23501f;
+    background-color: #7fa99b;
+}
+
+.justified {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+::ng-deep .toolMainPage {
+    font-size: 14px;
+    background-color: #23501f;
+}
+
+.mat-card {
+    padding: 30px;
+    width: 40%;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+    background-color: #7fa99b;
+}
+
+.mat-raised-button:hover {
+    transform: scale(1.01);
+}
+
+.button {
+    margin: 7px;
+    width: 95%;
+    padding: 5px;
+
+    font-size: 23px;
+    font-weight: 500;
+    font-family: system-ui;
+    text-align: center;
+
+    color: #cff3e8;
+    background-color: #23501f;
+}
+
+.buttons-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 8px;
+    padding-top: 16px;
+    justify-self: center;
+
+    button {
+        justify-self: center;
+    }
+}
+
+.text-input {
+    padding: 16px;
+}
+
+#scores {
+    display: flex;
+    flex-direction: row;
+    cursor: pointer;
+}
+
+#scores:hover {
+    transform: scale(1.01);
+}
+
+#scores > * {
+    color: #23501f;
+    font-weight: 800;
+    font-family: system-ui;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fbd7a3;
+    border-radius: 3px;
+    margin: 2px;
+    margin-top: 30px;
+    width: 35px;
+    height: 35px;
+    box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+    text-align: center;
+}
+
+#scores #icon {
+    margin-left: 15px;
+}
+
+.help-button {
+    position: absolute;
+    margin-right: -460px;
+    margin-bottom: -190px !important;
+    // background-color: #23501f;
+}
+
+::ng-deep .mat-fab {
+    height: 40px !important;
+    width: 40px !important;
+}
+
+::ng-deep .mat-button-wrapper {
+    padding: 0px !important;
+}
+
+::ng-deep .mat-drawer-content {
+    width: 100%;
+}
