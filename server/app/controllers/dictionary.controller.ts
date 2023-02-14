@@ -1,12 +1,8 @@
 import { Dictionary } from '@app/interfaces/dictionary';
 import { GamesHandler } from '@app/services/games-management/games-handler.service';
 import { Request, Response, Router } from 'express';
-import { StatusCodes } from 'http-status-codes';
 import { Service } from 'typedi';
-
-const HTTP_STATUS_CREATED = StatusCodes.CREATED;
-const HTTP_STATUS_NO_CONTENT = StatusCodes.NO_CONTENT;
-const HTTP_STATUS_FOUND = StatusCodes.OK;
+import { HTTP_STATUS } from '@common/models/http-status';
 
 @Service()
 export class DictionaryController {
@@ -23,9 +19,9 @@ export class DictionaryController {
             try {
                 const title = req.params.title;
                 await this.gamesHandler.dictionaryIsInDb(title);
-                res.status(HTTP_STATUS_FOUND).send();
+                res.status(HTTP_STATUS.OK).send();
             } catch {
-                res.status(HTTP_STATUS_NO_CONTENT).send();
+                res.status(HTTP_STATUS.NO_CONTENT).send();
             }
         });
 
@@ -36,19 +32,19 @@ export class DictionaryController {
 
         this.router.delete('/', async (req: Request, res: Response) => {
             await this.gamesHandler.resetDictionaries();
-            res.sendStatus(HTTP_STATUS_NO_CONTENT);
+            res.sendStatus(HTTP_STATUS.NO_CONTENT);
         });
 
         this.router.patch('/', async (req: Request, res: Response) => {
             const dictionaryTitle = req.body;
             await this.gamesHandler.deleteDictionary(dictionaryTitle.title);
-            res.sendStatus(HTTP_STATUS_NO_CONTENT);
+            res.sendStatus(HTTP_STATUS.NO_CONTENT);
         });
 
         this.router.put('/', async (req: Request, res: Response) => {
             const infoToReplace = req.body;
             await this.gamesHandler.updateDictionary(infoToReplace);
-            res.sendStatus(HTTP_STATUS_CREATED);
+            res.sendStatus(HTTP_STATUS.CREATED);
         });
 
         this.router.get('/info', async (req: Request, res: Response) => {
@@ -62,7 +58,7 @@ export class DictionaryController {
         this.router.post('/', async (req: Request, res: Response) => {
             const dictionary = req.body;
             await this.gamesHandler.addDictionary(dictionary);
-            res.sendStatus(HTTP_STATUS_CREATED);
+            res.sendStatus(HTTP_STATUS.CREATED);
         });
     }
 }

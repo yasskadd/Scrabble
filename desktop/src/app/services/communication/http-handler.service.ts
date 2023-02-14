@@ -9,8 +9,7 @@ import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-i
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-
-type BotNameInfo = { currentName: string; newName: string; difficulty: string };
+import { BotNameSwitcher } from '@common/interfaces/bot-name-switcher';
 
 @Injectable({
     providedIn: 'root',
@@ -104,7 +103,7 @@ export class HttpHandlerService {
         return this.http.post<void>(`${this.baseUrl}/virtualPlayer`, bot).pipe(catchError(this.handleError<void>('addBot')));
     }
 
-    replaceBot(bot: BotNameInfo): Observable<void> {
+    replaceBot(bot: BotNameSwitcher): Observable<void> {
         return this.http.put<void>(`${this.baseUrl}/virtualPlayer`, bot).pipe(catchError(this.handleError<void>('replaceBot')));
     }
 

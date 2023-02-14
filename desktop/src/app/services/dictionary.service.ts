@@ -6,11 +6,6 @@ import { DictionaryInfo } from '@app/interfaces/dictionary-info';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
 import { HttpHandlerService } from './communication/http-handler.service';
 
-export interface FileError {
-    message: string;
-    color: string;
-}
-
 @Injectable({
     providedIn: 'root',
 })

@@ -98,7 +98,7 @@ export class GamesHandler {
         this.dictionaries.delete(title);
     }
 
-    async dictionaryIsInDb(title: string) {
+    async dictionaryIsInDb(title: string): Promise<void> {
         if (title === 'Mon dictionnaire') title = 'dictionary';
         return await this.dictionaryStorage.dictionaryIsInDb(title);
     }

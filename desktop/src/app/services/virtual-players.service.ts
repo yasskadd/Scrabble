@@ -3,8 +3,7 @@
 import { Injectable } from '@angular/core';
 import { Bot } from '@app/interfaces/bot';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
-
-type BotNameInfo = { currentName: string; newName: string; difficulty: string };
+import { BotNameSwitcher } from '@common/interfaces/bot-name-switcher';
 
 export enum VirtualPlayer {
     Beginner = 'beginner',
@@ -42,7 +41,7 @@ export class VirtualPlayersService {
             .then(async () => this.getBotNames());
     }
 
-    replaceBotName(nameBotToReplace: BotNameInfo) {
+    replaceBotName(nameBotToReplace: BotNameSwitcher) {
         this.httpHandler
             .replaceBot(nameBotToReplace)
             .toPromise()

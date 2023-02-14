@@ -2,8 +2,7 @@ import * as constants from '@common/constants/bots';
 import { Document } from 'mongodb';
 import { Service } from 'typedi';
 import { DatabaseService } from './database.service';
-
-type BotNameInfo = { currentName: string; newName: string; difficulty: string };
+import { BotNameSwitcher } from '@common/interfaces/bot-name-switcher';
 
 @Service()
 export class VirtualPlayersStorageService {
@@ -12,23 +11,25 @@ export class VirtualPlayersStorageService {
     async getExpertBot(): Promise<Document[]> {
         await this.populateDb();
 
-        const currentExpertBot = await this.database.virtualNames.fetchDocuments({ difficulty: 'Expert' });
-        return currentExpertBot;
+        return await this.database.virtualNames.fetchDocuments({ difficulty: 'Expert' });
     }
 
     async getBeginnerBot(): Promise<Document[]> {
         await this.populateDb();
-        const currentBeginnerBot = await this.database.virtualNames.fetchDocuments({ difficulty: 'debutant' });
-
-        return currentBeginnerBot;
+        return await this.database.virtualNames.fetchDocuments({ difficulty: 'debutant' });
     }
 
-    async replaceBotName(botNameInfo: BotNameInfo) {
+    async replaceBotName(botNameSwitcher: BotNameSwitcher) {
         await this.populateDb();
-        this.database.virtualNames.replaceDocument(
-            { username: botNameInfo.currentName },
-            { username: botNameInfo.newName, difficulty: botNameInfo.difficulty },
-        );
+        this.database.virtualNames
+            .replaceDocument(
+                { username: botNameSwitcher.currentName },
+                {
+                    username: botNameSwitcher.newName,
+                    difficulty: botNameSwitcher.difficulty,
+                },
+            )
+            .then();
     }
 
     async addBot(bot: Document) {
@@ -57,8 +58,14 @@ export class VirtualPlayersStorageService {
         const currentBot = await this.database.virtualNames.fetchDocuments({});
         if (currentBot.length !== 0) return;
         for (let i = 0; i < constants.BOT_BEGINNER_NAME_LIST.length; i++) {
-            await this.database.virtualNames.addDocument({ username: constants.BOT_BEGINNER_NAME_LIST[i], difficulty: 'debutant' });
-            await this.database.virtualNames.addDocument({ username: constants.BOT_EXPERT_NAME_LIST[i], difficulty: 'Expert' });
+            await this.database.virtualNames.addDocument({
+                username: constants.BOT_BEGINNER_NAME_LIST[i],
+                difficulty: 'debutant',
+            });
+            await this.database.virtualNames.addDocument({
+                username: constants.BOT_EXPERT_NAME_LIST[i],
+                difficulty: 'Expert',
+            });
         }
     }
 }
