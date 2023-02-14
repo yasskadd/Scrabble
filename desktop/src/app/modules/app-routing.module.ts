@@ -13,12 +13,14 @@ const routes: Routes = [
     { path: AppRoutes.AdminPage, component: AdminPageComponent },
     { path: AppRoutes.HomePage, component: MainPageComponent },
     { path: AppRoutes.GamePage, component: GamePageComponent },
-    { path: '${AppRoutes.SoloGameCreationPage}:id', component: GameCreationPageComponent },
-    { path: '${AppRoutes.MultiJoinPage}:id', component: MultiplayerJoinPageComponent },
-    { path: '${AppRoutes.MultiGameCreationPage}:id', component: GameCreationPageComponent },
-    { path: '${AppRoutes.MultiWaitingPage}:id', component: WaitingOpponentPageComponent },
+    { path: `${AppRoutes.SoloGameCreationPage}/:id`, component: GameCreationPageComponent },
+    { path: `${AppRoutes.MultiJoinPage}/:id`, component: MultiplayerJoinPageComponent },
+    { path: `${AppRoutes.MultiGameCreationPage}/:id`, component: GameCreationPageComponent },
+    { path: `${AppRoutes.MultiWaitingPage}/:id`, component: WaitingOpponentPageComponent },
     { path: '**', redirectTo: AppRoutes.HomePage },
 ];
+
+console.log(routes);
 
 @NgModule({
     imports: [RouterModule.forRoot(routes, { useHash: true })],

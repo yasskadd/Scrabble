@@ -23,6 +23,7 @@ interface RoomInformation {
     isCreator: boolean;
     statusGame: string;
 }
+
 const ROOM_INFORMATION: RoomInformation = {
     playerName: ['Vincent'],
     roomId: '1',
@@ -32,10 +33,10 @@ const ROOM_INFORMATION: RoomInformation = {
 const TEST_ERROR = "La salle n'est plus disponible";
 const TEST_ERROR_REASON = new ReplaySubject<string>(1);
 const TEST_ISGAMESTARTED = new ReplaySubject<string>(1);
-const MULTIPLAYER_WAITING_ROOM_ROUTE = '${AppRoutes.MultiWaitingPage}classique';
-const MULTIPLAYER_CREATE_ROOM_ROUTE = '${AppRoutes.MultiGameCreationPage}classique';
-const SOLO_ROUTE = '${AppRoutes.SoloGameCreationPage}classique';
-const MULTIPLAYER_JOIN_ROOM_ROUTE = '${AppRoutes.MultiJoinPage}classique';
+const MULTIPLAYER_WAITING_ROOM_ROUTE = `${AppRoutes.MultiWaitingPage}/classique`;
+const MULTIPLAYER_CREATE_ROOM_ROUTE = `${AppRoutes.MultiGameCreationPage}/classique`;
+const SOLO_ROUTE = `${AppRoutes.SoloGameCreationPage}/classique`;
+const MULTIPLAYER_JOIN_ROOM_ROUTE = `${AppRoutes.MultiJoinPage}/classique`;
 
 describe('WaitingOpponentPageComponent', () => {
     let component: WaitingOpponentPageComponent;

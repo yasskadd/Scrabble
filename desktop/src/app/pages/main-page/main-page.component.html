@@ -24,8 +24,6 @@
                         [matTooltip]="'Mode classique de Scrabble'"
                         matTooltipPosition='right'
                         matTooltipClass='toolMainPage'
-                        disabled='true'
-                        hidden
                     >
                         Scrabble Classique
                     </button>
@@ -38,24 +36,22 @@
                         matTooltipPosition='right'
                         matTooltipClass='toolMainPage'
                         disabled='true'
-                        hidden
                     >
                         Scrabble LOG2990
                     </button>
                     <!-- TODO : DO NOT DELETE!!! -->
-                    <!-- <div
-                        id="scores"
-                        (click)="openHighScoreDialog()"
+                    <div
+                        id='scores'
+                        (click)='openHighScoreDialog()'
                         [matTooltip]="'Classement des meilleurs scores pour chacun des modes de jeu'"
-                        matTooltipPosition="right"
-                        matTooltipClass="toolMainPage"
-                        disabled="true"
+                        matTooltipPosition='right'
+                        matTooltipClass='toolMainPage'
                     >
                         <div *ngFor="let letter of ['S', 'C', 'O', 'R', 'E', 'S']">{{ letter }}</div>
-                        <div id="icon">
+                        <div id='icon'>
                             <mat-icon>emoji_events</mat-icon>
                         </div>
-                    </div> -->
+                    </div>
                     <button
                         mat-fab
                         (click)='openHelpDialog()'
@@ -63,8 +59,6 @@
                         matTooltip='Des instructions pour le jeu'
                         matTooltipPosition='right'
                         matTooltipClass='toolMainPage'
-                        disabled='true'
-                        hidden
                     >
                         <mat-icon>help_outline</mat-icon>
                     </button>

@@ -13,7 +13,7 @@ export class DialogBoxGameTypeComponent implements OnInit {
     singleplayerLink: string;
     gameMode: string;
 
-    constructor(@Inject(MAT_DIALOG_DATA) private data: string) {}
+    constructor(@Inject(MAT_DIALOG_DATA) protected data: string) {}
 
     ngOnInit(): void {
         this.gameMode = this.data;

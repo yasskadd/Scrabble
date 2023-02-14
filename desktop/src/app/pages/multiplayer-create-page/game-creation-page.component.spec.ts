@@ -83,9 +83,9 @@ const BOT_BEGINNER_LIST = [
     },
 ];
 
-const MULTIPLAYER_WAITING_ROOM_ROUTE = 'multijoueur/salleAttente/classique';
-const SOLO_MODE = '${AppRoutes.SoloGameCreationPage}/classique';
-const CREATE_MULTIPLAYER_GAME = 'multijoueur/creer/classique';
+const MULTIPLAYER_WAITING_ROOM_ROUTE = `${AppRoutes.MultiWaitingPage}/classique`;
+const SOLO_MODE = `${AppRoutes.SoloGameCreationPage}/classique`;
+const CREATE_MULTIPLAYER_GAME = `${AppRoutes.MultiGameCreationPage}/classique`;
 const RETURN_ROUTE = AppRoutes.HomePage;
 const DB_DICTIONARY = { _id: '932487fds', title: 'Mon dictionnaire', description: 'Un dictionnaire' };
 
