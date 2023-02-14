@@ -4,7 +4,7 @@
 /* eslint-disable-next-line max-classes-per-file */
 import { Location } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
-import { Component, NO_ERRORS_SCHEMA, Renderer2, Type } from '@angular/core';
+import { Component, NO_ERRORS_SCHEMA, Renderer2 } from '@angular/core';
 import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -99,8 +99,6 @@ describe('MultiplayerCreatePageComponent', () => {
     let httpHandlerSpy: jasmine.SpyObj<HttpHandlerService>;
     let dictionaryVerificationSpy: jasmine.SpyObj<DictionaryVerificationService>;
     let virtualPlayersServiceSpy: jasmine.SpyObj<VirtualPlayersService>;
-    let renderer2: Renderer2;
-    let setStyleSpy: unknown;
 
     const mockMatSnackBar = {
         // Reason : mock needed for test, but it doesn't have to do anything
@@ -181,44 +179,26 @@ describe('MultiplayerCreatePageComponent', () => {
         fixture.detectChanges();
         location = TestBed.inject(Location);
         matSnackBar = TestBed.inject(MatSnackBar);
-        renderer2 = fixture.componentRef.injector.get<Renderer2>(Renderer2 as Type<Renderer2>);
-        setStyleSpy = spyOn(renderer2, 'setStyle').and.callThrough();
     });
 
     it('should create', () => {
         expect(component).toBeTruthy();
     });
 
-    it('onMouseOver() should set textContent of info panel with title and description of the dictionary passed as param', () => {
-        component.onMouseOver(DB_DICTIONARY);
-        expect(component.info.nativeElement.children[0].textContent).toEqual(DB_DICTIONARY.title);
-        expect(component.info.nativeElement.children[1].textContent).toEqual(DB_DICTIONARY.description);
-    });
-
-    it('onMouseOver() should call setStyle of Renderer2 and show dictionary info panel', () => {
-        component.onMouseOver(DB_DICTIONARY);
-        expect(setStyleSpy).toHaveBeenCalledWith(component.info.nativeElement, 'visibility', 'visible');
-    });
-
-    it('onMouseOut() should call setStyle of Renderer2 and hide dictionary info panel', () => {
-        component.onMouseOut();
-        expect(setStyleSpy).toHaveBeenCalledWith(component.info.nativeElement, 'visibility', 'hidden');
-    });
-
     it('onOpen() should call getDictionaries() of HttpHandlerService', () => {
-        component.onOpen();
+        component.downloadDictionaries();
         expect(httpHandlerSpy.getDictionaries).toHaveBeenCalled();
     });
 
     it('onOpen() should set dictionaryList', () => {
         component.dictionaryList = [];
-        component.onOpen();
+        component.downloadDictionaries();
         expect(component.dictionaryList.length).not.toEqual(0);
     });
 
     it('navigatePage should redirect to salleAttente when we create a multiplayer Game', fakeAsync(() => {
         const expectedURL = '/' + MULTIPLAYER_WAITING_ROOM_ROUTE;
-        component.navigatePage();
+        component.navigateToGamePage();
         tick();
         fixture.detectChanges();
         expect(location.path()).toEqual(expectedURL);
@@ -228,7 +208,7 @@ describe('MultiplayerCreatePageComponent', () => {
         const expectedURL = '/' + GAME_ROUTE;
         router.navigateByUrl(SOLO_MODE);
         tick();
-        component.navigatePage();
+        component.navigateToGamePage();
         tick();
         fixture.detectChanges();
         expect(location.path()).toEqual(expectedURL);
@@ -299,12 +279,12 @@ describe('MultiplayerCreatePageComponent', () => {
         tick();
         fixture.detectChanges();
         flush();
-        component['createBotName']();
+        component['setBotName']();
         expect(component.botName).not.toEqual('');
     }));
 
     it('createBotName should assign a name to the Beginner opponent', () => {
-        component['createBotName']();
+        component['setBotName']();
         expect(component.botName).not.toEqual('');
     });
 
@@ -319,7 +299,7 @@ describe('MultiplayerCreatePageComponent', () => {
     }));
 
     it('giveNameToBot should call createBotName if  we use the path solo/classique to navigate to this page', fakeAsync(() => {
-        const spy = spyOn(component, 'createBotName');
+        const spy = spyOn<any>(component, 'createBotName');
         router.navigateByUrl(SOLO_MODE);
         tick();
         component.giveNameToBot();
@@ -328,7 +308,7 @@ describe('MultiplayerCreatePageComponent', () => {
     }));
 
     it('giveNameToBot should not call createBotName if  we use the path multijoueur/creer/classique to navigate to this page', fakeAsync(() => {
-        const spy = spyOn(component, 'createBotName');
+        const spy = spyOn<any>(component, 'createBotName');
         router.navigateByUrl(CREATE_MULTIPLAYER_GAME);
         tick();
         component.giveNameToBot();
@@ -448,7 +428,7 @@ describe('MultiplayerCreatePageComponent', () => {
     }));
 
     it('createGame should call navigatePage', fakeAsync(() => {
-        const spy = spyOn(component, 'navigatePage');
+        const spy = spyOn<any>(component, 'navigatePage');
         component.createGame();
         tick();
         flush();
@@ -490,7 +470,7 @@ describe('MultiplayerCreatePageComponent', () => {
     }));
 
     it('should call giveNameToBot() when the difficulty of the bot change', fakeAsync(() => {
-        const spy = spyOn(component, 'giveNameToBot');
+        const spy = spyOn<any>(component, 'giveNameToBot');
         router.navigateByUrl(SOLO_MODE);
         tick();
         fixture.detectChanges();
@@ -563,7 +543,7 @@ describe('MultiplayerCreatePageComponent', () => {
     }));
 
     it('createGame should do nothing if selected dictionary is no longer in the database', fakeAsync(() => {
-        const navigatePageSpy = spyOn(component, 'navigatePage');
+        const navigatePageSpy = spyOn<any>(component, 'navigatePage');
         const validateNameSpy = spyOn(component, 'validateName' as never);
         // Reason : Testing private method
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -582,8 +562,8 @@ describe('MultiplayerCreatePageComponent', () => {
     }));
 
     it('resetInput() should clear the playerName', () => {
-        const VALID_NAME = 'Serge';
-        component.playerName = VALID_NAME;
+        component.playerName = 'Serge';
+        // @ts-ignore
         component['resetInput']();
         expect(component.playerName).toEqual('');
     });

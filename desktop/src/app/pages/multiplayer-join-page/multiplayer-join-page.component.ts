@@ -3,8 +3,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
 import { TimerService } from '@app/services/timer.service';
-
-const TIMEOUT = 3000;
+import { SNACKBAR_TIMEOUT } from '@common/constants/ui-events';
 
 @Component({
     selector: 'app-multiplayer-join-page',
@@ -58,12 +57,12 @@ export class MultiplayerJoinPageComponent implements OnInit {
     }
 
     navigatePage() {
-        this.router.navigate([`/multijoueur/salleAttente/${this.gameMode}`]);
+        this.router.navigate([`/multijoueur/salleAttente/${this.gameMode}`]).then();
     }
 
     openSnackBar(reason: string): void {
         this.snackBar.open(reason, 'fermer', {
-            duration: TIMEOUT,
+            duration: SNACKBAR_TIMEOUT,
             verticalPosition: 'top',
         });
     }
