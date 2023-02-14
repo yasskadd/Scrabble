@@ -6,6 +6,7 @@ import { DialogGameHelpComponent } from '@app/components/dialog-game-help/dialog
 import { GameClientService } from '@app/services/game-client.service';
 import { TimerService } from '@app/services/timer.service';
 import { Objective } from '@common/interfaces/objective';
+import { AppRoutes } from '@app/models/app-routes';
 
 @Component({
     selector: 'app-information-panel',
@@ -24,7 +25,7 @@ export class InformationPanelComponent {
     }
 
     leaveGame(): void {
-        this.router.navigate(['/home']);
+        this.router.navigate([AppRoutes.HomePage]);
         this.gameClientService.quitGame();
     }
 

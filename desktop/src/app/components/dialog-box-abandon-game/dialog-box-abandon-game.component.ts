@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
+import { AppRoutes } from '@app/models/app-routes';
 import { GameClientService } from '@app/services/game-client.service';
 
 const TIMEOUT = 3000;
@@ -15,7 +16,7 @@ export class DialogBoxAbandonGameComponent {
 
     abandonGame() {
         this.gameclient.abandonGame();
-        this.router.navigate(['/home']);
+        this.router.navigate([AppRoutes.HomePage]).then();
         this.openSnackBar();
     }
 

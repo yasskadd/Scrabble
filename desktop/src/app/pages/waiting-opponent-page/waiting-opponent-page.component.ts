@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AppRoutes } from '@app/models/app-routes';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
 import { SNACKBAR_TIMEOUT } from '@common/constants/ui-events';
 
@@ -48,19 +49,19 @@ export class WaitingOpponentPageComponent implements OnInit, OnDestroy {
 
     joinSoloMode() {
         this.gameConfiguration.removeRoom();
-        this.router.navigate([`/solo/${this.gameMode}`]).then();
+        this.router.navigate([`${AppRoutes.SoloGameCreationPage}/${this.gameMode}`]).then();
     }
 
     joinGamePage() {
-        this.router.navigate(['/game']).then();
+        this.router.navigate([AppRoutes.GamePage]).then();
     }
 
     exitRoom(exitByIsOwn?: boolean) {
         if (this.gameConfiguration.roomInformation.isCreator) {
-            this.router.navigate([`/multijoueur/creer/${this.gameMode}`]).then();
+            this.router.navigate([`${AppRoutes.MultiGameCreationPage}/${this.gameMode}`]).then();
             this.gameConfiguration.removeRoom();
         } else {
-            this.router.navigate([`/multijoueur/rejoindre/${this.gameMode}`]).then();
+            this.router.navigate([`${AppRoutes.MultiJoinPage}/${this.gameMode}`]).then();
             if (!exitByIsOwn) return;
             this.gameConfiguration.exitWaitingRoom();
         }

@@ -11,6 +11,7 @@ import { VirtualPlayersService } from '@app/services/virtual-players.service';
 import { GameTimeOptions } from '@common/models/game-time-options';
 import { GameDifficulty } from '@common/models/game-difficulty';
 import { SNACKBAR_TIMEOUT } from '@common/constants/ui-events';
+import { AppRoutes } from '@app/models/app-routes';
 
 @Component({
     selector: 'app-multiplayer-create-page',
@@ -102,12 +103,12 @@ export class GameCreationPageComponent implements OnInit {
     }
 
     navigateToGamePage() {
-        if (this.isSoloMode()) this.router.navigate(['/game']).then();
-        else this.router.navigate([`/multijoueur/salleAttente/${this.gameMode}`]).then();
+        if (this.isSoloMode()) this.router.navigate([AppRoutes.GamePage]).then();
+        else this.router.navigate([`${AppRoutes.MultiWaitingPage}/${this.gameMode}`]).then();
     }
 
     isSoloMode() {
-        return this.router.url === `/solo/${this.gameMode}`;
+        return this.router.url === `/${AppRoutes.SoloGameCreationPage}/${this.gameMode}`;
     }
 
     setBotName(): void {

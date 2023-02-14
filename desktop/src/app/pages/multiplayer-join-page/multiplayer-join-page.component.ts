@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
 import { TimerService } from '@app/services/timer.service';
 import { SNACKBAR_TIMEOUT } from '@common/constants/ui-events';
+import { AppRoutes } from '@app/models/app-routes';
 
 @Component({
     selector: 'app-multiplayer-join-page',
@@ -62,7 +63,7 @@ export class MultiplayerJoinPageComponent implements OnInit, OnDestroy {
     }
 
     navigatePage() {
-        this.router.navigate([`/multijoueur/salleAttente/${this.gameMode}`]).then();
+        this.router.navigate([`${AppRoutes.MultiWaitingPage}/${this.gameMode}`]).then();
     }
 
     openSnackBar(reason: string): void {

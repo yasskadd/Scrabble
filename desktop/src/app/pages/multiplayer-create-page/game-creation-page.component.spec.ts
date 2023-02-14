@@ -20,6 +20,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { ImportDictionaryComponent } from '@app/components/import-dictionary/import-dictionary.component';
 import { Dictionary } from '@app/interfaces/dictionary';
+import { AppRoutes } from '@app/models/app-routes';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
 import { DictionaryVerificationService } from '@app/services/dictionary-verification.service';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
@@ -83,10 +84,9 @@ const BOT_BEGINNER_LIST = [
 ];
 
 const MULTIPLAYER_WAITING_ROOM_ROUTE = 'multijoueur/salleAttente/classique';
-const SOLO_MODE = 'solo/classique';
+const SOLO_MODE = '${AppRoutes.SoloGameCreationPage}/classique';
 const CREATE_MULTIPLAYER_GAME = 'multijoueur/creer/classique';
-const RETURN_ROUTE = 'home';
-const GAME_ROUTE = 'game';
+const RETURN_ROUTE = AppRoutes.HomePage;
 const DB_DICTIONARY = { _id: '932487fds', title: 'Mon dictionnaire', description: 'Un dictionnaire' };
 
 describe('MultiplayerCreatePageComponent', () => {
@@ -145,7 +145,7 @@ describe('MultiplayerCreatePageComponent', () => {
                     { path: RETURN_ROUTE, component: StubComponent },
                     { path: SOLO_MODE, component: StubComponent },
                     { path: CREATE_MULTIPLAYER_GAME, component: StubComponent },
-                    { path: GAME_ROUTE, component: StubComponent },
+                    { path: AppRoutes.GamePage, component: StubComponent },
                 ]),
             ],
             schemas: [NO_ERRORS_SCHEMA],
@@ -205,7 +205,7 @@ describe('MultiplayerCreatePageComponent', () => {
     }));
 
     it('navigatePage should redirect to game when we create a solo Game', fakeAsync(() => {
-        const expectedURL = '/' + GAME_ROUTE;
+        const expectedURL = '/' + AppRoutes.GamePage;
         router.navigateByUrl(SOLO_MODE);
         tick();
         component.navigateToGamePage();
