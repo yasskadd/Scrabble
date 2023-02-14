@@ -6,7 +6,7 @@ import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
-import { TimerService } from '@app/services/timer.service';
+import { TimeService } from '@services/time.service';
 import { VirtualPlayersService } from '@app/services/virtual-players.service';
 import { GameTimeOptions } from '@common/models/game-time-options';
 import { GameDifficulty } from '@common/models/game-difficulty';
@@ -31,7 +31,7 @@ export class GameCreationPageComponent implements OnInit {
     constructor(
         public virtualPlayers: VirtualPlayersService,
         public gameConfiguration: GameConfigurationService,
-        public timer: TimerService,
+        public timer: TimeService,
         private router: Router,
         private activatedRoute: ActivatedRoute,
         private fb: FormBuilder,

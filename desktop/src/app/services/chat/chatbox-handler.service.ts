@@ -9,9 +9,9 @@ import { ClientSocketService } from '@app/services/communication/client-socket.s
 // import { GameClientService } from '@app/services/game-client.service';
 // import { GameConfigurationService } from '@app/services/game-configuration.service';
 import { SocketResponse } from '@app/interfaces/server-responses';
-import { TimeService } from '@app/services/chat/time.service';
 import { UserService } from '@app/services/user.service';
 import { Subject } from 'rxjs';
+import { TimeService } from '@services/time.service';
 
 // const EXCHANGE_ALLOWED_MINIMUM = 7;
 // const CHAR_ASCII = 96;
@@ -38,7 +38,7 @@ export class ChatboxHandlerService {
         // private gameConfiguration: GameConfigurationService,
         // private gameClient: GameClientService,
         // private commandHandler: CommandHandlerService,
-        private timeService: TimeService,
+        private timerService: TimeService,
         private userService: UserService,
     ) {
         this.messages = [];
@@ -154,7 +154,7 @@ export class ChatboxHandlerService {
         return {
             type: 'system',
             message: `'${userName}' a join le salon!`,
-            timeStamp: this.timeService.getTimeStamp(),
+            timeStamp: this.timerService.getTimeStampNow(),
         };
     }
 
@@ -162,7 +162,7 @@ export class ChatboxHandlerService {
         return {
             type: 'system',
             message: `'${userName}' a quitté le salon.`,
-            timeStamp: this.timeService.getTimeStamp(),
+            timeStamp: this.timerService.getTimeStampNow(),
         };
 
         // TODO : Send message when replacing player with virutal one
@@ -180,7 +180,7 @@ export class ChatboxHandlerService {
             username: this.userService.userName,
             type: 'client',
             message: userInput,
-            timeStamp: this.timeService.getTimeStamp(),
+            timeStamp: this.timerService.getTimeStampNow(),
         };
     }
 

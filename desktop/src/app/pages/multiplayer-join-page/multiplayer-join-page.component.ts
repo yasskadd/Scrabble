@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
-import { TimerService } from '@app/services/timer.service';
+import { TimeService } from '@services/time.service';
 import { SNACKBAR_TIMEOUT } from '@common/constants/ui-events';
 import { AppRoutes } from '@app/models/app-routes';
 
@@ -16,7 +16,7 @@ export class MultiplayerJoinPageComponent implements OnInit, OnDestroy {
     gameMode: string;
 
     constructor(
-        public timer: TimerService,
+        public timer: TimeService,
         private gameConfiguration: GameConfigurationService,
         private router: Router,
         private snackBar: MatSnackBar,

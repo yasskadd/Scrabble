@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
-import { TimerService } from './timer.service';
+import { TimeService } from './time.service';
 
-describe('TimerService', () => {
-    let service: TimerService;
+describe('TimeService', () => {
+    let service: TimeService;
 
     beforeEach(() => {
         TestBed.configureTestingModule({});
-        service = TestBed.inject(TimerService);
+        service = TestBed.inject(TimeService);
     });
 
     it('should be created', () => {
@@ -16,7 +16,7 @@ describe('TimerService', () => {
     it('timerToMinute() should return number of minute in the timer', () => {
         const twoMinute = 120;
         const expectedValue = 2;
-        expect(service.timerToMinute(twoMinute)).toEqual(expectedValue);
+        expect(service.secondsToMinute(twoMinute)).toEqual(expectedValue);
     });
 
     it('timerToSecond() should return number of second in the timer', () => {
@@ -30,7 +30,7 @@ describe('TimerService', () => {
         const TIMER2 = 210;
         const expectedValue1 = '3:00 minutes';
         const expectedValue2 = '3:30 minutes';
-        expect(service.secondToMinute(TIMER1)).toEqual(expectedValue1);
-        expect(service.secondToMinute(TIMER2)).toEqual(expectedValue2);
+        expect(service.getTimeStamp(TIMER1)).toEqual(expectedValue1);
+        expect(service.getTimeStamp(TIMER2)).toEqual(expectedValue2);
     });
 });
