@@ -70,7 +70,6 @@
                 "resizable": true,
                 "title": "desktop",
                 "width": 800,
-                "visible": false,
                 "focus": false
             }
         ]
