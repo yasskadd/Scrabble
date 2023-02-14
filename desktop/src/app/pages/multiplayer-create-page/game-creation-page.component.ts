@@ -1,5 +1,3 @@
-/* eslint-disable deprecation/deprecation */
-// TODO : Handle deprecation
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -16,10 +14,10 @@ import { SNACKBAR_TIMEOUT } from '@common/constants/ui-events';
 
 @Component({
     selector: 'app-multiplayer-create-page',
-    templateUrl: './multiplayer-create-page.component.html',
-    styleUrls: ['./multiplayer-create-page.component.scss'],
+    templateUrl: './game-creation-page.component.html',
+    styleUrls: ['./game-creation-page.component.scss'],
 })
-export class MultiplayerCreatePageComponent implements OnInit {
+export class GameCreationPageComponent implements OnInit {
     timerList: number[];
     botName: string;
     playerName: string;

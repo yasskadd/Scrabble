@@ -39,7 +39,7 @@ import { InformationPanelComponent } from './components/information-panel/inform
 import { PlayerRackComponent } from './components/player-rack/player-rack.component';
 import { AdminPageComponent } from './pages/admin-page/admin-page.component';
 import { MainPageComponent } from './pages/main-page/main-page.component';
-import { MultiplayerCreatePageComponent } from './pages/multiplayer-create-page/multiplayer-create-page.component';
+import { GameCreationPageComponent } from './pages/multiplayer-create-page/game-creation-page.component';
 import { MultiplayerJoinPageComponent } from './pages/multiplayer-join-page/multiplayer-join-page.component';
 import { WaitingOpponentPageComponent } from './pages/waiting-opponent-page/waiting-opponent-page.component';
 
@@ -56,7 +56,7 @@ import { WaitingOpponentPageComponent } from './pages/waiting-opponent-page/wait
         MainPageComponent,
         PlayAreaComponent,
         MultiplayerJoinPageComponent,
-        MultiplayerCreatePageComponent,
+        GameCreationPageComponent,
         WaitingOpponentPageComponent,
         ChatboxComponent,
         DialogBoxGameTypeComponent,

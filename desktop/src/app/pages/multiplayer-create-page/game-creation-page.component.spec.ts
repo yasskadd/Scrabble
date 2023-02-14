@@ -25,7 +25,7 @@ import { DictionaryVerificationService } from '@app/services/dictionary-verifica
 import { GameConfigurationService } from '@app/services/game-configuration.service';
 import { VirtualPlayersService } from '@app/services/virtual-players.service';
 import { of } from 'rxjs';
-import { MultiplayerCreatePageComponent } from './multiplayer-create-page.component';
+import { GameCreationPageComponent } from './game-creation-page.component';
 
 @Component({
     template: '',
@@ -91,8 +91,8 @@ const DB_DICTIONARY = { _id: '932487fds', title: 'Mon dictionnaire', description
 
 describe('MultiplayerCreatePageComponent', () => {
     let matSnackBar: MatSnackBar;
-    let component: MultiplayerCreatePageComponent;
-    let fixture: ComponentFixture<MultiplayerCreatePageComponent>;
+    let component: GameCreationPageComponent;
+    let fixture: ComponentFixture<GameCreationPageComponent>;
     let location: Location;
     let router: Router;
     let gameConfigurationServiceSpy: jasmine.SpyObj<GameConfigurationService>;
@@ -149,7 +149,7 @@ describe('MultiplayerCreatePageComponent', () => {
                 ]),
             ],
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [MultiplayerCreatePageComponent, ImportDictionaryComponent],
+            declarations: [GameCreationPageComponent, ImportDictionaryComponent],
             providers: [
                 { provide: GameConfigurationService, useValue: gameConfigurationServiceSpy },
                 { provide: MatSnackBar, useValue: mockMatSnackBar },
@@ -174,7 +174,7 @@ describe('MultiplayerCreatePageComponent', () => {
 
     beforeEach(() => {
         router = TestBed.inject(Router);
-        fixture = TestBed.createComponent(MultiplayerCreatePageComponent);
+        fixture = TestBed.createComponent(GameCreationPageComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
         location = TestBed.inject(Location);
