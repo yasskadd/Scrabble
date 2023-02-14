@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
@@ -10,7 +10,7 @@ import { SNACKBAR_TIMEOUT } from '@common/constants/ui-events';
     templateUrl: './multiplayer-join-page.component.html',
     styleUrls: ['./multiplayer-join-page.component.scss'],
 })
-export class MultiplayerJoinPageComponent implements OnInit {
+export class MultiplayerJoinPageComponent implements OnInit, OnDestroy {
     playerName: string;
     gameMode: string;
 
@@ -23,6 +23,11 @@ export class MultiplayerJoinPageComponent implements OnInit {
     ) {
         this.gameMode = this.activatedRoute.snapshot.params.id;
         this.playerName = '';
+    }
+
+    ngOnDestroy() {
+        this.gameConfiguration.isRoomJoinable.unsubscribe();
+        this.gameConfiguration.errorReason.unsubscribe();
     }
 
     get availableRooms() {

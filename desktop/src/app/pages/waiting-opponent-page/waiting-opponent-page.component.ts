@@ -1,16 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
-
-const TIMEOUT = 3000;
+import { SNACKBAR_TIMEOUT } from '@common/constants/ui-events';
 
 @Component({
     selector: 'app-waiting-opponent-page',
     templateUrl: './waiting-opponent-page.component.html',
     styleUrls: ['./waiting-opponent-page.component.scss'],
 })
-export class WaitingOpponentPageComponent implements OnInit {
+export class WaitingOpponentPageComponent implements OnInit, OnDestroy {
     gameMode: string;
 
     constructor(
@@ -24,6 +23,11 @@ export class WaitingOpponentPageComponent implements OnInit {
 
     ngOnInit(): void {
         this.listenToServerResponse();
+    }
+
+    ngOnDestroy() {
+        this.gameConfiguration.errorReason.unsubscribe();
+        this.gameConfiguration.isRoomJoinable.unsubscribe();
     }
 
     listenToServerResponse() {
@@ -42,35 +46,29 @@ export class WaitingOpponentPageComponent implements OnInit {
         });
     }
 
-    soloMode() {
+    joinSoloMode() {
         this.gameConfiguration.removeRoom();
-        this.router.navigate([`/solo/${this.gameMode}`]);
-    }
-
-    rejectOpponent() {
-        this.gameConfiguration.rejectOpponent();
-    }
-
-    startGame() {
-        this.gameConfiguration.beginScrabbleGame();
+        this.router.navigate([`/solo/${this.gameMode}`]).then();
     }
 
     joinGamePage() {
-        this.router.navigate(['/game']);
+        this.router.navigate(['/game']).then();
     }
+
     exitRoom(exitByIsOwn?: boolean) {
         if (this.gameConfiguration.roomInformation.isCreator) {
-            this.router.navigate([`/multijoueur/creer/${this.gameMode}`]);
+            this.router.navigate([`/multijoueur/creer/${this.gameMode}`]).then();
             this.gameConfiguration.removeRoom();
         } else {
-            this.router.navigate([`/multijoueur/rejoindre/${this.gameMode}`]);
+            this.router.navigate([`/multijoueur/rejoindre/${this.gameMode}`]).then();
             if (!exitByIsOwn) return;
             this.gameConfiguration.exitWaitingRoom();
         }
     }
+
     openSnackBar(reason: string): void {
         this.snackBar.open(reason, 'fermer', {
-            duration: TIMEOUT,
+            duration: SNACKBAR_TIMEOUT,
             verticalPosition: 'top',
         });
     }
