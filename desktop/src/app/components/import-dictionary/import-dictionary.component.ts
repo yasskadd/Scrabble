@@ -40,7 +40,6 @@ export class ImportDictionaryComponent implements OnDestroy {
         this.updateDictionaryMessage('En vérification, veuillez patienter...', 'red');
         this.readFile(selectedFile, fileReader).subscribe((content: string) => {
             if (content === FileErrors.READING) {
-                console.log('reading error');
                 this.updateDictionaryMessage(FileErrors.READING, 'red');
                 return;
             }
@@ -48,7 +47,6 @@ export class ImportDictionaryComponent implements OnDestroy {
             try {
                 this.fileOnLoad(JSON.parse(content));
             } catch (e) {
-                console.log(e);
                 this.updateDictionaryMessage(FileErrors.NOT_JSON, 'red');
             }
         });
