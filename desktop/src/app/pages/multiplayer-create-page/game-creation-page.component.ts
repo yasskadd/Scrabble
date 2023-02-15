@@ -124,7 +124,8 @@ export class GameCreationPageComponent implements OnInit {
     }
 
     private openSnackBar(reason: string): void {
-        this.snackBar.open(reason, 'fermer', {
+        // TODO : Language
+        this.snackBar.open(reason, 'Fermer', {
             duration: SNACKBAR_TIMEOUT,
             verticalPosition: 'top',
         });
