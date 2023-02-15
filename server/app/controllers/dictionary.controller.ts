@@ -15,7 +15,7 @@ export class DictionaryController {
     private configureRouter(): void {
         this.router = Router();
 
-        this.router.get('/dictionaryisindb/:title', async (req: Request, res: Response) => {
+        this.router.get('/isindb/:title', async (req: Request, res: Response) => {
             try {
                 const title = req.params.title;
                 await this.gamesHandler.dictionaryIsInDb(title);

@@ -12,58 +12,64 @@ import { DictionaryEvents } from '@common/models/dictionary-events';
     providedIn: 'root',
 })
 export class DictionaryVerificationService {
-    constructor(private readonly httpHandler: HttpHandlerService, public gameConfiguration: GameConfigurationService) {}
+    verificationStatus: Subject<DictionaryEvents>;
 
-    globalVerification(dictionary: Dictionary): Subject<string> {
-        const subject: Subject<string> = new Subject<string>();
-
-        this.httpHandler.dictionaryIsInDb(dictionary.title).subscribe((res: any) => {
-            if (res.status === HTTP_STATUS.FOUND) {
-                subject.next(DictionaryEvents.FOUND);
-            } else if (this.fieldEmptyVerification(dictionary)) {
-                subject.next(this.fieldEmptyVerification(dictionary));
-            } else if (this.fieldLimitVerification(dictionary)) {
-                subject.next(this.fieldLimitVerification(dictionary));
-            } else if (!this.isDictionary(dictionary)) {
-                subject.next(DictionaryEvents.NOT_DICTIONARY);
-            } else {
-                subject.next('');
-            }
-        });
-
-        return subject;
+    constructor(private readonly httpHandler: HttpHandlerService, public gameConfiguration: GameConfigurationService) {
+        this.verificationStatus = new Subject<DictionaryEvents>();
     }
 
-    private isDictionary(dictionary: Dictionary): boolean {
-        if ('title' && 'description' && 'words' in dictionary) {
-            return typeof dictionary.title === 'string' && typeof dictionary.description === 'string' && this.wordsListIsValid(dictionary.words);
-        }
+    globalVerification(dictionary: Dictionary): void {
+        if (dictionary.title.split(' ').length > 1 && dictionary.title !== 'Mon Dictionnaire') {
+            this.verificationStatus.next(DictionaryEvents.TITLE_INVALID);
+        } else {
+            this.httpHandler.dictionaryIsInDb(dictionary.title).subscribe((res: any) => {
+                if (res.status === HTTP_STATUS.FOUND) {
+                    this.verificationStatus.next(DictionaryEvents.FOUND);
+                }
 
+                if (this.fieldEmptyVerification(dictionary) && this.isDictionaryVerification(dictionary) && this.fieldLimitVerification(dictionary)) {
+                    this.verificationStatus.next(DictionaryEvents.VALID);
+                }
+            });
+        }
+    }
+
+    private isDictionaryVerification(dictionary: Dictionary): boolean {
+        if (typeof dictionary.title === 'string' && typeof dictionary.description === 'string' && this.wordsListIsValid(dictionary.words)) {
+            return true;
+        }
+        this.verificationStatus.next(DictionaryEvents.NOT_DICTIONARY);
         return false;
     }
 
-    private fieldEmptyVerification(dictionary: Dictionary): string {
+    private fieldEmptyVerification(dictionary: Dictionary): boolean {
         if (!dictionary.title) {
-            return DictionaryEvents.NO_TITLE;
+            this.verificationStatus.next(DictionaryEvents.NO_TITLE);
+            return false;
         }
         if (!dictionary.description) {
-            return DictionaryEvents.NO_DESCRIPTION;
+            this.verificationStatus.next(DictionaryEvents.NO_DESCRIPTION);
+            return false;
         }
         if (!dictionary.words) {
-            return DictionaryEvents.NO_WORDS;
+            this.verificationStatus.next(DictionaryEvents.NO_WORDS);
+            return false;
         }
-        return '';
+
+        return true;
     }
 
-    private fieldLimitVerification(dictionary: Dictionary): string {
+    private fieldLimitVerification(dictionary: Dictionary): boolean {
         if (this.fieldCharacterLimit(dictionary.title.split(''), MAX_TITLE_LENGTH)) {
-            return DictionaryEvents.TITLE_TOO_LONG;
+            this.verificationStatus.next(DictionaryEvents.TITLE_TOO_LONG);
+            return false;
         }
         if (this.fieldCharacterLimit(dictionary.description.split(''), MAX_DESCRIPTION_LENGTH)) {
-            return DictionaryEvents.DESCRIPTION_TOO_LONG;
+            this.verificationStatus.next(DictionaryEvents.DESCRIPTION_TOO_LONG);
+            return false;
         }
 
-        return '';
+        return true;
     }
 
     private fieldCharacterLimit(array: unknown[], maxLimit: number): boolean {

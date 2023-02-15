@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Bot } from '@app/interfaces/bot';
 import { Dictionary } from '@app/interfaces/dictionary';
@@ -73,10 +73,10 @@ export class HttpHandlerService {
             .pipe(catchError(this.handleError<void>('addDictionary')));
     }
 
-    // Reason: the server does't really return something but just a status code
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    dictionaryIsInDb(title: string): Observable<any> {
-        return this.http.post<any>(`${this.baseUrl}/dictionary/isindb`, { title }).pipe(catchError(this.handleError<any>('dictionaryIsInDb')));
+    dictionaryIsInDb(title: string): Observable<void | HttpResponse<void>> {
+        return this.http
+            .get<void>(`${this.baseUrl}/dictionary/isindb/${title}`, { observe: 'response' })
+            .pipe(catchError(this.handleError<void>('dictionaryIsInDb')));
     }
 
     modifyDictionary(dictionary: ModifiedDictionaryInfo): Observable<void> {

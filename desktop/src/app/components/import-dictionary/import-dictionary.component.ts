@@ -1,6 +1,6 @@
 /* eslint-disable deprecation/deprecation */
 // TODO : Handle deprecation
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
@@ -14,7 +14,7 @@ import { DictionaryEvents } from '@common/models/dictionary-events';
     templateUrl: './import-dictionary.component.html',
     styleUrls: ['./import-dictionary.component.scss'],
 })
-export class ImportDictionaryComponent {
+export class ImportDictionaryComponent implements OnDestroy {
     @ViewChild('file', { static: false }) file: ElementRef;
     @ViewChild('fileError', { static: false }) fileError: ElementRef;
     dictionaryList: DictionaryInfo[];
@@ -22,6 +22,10 @@ export class ImportDictionaryComponent {
 
     constructor(private readonly httpHandler: HttpHandlerService, private dictionaryVerification: DictionaryVerificationService) {
         this.selectedFile = null;
+    }
+
+    ngOnDestroy() {
+        this.dictionaryVerification.verificationStatus.unsubscribe();
     }
 
     uploadDictionary() {
@@ -36,6 +40,7 @@ export class ImportDictionaryComponent {
         this.updateDictionaryMessage('En vérification, veuillez patienter...', 'red');
         this.readFile(selectedFile, fileReader).subscribe((content: string) => {
             if (content === FileErrors.READING) {
+                console.log('reading error');
                 this.updateDictionaryMessage(FileErrors.READING, 'red');
                 return;
             }
@@ -43,13 +48,14 @@ export class ImportDictionaryComponent {
             try {
                 this.fileOnLoad(JSON.parse(content));
             } catch (e) {
+                console.log(e);
                 this.updateDictionaryMessage(FileErrors.NOT_JSON, 'red');
             }
         });
     }
 
     fileOnLoad(newDictionary: Dictionary) {
-        this.dictionaryVerification.globalVerification(newDictionary).subscribe((errorMessage: string) => {
+        this.dictionaryVerification.verificationStatus.subscribe((errorMessage: string) => {
             if (errorMessage) {
                 this.updateDictionaryMessage(errorMessage, 'red');
             } else {
@@ -59,7 +65,9 @@ export class ImportDictionaryComponent {
                     this.updateDictionaryMessage(DictionaryEvents.ADDED, 'black');
                 });
             }
+            this.file.nativeElement.value = '';
         });
+        this.dictionaryVerification.globalVerification(newDictionary);
     }
 
     detectImportFile() {
@@ -78,7 +86,7 @@ export class ImportDictionaryComponent {
         fileReader.onload = () => {
             subject.next(fileReader.result as string);
         };
-        fileReader.onerror = (e: any) => {
+        fileReader.onerror = () => {
             subject.next(FileErrors.READING);
         };
 
