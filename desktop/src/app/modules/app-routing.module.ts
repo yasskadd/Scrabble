@@ -20,8 +20,6 @@ const routes: Routes = [
     { path: '**', redirectTo: AppRoutes.HomePage },
 ];
 
-console.log(routes);
-
 @NgModule({
     imports: [RouterModule.forRoot(routes, { useHash: true })],
     exports: [RouterModule],

@@ -1,7 +1,7 @@
 export enum DictionaryEvents {
     // TODO : Language
     NOT_DICTIONARY = "Le fichier téléversé n'est pas un dictionnaire. Les champs title, description ou words sont manquant.",
-    NOT_FOUND = 'Le dictionnaire existe déjà dans la base de données.',
+    FOUND = 'Le dictionnaire existe déjà dans la base de données.',
     NO_TITLE = "Le dictionnaire n'a pas de titre.",
     NO_DESCRIPTION = "Le dictionnaire n'a pas de description.",
     NO_WORDS = "Le dictionnaire n'a pas une liste de mots.",

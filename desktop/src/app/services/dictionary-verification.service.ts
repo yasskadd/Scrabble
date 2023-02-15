@@ -4,8 +4,8 @@ import { HttpHandlerService } from './communication/http-handler.service';
 import { GameConfigurationService } from './game-configuration.service';
 import { MAX_DESCRIPTION_LENGTH, MAX_TITLE_LENGTH } from '@common/constants/dictionary';
 import { HTTP_STATUS } from '@common/models/http-status';
-import { HttpResponse } from '@angular/common/http';
-import { Observable, Subject } from 'rxjs';
+// import { HttpResponse } from '@angular/common/http';
+import { Subject } from 'rxjs';
 import { DictionaryEvents } from '@common/models/dictionary-events';
 
 @Injectable({
@@ -14,23 +14,21 @@ import { DictionaryEvents } from '@common/models/dictionary-events';
 export class DictionaryVerificationService {
     constructor(private readonly httpHandler: HttpHandlerService, public gameConfiguration: GameConfigurationService) {}
 
-    globalVerification(dictionary: Dictionary): Observable<string> {
+    globalVerification(dictionary: Dictionary): Subject<string> {
         const subject: Subject<string> = new Subject<string>();
 
-        this.httpHandler.dictionaryIsInDb(dictionary.title).subscribe((res: HttpResponse<void>) => {
-            if (res.status === HTTP_STATUS.NOT_FOUND) {
-                subject.next(DictionaryEvents.NOT_FOUND);
-            }
-            if (this.fieldEmptyVerification(dictionary)) {
+        this.httpHandler.dictionaryIsInDb(dictionary.title).subscribe((res: any) => {
+            if (res.status === HTTP_STATUS.FOUND) {
+                subject.next(DictionaryEvents.FOUND);
+            } else if (this.fieldEmptyVerification(dictionary)) {
                 subject.next(this.fieldEmptyVerification(dictionary));
-            }
-            if (this.fieldLimitVerification(dictionary)) {
+            } else if (this.fieldLimitVerification(dictionary)) {
                 subject.next(this.fieldLimitVerification(dictionary));
-            }
-            if (!this.isDictionary(dictionary)) {
+            } else if (!this.isDictionary(dictionary)) {
                 subject.next(DictionaryEvents.NOT_DICTIONARY);
+            } else {
+                subject.next('');
             }
-            subject.next('');
         });
 
         return subject;

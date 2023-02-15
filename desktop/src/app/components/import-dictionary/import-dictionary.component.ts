@@ -30,31 +30,35 @@ export class ImportDictionaryComponent {
             return;
         }
 
-        console.log(this.file.nativeElement.files);
         const selectedFile = this.file.nativeElement.files[0];
         const fileReader = new FileReader();
 
         this.updateDictionaryMessage('En vérification, veuillez patienter...', 'red');
         this.readFile(selectedFile, fileReader).subscribe((content: string) => {
-            if (content === FileErrors.NOT_JSON) {
+            if (content === FileErrors.READING) {
+                this.updateDictionaryMessage(FileErrors.READING, 'red');
+                return;
+            }
+
+            try {
+                this.fileOnLoad(JSON.parse(content));
+            } catch (e) {
                 this.updateDictionaryMessage(FileErrors.NOT_JSON, 'red');
             }
-            this.fileOnLoad(JSON.parse(content));
         });
     }
 
     fileOnLoad(newDictionary: Dictionary) {
-        this.dictionaryVerification.globalVerification(newDictionary).subscribe((verification: string) => {
-            if (verification) {
-                this.updateDictionaryMessage(verification, 'red');
-                return;
+        this.dictionaryVerification.globalVerification(newDictionary).subscribe((errorMessage: string) => {
+            if (errorMessage) {
+                this.updateDictionaryMessage(errorMessage, 'red');
+            } else {
+                this.selectedFile = newDictionary;
+                this.httpHandler.addDictionary(this.selectedFile).subscribe(() => {
+                    this.httpHandler.getDictionaries().subscribe((dictionaries) => (this.dictionaryList = dictionaries));
+                    this.updateDictionaryMessage(DictionaryEvents.ADDED, 'black');
+                });
             }
-
-            this.selectedFile = newDictionary;
-            this.httpHandler.addDictionary(this.selectedFile).subscribe(() => {
-                this.httpHandler.getDictionaries().subscribe((dictionaries) => (this.dictionaryList = dictionaries));
-                this.updateDictionaryMessage(DictionaryEvents.ADDED, 'black');
-            });
         });
     }
 
@@ -74,8 +78,8 @@ export class ImportDictionaryComponent {
         fileReader.onload = () => {
             subject.next(fileReader.result as string);
         };
-        fileReader.onerror = () => {
-            subject.next(FileErrors.NOT_JSON);
+        fileReader.onerror = (e: any) => {
+            subject.next(FileErrors.READING);
         };
 
         return subject;

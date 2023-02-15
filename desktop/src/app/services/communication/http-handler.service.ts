@@ -76,15 +76,7 @@ export class HttpHandlerService {
     // Reason: the server does't really return something but just a status code
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     dictionaryIsInDb(title: string): Observable<any> {
-        return (
-            this.http
-                // Reason: the server does't really return something but just a status code
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                .get<any>(`${this.baseUrl}/dictionary/dictionaryisindb/${title}`, { observe: 'response' })
-                // Reason: the server does't really return something but just a status code
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                .pipe(catchError(this.handleError<any>('dictionaryIsInDb')))
-        );
+        return this.http.post<any>(`${this.baseUrl}/dictionary/isindb`, { title }).pipe(catchError(this.handleError<any>('dictionaryIsInDb')));
     }
 
     modifyDictionary(dictionary: ModifiedDictionaryInfo): Observable<void> {
