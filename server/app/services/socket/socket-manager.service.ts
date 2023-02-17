@@ -45,7 +45,7 @@ export class SocketManager {
     handleSockets(): void {
         this.sio.on('connection', (socket) => {
             // eslint-disable-next-line no-console
-            console.log('Connection of client with id = ' + socket.id + ' from : ' + socket.handshake.headers.origin);
+            console.log('Connection of client with id = ' + socket.id + ' from : ' + socket.handshake.headers.host);
             for (const [event, callbacks] of this.onEvents.entries()) {
                 for (const callback of callbacks) {
                     socket.on(event, (...args: unknown[]) => callback(socket, ...args));
@@ -57,6 +57,9 @@ export class SocketManager {
                     socket.on(event, (...args: unknown[]) => callback(this.sio, socket, ...args));
                 }
             }
+            socket.on('disconnect', () => {
+                console.log('Disconnection of client with id = ' + socket.id + ' from : ' + socket.handshake.headers.origin);
+            });
         });
     }
 }
