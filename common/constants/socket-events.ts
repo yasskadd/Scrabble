@@ -3,6 +3,7 @@ export enum SocketEvents {
     ReceiveHomeMessage = 'broadcastMessageHome',
     JoinHomeRoom = 'joinHomeRoom',
     UserJoinedRoom = 'userJoinedRoom',
+    UserConnected = 'userConnected',
     SendHomeMessage = 'sendHomeMessage',
     UserLeftRoom = 'leaveHomeRoom',
     RoomIsFull = 'roomIsFull',

@@ -65,7 +65,7 @@ fn socketSend(eventName: &str, data: Option<&str>, socketClient: tauri::State<So
 }
 
 fn main() {
-    std::env::set_var("RUST_BACKTRACE", "full");
+    // std::env::set_var("RUST_BACKTRACE", "full");
     tauri::Builder::default()
         .manage(SocketClient {
             socket: Mutex::new(None),

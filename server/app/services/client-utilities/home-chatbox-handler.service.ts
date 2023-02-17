@@ -48,7 +48,10 @@ export class HomeChatBoxHandlerService {
     }
 
     private joinHomeRoom(sio: Server, socket: Socket, username: string): void {
-        if (this.userMap.has(socket.id)) return; // Because already connected
+        if (this.userMap.has(socket.id)) {
+            // Because already connected
+            this.notifyAlreadyConnected(socket, username);
+        }
         if (this.usernameSet.has(username)) {
             this.notifyInvalidUsername(socket, username);
             return;
@@ -68,6 +71,10 @@ export class HomeChatBoxHandlerService {
 
     private setIsAvailable(): void {
         this.homeRoom.isAvailable = this.userMap.size < ROOM_LIMIT;
+    }
+
+    private notifyAlreadyConnected(socket: Socket, username: string): void {
+        socket.emit(SocketEvents.UserConnected, username);
     }
 
     // Notify sender

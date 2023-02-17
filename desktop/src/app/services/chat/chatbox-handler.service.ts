@@ -1,10 +1,10 @@
 /* eslint-disable max-lines */
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { SocketEvents } from '@common/constants/socket-events';
 import { ChatboxMessage } from '@common/interfaces/chatbox-message';
 // import { CommandInfo } from '@common/interfaces/command-info';
 // import { Letter } from '@common/interfaces/letter';
-// import { CommandHandlerService } from '@app/services/command-handler.service';
+import { CommandHandlerService } from '@app/services/command-handler.service';
 import { ClientSocketService } from '@app/services/communication/client-socket.service';
 // import { GameClientService } from '@app/services/game-client.service';
 // import { GameConfigurationService } from '@app/services/game-configuration.service';
@@ -12,53 +12,40 @@ import { SocketResponse } from '@app/interfaces/server-responses';
 import { UserService } from '@app/services/user.service';
 import { Subject } from 'rxjs';
 import { TimeService } from '@services/time.service';
-
-// const EXCHANGE_ALLOWED_MINIMUM = 7;
-// const CHAR_ASCII = 96;
-// const TIMEOUT = 15;
-// const VALID_COMMAND_REGEX_STRING =
-//     '^!r(é|e)serve$|^!indice$|^!aide$|^!placer [a-o][0-9]{1,2}(v|h){0,1} [a-zA-Z]$' +
-//     '|^!placer [a-o][0-9]{1,2}(v|h) ([a-zA-Z]){1,7}$|^!(é|e)changer ([a-z]|[*]){1,7}$|^!passer$';
-// const VALID_COMMAND_REGEX = new RegExp(VALID_COMMAND_REGEX_STRING);
-// const IS_COMMAND_REGEX_STRING = '^!';
-// const IS_COMMAND_REGEX = new RegExp(IS_COMMAND_REGEX_STRING);
+import { ChatCommand } from '@app/models/chat-command';
 
 @Injectable({
     providedIn: 'root',
 })
-export class ChatboxHandlerService {
-    // private static readonly syntaxRegexString = '^!r(é|e)serve|^!aide|^!placer|^!(é|e)changer|^!passer|^!indice';
+export class ChatboxHandlerService implements OnDestroy {
     messages: ChatboxMessage[];
     loggedIn: boolean;
-
-    // private readonly validSyntaxRegex = RegExp(ChatboxHandlerService.syntaxRegexString);
 
     constructor(
         private clientSocket: ClientSocketService,
         // private gameConfiguration: GameConfigurationService,
         // private gameClient: GameClientService,
-        // private commandHandler: CommandHandlerService,
+        private commandHandler: CommandHandlerService,
         private timerService: TimeService,
         private userService: UserService,
     ) {
         this.messages = [];
         this.loggedIn = false;
-        // TODO : Check si toujours utile
-        // this.addWelcomeMessages();
+
         this.configureBaseSocketFeatures();
-        // TODO : Check si toujours utile
-        // this.listenToObserver();
+    }
+
+    ngOnDestroy() {
+        this.leaveHomeRoom(this.userService.userName);
     }
 
     submitMessage(userInput: string): void {
-        if (userInput !== '') {
-            const message: ChatboxMessage = this.configureUserMessage(userInput);
-            this.messages.push(message);
-            // if (this.isMessageACommand(userInput)) {
-            //     this.sendCommand(userInput);
-            // } else {
+        const message: ChatboxMessage = this.configureUserMessage(userInput);
+        if (this.isCommand(userInput)) {
+            this.sendCommand(userInput);
+        } else {
             this.sendMessage(message);
-            // }
+            this.messages.push(message);
         }
     }
 
@@ -72,6 +59,12 @@ export class ChatboxHandlerService {
 
     subscribeToUserConnection(): Subject<SocketResponse> {
         const roomJoinedSubject: Subject<SocketResponse> = new Subject<SocketResponse>();
+        this.clientSocket.on(SocketEvents.UserConnected, (userName: string) => {
+            if (userName === this.userService.userName) {
+                roomJoinedSubject.next({ validity: true });
+                this.loggedIn = true;
+            }
+        });
         this.clientSocket.on(SocketEvents.UserJoinedRoom, (userName: string) => {
             if (userName === this.userService.userName) {
                 roomJoinedSubject.next({ validity: true });
@@ -144,11 +137,13 @@ export class ChatboxHandlerService {
         this.clientSocket.send(SocketEvents.SendMessageHome, message);
     }
 
-    // private sendCommand(command: string): void {
-    //     if (this.isValidCommand(command)) {
-    //         this.commandHandler.sendCommand(command);
-    //     }
-    // }
+    private sendCommand(command: string): void {
+        if (this.isValidCommand(command)) {
+            console.log('sending');
+            this.commandHandler.sendCommand(command);
+            this.messages.push({ type: 'system', message: command });
+        }
+    }
 
     private createConnectedUserMessage(userName: string): ChatboxMessage {
         return {
@@ -206,33 +201,6 @@ export class ChatboxHandlerService {
     //     }, TIMEOUT);
     // }
 
-    // resetMessage(): void {
-    // this.addWelcomeMessages();
-    // }
-
-    // private listenToObserver(): void {
-    //     this.gameClient.turnFinish.subscribe((value) => {
-    //         if (value) {
-    //             this.addMessage(this.configureUserMessage('!passer'));
-    //             this.sendMessage('!passer');
-    //         }
-    //     });
-    // }
-
-    // private addWelcomeMessages() {
-    //     this.messages = [
-    //         { type: 'system-message', data: 'Bienvenue dans votre partie de Scrabble' },
-    //         {
-    //             type: 'system-message',
-    //             data: 'La commande !aide est mise à votre disposition afin de faciliter votre compréhension du jeu',
-    //         },
-    //     ];
-    // }
-
-    // private isMessageACommand(userInput: string): boolean {
-    //     return this.isCommand(userInput.normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
-    // }
-
     // private configureClueCommand(clueCommand: CommandInfo[]): void {
     //     if (clueCommand.length !== 0) {
     //         this.addClueCommand(clueCommand);
@@ -264,14 +232,19 @@ export class ChatboxHandlerService {
     //         });
     // }
 
-    // private isCommand(userInput: string): boolean {
-    //     return IS_COMMAND_REGEX.test(userInput);
-    // }
+    private isCommand(userInput: string): boolean {
+        return userInput.split(ChatCommand.Flag)[0] === '';
+    }
 
-    // private isValidCommand(userCommand: string): boolean {
-    //     if (this.isHelpCommand(userCommand) || this.isReserveCommand(userCommand)) return true;
-    //     return this.validCommandSyntax(userCommand);
-    // }
+    private isValidCommand(userCommand: string): boolean {
+        userCommand = userCommand.split(ChatCommand.Flag)[1];
+
+        return (
+            Object.values(ChatCommand).find((command: string) => {
+                return command === userCommand;
+            }) !== undefined
+        );
+    }
 
     // private isHelpCommand(userCommand: string): boolean {
     //     const validReserveCommand = '^!aide$';
