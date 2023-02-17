@@ -4,7 +4,7 @@
     <mat-card-title>Nom</mat-card-title>
     <mat-form-field appearance='fill'>
         <mat-label>Entrez votre Nom</mat-label>
-        <input matInput maxlength='20' type='text' [(ngModel)]='playerName' placeholder='Ex. Robert' />
+        <input matInput maxlength='20' type='text' [formControl]='playerNameForm' placeholder='Ex. Robert' />
         <mat-hint
             [ngClass]='{
                     max: playerName?.length === 20

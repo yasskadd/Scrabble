@@ -5,6 +5,7 @@ import { GameConfigurationService } from '@app/services/game-configuration.servi
 import { TimeService } from '@services/time.service';
 import { SNACKBAR_TIMEOUT } from '@common/constants/ui-events';
 import { AppRoutes } from '@app/models/app-routes';
+import { FormControl, Validators } from '@angular/forms';
 
 @Component({
     selector: 'app-multiplayer-join-page',
@@ -12,7 +13,7 @@ import { AppRoutes } from '@app/models/app-routes';
     styleUrls: ['./multiplayer-join-page.component.scss'],
 })
 export class MultiplayerJoinPageComponent implements OnInit, OnDestroy {
-    playerName: string;
+    playerNameForm: FormControl;
     gameMode: string;
 
     constructor(
@@ -23,7 +24,7 @@ export class MultiplayerJoinPageComponent implements OnInit, OnDestroy {
         private activatedRoute: ActivatedRoute,
     ) {
         this.gameMode = this.activatedRoute.snapshot.params.id;
-        this.playerName = '';
+        this.playerNameForm = new FormControl('', Validators.required);
     }
 
     ngOnDestroy() {
@@ -42,13 +43,13 @@ export class MultiplayerJoinPageComponent implements OnInit, OnDestroy {
     }
 
     joinRoom(roomId: string) {
-        this.gameConfiguration.joinGame(roomId, this.playerName);
-        this.playerName = '';
+        this.gameConfiguration.joinGame(roomId, this.playerNameForm.value);
+        this.playerNameForm.setValue('');
     }
 
     joinRandomGame() {
-        this.gameConfiguration.joinRandomRoom(this.playerName);
-        this.playerName = '';
+        this.gameConfiguration.joinRandomRoom(this.playerNameForm.value);
+        this.playerNameForm.setValue('');
     }
 
     listenToServerResponse() {
