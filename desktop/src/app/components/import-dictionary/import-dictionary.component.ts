@@ -67,7 +67,8 @@ export class ImportDictionaryComponent implements OnDestroy {
                 this.selectedFile = newDictionary;
                 this.httpHandler.addDictionary(this.selectedFile).subscribe(() => {
                     this.httpHandler.getDictionaries().subscribe((dictionaries) => (this.dictionaryList = dictionaries));
-                    // TODO : Fermer
+                    // TODO : Language
+                    this.errorMessage = '';
                     this.snackBar.open(DictionaryEvents.ADDED, 'Fermer', {
                         duration: SNACKBAR_TIMEOUT,
                         verticalPosition: 'bottom',
