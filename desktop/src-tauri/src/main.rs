@@ -37,8 +37,8 @@ fn socketEstablishConnection(
                     .expect("Couldn't emit the event to Angular");
             }
         })
-        .connect()
-        .expect("Failed to connect to socket");
+        .connect().unwrap();
+    // .expect("Failed to connect to socket");
 
     *socket = Some(client);
 }
@@ -65,6 +65,7 @@ fn socketSend(eventName: &str, data: Option<&str>, socketClient: tauri::State<So
 }
 
 fn main() {
+    std::env::set_var("RUST_BACKTRACE", "full");
     tauri::Builder::default()
         .manage(SocketClient {
             socket: Mutex::new(None),
