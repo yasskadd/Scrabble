@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 #![cfg_attr(
-    all(not(debug_assertions), target_os = "windows"),
-    windows_subsystem = "windows"
+all(not(debug_assertions), target_os = "windows"),
+windows_subsystem = "windows"
 )]
 
 use rust_socketio::{client::Client, ClientBuilder, Payload};
@@ -29,7 +29,7 @@ fn socketEstablishConnection(
     }
     let client = ClientBuilder::new(address)
         .on_any(move |event, payload, _raw_client| {
-            println!("Got event: {:?} {:?}", event, payload);
+            // println!("Got event: {:?} {:?}", event, payload);
             if let Payload::String(payload) = payload {
                 println!("Got payload: {}", payload);
                 window
