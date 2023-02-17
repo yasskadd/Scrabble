@@ -41,6 +41,10 @@ export class MainPageComponent implements OnDestroy {
         this.subscribeConnectionEvents();
     }
 
+    protected get loggedIn(): boolean {
+        return this.chatBoxHandlerService.loggedIn;
+    }
+
     ngOnDestroy() {
         this.connectionSubject.unsubscribe();
         this.disconnectionSubject.unsubscribe();
