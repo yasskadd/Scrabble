@@ -1,9 +1,11 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { RustSocketCommand } from '@app/models/rust-socket-command';
+import { RustCommand, RustEvent } from '@app/models/rust-command';
 import * as tauri from '@tauri-apps/api';
 import { Subject } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Event } from '@tauri-apps/api/event';
 
 @Injectable({
     providedIn: 'root',
@@ -14,7 +16,7 @@ export class ClientSocketService implements OnDestroy {
 
     private useTauriSocket: boolean;
 
-    constructor() {
+    constructor(private snackBar: MatSnackBar) {
         this.updateSubject = new Subject<void>();
         this.useTauriSocket = window.__TAURI_IPC__ ? true : false;
 
@@ -35,7 +37,14 @@ export class ClientSocketService implements OnDestroy {
 
     establishConnection() {
         if (this.useTauriSocket) {
-            tauri.tauri.invoke(RustSocketCommand.EstablishConnection, { address: environment.serverUrl }).then();
+            tauri.tauri.invoke(RustCommand.EstablishConnection, { address: environment.serverUrl }).then(() => {
+                tauri.event
+                    .listen(RustEvent.SocketConnectionFailed, (event: Event<unknown>) => {
+                        // TODO : Language
+                        this.snackBar.open(('Socket connection failed : ' + event.payload) as string, 'fermer');
+                    })
+                    .then();
+            });
         } else if (!this.isSocketAlive()) {
             this.connect();
         }
@@ -43,7 +52,14 @@ export class ClientSocketService implements OnDestroy {
 
     disconnect() {
         if (this.useTauriSocket) {
-            tauri.tauri.invoke(RustSocketCommand.Disconnect).then();
+            tauri.tauri.invoke(RustCommand.Disconnect).then(() => {
+                tauri.event
+                    .listen(RustEvent.SocketDisconnectionFailed, (error: Event<unknown>) => {
+                        // TODO : Language
+                        this.snackBar.open(('Socket disconnection failed : ' + error.payload) as string, 'fermer');
+                    })
+                    .then();
+            });
         } else {
             this.socket.disconnect();
         }
@@ -52,7 +68,7 @@ export class ClientSocketService implements OnDestroy {
     on<T>(eventName: string, action: (data: T) => void): void {
         if (this.useTauriSocket) {
             tauri.event
-                .listen(eventName, (event) => {
+                .listen(eventName, (event: Event<unknown>) => {
                     action(JSON.parse(event.payload as string));
                     this.updateSubject.next();
                 })
@@ -65,9 +81,25 @@ export class ClientSocketService implements OnDestroy {
     send<T>(event: string, data?: T): void {
         if (this.useTauriSocket) {
             if (data) {
-                tauri.tauri.invoke(RustSocketCommand.Send, { eventName: event, data: JSON.stringify(data) }).then();
+                tauri.tauri.invoke(RustCommand.Send, { eventName: event, data: JSON.stringify(data) }).then(() => {
+                    tauri.event
+                        .listen(RustEvent.SocketSendFailed, (error: Event<unknown>) => {
+                            console.log('test');
+                            // TODO : Language
+                            this.snackBar.open(('Socket send failed : ' + error.payload) as string, 'fermer');
+                        })
+                        .then();
+                });
             } else {
-                tauri.tauri.invoke(RustSocketCommand.Send, { eventName: event }).then();
+                tauri.tauri.invoke(RustCommand.Send, { eventName: event }).then(() => {
+                    tauri.event
+                        .listen(RustEvent.SocketSendFailed, (error: Event<unknown>) => {
+                            console.log('test');
+                            // TODO : Language
+                            this.snackBar.open(('Socket send failed : ' + error.payload) as string, 'fermer');
+                        })
+                        .then();
+                });
             }
         } else {
             if (data) {

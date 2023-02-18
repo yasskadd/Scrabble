@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 #![cfg_attr(
-all(not(debug_assertions), target_os = "windows"),
-windows_subsystem = "windows"
+    all(not(debug_assertions), target_os = "windows"),
+    windows_subsystem = "windows"
 )]
 
 use rust_socketio::{client::Client, ClientBuilder, Payload};
@@ -9,6 +9,22 @@ use std::sync::Mutex;
 
 struct SocketClient {
     socket: Mutex<Option<Client>>,
+}
+
+enum RustEvent {
+    SocketConnectionFailed,
+    SocketDisconnectionFailed,
+    SocketSendFailed,
+}
+
+impl RustEvent {
+    pub fn to_string(&self) -> &'static str {
+        match self {
+            Self::SocketConnectionFailed => "socketConnectionFailed",
+            Self::SocketDisconnectionFailed => "socketDisconnectionFailed",
+            Self::SocketSendFailed => "socketSendFailed",
+        }
+    }
 }
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
@@ -27,40 +43,74 @@ fn socketEstablishConnection(
     if socket.is_some() {
         return;
     }
-    let client = ClientBuilder::new(address)
+    let socketEventWindow = window.clone();
+    let connection = ClientBuilder::new(address)
         .on_any(move |event, payload, _raw_client| {
             // println!("Got event: {:?} {:?}", event, payload);
             if let Payload::String(payload) = payload {
                 println!("Got payload: {}", payload);
-                window
+                socketEventWindow
                     .emit(&String::from(event), payload)
                     .expect("Couldn't emit the event to Angular");
             }
         })
-        .connect().unwrap();
-    // .expect("Failed to connect to socket");
+        .connect();
 
-    *socket = Some(client);
-}
-
-#[tauri::command]
-fn socketDisconnect(socketClient: tauri::State<SocketClient>) {
-    let client = socketClient.socket.lock().expect("Couldn't get the lock");
-    if let Some(socket_client) = &*client {
-        socket_client
-            .disconnect()
-            .expect("Couldn't disconnect from socket");
-        println!("Disconnected from socket");
+    match connection {
+        Ok(client) => {
+            *socket = Some(client);
+        }
+        Err(error) => {
+            window
+                .emit(
+                    RustEvent::SocketConnectionFailed.to_string(),
+                    error.to_string(),
+                )
+                .expect("oups");
+        }
     }
 }
 
 #[tauri::command]
-fn socketSend(eventName: &str, data: Option<&str>, socketClient: tauri::State<SocketClient>) {
+fn socketDisconnect(socketClient: tauri::State<SocketClient>, window: tauri::Window) {
     let client = socketClient.socket.lock().expect("Couldn't get the lock");
     if let Some(socket_client) = &*client {
-        socket_client
-            .emit(eventName, data.unwrap_or(""))
-            .expect("Couldn't emit the socket event");
+        let disconnection = socket_client.disconnect();
+        println!("Disconnected from socket");
+
+        match disconnection {
+            Ok(..) => {}
+            Err(error) => {
+                window
+                    .emit(
+                        RustEvent::SocketDisconnectionFailed.to_string(),
+                        error.to_string(),
+                    )
+                    .expect("oups");
+            }
+        }
+    }
+}
+
+#[tauri::command]
+fn socketSend(
+    eventName: &str,
+    data: Option<&str>,
+    socketClient: tauri::State<SocketClient>,
+    window: tauri::Window,
+) {
+    let client = socketClient.socket.lock().expect("Couldn't get the lock");
+    if let Some(socket_client) = &*client {
+        let send = socket_client.emit(eventName, data.unwrap_or(""));
+
+        match send {
+            Ok(..) => {}
+            Err(error) => {
+                window
+                    .emit(RustEvent::SocketSendFailed.to_string(), error.to_string())
+                    .expect("oups");
+            }
+        }
     }
 }
 
