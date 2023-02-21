@@ -5,9 +5,8 @@ import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-i
 import { HttpHandlerService } from './communication/http-handler.service';
 import { Observable, Subject } from 'rxjs';
 import { DictionaryEvents } from '@common/models/dictionary-events';
-import { SNACKBAR_TIMEOUT } from '@common/constants/ui-events';
 import { DictionaryVerificationService } from '@services/dictionary-verification.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { SnackBarService } from '@services/snack-bar.service';
 
 @Injectable({
     providedIn: 'root',
@@ -17,7 +16,7 @@ export class DictionaryService {
     dictionariesInfos: DictionaryInfo[];
 
     constructor(
-        private snackBar: MatSnackBar,
+        private snackBarService: SnackBarService,
         private readonly httpHandler: HttpHandlerService,
         private dictionaryVerificationService: DictionaryVerificationService,
     ) {}
@@ -31,10 +30,7 @@ export class DictionaryService {
                 subject.next('');
                 this.httpHandler.addDictionary(dictionary).subscribe(() => {
                     // TODO : Language
-                    this.snackBar.open(DictionaryEvents.ADDED, 'Fermer', {
-                        duration: SNACKBAR_TIMEOUT,
-                        verticalPosition: 'bottom',
-                    });
+                    this.snackBarService.openInfo(DictionaryEvents.ADDED);
                 });
                 this.updateDictionariesInfos();
             }

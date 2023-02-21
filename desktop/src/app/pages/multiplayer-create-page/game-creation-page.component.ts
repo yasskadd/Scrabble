@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
@@ -10,8 +9,9 @@ import { TimeService } from '@services/time.service';
 import { VirtualPlayersService } from '@app/services/virtual-players.service';
 import { GameTimeOptions } from '@common/models/game-time-options';
 import { GameDifficulty } from '@common/models/game-difficulty';
-import { SNACKBAR_TIMEOUT } from '@common/constants/ui-events';
 import { AppRoutes } from '@app/models/app-routes';
+import { DictionaryEvents } from '@common/models/dictionary-events';
+import { SnackBarService } from '@services/snack-bar.service';
 
 @Component({
     selector: 'app-multiplayer-create-page',
@@ -36,7 +36,7 @@ export class GameCreationPageComponent implements OnInit {
         private activatedRoute: ActivatedRoute,
         private fb: FormBuilder,
         private readonly httpHandler: HttpHandlerService,
-        private snackBar: MatSnackBar,
+        private snackBarService: SnackBarService,
     ) {
         this.gameMode = this.activatedRoute.snapshot.params.id;
         this.playerName = '';
@@ -85,7 +85,7 @@ export class GameCreationPageComponent implements OnInit {
 
         if (!this.dictionaryAvailable(dictionnaryTitleSelected)) {
             // TODO : Language
-            this.openSnackBar("Le dictionnaire n'est plus disponible. Veuillez en choisir un autre");
+            this.snackBarService.openError(DictionaryEvents.UNAVAILABLE);
             return;
         }
 
@@ -97,7 +97,7 @@ export class GameCreationPageComponent implements OnInit {
                 this.initGame(dictionaryTitle);
                 this.navigateToGamePage();
             } else {
-                this.openSnackBar("Le dictionnaire n'est plus disponible. Veuillez en choisir un autre");
+                this.snackBarService.openError(DictionaryEvents.UNAVAILABLE);
             }
         });
     }
@@ -121,14 +121,6 @@ export class GameCreationPageComponent implements OnInit {
 
     dictionaryAvailable(dictionaryTitle: string): boolean {
         return this.dictionaryList.some((dictionaryList) => dictionaryList.title === dictionaryTitle);
-    }
-
-    private openSnackBar(reason: string): void {
-        // TODO : Language
-        this.snackBar.open(reason, 'Fermer', {
-            duration: SNACKBAR_TIMEOUT,
-            verticalPosition: 'top',
-        });
     }
 
     private validateName(): void {

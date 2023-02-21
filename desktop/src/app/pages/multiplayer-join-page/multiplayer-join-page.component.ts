@@ -1,11 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
 import { TimeService } from '@services/time.service';
-import { SNACKBAR_TIMEOUT } from '@common/constants/ui-events';
 import { AppRoutes } from '@app/models/app-routes';
 import { FormControl, Validators } from '@angular/forms';
+import { SnackBarService } from '@services/snack-bar.service';
 
 @Component({
     selector: 'app-multiplayer-join-page',
@@ -20,7 +19,7 @@ export class MultiplayerJoinPageComponent implements OnInit, OnDestroy {
         public timer: TimeService,
         private gameConfiguration: GameConfigurationService,
         private router: Router,
-        private snackBar: MatSnackBar,
+        private snackBarService: SnackBarService,
         private activatedRoute: ActivatedRoute,
     ) {
         this.gameMode = this.activatedRoute.snapshot.params.id;
@@ -56,21 +55,14 @@ export class MultiplayerJoinPageComponent implements OnInit, OnDestroy {
         this.gameConfiguration.isRoomJoinable.subscribe((value) => {
             if (value) this.navigatePage();
         });
-        this.gameConfiguration.errorReason.subscribe((reason) => {
-            if (reason !== '') {
-                this.openSnackBar(reason);
+        this.gameConfiguration.errorReason.subscribe((error) => {
+            if (error) {
+                this.snackBarService.openError(error);
             }
         });
     }
 
     navigatePage() {
         this.router.navigate([`${AppRoutes.MultiWaitingPage}/${this.gameMode}`]).then();
-    }
-
-    openSnackBar(reason: string): void {
-        this.snackBar.open(reason, 'fermer', {
-            duration: SNACKBAR_TIMEOUT,
-            verticalPosition: 'top',
-        });
     }
 }

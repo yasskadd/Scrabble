@@ -1,9 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
-import { SNACKBAR_TIMEOUT } from '@common/constants/ui-events';
+import { SnackBarService } from '@services/snack-bar.service';
 
 @Component({
     selector: 'app-waiting-opponent-page',
@@ -16,7 +15,7 @@ export class WaitingOpponentPageComponent implements OnInit, OnDestroy {
     constructor(
         public gameConfiguration: GameConfigurationService,
         private router: Router,
-        private snackBar: MatSnackBar,
+        private snackBarService: SnackBarService,
         private activatedRoute: ActivatedRoute,
     ) {
         this.gameMode = this.activatedRoute.snapshot.params.id;
@@ -32,9 +31,9 @@ export class WaitingOpponentPageComponent implements OnInit, OnDestroy {
     }
 
     listenToServerResponse() {
-        this.gameConfiguration.errorReason.subscribe((reason) => {
-            if (reason !== '') {
-                this.openSnackBar(reason);
+        this.gameConfiguration.errorReason.subscribe((error: string) => {
+            if (error !== '') {
+                this.snackBarService.openError(error);
                 this.exitRoom();
             }
             this.exitRoom(false);
@@ -65,12 +64,5 @@ export class WaitingOpponentPageComponent implements OnInit, OnDestroy {
             if (!exitByIsOwn) return;
             this.gameConfiguration.exitWaitingRoom();
         }
-    }
-
-    openSnackBar(reason: string): void {
-        this.snackBar.open(reason, 'fermer', {
-            duration: SNACKBAR_TIMEOUT,
-            verticalPosition: 'top',
-        });
     }
 }

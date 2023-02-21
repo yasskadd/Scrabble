@@ -30,8 +30,10 @@ describe('AdminDictionariesComponent', () => {
             'getDictionary',
         ]);
 
+        // @ts-ignore
         dictionaryServiceSpy.updateDictionariesInfos.and.resolveTo([]);
         dictionaryServiceSpy.modifyDictionary.and.resolveTo();
+        // @ts-ignore
         dictionaryServiceSpy.getDictionary.and.resolveTo({} as Dictionary);
         dictionaryServiceSpy.deleteDictionary.and.resolveTo();
         dictionaryServiceSpy.resetDictionaries.and.resolveTo();

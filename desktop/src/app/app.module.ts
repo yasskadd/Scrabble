@@ -42,6 +42,8 @@ import { MainPageComponent } from './pages/main-page/main-page.component';
 import { GameCreationPageComponent } from './pages/multiplayer-create-page/game-creation-page.component';
 import { MultiplayerJoinPageComponent } from './pages/multiplayer-join-page/multiplayer-join-page.component';
 import { WaitingOpponentPageComponent } from './pages/waiting-opponent-page/waiting-opponent-page.component';
+import { ErrorSnackBarComponent } from './components/snack-bar/error/error-snack-bar.component';
+import { InfoSnackBarComponent } from './components/snack-bar/info/info-snack-bar.component';
 
 /**
  * Main module that is used in main.ts.
@@ -77,6 +79,8 @@ import { WaitingOpponentPageComponent } from './pages/waiting-opponent-page/wait
         HighScoresComponent,
         ImportDictionaryComponent,
         GenericChatComponent,
+        ErrorSnackBarComponent,
+        InfoSnackBarComponent,
     ],
     imports: [
         CommonModule,

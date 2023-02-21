@@ -1,1 +1,2 @@
-export const SNACKBAR_TIMEOUT = 3000;
+export const SNACKBAR_INFO_TIMEOUT = 3000;
+export const SNACKBAR_ERROR_TIMEOUT = 10000;
