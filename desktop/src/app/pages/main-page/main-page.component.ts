@@ -6,6 +6,7 @@ import { DialogBoxHighScoresComponent } from '@app/components/dialog-box-high-sc
 import { DialogGameHelpComponent } from '@app/components/dialog-game-help/dialog-game-help.component';
 import { SocketResponse } from '@app/interfaces/server-responses';
 import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
+import { ThemeService } from '@app/services/theme.service';
 import { UserService } from '@app/services/user.service';
 import { SocketEvents } from '@common/constants/socket-events';
 import { Subject } from 'rxjs';
@@ -16,13 +17,13 @@ import { Subject } from 'rxjs';
     styleUrls: ['./main-page.component.scss'],
 })
 export class MainPageComponent implements OnDestroy {
+    isDarkTheme: boolean;
     readonly title: string = "Bienvenue au Scrabble de l'équipe 107!";
 
     protected userNameForm: FormControl;
     protected homeConnectionResponse: SocketResponse;
     protected connectionSubject: Subject<SocketResponse>;
     protected disconnectionSubject: Subject<void>;
-
     protected chatIsOpen: boolean;
 
     private readonly dialogWidth: string = '500px';
@@ -31,9 +32,13 @@ export class MainPageComponent implements OnDestroy {
     constructor(
         protected chatBoxHandlerService: ChatboxHandlerService,
         protected userService: UserService,
+        private themeService: ThemeService,
         private dialog: MatDialog,
         private highScore: MatDialog,
     ) {
+        this.themeService.isDarkTheme.subscribe((isDarkTheme) => {
+            this.isDarkTheme = isDarkTheme;
+        });
         this.homeConnectionResponse = { validity: false };
         this.userNameForm = new FormControl('', Validators.required);
         this.chatIsOpen = false;

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { invoke } from '@tauri-apps/api/tauri';
+import { ThemeService } from './services/theme.service';
 
 @Component({
     selector: 'app-root',
@@ -39,6 +40,18 @@ import { invoke } from '@tauri-apps/api/tauri';
 })
 export class AppComponent {
     greetingMessage = '';
+    isDarkTheme = false;
+
+    constructor(private themeService: ThemeService) {
+        this.themeService.isDarkTheme.subscribe((isDarkTheme) => {
+            this.isDarkTheme = isDarkTheme;
+        });
+    }
+
+    toggleTheme(): void {
+        this.isDarkTheme = !this.isDarkTheme;
+        this.themeService.setDarkTheme(this.isDarkTheme);
+    }
 
     greet(name: string): void {
         invoke<string>('greet', { name }).then((text) => {
