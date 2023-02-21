@@ -26,13 +26,13 @@ export class MultiplayerJoinPageComponent implements OnInit, OnDestroy {
         this.playerNameForm = new FormControl('', Validators.required);
     }
 
+    get availableRooms() {
+        return this.gameConfiguration.availableRooms;
+    }
+
     ngOnDestroy() {
         this.gameConfiguration.isRoomJoinable.unsubscribe();
         this.gameConfiguration.errorReason.unsubscribe();
-    }
-
-    get availableRooms() {
-        return this.gameConfiguration.availableRooms;
     }
 
     ngOnInit(): void {
