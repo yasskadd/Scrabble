@@ -3,6 +3,7 @@ import { Document } from 'mongodb';
 import { Service } from 'typedi';
 import { DatabaseService } from './database.service';
 import { BotNameSwitcher } from '@common/interfaces/bot-name-switcher';
+import { VirtualPlayerDifficulty } from '@common/models/virtual-player-difficulty';
 
 @Service()
 export class VirtualPlayersStorageService {
@@ -11,12 +12,13 @@ export class VirtualPlayersStorageService {
     async getExpertBot(): Promise<Document[]> {
         await this.populateDb();
 
-        return await this.database.virtualNames.fetchDocuments({ difficulty: 'Expert' });
+        return await this.database.virtualNames.fetchDocuments({ difficulty: VirtualPlayerDifficulty.Expert });
     }
 
     async getBeginnerBot(): Promise<Document[]> {
         await this.populateDb();
-        return await this.database.virtualNames.fetchDocuments({ difficulty: 'debutant' });
+
+        return await this.database.virtualNames.fetchDocuments({ difficulty: VirtualPlayerDifficulty.Beginner });
     }
 
     async replaceBotName(botNameSwitcher: BotNameSwitcher) {
@@ -33,7 +35,10 @@ export class VirtualPlayersStorageService {
     }
 
     async addBot(bot: Document) {
-        if (await this.botIsInDb(bot.username)) return;
+        if (await this.botIsInDb(bot.username)) {
+            return;
+        }
+
         await this.database.virtualNames.addDocument(bot);
     }
 
@@ -60,11 +65,11 @@ export class VirtualPlayersStorageService {
         for (let i = 0; i < constants.BOT_BEGINNER_NAME_LIST.length; i++) {
             await this.database.virtualNames.addDocument({
                 username: constants.BOT_BEGINNER_NAME_LIST[i],
-                difficulty: 'debutant',
+                difficulty: VirtualPlayerDifficulty.Beginner,
             });
             await this.database.virtualNames.addDocument({
                 username: constants.BOT_EXPERT_NAME_LIST[i],
-                difficulty: 'Expert',
+                difficulty: VirtualPlayerDifficulty.Expert,
             });
         }
     }
