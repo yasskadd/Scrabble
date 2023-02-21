@@ -13,3 +13,5 @@ coverage/
 */.angular
 */dist
 */build
+*/debug
+*/target

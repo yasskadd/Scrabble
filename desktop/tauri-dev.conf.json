@@ -7,8 +7,8 @@
         "withGlobalTauri": false
     },
     "package": {
-        "productName": "desktop",
-        "version": "0.0.0"
+        "productName": "PolyScrabble - dev",
+        "version": "0.0.1"
     },
     "tauri": {
         "allowlist": {
@@ -16,12 +16,14 @@
             "window": {
                 "all": true
             },
-            "dialog": {
-                "all": true
-            },
-            "shell": {
-                "all": false,
-                "open": true
+            "http": {
+                "scope": [
+                    "http://**",
+                    "https://**",
+                    "ws://**"
+                ],
+                "all": true,
+                "request": true
             }
         },
         "bundle": {
@@ -58,7 +60,7 @@
             }
         },
         "security": {
-            "csp": null
+            "csp": "default-src blob: data: filesystem: ws: wss: http: https: tauri: 'unsafe-eval' 'unsafe-inline' 'self' img-src: 'self'"
         },
         "updater": {
             "active": false
@@ -68,9 +70,8 @@
                 "fullscreen": false,
                 "height": 600,
                 "resizable": true,
-                "title": "desktop",
+                "title": "PolyScrabble - dev",
                 "width": 800,
-                "visible": false,
                 "focus": false
             }
         ]

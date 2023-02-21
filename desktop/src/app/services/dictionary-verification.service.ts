@@ -1,82 +1,84 @@
-/* eslint-disable deprecation/deprecation */
-// TODO : Handle deprecation
 import { Injectable } from '@angular/core';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { HttpHandlerService } from './communication/http-handler.service';
 import { GameConfigurationService } from './game-configuration.service';
-
-const MAX_TITLE_CHAR = 30;
-const MAX_DESCRIPTION_CHAR = 125;
-const HTTP_STATUS_FOUND = 200;
+import { MAX_DESCRIPTION_LENGTH, MAX_TITLE_LENGTH } from '@common/constants/dictionary';
+import { HTTP_STATUS } from '@common/models/http-status';
+// import { HttpResponse } from '@angular/common/http';
+import { Subject } from 'rxjs';
+import { DictionaryEvents } from '@common/models/dictionary-events';
 
 @Injectable({
     providedIn: 'root',
 })
 export class DictionaryVerificationService {
-    constructor(private readonly httpHandler: HttpHandlerService, public gameConfiguration: GameConfigurationService) {}
+    verificationStatus: Subject<DictionaryEvents>;
 
-    async globalVerification(dictionary: unknown): Promise<string> {
-        if (!this.isDictionary(dictionary))
-            return "Le fichier téléversé n'est pas un dictionnaire. Les champs title, description ou words sont manquant.";
-        if (this.fieldEmptyVerification(dictionary as Dictionary) !== 'Passed') return this.fieldEmptyVerification(dictionary as Dictionary);
-        if (this.fieldLimitVerification(dictionary as Dictionary) !== 'Passed') return this.fieldLimitVerification(dictionary as Dictionary);
-        const alreadyExist = await this.alreadyExist((dictionary as Dictionary).title);
-        if (alreadyExist !== 'Passed') return alreadyExist;
-        return 'Passed';
+    constructor(private readonly httpHandler: HttpHandlerService, public gameConfiguration: GameConfigurationService) {
+        this.verificationStatus = new Subject<DictionaryEvents>();
     }
 
-    // Reason: we don't really what type of content the json file has.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private isDictionary(dictionary: any): boolean {
-        if ('title' && 'description' && 'words' in dictionary) {
-            if (typeof dictionary.title === 'string' && typeof dictionary.description === 'string' && this.wordsListIsValid(dictionary.words))
-                return true;
-            return false;
-        }
+    globalVerification(dictionary: Dictionary): void {
+        if (dictionary.title.split(' ').length > 1 && dictionary.title !== 'Mon Dictionnaire') {
+            this.verificationStatus.next(DictionaryEvents.TITLE_INVALID);
+        } else {
+            this.httpHandler.dictionaryIsInDb(dictionary.title).subscribe((res: any) => {
+                if (res.status === HTTP_STATUS.FOUND) {
+                    this.verificationStatus.next(DictionaryEvents.FOUND);
+                }
 
+                if (this.fieldEmptyVerification(dictionary) && this.isDictionaryVerification(dictionary) && this.fieldLimitVerification(dictionary)) {
+                    this.verificationStatus.next(DictionaryEvents.VALID);
+                }
+            });
+        }
+    }
+
+    private isDictionaryVerification(dictionary: Dictionary): boolean {
+        if (typeof dictionary.title === 'string' && typeof dictionary.description === 'string' && this.wordsListIsValid(dictionary.words)) {
+            return true;
+        }
+        this.verificationStatus.next(DictionaryEvents.NOT_DICTIONARY);
         return false;
     }
 
-    private fieldEmptyVerification(dictionary: Dictionary): string {
-        if (this.fieldIsEmpty(dictionary.title)) return "Le dictionnaire n'a pas de titre";
-        if (this.fieldIsEmpty(dictionary.description)) return "Le dictionnaire n'a pas de description";
-        if (this.fieldIsEmpty(dictionary.words)) return "Le dictionnaire n'a pas une liste de mots";
-        return 'Passed';
+    private fieldEmptyVerification(dictionary: Dictionary): boolean {
+        if (!dictionary.title) {
+            this.verificationStatus.next(DictionaryEvents.NO_TITLE);
+            return false;
+        }
+        if (!dictionary.description) {
+            this.verificationStatus.next(DictionaryEvents.NO_DESCRIPTION);
+            return false;
+        }
+        if (!dictionary.words) {
+            this.verificationStatus.next(DictionaryEvents.NO_WORDS);
+            return false;
+        }
+
+        return true;
     }
 
-    private fieldLimitVerification(dictionary: Dictionary): string {
-        if (this.fieldCharacterLimit(dictionary.title.split(''), MAX_TITLE_CHAR)) return 'Le titre du dictionnaire est trop long!';
-        if (this.fieldCharacterLimit(dictionary.description.split(''), MAX_DESCRIPTION_CHAR)) return 'La description du dictionnaire est trop long!';
-        return 'Passed';
-    }
+    private fieldLimitVerification(dictionary: Dictionary): boolean {
+        if (this.fieldCharacterLimit(dictionary.title.split(''), MAX_TITLE_LENGTH)) {
+            this.verificationStatus.next(DictionaryEvents.TITLE_TOO_LONG);
+            return false;
+        }
+        if (this.fieldCharacterLimit(dictionary.description.split(''), MAX_DESCRIPTION_LENGTH)) {
+            this.verificationStatus.next(DictionaryEvents.DESCRIPTION_TOO_LONG);
+            return false;
+        }
 
-    private fieldIsEmpty(field: unknown[] | string): boolean {
-        if (typeof field === 'string') return (field as string).trim().length === 0;
-        return field.length === 0;
+        return true;
     }
 
     private fieldCharacterLimit(array: unknown[], maxLimit: number): boolean {
         return array.length > maxLimit;
     }
 
-    private async alreadyExist(title: string): Promise<string> {
-        return this.httpHandler
-            .dictionaryIsInDb(title)
-            .toPromise()
-            .then((response) => {
-                return this.returnStatus(response.status);
-            });
-    }
-
-    private returnStatus(response: number) {
-        if (response === HTTP_STATUS_FOUND) return 'Le dictionnaire existe déjà dans la base de données';
-        return 'Passed';
-    }
-
     private wordsListIsValid(words: unknown): boolean {
         if (!Array.isArray(words)) return false;
-        if (words.some((word) => !this.wordIsValid(word))) return false;
-        return true;
+        return !words.some((word) => !this.wordIsValid(word));
     }
 
     private wordIsValid(word: unknown): boolean {

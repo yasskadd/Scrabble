@@ -1,33 +1,38 @@
-import { Component, OnInit } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
-import { TimerService } from '@app/services/timer.service';
-
-const TIMEOUT = 3000;
+import { TimeService } from '@services/time.service';
+import { AppRoutes } from '@app/models/app-routes';
+import { FormControl, Validators } from '@angular/forms';
+import { SnackBarService } from '@services/snack-bar.service';
 
 @Component({
     selector: 'app-multiplayer-join-page',
     templateUrl: './multiplayer-join-page.component.html',
     styleUrls: ['./multiplayer-join-page.component.scss'],
 })
-export class MultiplayerJoinPageComponent implements OnInit {
-    playerName: string;
+export class MultiplayerJoinPageComponent implements OnInit, OnDestroy {
+    playerNameForm: FormControl;
     gameMode: string;
 
     constructor(
-        public timer: TimerService,
+        public timer: TimeService,
         private gameConfiguration: GameConfigurationService,
         private router: Router,
-        private snackBar: MatSnackBar,
+        private snackBarService: SnackBarService,
         private activatedRoute: ActivatedRoute,
     ) {
         this.gameMode = this.activatedRoute.snapshot.params.id;
-        this.playerName = '';
+        this.playerNameForm = new FormControl('', Validators.required);
     }
 
     get availableRooms() {
         return this.gameConfiguration.availableRooms;
+    }
+
+    ngOnDestroy() {
+        this.gameConfiguration.isRoomJoinable.unsubscribe();
+        this.gameConfiguration.errorReason.unsubscribe();
     }
 
     ngOnInit(): void {
@@ -37,34 +42,27 @@ export class MultiplayerJoinPageComponent implements OnInit {
     }
 
     joinRoom(roomId: string) {
-        this.gameConfiguration.joinGame(roomId, this.playerName);
-        this.playerName = '';
+        this.gameConfiguration.joinGame(roomId, this.playerNameForm.value);
+        this.playerNameForm.setValue('');
     }
 
     joinRandomGame() {
-        this.gameConfiguration.joinRandomRoom(this.playerName);
-        this.playerName = '';
+        this.gameConfiguration.joinRandomRoom(this.playerNameForm.value);
+        this.playerNameForm.setValue('');
     }
 
     listenToServerResponse() {
         this.gameConfiguration.isRoomJoinable.subscribe((value) => {
             if (value) this.navigatePage();
         });
-        this.gameConfiguration.errorReason.subscribe((reason) => {
-            if (reason !== '') {
-                this.openSnackBar(reason);
+        this.gameConfiguration.errorReason.subscribe((error) => {
+            if (error) {
+                this.snackBarService.openError(error);
             }
         });
     }
 
     navigatePage() {
-        this.router.navigate([`/multijoueur/salleAttente/${this.gameMode}`]);
-    }
-
-    openSnackBar(reason: string): void {
-        this.snackBar.open(reason, 'fermer', {
-            duration: TIMEOUT,
-            verticalPosition: 'top',
-        });
+        this.router.navigate([`${AppRoutes.MultiWaitingPage}/${this.gameMode}`]).then();
     }
 }

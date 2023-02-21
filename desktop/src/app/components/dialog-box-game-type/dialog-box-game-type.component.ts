@@ -1,5 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { AppRoutes } from '@app/models/app-routes';
 
 @Component({
     selector: 'app-dialog-box-game-type',
@@ -12,11 +13,12 @@ export class DialogBoxGameTypeComponent implements OnInit {
     singleplayerLink: string;
     gameMode: string;
 
-    constructor(@Inject(MAT_DIALOG_DATA) private data: string) {}
+    constructor(@Inject(MAT_DIALOG_DATA) protected data: string) {}
+
     ngOnInit(): void {
         this.gameMode = this.data;
-        this.multiplayerCreateLink = `/multijoueur/creer/${this.data}`;
-        this.multiplayerjoinLink = `/multijoueur/rejoindre/${this.gameMode}`;
-        this.singleplayerLink = `/solo/${this.gameMode}`;
+        this.multiplayerCreateLink = `/${AppRoutes.MultiGameCreationPage}/${this.data}`;
+        this.multiplayerjoinLink = `/${AppRoutes.MultiJoinPage}/${this.gameMode}`;
+        this.singleplayerLink = `/${AppRoutes.SoloGameCreationPage}/${this.gameMode}`;
     }
 }

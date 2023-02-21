@@ -1,13 +1,13 @@
 /* eslint-disable dot-notation*/
 import { DatabaseCollection } from '@app/classes/database-collection.class';
-import * as constants from '@common/constants/bots';
+import * as constants from '@common/constants/bots-names';
 import { expect } from 'chai';
 import * as Sinon from 'sinon';
 import { stub } from 'sinon';
 import { DatabaseService } from './database.service';
 import { VirtualPlayersStorageService } from './virtual-players-storage.service';
+import { BotNameSwitcher } from '@common/interfaces/bot-name-switcher';
 
-type BotNameInfo = { currentName: string; newName: string; difficulty: string };
 type CollectionStub = Sinon.SinonStubbedInstance<DatabaseCollection>;
 
 const BOT_EXPERT_LIST = [
@@ -82,7 +82,11 @@ describe('virtualPlayerStorage Service', () => {
     });
 
     it('replaceBotName() should replace the player name with the new one that is send to the server ', async () => {
-        const infoBot: BotNameInfo = { currentName: BOT_BEGINNER_LIST[1].username, newName: 'Pauline', difficulty: 'debutant' };
+        const infoBot: BotNameSwitcher = {
+            currentName: BOT_BEGINNER_LIST[1].username,
+            newName: 'Pauline',
+            difficulty: 'debutant',
+        };
 
         Sinon.stub(virtualPlayersStorage, 'populateDb' as never);
         (databaseServiceStub.virtualNames as unknown as CollectionStub).fetchDocuments.resolves(BOT_BEGINNER_LIST);

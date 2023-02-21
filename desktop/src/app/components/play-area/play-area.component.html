@@ -1,11 +1,13 @@
-<div class="container-wrapper">
-    <b id="winning-message" *ngIf="this.gameClientService.isGameFinish">{{ this.gameClientService.winningMessage }}</b>
-    <div class="container">
-        <div id="police">
-            <p id="font-size">Taille de la police :</p>
-            <mat-slider id="updateFontSlider" (input)="updateFontSize($any($event))" step="1" min="20" max="30"></mat-slider>
+<div class='container-wrapper'>
+    <b id='winning-message' *ngIf='gameClientService.isGameFinish'>{{ gameClientService.winningMessage }}</b>
+    <div class='container'>
+        <div id='police'>
+            <p id='font-size'>Taille de la police :</p>
+            <mat-slider id='updateFontSlider' (input)='updateFontSize($any($event))' step='1' min='20'
+                        max='30'></mat-slider>
         </div>
-        <canvas id="canvas" #gridCanvas (click)="mouseHitDetect($event)" [attr.width]="width" [attr.height]="height"></canvas>
+        <canvas id='canvas' #gridCanvas (click)='mouseHitDetect($event)' [attr.width]='width'
+                [attr.height]='height'></canvas>
     </div>
-    <app-player-rack [keyboardParentSubject]="keyboardParentSubject" class="player-rack"></app-player-rack>
+    <app-player-rack [keyboardParentSubject]='keyboardParentSubject' class='player-rack'></app-player-rack>
 </div>

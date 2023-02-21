@@ -4,8 +4,9 @@ import { Router } from '@angular/router';
 import { DialogBoxAbandonGameComponent } from '@app/components/dialog-box-abandon-game/dialog-box-abandon-game.component';
 import { DialogGameHelpComponent } from '@app/components/dialog-game-help/dialog-game-help.component';
 import { GameClientService } from '@app/services/game-client.service';
-import { TimerService } from '@app/services/timer.service';
+import { TimeService } from '@services/time.service';
 import { Objective } from '@common/interfaces/objective';
+import { AppRoutes } from '@app/models/app-routes';
 
 @Component({
     selector: 'app-information-panel',
@@ -13,7 +14,7 @@ import { Objective } from '@common/interfaces/objective';
     styleUrls: ['./information-panel.component.scss'],
 })
 export class InformationPanelComponent {
-    constructor(public gameClientService: GameClientService, public timer: TimerService, private dialog: MatDialog, private router: Router) {}
+    constructor(public gameClientService: GameClientService, public timer: TimeService, private dialog: MatDialog, private router: Router) {}
 
     abandonGame(): void {
         this.dialog.open(DialogBoxAbandonGameComponent, {
@@ -24,7 +25,7 @@ export class InformationPanelComponent {
     }
 
     leaveGame(): void {
-        this.router.navigate(['/home']);
+        this.router.navigate([AppRoutes.HomePage]);
         this.gameClientService.quitGame();
     }
 

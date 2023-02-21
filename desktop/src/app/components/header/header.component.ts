@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { AppRoutes } from '@app/models/app-routes';
 
 @Component({
     selector: 'app-header',
@@ -16,16 +17,16 @@ export class HeaderComponent {
     }
 
     checkIfHomePage() {
-        return this.router.url === '/home';
+        return this.router.url === AppRoutes.HomePage;
     }
 
     redirectHome() {
         this.isHomePage = true;
-        this.router.navigate(['/home']).then();
+        this.router.navigate([AppRoutes.HomePage]).then();
     }
 
     redirectAdmin() {
         this.isHomePage = false;
-        this.router.navigate(['/admin']).then();
+        this.router.navigate([AppRoutes.AdminPage]).then();
     }
 }

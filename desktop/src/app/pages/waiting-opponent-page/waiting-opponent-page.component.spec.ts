@@ -10,6 +10,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
 import { ReplaySubject } from 'rxjs';
 import { WaitingOpponentPageComponent } from './waiting-opponent-page.component';
+import { AppRoutes } from '@app/models/app-routes';
 
 @Component({
     template: '',
@@ -22,6 +23,7 @@ interface RoomInformation {
     isCreator: boolean;
     statusGame: string;
 }
+
 const ROOM_INFORMATION: RoomInformation = {
     playerName: ['Vincent'],
     roomId: '1',
@@ -31,11 +33,10 @@ const ROOM_INFORMATION: RoomInformation = {
 const TEST_ERROR = "La salle n'est plus disponible";
 const TEST_ERROR_REASON = new ReplaySubject<string>(1);
 const TEST_ISGAMESTARTED = new ReplaySubject<string>(1);
-const MULTIPLAYER_WAITING_ROOM_ROUTE = 'multijoueur/salleAttente/classique';
-const MULTIPLAYER_CREATE_ROOM_ROUTE = 'multijoueur/creer/classique';
-const SOLO_ROUTE = 'solo/classique';
-const MULTIPLAYER_JOIN_ROOM_ROUTE = 'multijoueur/rejoindre/classique';
-const MULTIPLAYER_GAME_PAGE = 'game';
+const MULTIPLAYER_WAITING_ROOM_ROUTE = `${AppRoutes.MultiWaitingPage}/classique`;
+const MULTIPLAYER_CREATE_ROOM_ROUTE = `${AppRoutes.MultiGameCreationPage}/classique`;
+const SOLO_ROUTE = `${AppRoutes.SoloGameCreationPage}/classique`;
+const MULTIPLAYER_JOIN_ROOM_ROUTE = `${AppRoutes.MultiJoinPage}/classique`;
 
 describe('WaitingOpponentPageComponent', () => {
     let component: WaitingOpponentPageComponent;
@@ -69,7 +70,7 @@ describe('WaitingOpponentPageComponent', () => {
                 RouterTestingModule.withRoutes([
                     { path: MULTIPLAYER_CREATE_ROOM_ROUTE, component: StubComponent },
                     { path: MULTIPLAYER_JOIN_ROOM_ROUTE, component: StubComponent },
-                    { path: MULTIPLAYER_GAME_PAGE, component: StubComponent },
+                    { path: AppRoutes.GamePage, component: StubComponent },
                     { path: MULTIPLAYER_WAITING_ROOM_ROUTE, component: StubComponent },
                     { path: SOLO_ROUTE, component: StubComponent },
                 ]),
@@ -210,7 +211,7 @@ describe('WaitingOpponentPageComponent', () => {
         gameConfigurationServiceSpy.roomInformation.playerName[1] = 'Vincent';
         gameConfigurationServiceSpy.roomInformation.isCreator = true;
         fixture.detectChanges();
-        const spy = spyOn(component, 'startGame');
+        const spy = spyOn<any>(component, 'startGame');
         const button = fixture.debugElement.nativeElement.querySelector('.startButton');
         button.click();
         tick();
@@ -222,7 +223,7 @@ describe('WaitingOpponentPageComponent', () => {
         gameConfigurationServiceSpy.roomInformation.isCreator = true;
         gameConfigurationServiceSpy.roomInformation.playerName[1] = '';
         fixture.detectChanges();
-        const spy = spyOn(component, 'soloMode');
+        const spy = spyOn<any>(component, 'soloMode');
         const button = fixture.debugElement.nativeElement.querySelector('.solo-mode-button');
         button.click();
         tick();
@@ -234,31 +235,13 @@ describe('WaitingOpponentPageComponent', () => {
         gameConfigurationServiceSpy.roomInformation.playerName[1] = 'Vincent';
         gameConfigurationServiceSpy.roomInformation.isCreator = true;
         fixture.detectChanges();
-        const spy = spyOn(component, 'rejectOpponent');
+        const spy = spyOn<any>(component, 'rejectOpponent');
         const button = fixture.debugElement.nativeElement.querySelector('.rejectButton');
         button.click();
         tick();
         fixture.detectChanges();
         expect(spy).toHaveBeenCalled();
     }));
-
-    it('rejectOpponent should call gameconfiguration.rejectOponent()', () => {
-        component.rejectOpponent();
-        fixture.detectChanges();
-        expect(gameConfigurationServiceSpy.rejectOpponent).toHaveBeenCalled();
-    });
-
-    it('startGame should call gameconfiguration.beginScrabbleGame()', () => {
-        component.startGame();
-        fixture.detectChanges();
-        expect(gameConfigurationServiceSpy.beginScrabbleGame).toHaveBeenCalled();
-    });
-
-    it('should call gameConfiguration.removeRoom if he want to exitWaitingRoom and he is the creator', () => {
-        component.startGame();
-        fixture.detectChanges();
-        expect(gameConfigurationServiceSpy.beginScrabbleGame).toHaveBeenCalled();
-    });
 
     it('should call joinGamePage when the isGameStarted value is true', () => {
         const spy = spyOn(component, 'joinGamePage');
@@ -284,14 +267,14 @@ describe('WaitingOpponentPageComponent', () => {
     it('soloMode() should navigate to solo/classique ', fakeAsync(() => {
         const spyRouter = spyOn(router, 'navigate');
         const expectedURL = '/' + SOLO_ROUTE;
-        component.soloMode();
+        component.joinSoloMode();
         tick();
         fixture.detectChanges();
         expect(spyRouter).toHaveBeenCalledWith([expectedURL]);
     }));
 
     it('should call gameConfiguration.removeRoom if the soloMode method is called', () => {
-        component.soloMode();
+        component.joinSoloMode();
         expect(gameConfigurationServiceSpy.removeRoom).toHaveBeenCalled();
     });
 

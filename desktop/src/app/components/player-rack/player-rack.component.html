@@ -1,44 +1,48 @@
-<div class="rack-info justified" id="player-letters" #info>
+<div class='rack-info justified' id='player-letters' #info>
     <div
-        *ngFor="let letter of rack; index as i"
+        *ngFor='let letter of rack; index as i'
         [ngClass]="[
-            this.lettersToExchange.includes(i) ? 'rack-letter-exchange-selected' : 'rack-letter',
-            !this.lettersToExchange.includes(i) && this.lettersToManipulate.includes(i) ? 'rack-letter-manipulate-selected' : 'rack-letter'
+            lettersToExchange.includes(i) ? 'rack-letter-exchange-selected' : 'rack-letter',
+            !lettersToExchange.includes(i) && lettersToManipulate.includes(i) ? 'rack-letter-manipulate-selected' : 'rack-letter'
         ]"
-        (click)="onLeftClick($event, i)"
-        (contextmenu)="onRightClick($event, i)"
+        (click)='onLeftClick($event, i)'
+        (contextmenu)='onRightClick($event, i)'
     >
-        <div class="letter-value" [style.font-size]="letterSize + 'px'" *ngIf="letter.value !== undefined">
+        <div class='letter-value' [style.font-size]="letterSize + 'px'" *ngIf='letter.value !== undefined'>
             {{ letter.value.toUpperCase() }}
         </div>
-        <div class="letter-points" [style.font-size]="pointsSize + 'px'">{{ letter.points }}</div>
+        <div class='letter-points' [style.font-size]="pointsSize + 'px'">{{ letter.points }}</div>
     </div>
 </div>
 
-<div class="button-container justified">
-    <div class="left-side">
-        <button id="skip-turn" mat-raised-button [disabled]="!this.gameClient.playerOneTurn" (click)="skipTurn()">passer son tour</button>
+<div class='button-container justified'>
+    <div class='left-side'>
+        <button id='skip-turn' mat-raised-button [disabled]='!gameClient.playerOneTurn' (click)='skipTurn()'>passer son
+            tour
+        </button>
         <button
-            *ngIf="this.lettersToExchange.length !== 0"
-            id="exchange"
+            *ngIf='lettersToExchange.length !== 0'
+            id='exchange'
             mat-raised-button
-            [disabled]="!this.gameClient.playerOneTurn || this.lettersToExchange.length === 0 || this.gameClient.letterReserveLength < 7"
-            (click)="exchange()"
+            [disabled]='!gameClient.playerOneTurn || lettersToExchange.length === 0 || gameClient.letterReserveLength < 7'
+            (click)='exchange()'
         >
             échanger
         </button>
     </div>
 
-    <div class="right-side">
+    <div class='right-side'>
         <button
-            *ngIf="this.lettersToExchange.length !== 0"
-            id="cancel"
+            *ngIf='lettersToExchange.length !== 0'
+            id='cancel'
             mat-raised-button
-            [disabled]="this.lettersToExchange.length === 0"
-            (click)="cancel()"
+            [disabled]='lettersToExchange.length === 0'
+            (click)='cancel()'
         >
             annuler
         </button>
-        <button mat-raised-button (click)="this.playPlacedLetters()" [disabled]="this.letterPlacementService.noLettersPlaced()">Jouer</button>
+        <button mat-raised-button (click)='playPlacedLetters()' [disabled]='letterPlacementService.noLettersPlaced()'>
+            Jouer
+        </button>
     </div>
 </div>

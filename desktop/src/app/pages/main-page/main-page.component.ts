@@ -38,19 +38,11 @@ export class MainPageComponent implements OnDestroy {
         this.userNameForm = new FormControl('', Validators.required);
         this.chatIsOpen = false;
 
-        this.connectionSubject = this.chatBoxHandlerService.subscribeToUserConnection();
-        this.connectionSubject.subscribe((res: SocketResponse) => {
-            this.homeConnectionResponse = res;
-            if (!res.validity) {
-                this.userNameForm.setErrors({ notMatched: true });
-            }
-        });
+        this.subscribeConnectionEvents();
+    }
 
-        this.disconnectionSubject = this.chatBoxHandlerService.subscribeToUserDisconnecting();
-        this.disconnectionSubject.subscribe(() => {
-            this.userService.userName = '';
-            this.userNameForm.setValue('');
-        });
+    protected get loggedIn(): boolean {
+        return this.chatBoxHandlerService.loggedIn;
     }
 
     ngOnDestroy() {
@@ -58,7 +50,7 @@ export class MainPageComponent implements OnDestroy {
         this.disconnectionSubject.unsubscribe();
     }
 
-    openDialog(gameModeValue: string): void {
+    openGameTypeDialog(gameModeValue: string): void {
         this.dialog.open(DialogBoxGameTypeComponent, {
             width: this.dialogWidth,
             data: gameModeValue,
@@ -119,5 +111,21 @@ export class MainPageComponent implements OnDestroy {
 
     closeChat() {
         this.chatIsOpen = false;
+    }
+
+    private subscribeConnectionEvents(): void {
+        this.connectionSubject = this.chatBoxHandlerService.subscribeToUserConnection();
+        this.connectionSubject.subscribe((res: SocketResponse) => {
+            this.homeConnectionResponse = res;
+            if (!res.validity) {
+                this.userNameForm.setErrors({ notMatched: true });
+            }
+        });
+
+        this.disconnectionSubject = this.chatBoxHandlerService.subscribeToUserDisconnecting();
+        this.disconnectionSubject.subscribe(() => {
+            this.userService.userName = '';
+            this.userNameForm.setValue('');
+        });
     }
 }

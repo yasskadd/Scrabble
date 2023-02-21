@@ -1,6 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Bot } from '@app/interfaces/bot';
+import { Bot } from '@common/interfaces/bot';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
 import { HighScores } from '@app/interfaces/high-score-parameters';
@@ -9,8 +9,7 @@ import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-i
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-
-type BotNameInfo = { currentName: string; newName: string; difficulty: string };
+import { BotNameSwitcher } from '@common/interfaces/bot-name-switcher';
 
 @Injectable({
     providedIn: 'root',
@@ -74,18 +73,10 @@ export class HttpHandlerService {
             .pipe(catchError(this.handleError<void>('addDictionary')));
     }
 
-    // Reason: the server does't really return something but just a status code
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    dictionaryIsInDb(title: string): Observable<any> {
-        return (
-            this.http
-                // Reason: the server does't really return something but just a status code
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                .get<any>(`${this.baseUrl}/dictionary/dictionaryisindb/${title}`, { observe: 'response' })
-                // Reason: the server does't really return something but just a status code
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                .pipe(catchError(this.handleError<any>('dictionaryIsInDb')))
-        );
+    dictionaryIsInDb(title: string): Observable<void | HttpResponse<void>> {
+        return this.http
+            .get<void>(`${this.baseUrl}/dictionary/isindb/${title}`, { observe: 'response' })
+            .pipe(catchError(this.handleError<void>('dictionaryIsInDb')));
     }
 
     modifyDictionary(dictionary: ModifiedDictionaryInfo): Observable<void> {
@@ -104,7 +95,7 @@ export class HttpHandlerService {
         return this.http.post<void>(`${this.baseUrl}/virtualPlayer`, bot).pipe(catchError(this.handleError<void>('addBot')));
     }
 
-    replaceBot(bot: BotNameInfo): Observable<void> {
+    replaceBot(bot: BotNameSwitcher): Observable<void> {
         return this.http.put<void>(`${this.baseUrl}/virtualPlayer`, bot).pipe(catchError(this.handleError<void>('replaceBot')));
     }
 

@@ -16,8 +16,8 @@ import { Letter } from '@common/interfaces/letter';
 import { Objective } from '@common/interfaces/objective';
 import { of } from 'rxjs';
 import { InformationPanelComponent } from './information-panel.component';
+import { AppRoutes } from '@app/models/app-routes';
 
-const MULTIPLAYER_HOME_PAGE = 'home';
 type Timer = { minutes: number; seconds: number };
 type Player = { name: string; score: number; rack: Letter[]; objective?: Objective[] };
 
@@ -87,7 +87,7 @@ describe('InformationPanelComponent', () => {
                 BrowserModule,
                 MatIconModule,
                 MatCardModule,
-                RouterTestingModule.withRoutes([{ path: MULTIPLAYER_HOME_PAGE, component: StubComponent }]),
+                RouterTestingModule.withRoutes([{ path: AppRoutes.HomePage, component: StubComponent }]),
             ],
             declarations: [InformationPanelComponent],
             schemas: [NO_ERRORS_SCHEMA],
@@ -127,7 +127,7 @@ describe('InformationPanelComponent', () => {
 
     it('should navigate to the home page if the leaveGame method is called', () => {
         const spyRouter = spyOn(router, 'navigate');
-        const expectedURL = '/' + MULTIPLAYER_HOME_PAGE;
+        const expectedURL = '/' + AppRoutes.HomePage;
         component.leaveGame();
         expect(spyRouter).toHaveBeenCalledWith([expectedURL]);
     });

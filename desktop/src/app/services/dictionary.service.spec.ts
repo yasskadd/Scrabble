@@ -36,7 +36,11 @@ describe('DictionaryService', () => {
     });
 
     it('should call httpHandler addDictionary() when calling dictionaryService addDictionary() is called', () => {
-        service.addDictionary({ title: 'test dictionary', description: 'a test dictionary', words: ['Expert', 'yo', 'ma'] });
+        service.addDictionary({
+            title: 'test dictionary',
+            description: 'a test dictionary',
+            words: ['Expert', 'yo', 'ma'],
+        });
         expect(httpHandlerSpy.addDictionary).toHaveBeenCalled();
         expect(httpHandlerSpy.getDictionaries).toHaveBeenCalled();
     });
@@ -47,7 +51,11 @@ describe('DictionaryService', () => {
     });
 
     it('should call httpHandler modifyDictionary() when calling dictionaryService modifyDictionary() is called', () => {
-        service.modifyDictionary({ title: 'test dictionary', newTitle: 'test test', newDescription: 'a test dictionary' });
+        service.modifyDictionary({
+            title: 'test dictionary',
+            newTitle: 'test test',
+            newDescription: 'a test dictionary',
+        });
         expect(httpHandlerSpy.modifyDictionary).toHaveBeenCalled();
     });
 
@@ -62,7 +70,7 @@ describe('DictionaryService', () => {
     });
 
     it('should call httpHandler getDictionaries() when calling dictionaryService getDictionaries() is called', () => {
-        service.getDictionaries();
+        service.updateDictionariesInfos();
         expect(httpHandlerSpy.getDictionaries).toHaveBeenCalled();
     });
 });
