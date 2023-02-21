@@ -1,38 +1,22 @@
-/* eslint-disable deprecation/deprecation */
-// TODO : Handle deprecation
-import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { Dictionary } from '@app/interfaces/dictionary';
-import { DictionaryInfo } from '@app/interfaces/dictionary-info';
-import { HttpHandlerService } from '@app/services/communication/http-handler.service';
-import { DictionaryVerificationService } from '@app/services/dictionary-verification.service';
 import { Subject } from 'rxjs';
 import { FileStatus } from '@common/models/file-status';
-import { DictionaryEvents } from '@common/models/dictionary-events';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { SNACKBAR_TIMEOUT } from '@common/constants/ui-events';
+import { DictionaryService } from '@services/dictionary.service';
 
 @Component({
     selector: 'app-import-dictionary',
     templateUrl: './import-dictionary.component.html',
     styleUrls: ['./import-dictionary.component.scss'],
 })
-export class ImportDictionaryComponent implements OnDestroy {
+export class ImportDictionaryComponent {
     @ViewChild('file', { static: false }) file: ElementRef;
-    dictionaryList: DictionaryInfo[];
     selectedFile: Dictionary | null;
     errorMessage: string;
 
-    constructor(
-        private readonly httpHandler: HttpHandlerService,
-        private dictionaryVerification: DictionaryVerificationService,
-        private snackBar: MatSnackBar,
-    ) {
+    constructor(private dictionaryService: DictionaryService) {
         this.selectedFile = null;
         this.errorMessage = '';
-    }
-
-    ngOnDestroy() {
-        this.dictionaryVerification.verificationStatus.unsubscribe();
     }
 
     uploadDictionary() {
@@ -60,24 +44,13 @@ export class ImportDictionaryComponent implements OnDestroy {
     }
 
     fileOnLoad(newDictionary: Dictionary) {
-        this.dictionaryVerification.verificationStatus.subscribe((error: string) => {
-            if (error) {
-                this.errorMessage = error;
-            } else {
-                this.selectedFile = newDictionary;
-                this.httpHandler.addDictionary(this.selectedFile).subscribe(() => {
-                    this.httpHandler.getDictionaries().subscribe((dictionaries) => (this.dictionaryList = dictionaries));
-                    // TODO : Language
-                    this.errorMessage = '';
-                    this.snackBar.open(DictionaryEvents.ADDED, 'Fermer', {
-                        duration: SNACKBAR_TIMEOUT,
-                        verticalPosition: 'bottom',
-                    });
-                });
+        this.dictionaryService.addDictionary(newDictionary).subscribe((res: string | Dictionary) => {
+            if (typeof res === 'string') {
+                this.errorMessage = res;
             }
+
             this.file.nativeElement.value = '';
         });
-        this.dictionaryVerification.globalVerification(newDictionary);
     }
 
     detectImportFile() {

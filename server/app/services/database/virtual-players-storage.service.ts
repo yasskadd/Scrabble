@@ -1,4 +1,4 @@
-import * as constants from '@common/constants/bots';
+import * as constants from '@common/constants/bots-names';
 import { Document } from 'mongodb';
 import { Service } from 'typedi';
 import { DatabaseService } from './database.service';

@@ -2,7 +2,7 @@
 // TODO : Handle deprecation
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { Bot } from '@app/interfaces/bot';
+import { Bot } from '@common/interfaces/bot';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
 import { HighScores } from '@app/interfaces/high-score-parameters';

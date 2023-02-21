@@ -53,7 +53,7 @@ export class GameCreationPageComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.virtualPlayers.getBotNames();
+        this.virtualPlayers.updateBotNames();
         this.gameConfiguration.resetRoomInformation();
 
         const defaultTimer = this.timerList.find((timerOption) => timerOption === GameTimeOptions.OneMinute);
@@ -143,7 +143,7 @@ export class GameCreationPageComponent implements OnInit {
     }
 
     private updateBotList(): void {
-        this.virtualPlayers.getBotNames().then(() => this.giveNameToBot());
+        this.virtualPlayers.updateBotNames().subscribe(() => this.giveNameToBot());
     }
 
     private initGame(dictionaryTitle: string): void {
