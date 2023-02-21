@@ -29,7 +29,7 @@
             <tr *ngFor='let gameRoom of availableRooms'>
                 <td>{{ gameRoom.users }}</td>
                 <td>{{ gameRoom.dictionary }}</td>
-                <td>{{ this.timer.getTimeStamp(gameRoom.timer) }}</td>
+                <td>{{ timer.getTimeStamp(gameRoom.timer) }}</td>
                 <td>{{ gameRoom.mode }}</td>
                 <button class='join-game' (click)='joinRoom(gameRoom.id)' mat-raised-button
                         [disabled]='!playerNameForm.value'>
