@@ -1,4 +1,5 @@
 export enum VirtualPlayerDifficulty {
-    Beginner = 'beginner',
-    Expert = 'expert',
+    // TODO : Change on the DB
+    Beginner = 'debutant',
+    Expert = 'Expert',
 }

@@ -23,8 +23,8 @@ export class DatabaseCollection {
 
     async fetchDocuments(query: Filter<Document>, projection?: FindOptions<Document> | undefined): Promise<Document[]> {
         await this.connect();
-        const documents = await this.collection.find(query, projection).toArray();
-        return documents;
+
+        return await this.collection.find(query, projection).toArray();
     }
 
     async addDocument(object: MongoDocument) {
