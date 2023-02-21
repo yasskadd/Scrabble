@@ -12,7 +12,7 @@ app-header {
 
 mat-drawer-container {
     height: 75%;
-    background-color: #c2e5da;
+    background-color: $primary-light-color;
     display: flex;
     justify-content: center; // for horizontal
     align-items: center;
