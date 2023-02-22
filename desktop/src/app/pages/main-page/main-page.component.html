@@ -5,13 +5,23 @@
             <button *ngIf='!chatIsOpen' class='open-chat-button' mat-button (click)='drawer.toggle()'
                     (click)='openChat()'>
                 <mat-icon>chat_bubble_outline</mat-icon>
-                Open Chat
+                {{ "MAIN.OPEN_CHAT" | translate }}
             </button>
             <button *ngIf='chatIsOpen' class='open-chat-button' mat-button (click)='drawer.toggle()'
                     (click)='closeChat()'>
                 <mat-icon>keyboard_arrow_left</mat-icon>
-                Close Chat
+                {{ "MAIN.CLOSE_CHAT" | translate }}
             </button>
+
+            <mat-form-field appearance='outline' class='language-selector'>
+                <mat-label>Language</mat-label>
+                <mat-select [formControl]='languageForm' required>
+                    <mat-option
+                        [value]='languageChoices.French'>{{languageChoices.French.toString().toLocaleUpperCase()}}</mat-option>
+                    <mat-option
+                        [value]='languageChoices.English'>{{languageChoices.English.toString().toLocaleUpperCase()}}</mat-option>
+                </mat-select>
+            </mat-form-field>
 
             <mat-card class='justified'>
                 <mat-card-content class='justified'>
