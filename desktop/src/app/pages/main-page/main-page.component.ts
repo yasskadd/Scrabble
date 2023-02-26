@@ -98,17 +98,23 @@ export class MainPageComponent implements OnDestroy {
         let message = '';
         switch (this.homeConnectionResponse.socketMessage) {
             case SocketEvents.UsernameTaken: {
-                message = "Le nom d'utilisateur existe déjà";
+                this.languageService.getWord('error.connection.usernameAlreadyExists').subscribe((word: string) => {
+                    message = word;
+                });
                 break;
             }
             case SocketEvents.RoomIsFull: {
-                message = 'Impossible de se connecter à la salle';
+                this.languageService.getWord('error.connection.roomFull').subscribe((word: string) => {
+                    message = word;
+                });
                 break;
             }
         }
 
         if (this.userNameForm.hasError('required')) {
-            message = 'Le nom ne peut pas être vide';
+            this.languageService.getWord('error.connection.empty').subscribe((word: string) => {
+                message = word;
+            });
         }
 
         return message;

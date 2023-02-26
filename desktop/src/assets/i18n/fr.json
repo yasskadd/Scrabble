@@ -1,6 +1,39 @@
 {
-    "MAIN": {
-        "OPEN_CHAT": "Ouvrir le chat",
-        "CLOSE_CHAT": "Fermer le chat"
+    "main": {
+        "chat": {
+            "open": "Ouvrir le chat",
+            "close": "Fermer le chat"
+        },
+        "play": "Jouer",
+        "connected_w_username": "Connecté en tant que",
+        "login": "Se connecter",
+        "logout": "Se déconnecter",
+        "tooltip": {
+            "game_instructions": "Des instructions pour le jeu",
+            "play": "Mode classique de Scrabble",
+            "scores": "Classement des meilleurs scores pour chacun des modes de jeu"
+        },
+        "label": {
+            "username": "Nom d'utilisateur"
+        }
+    },
+    "header": {
+        "welcome": "Bienvenue"
+    },
+    "chat": {
+        "disconnected": "Vous devez vous connecter afin d'avoir accès au clavardage"
+    },
+    "footer": {
+        "team": "Équipe"
+    },
+    "error": {
+        "connection": {
+            "usernameAlreadyExists": "Le nom d'utilisateur existe déjà",
+            "roomFull": "Impossible de se connecter à la salle",
+            "empty": "Le nom ne peut pas être vide"
+        }
+    },
+    "snackbar": {
+        "close": "Fermer"
     }
 }

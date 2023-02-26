@@ -1,6 +1,39 @@
 {
-    "MAIN": {
-        "OPEN_CHAT": "Close chat",
-        "CLOSE_CHAT": "Open chat"
+    "main": {
+        "chat": {
+            "open": "Close chat",
+            "close": "Open chat"
+        },
+        "play": "Play",
+        "connected_w_username": "Connected as",
+        "login": "Login",
+        "logout": "Logout",
+        "tooltip": {
+            "game_instructions": "Instructions for the game",
+            "play": "Scrabble as you know it",
+            "scores": "Leaderboard of all the best scores"
+        },
+        "label": {
+            "username": "Username"
+        }
+    },
+    "header": {
+        "welcome": "Welcome"
+    },
+    "chat": {
+        "disconnected": "You need to be connected to access the chat rooms"
+    },
+    "footer": {
+        "team": "Team"
+    },
+    "error": {
+        "connection": {
+            "usernameAlreadyExists": "Username already exists",
+            "roomFull": "Can't connect to the room",
+            "empty": "Username cannot be empty"
+        }
+    },
+    "snackbar": {
+        "close": "Close"
     }
 }
