@@ -9,7 +9,7 @@
         "login": "Login",
         "logout": "Logout",
         "tooltip": {
-            "game_instructions": "Instructions for the game",
+            "game_instructions": "Game's instructions",
             "play": "Scrabble as you know it",
             "scores": "Leaderboard of all the best scores"
         },
