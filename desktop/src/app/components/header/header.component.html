@@ -1,18 +1,18 @@
-<div *ngIf="!isHomePage" id="home" (click)="redirectHome()">
-    <div *ngFor="let letter of homePage">{{ letter }}</div>
+<div *ngIf='!isHomePage' id='home' (click)='redirectHome()'>
+    <div *ngFor='let letter of homePage'>{{ letter }}</div>
 </div>
 
-<div *ngIf="isHomePage" id="admin" (click)="redirectAdmin()">
-    <div *ngFor="let letter of adminPage">{{ letter }}</div>
+<div *ngIf='isHomePage' id='admin' (click)='redirectAdmin()'>
+    <div *ngFor='let letter of adminPage'>{{ letter }}</div>
 </div>
 
-<div id="toggle">
-    <button mat-fab color="accent" (click)="toggleDarkMode()">
-        <mat-icon *ngIf="!isDarkMode">bedtime</mat-icon>
-        <mat-icon *ngIf="isDarkMode">wb_sunny</mat-icon>
+<div id='toggle'>
+    <button mat-fab color='accent' (click)='themeService.toggleDarkMode()'>
+        <mat-icon *ngIf='themeService.isDarkTheme.value'>bedtime</mat-icon>
+        <mat-icon *ngIf='!themeService.isDarkTheme.value'>wb_sunny</mat-icon>
     </button>
 </div>
 
-<div id="image">
-    <img src="https://bit.ly/3m206ss" width="300" height="60" alt="Logo Scrabble" (click)="redirectHome()" />
+<div id='image'>
+    <img src='https://bit.ly/3m206ss' width='300' height='60' alt='Logo Scrabble' (click)='redirectHome()' />
 </div>

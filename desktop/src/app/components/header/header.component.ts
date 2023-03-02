@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
+import { ThemeService } from '@services/theme.service';
 
 @Component({
     selector: 'app-header',
@@ -11,23 +12,14 @@ export class HeaderComponent {
     readonly homePage: string[] = ['A', 'C', 'C', 'U', 'E', 'I', 'L'];
     readonly adminPage: string[] = ['A', 'D', 'M', 'I', 'N'];
     isHomePage: boolean;
-    isDarkMode: boolean;
 
-    constructor(private router: Router) {
+    constructor(private router: Router, protected themeService: ThemeService) {
         this.isHomePage = this.checkIfHomePage();
-        this.isDarkMode = false; // TODO : change on theme service is linked to client
     }
 
     checkIfHomePage() {
         return this.router.url === AppRoutes.HomePage;
     }
-
-    toggleDarkMode() {
-        this.isDarkMode = !this.isDarkMode;
-        this.setDarkMode();
-    }
-
-    setDarkMode() {} // TODO : implement
 
     redirectHome() {
         this.isHomePage = true;
