@@ -45,11 +45,15 @@
         "@common": "out/common"
     },
     "dependencies": {
+        "@types/bcrypt": "^5.0.0",
+        "@types/jsonwebtoken": "^9.0.1",
+        "bcrypt": "^5.1.0",
         "cookie-parser": "1.4.5",
         "cors": "2.8.5",
         "debug": "^4.3.2",
         "express": "~4.17.1",
         "http-status-codes": "^2.1.4",
+        "jsonwebtoken": "^9.0.0",
         "module-alias": "^2.2.2",
         "mongodb": "^4.4.1",
         "mongodb-memory-server-core": "^8.4.0",
