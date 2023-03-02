@@ -11,14 +11,22 @@ export class HeaderComponent {
     readonly homePage: string[] = ['A', 'C', 'C', 'U', 'E', 'I', 'L'];
     readonly adminPage: string[] = ['A', 'D', 'M', 'I', 'N'];
     isHomePage: boolean;
+    isDarkMode: boolean;
 
     constructor(private router: Router) {
         this.isHomePage = this.checkIfHomePage();
+        this.isDarkMode = false; // TODO : change on theme service is linked to client
     }
 
     checkIfHomePage() {
         return this.router.url === AppRoutes.HomePage;
     }
+
+    toggleDarkMode() {
+        this.isDarkMode = !this.isDarkMode;
+    }
+
+    setDarkMode() {}
 
     redirectHome() {
         this.isHomePage = true;

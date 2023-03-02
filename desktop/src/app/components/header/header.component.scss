@@ -1,5 +1,6 @@
 #home,
 #admin,
+#toggle,
 #image {
     display: flex;
     flex-direction: row;
@@ -21,6 +22,10 @@
 #image {
     margin-right: 30px;
     justify-content: right;
+}
+
+#toggle {
+    justify-content: center;
 }
 
 #home > *,
