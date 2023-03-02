@@ -24,9 +24,10 @@ export class HeaderComponent {
 
     toggleDarkMode() {
         this.isDarkMode = !this.isDarkMode;
+        this.setDarkMode();
     }
 
-    setDarkMode() {}
+    setDarkMode() {} // TODO : implement
 
     redirectHome() {
         this.isHomePage = true;
