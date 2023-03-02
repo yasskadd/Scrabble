@@ -6,13 +6,13 @@
 
 app-header {
     display: flex;
-    background-color: $primary-medium-color;
+    background-color: #7fa99b;
     height: 10%;
 }
 
 mat-drawer-container {
     height: 75%;
-    background-color: $primary-light-color;
+    background-color: #c2e5da;
     display: flex;
     justify-content: center; // for horizontal
     align-items: center;
@@ -66,8 +66,8 @@ mat-drawer {
 app-footer {
     height: 15%;
     text-align: center;
-    color: $primary-dark-color;
-    background-color: $primary-medium-color;
+    color: #23501f;
+    background-color: #7fa99b;
 }
 
 .justified {
@@ -79,14 +79,14 @@ app-footer {
 
 ::ng-deep .toolMainPage {
     font-size: 14px;
-    background-color: $primary-dark-color;
+    background-color: #23501f;
 }
 
 .mat-card {
     padding: 30px;
     width: 40%;
     box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
-    background-color: $primary-medium-color;
+    background-color: #7fa99b;
 }
 
 .mat-raised-button:hover {
@@ -104,7 +104,7 @@ app-footer {
     text-align: center;
 
     color: #cff3e8;
-    background-color: $primary-dark-color;
+    background-color: #23501f;
 }
 
 .buttons-columns {
@@ -134,7 +134,7 @@ app-footer {
 }
 
 #scores > * {
-    color: $primary-dark-color;
+    color: #23501f;
     font-weight: 800;
     font-family: system-ui;
     display: flex;
@@ -158,7 +158,7 @@ app-footer {
     position: absolute;
     margin-right: -460px;
     margin-bottom: -190px !important;
-    background-color: $primary-dark-color;
+    // background-color: #23501f;
 }
 
 ::ng-deep .mat-fab {
