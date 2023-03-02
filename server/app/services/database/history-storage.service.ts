@@ -32,7 +32,7 @@ export class HistoryStorageService {
     }
 
     private formatGameInfo(room: string): GameHistoryInfo {
-        const players = this.gamesHandler.gamePlayers.get(room);
+        const players = this.gamesHandler.gamePlayers.get(room)?.players;
         if (players === undefined) return {} as GameHistoryInfo;
         const endTime = new Date();
         return {
