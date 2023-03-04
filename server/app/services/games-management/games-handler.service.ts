@@ -41,7 +41,6 @@ export class GamesHandler {
             });
             this.socketManager.emitRoom(socket, SocketEvents.UpdateOpponentInformation, opponentPlayersInfos);
         });
-
         this.socketManager.emitRoom(gameInfos?.gameInfo.roomId as string, SocketEvents.LetterReserveUpdated, game.letterReserve.lettersReserve);
     }
 

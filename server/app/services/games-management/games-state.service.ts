@@ -9,6 +9,7 @@ import { Player } from '@app/classes/player/player.class';
 import { RealPlayer } from '@app/classes/player/real-player.class';
 import { Turn } from '@app/classes/turn.class';
 import { WordSolver } from '@app/classes/word-solver.class';
+import { NUMBER_OF_PLAYERS } from '@app/constants/players';
 import { Behavior } from '@app/interfaces/behavior';
 import { GameScrabbleInformation } from '@app/interfaces/game-scrabble-information';
 import { ScoreStorageService } from '@app/services/database/score-storage.service';
@@ -22,7 +23,6 @@ import { GamesHandler } from './games-handler.service';
 
 const MAX_SKIP = 6;
 const SECOND = 1000;
-const NUMBER_OF_PLAYERS = 2;
 
 @Service()
 export class GamesStateService {
@@ -37,10 +37,7 @@ export class GamesStateService {
     }
 
     initSocketsEvents(): void {
-        this.socketManager.on(
-            SocketEvents.CreateScrabbleGame,
-            async (socket, gameInfo: GameScrabbleInformation) => await this.createGame(socket, gameInfo),
-        );
+        this.socketManager.on(SocketEvents.CreateScrabbleGame, async (socket, gameInfo: GameScrabbleInformation) => await this.createGame(gameInfo));
 
         this.socketManager.on(SocketEvents.Disconnect, (socket) => {
             this.disconnect(socket);
@@ -55,7 +52,7 @@ export class GamesStateService {
         });
     }
 
-    private async createGame(this: this, socket: Socket, gameInfo: GameScrabbleInformation) {
+    async createGame(this: this, gameInfo: GameScrabbleInformation) {
         const players = this.setAndGetPlayer(gameInfo);
         const game = this.createNewGame(gameInfo);
         const gameCreator = players[0];
@@ -130,12 +127,7 @@ export class GamesStateService {
         }
     }
 
-    // eslint-disable-next-line @typescript-eslint/member-ordering
-    setAndGetPlayer(gameInfo: GameScrabbleInformation): Player[] {
-        // console.log(gameInfo.socketId[0]);
-        // const player = this.gamesHandler.players.has(gameInfo.socketId[0]) ? 1 : 0;
-
-        // let newPlayer: Player;
+    private setAndGetPlayer(gameInfo: GameScrabbleInformation): Player[] {
         const players: Player[] = [];
         gameInfo.socketId.forEach((socket, i) => {
             const newPlayer: Player = new RealPlayer(gameInfo.playerName[i]);
@@ -178,8 +170,7 @@ export class GamesStateService {
         const players = this.gamesHandler.gamePlayers.get(gameInfo.roomId)?.players as Player[];
         const gameBehavior = this.gamesHandler.dictionaries.get(gameInfo.dictionary);
         return new Game(
-            players[0],
-            players[1],
+            players,
             new Turn(gameInfo.timer),
             new LetterReserve(),
             gameInfo.mode === 'classique' ? false : true,
@@ -235,7 +226,7 @@ export class GamesStateService {
         botPlayer.rack = info.rack;
 
         if (playerToReplace.game.turn.activePlayer === playerToReplace.name) playerToReplace.game.turn.activePlayer = botPlayer.name;
-        else playerToReplace.game.turn.inactivePlayer = botPlayer.name;
+        else playerToReplace.game.turn.inactivePlayers?.push(botPlayer.name);
         if (playerInRoom[1] === playerToReplace)
             this.gamesHandler.gamePlayers.set(playerToReplace.room, {
                 gameInfo: this.gamesHandler.gamePlayers.get(playerToReplace.room)?.gameInfo as GameScrabbleInformation,
