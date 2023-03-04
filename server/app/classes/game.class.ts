@@ -26,8 +26,7 @@ export class Game {
     letterPlacement: LetterPlacement;
 
     constructor(
-        player1: Player,
-        player2: Player,
+        players: Player[],
         public turn: Turn,
         public letterReserve: LetterReserve,
         public isMode2990: boolean,
@@ -35,12 +34,12 @@ export class Game {
         letterPlacement: LetterPlacement,
         wordSolver: WordSolver,
     ) {
-        this.start(player1, player2);
+        this.start(players);
         this.beginningTime = new Date();
         this.gameboard = new Gameboard();
         this.isGameFinish = false;
         this.isModeSolo = false;
-        if (isMode2990) this.objectivesHandler = new ObjectivesHandler(player1, player2);
+        // if (isMode2990) this.objectivesHandler = new ObjectivesHandler(player1, player2);
         this.isGameAbandoned = false;
         this.gameMode = '';
         this.dictionaryValidation = dictionaryValidation;
@@ -48,10 +47,12 @@ export class Game {
         this.wordSolver = wordSolver;
     }
 
-    start(player1: Player, player2: Player): void {
-        this.letterReserve.generateLetters(MAX_QUANTITY, player1.rack);
-        this.letterReserve.generateLetters(MAX_QUANTITY, player2.rack);
-        this.turn.determinePlayer(player1, player2);
+    start(players: Player[]): void {
+        players.forEach((player) => {
+            this.letterReserve.generateLetters(MAX_QUANTITY, player.rack);
+        });
+
+        this.turn.determinePlayer(players);
         this.turn.start();
     }
 
