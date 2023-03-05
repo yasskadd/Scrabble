@@ -3,8 +3,13 @@
     <div class='container'>
         <div id='police'>
             <p id='font-size'>Taille de la police :</p>
-            <mat-slider id='updateFontSlider' (input)='updateFontSize($any($event))' step='1' min='20'
-                        max='30'></mat-slider>
+            <mat-slider 
+                step='1' 
+                min='20' 
+                max='30'
+            >
+                <input matSliderThumb [formControl]="sliderForm" >
+            </mat-slider>
         </div>
         <canvas id='canvas' #gridCanvas (click)='mouseHitDetect($event)' [attr.width]='width'
                 [attr.height]='height'></canvas>
