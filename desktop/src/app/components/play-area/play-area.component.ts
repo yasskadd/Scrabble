@@ -91,7 +91,6 @@ export class PlayAreaComponent implements AfterViewInit {
     }
 
     updateFontSize(): void {
-        console.log('test');
         this.gridService.letterSize = this.sliderForm.value;
         this.gameClientService.updateGameboard();
         this.letterService.resetGameBoardView();

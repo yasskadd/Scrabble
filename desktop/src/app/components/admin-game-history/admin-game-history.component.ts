@@ -18,10 +18,9 @@ export class AdminGameHistoryComponent implements OnInit {
     }
 
     deleteHistory() {
-        this.httpHandler
-            .deleteHistory().subscribe(() => {
-                this.updateHistory();
-            });
+        this.httpHandler.deleteHistory().subscribe(() => {
+            this.updateHistory();
+        });
     }
 
     updateHistory() {

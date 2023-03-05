@@ -30,9 +30,8 @@ export class HighScoresService {
     }
 
     resetHighScores() {
-        this.httpHandler
-            .resetHighScores().subscribe(() => {
-                this.getHighScores();
-            });
+        this.httpHandler.resetHighScores().subscribe(() => {
+            this.getHighScores();
+        });
     }
 }
