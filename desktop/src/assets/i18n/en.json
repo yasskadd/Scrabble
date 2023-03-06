@@ -22,16 +22,20 @@
             "join": "Join"
         }
     },
-    "creation_page": {
+    "new_game_page": {
         "game_settings": "Game's settings",
         "opponent_name": "Opponent name",
+        "available_games": "Available games",
+        "no_available_games": "No available games",
         "label": {
             "name": "Player name",
+            "difficulty": "Difficulty",
             "timer": "Timer",
-            "dictionary": "Dictionnary",
-            "difficulty": "Difficulty"
+            "dictionary": "Dictionary"
         },
-        "start": "Start"
+        "random": "Random",
+        "start": "Start",
+        "join": "Join"
     },
     "admin_page": {
         "dictionary_list": "List of available dictionaries",

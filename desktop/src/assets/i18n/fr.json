@@ -22,16 +22,20 @@
             "join": "Rejoindre"
         }
     },
-    "creation_page": {
+    "new_game_page": {
         "game_settings": "Paramètres de jeu",
         "opponent_name": "Nom d'adversaire",
+        "available_games": "Parties disponibles",
+        "no_available_games": "Aucunes parties disponibles",
         "label": {
             "name": "Nom de joueur",
+            "difficulty": "Difficulté",
             "timer": "Minuterie",
-            "dictionary": "Dictionnaire",
-            "difficulty": "Difficulté"
+            "dictionary": "Dictionnaire"
         },
-        "start": "Commencer"
+        "random": "Aléatoire",
+        "start": "Commencer",
+        "join": "Joindre"
     },
     "admin_page": {
         "dictionary_list": "Liste des dictionnaires disponibles",
