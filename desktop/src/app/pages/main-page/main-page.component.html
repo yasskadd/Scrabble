@@ -4,11 +4,11 @@
         <div class="always-visible-content">
             <button *ngIf="!chatIsOpen" class="open-chat-button" mat-button (click)="drawer.toggle()" (click)="openChat()">
                 <mat-icon>chat_bubble_outline</mat-icon>
-                {{ "main.chat.open" | translate }}
+                {{ "main_page.chat.open" | translate }}
             </button>
             <button *ngIf="chatIsOpen" class="open-chat-button" mat-button (click)="drawer.toggle()" (click)="closeChat()">
                 <mat-icon>keyboard_arrow_left</mat-icon>
-                {{ "main.chat.close" | translate }}
+                {{ "main_page.chat.close" | translate }}
             </button>
 
             <mat-card class="justified">
@@ -19,11 +19,11 @@
                         color="primary"
                         class="button game"
                         (click)="openGameTypeDialog('classique')"
-                        matTooltip="{{ 'main.tooltip.play' | translate }}"
+                        matTooltip="{{ 'main_page.tooltip.play' | translate }}"
                         matTooltipPosition="right"
                         matTooltipClass="toolMainPage"
                     >
-                        {{ "main.play" | translate }}
+                        {{ "main_page.play" | translate }}
                     </button>
                     <button
                         id="LOG3900"
@@ -41,7 +41,7 @@
                     <div
                         id="scores"
                         (click)="openHighScoreDialog()"
-                        matTooltip="{{ 'main.tooltip.scores' | translate }}"
+                        matTooltip="{{ 'main_page.tooltip.scores' | translate }}"
                         matTooltipPosition="right"
                         matTooltipClass="toolMainPage"
                     >
@@ -54,15 +54,15 @@
                         mat-fab
                         (click)="openHelpDialog()"
                         class="help-button"
-                        matTooltip="{{ 'main.tooltip.game_instructions' | translate }}"
+                        matTooltip="{{ 'main_page.tooltip.game_instructions' | translate }}"
                         matTooltipPosition="right"
                         matTooltipClass="toolMainPage"
                     >
                         <mat-icon>help_outline</mat-icon>
                     </button> -->
-                    <div *ngIf="loggedIn">{{ "main.connected_w_username" | translate }} : {{ userService.userName }}</div>
+                    <div *ngIf="loggedIn">{{ "main_page.connected_w_username" | translate }} : {{ userService.userName }}</div>
                     <mat-form-field class="text-input">
-                        <mat-label>{{ "main.label.username" | translate }}</mat-label>
+                        <mat-label>{{ "main_page.label.username" | translate }}</mat-label>
                         <input matInput (keydown.enter)="logIn()" [formControl]="userNameForm" />
                         <mat-icon matSuffix>person</mat-icon>
                         <mat-error *ngIf="(!homeConnectionResponse.validity || userNameForm.invalid) && !chatBoxHandlerService.loggedIn"
@@ -70,10 +70,10 @@
                         </mat-error>
                     </mat-form-field>
                     <div class="buttons-columns">
-                        <button mat-raised-button *ngIf="!loggedIn" (click)="logIn()">{{ "main.login" | translate }}</button>
-                        <button mat-raised-button *ngIf="loggedIn" disabled>{{ "main.login" | translate }}</button>
-                        <button mat-raised-button *ngIf="loggedIn" (click)="logOut()">{{ "main.logout" | translate }}</button>
-                        <button mat-raised-button *ngIf="!loggedIn" disabled>{{ "main.logout" | translate }}</button>
+                        <button mat-raised-button *ngIf="!loggedIn" (click)="logIn()">{{ "main_page.login" | translate }}</button>
+                        <button mat-raised-button *ngIf="loggedIn" disabled>{{ "main_page.login" | translate }}</button>
+                        <button mat-raised-button *ngIf="loggedIn" (click)="logOut()">{{ "main_page.logout" | translate }}</button>
+                        <button mat-raised-button *ngIf="!loggedIn" disabled>{{ "main_page.logout" | translate }}</button>
                     </div>
                 </mat-card-content>
             </mat-card>

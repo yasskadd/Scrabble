@@ -1,15 +1,15 @@
 <body class="justified">
     <mat-card class="wrapper">
         <mat-card-title class="main-title">
-            {{ "creation.game_settings" | translate }}
+            {{ "creation_page.game_settings" | translate }}
         </mat-card-title>
         <div>
             <form *ngIf="isSoloMode()" class="soloMode">
-                <mat-label> {{ "creation.opponent_name" | translate }} : {{ botName }} </mat-label>
+                <mat-label> {{ "creation_page.opponent_name" | translate }} : {{ botName }} </mat-label>
             </form>
             <br />
             <mat-form-field appearance="fill">
-                <mat-label> {{ "creation.label.name" | translate }} </mat-label>
+                <mat-label> {{ "creation_page.label.name" | translate }} </mat-label>
                 <input matInput maxlength="20" type="text" [(ngModel)]="playerName" placeholder="Ex. Robert" />
                 <mat-hint
                     [ngClass]="{
@@ -23,7 +23,7 @@
             <form *ngIf="isSoloMode()" class="soloMode" [formGroup]="form">
                 <mat-form-field appearance="fill">
                     <mat-label>
-                        {{ "creation.label.difficulty" | translate }}
+                        {{ "creation_page.label.difficulty" | translate }}
                     </mat-label>
                     <mat-select id="difficulty-select" formControlName="difficultyBot">
                         <mat-option id="difficulty-options" *ngFor="let difficulty of difficultyList" [value]="difficulty">
@@ -35,7 +35,7 @@
 
             <form [formGroup]="form">
                 <mat-form-field appearance="fill">
-                    <mat-label> {{ "creation.label.timer" | translate }} </mat-label>
+                    <mat-label> {{ "creation_page.label.timer" | translate }} </mat-label>
                     <mat-select id="timer-select" formControlName="timer">
                         <mat-option id="timer-options" *ngFor="let time of timerList" [value]="time">
                             {{ timer.getTimeStamp(time) }}
@@ -46,7 +46,7 @@
 
             <form [formGroup]="form">
                 <mat-form-field appearance="fill">
-                    <mat-label> {{ "creation.label.dictionary" | translate }} </mat-label>
+                    <mat-label> {{ "creation_page.label.dictionary" | translate }} </mat-label>
                     <mat-select (click)="downloadDictionaries()" formControlName="dictionary">
                         <mat-option *ngFor="let dictionary of dictionaryList" [value]="dictionary.title">
                             {{ dictionary.title.charAt(0).toUpperCase() + dictionary.title.slice(1) }}
@@ -67,7 +67,7 @@
                     <mat-icon>navigate_before</mat-icon>
                 </button>
                 <button class="start-button" (click)="createGame()" mat-raised-button [disabled]="!playerName">
-                    {{ "creation.start" | translate }}
+                    {{ "creation_page.start" | translate }}
                 </button>
             </div>
         </div>

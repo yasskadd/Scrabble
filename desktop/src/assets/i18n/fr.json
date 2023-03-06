@@ -1,5 +1,5 @@
 {
-    "main": {
+    "main_page": {
         "chat": {
             "open": "Ouvrir le chat",
             "close": "Fermer le chat"
@@ -22,7 +22,7 @@
             "join": "Rejoindre"
         }
     },
-    "creation": {
+    "creation_page": {
         "game_settings": "Paramètres de jeu",
         "opponent_name": "Nom d'adversaire",
         "label": {
@@ -33,8 +33,8 @@
         },
         "start": "Commencer"
     },
-    "admin": {
-        "dictionnary_list": "Liste des dictionnaires disponibles",
+    "admin_page": {
+        "dictionary_list": "Liste des dictionnaires disponibles",
         "tabs": {
             "dictionaries": "Dictionnaires",
             "virtual_players": "Joueurs virtuels",

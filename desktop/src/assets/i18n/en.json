@@ -1,5 +1,5 @@
 {
-    "main": {
+    "main_page": {
         "chat": {
             "open": "Close chat",
             "close": "Open chat"
@@ -22,7 +22,7 @@
             "join": "Join"
         }
     },
-    "creation": {
+    "creation_page": {
         "game_settings": "Game's settings",
         "opponent_name": "Opponent name",
         "label": {
@@ -33,8 +33,8 @@
         },
         "start": "Start"
     },
-    "admin": {
-        "dictionnary_list": "List of available dictionaries",
+    "admin_page": {
+        "dictionary_list": "List of available dictionaries",
         "tabs": {
             "dictionaries": "Dictionaries",
             "virtual_players": "Virtual players",
