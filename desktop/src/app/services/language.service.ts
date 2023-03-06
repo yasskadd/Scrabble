@@ -12,6 +12,10 @@ export class LanguageService {
         this.translateService.use('fr');
     }
 
+    get language(): string {
+        return this.translateService.currentLang;
+    }
+
     setLanguage(choice: LanguageChoice): void {
         this.translateService.use(choice.toString());
     }

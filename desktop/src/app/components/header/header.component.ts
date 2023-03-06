@@ -23,7 +23,7 @@ export class HeaderComponent {
     constructor(private languageService: LanguageService, private router: Router) {
         this.isHomePage = this.checkIfHomePage();
 
-        this.languageForm = new FormControl('fr', Validators.required);
+        this.languageForm = new FormControl(this.languageService.language, Validators.required);
         this.languageForm.valueChanges.subscribe((value: string) => {
             this.languageService.setLanguage(value as LanguageChoice);
         });
