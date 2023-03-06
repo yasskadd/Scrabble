@@ -2,13 +2,10 @@ import { Injectable } from '@angular/core';
 import { GameParameters } from '@app/interfaces/game-parameters';
 import { GameRoomClient } from '@app/interfaces/game-room-client';
 import { RoomInformation } from '@app/interfaces/room-information';
+import { GameStatus } from '@app/models/game-status';
 import { SocketEvents } from '@common/constants/socket-events';
 import { ReplaySubject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
-
-const FOUND_OPPONENT_MESSAGE = 'Adversaire Trouvé';
-const SEARCHING_OPPONENT = "En Attente d'un Adversaire ...";
-const WAITING_OPPONENT_CONFIRMATION = "En Attente de la confirmation de L'adversaire";
 
 @Injectable({
     providedIn: 'root',
@@ -104,12 +101,12 @@ export class GameConfigurationService {
 
     rejectOpponent(): void {
         this.clientSocket.send(SocketEvents.RejectOpponent, this.roomInformation.roomId);
-        this.roomInformation.statusGame = SEARCHING_OPPONENT;
+        this.roomInformation.statusGame = GameStatus.SearchingOpponent;
         this.roomInformation.playerName.pop();
     }
 
     gameInitialization(parameters: GameParameters): void {
-        this.roomInformation.statusGame = SEARCHING_OPPONENT;
+        this.roomInformation.statusGame = GameStatus.SearchingOpponent;
         if (parameters.opponent !== undefined) {
             this.roomInformation.playerName[1] = parameters.opponent;
             this.roomInformation.botDifficulty = parameters.botDifficulty;
@@ -160,13 +157,13 @@ export class GameConfigurationService {
     }
 
     private opponentLeaveEvent(): void {
-        this.roomInformation.statusGame = SEARCHING_OPPONENT;
+        this.roomInformation.statusGame = GameStatus.SearchingOpponent;
         this.roomInformation.playerName.pop();
     }
 
     private foundAnOpponentEvent(opponentName: string): void {
         this.roomInformation.playerName[1] = opponentName;
-        this.roomInformation.statusGame = FOUND_OPPONENT_MESSAGE;
+        this.roomInformation.statusGame = GameStatus.FoundOpponent;
     }
 
     private gameAboutToStartEvent(socketIDUserRoom: string[]): void {
@@ -192,7 +189,7 @@ export class GameConfigurationService {
 
     private joinValidGameEvent(playerName: string): void {
         this.roomInformation.isCreator = false;
-        this.roomInformation.statusGame = WAITING_OPPONENT_CONFIRMATION;
+        this.roomInformation.statusGame = GameStatus.WaitingOpponentConfirmation;
         this.roomInformation.playerName[1] = playerName;
         this.setRoomJoinableSubject();
     }
