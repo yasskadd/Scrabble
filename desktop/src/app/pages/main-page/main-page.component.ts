@@ -63,7 +63,6 @@ export class MainPageComponent implements OnDestroy {
         this.highScore.open(DialogBoxHighScoresComponent, {
             width: this.dialogWidthHighScore,
             panelClass: 'highScoreComponent',
-            disableClose: true,
         });
     }
 

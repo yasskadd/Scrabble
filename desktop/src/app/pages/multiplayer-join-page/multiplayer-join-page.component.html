@@ -29,7 +29,7 @@
                         <td>{{ timer.getTimeStamp(gameRoom.timer) }}</td>
                         <td>{{ gameRoom.dictionary }}</td>
                         <button class="join-game" (click)="joinRoom(gameRoom.id)" mat-raised-button [disabled]="!playerNameForm.value">
-                            {{ "new_game_page.join" | translate }}
+                            {{ "action.join" | translate }}
                         </button>
                     </tr>
                 </tbody>

@@ -17,9 +17,7 @@
             "username": "Username"
         },
         "play_dialog": {
-            "solo": "Solo",
-            "create": "Create",
-            "join": "Join"
+            "solo": "Solo"
         }
     },
     "new_game_page": {
@@ -33,9 +31,7 @@
             "timer": "Timer",
             "dictionary": "Dictionary"
         },
-        "random": "Random",
-        "start": "Start",
-        "join": "Join"
+        "random": "Random"
     },
     "admin_page": {
         "dictionary_list": "List of available dictionaries",
@@ -46,6 +42,13 @@
             "highscores": "Highscores"
         }
     },
+    "waiting_page": {
+        "start": "Start",
+        "reject": "Reject",
+        "join": {
+            "solo": "Join a solo game"
+        }
+    },
     "virtual_player": {
         "difficulty": {
             "beginner": "Beginner",
@@ -54,6 +57,9 @@
         "add": "Add a virtual player"
     },
     "action": {
+        "start": "Start",
+        "join": "Join",
+        "create": "Create",
         "refresh": "Refresh",
         "reset": "Reset",
         "modify": "Modify",
@@ -77,7 +83,10 @@
             "classic": "Classic"
         },
         "state": {
-            "abandoned": "Abandoned"
+            "abandoned": "Abandoned",
+            "found_opponent": "Opponent found",
+            "searching_opponent": "Searching for opponent...",
+            "waiting_opponent": "Waiting for opponent..."
         }
     },
     "header": {
