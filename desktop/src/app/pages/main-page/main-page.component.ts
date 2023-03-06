@@ -8,9 +8,8 @@ import { SocketResponse } from '@app/interfaces/server-responses';
 import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
 import { UserService } from '@app/services/user.service';
 import { SocketEvents } from '@common/constants/socket-events';
-import { Subject } from 'rxjs';
-import { LanguageChoice } from '@app/models/language-choice';
 import { LanguageService } from '@services/language.service';
+import { Subject } from 'rxjs';
 
 @Component({
     selector: 'app-main-page',
@@ -21,13 +20,11 @@ export class MainPageComponent implements OnDestroy {
     readonly title: string = "Bienvenue au Scrabble de l'équipe 107!";
 
     protected userNameForm: FormControl;
-    protected languageForm: FormControl;
     protected homeConnectionResponse: SocketResponse;
     protected connectionSubject: Subject<SocketResponse>;
     protected disconnectionSubject: Subject<void>;
 
     protected chatIsOpen: boolean;
-    protected languageChoices: typeof LanguageChoice = LanguageChoice;
 
     private readonly dialogWidth: string = '500px';
     private readonly dialogWidthHighScore: string = '750px';
@@ -41,13 +38,9 @@ export class MainPageComponent implements OnDestroy {
     ) {
         this.homeConnectionResponse = { validity: false };
         this.userNameForm = new FormControl('', Validators.required);
-        this.languageForm = new FormControl('fr', Validators.required);
         this.chatIsOpen = false;
 
         this.subscribeConnectionEvents();
-        this.languageForm.valueChanges.subscribe((value: string) => {
-            this.languageService.setLanguage(value as LanguageChoice);
-        });
     }
 
     protected get loggedIn(): boolean {

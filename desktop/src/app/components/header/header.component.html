@@ -8,8 +8,16 @@
 
 <div id="admin">
     <div *ngFor="let letter of getWelcomeLetters()">{{ letter }}</div>
-</div>
+</div> 
 
 <div id="image">
     <img src="https://bit.ly/3m206ss" width="300" height="60" alt="Logo Scrabble" (click)="redirectHome()" />
 </div>
+
+<mat-form-field appearance="outline" class="language-selector">
+    <mat-label>Language</mat-label>
+    <mat-select [formControl]="languageForm" required>
+        <mat-option [value]="languageChoices.French">{{ languageChoices.French.toString().toLocaleUpperCase() }}</mat-option>
+        <mat-option [value]="languageChoices.English">{{ languageChoices.English.toString().toLocaleUpperCase() }}</mat-option>
+    </mat-select> 
+</mat-form-field>
