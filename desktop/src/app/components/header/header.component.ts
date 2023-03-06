@@ -11,10 +11,6 @@ import { LanguageService } from '@app/services/language.service';
     styleUrls: ['./header.component.scss'],
 })
 export class HeaderComponent {
-    // TODO : Language
-    readonly homePage: string[] = ['A', 'C', 'C', 'U', 'E', 'I', 'L'];
-    readonly adminPage: string[] = ['A', 'D', 'M', 'I', 'N'];
-
     isHomePage: boolean;
 
     protected languageForm: FormControl;
@@ -30,7 +26,7 @@ export class HeaderComponent {
     }
 
     checkIfHomePage() {
-        return this.router.url === AppRoutes.HomePage;
+        return this.router.url.includes(AppRoutes.HomePage);
     }
 
     redirectHome() {
@@ -43,14 +39,14 @@ export class HeaderComponent {
         this.router.navigate([AppRoutes.AdminPage]).then();
     }
 
-    getWelcomeLetters(): string[] {
-        const welcomeLetters: string[] = [];
-        this.languageService.getWord('header.welcome').subscribe((word: string) => {
+    getLetters(translation: string): string[] {
+        const letters: string[] = [];
+        this.languageService.getWord(translation).subscribe((word: string) => {
             for (let i = 0; i < word.length; i++) {
-                welcomeLetters.push(word.charAt(i));
+                letters.push(word.charAt(i));
             }
         });
 
-        return welcomeLetters;
+        return letters;
     }
 }

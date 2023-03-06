@@ -81,7 +81,8 @@
         }
     },
     "header": {
-        "welcome": "Bienvenue"
+        "home": "Acceuil",
+        "admin": "Admin"
     },
     "chat": {
         "disconnected": "Vous devez vous connecter afin d'avoir accès au clavardage"

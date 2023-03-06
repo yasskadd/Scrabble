@@ -1,14 +1,10 @@
-<!-- <div *ngIf="!isHomePage" id="home" (click)="redirectHome()">
-    <div *ngFor="let letter of homePage">{{ letter }}</div>
-</div> -->
+<div *ngIf="!isHomePage" id="home" (click)="redirectHome()">
+    <div *ngFor="let letter of getLetters('header.home')">{{ letter }}</div>
+</div>
 
-<!-- <div *ngIf="isHomePage" id="admin" (click)="redirectAdmin()">
-    <div *ngFor="let letter of adminPage">{{ letter }}</div>
-</div> -->
-
-<div id="admin">
-    <div *ngFor="let letter of getWelcomeLetters()">{{ letter }}</div>
-</div> 
+<div *ngIf="isHomePage" id="admin" (click)="redirectAdmin()">
+    <div *ngFor="let letter of getLetters('header.admin')">{{ letter }}</div>
+</div>
 
 <div id="image">
     <img src="https://bit.ly/3m206ss" width="300" height="60" alt="Logo Scrabble" (click)="redirectHome()" />
@@ -19,5 +15,5 @@
     <mat-select [formControl]="languageForm" required>
         <mat-option [value]="languageChoices.French">{{ languageChoices.French.toString().toLocaleUpperCase() }}</mat-option>
         <mat-option [value]="languageChoices.English">{{ languageChoices.English.toString().toLocaleUpperCase() }}</mat-option>
-    </mat-select> 
+    </mat-select>
 </mat-form-field>

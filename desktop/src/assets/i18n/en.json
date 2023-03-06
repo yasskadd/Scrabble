@@ -81,7 +81,8 @@
         }
     },
     "header": {
-        "welcome": "Welcome"
+        "home": "Home",
+        "admin": "Admin"
     },
     "chat": {
         "disconnected": "You need to be connected to access the chat rooms"
