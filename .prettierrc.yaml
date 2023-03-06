@@ -1,5 +1,10 @@
 trailingComma: 'all'
 tabWidth: 4
 semi: true
-singleQuote: false
+singleQuote: true
 printWidth: 150
+overrides:
+  - files: 
+    - "*.html"
+    options:
+      singleQuote: false
