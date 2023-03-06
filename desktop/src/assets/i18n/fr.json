@@ -22,6 +22,17 @@
             "join": "Rejoindre"
         }
     },
+    "creation": {
+        "game_settings": "Paramètres de jeu",
+        "opponent_name": "Nom d'adversaire",
+        "label": {
+            "name": "Nom de joueur",
+            "timer": "Minuterie",
+            "dictionary": "Dictionnaire",
+            "difficulty": "Difficulté"
+        },
+        "start": "Commencer"
+    },
     "admin": {
         "dictionnary_list": "Liste des dictionnaires disponibles",
         "tabs": {

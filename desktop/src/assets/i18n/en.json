@@ -22,6 +22,17 @@
             "join": "Join"
         }
     },
+    "creation": {
+        "game_settings": "Game's settings",
+        "opponent_name": "Opponent name",
+        "label": {
+            "name": "Player name",
+            "timer": "Timer",
+            "dictionary": "Dictionnary",
+            "difficulty": "Difficulty"
+        },
+        "start": "Start"
+    },
     "admin": {
         "dictionnary_list": "List of available dictionaries",
         "tabs": {

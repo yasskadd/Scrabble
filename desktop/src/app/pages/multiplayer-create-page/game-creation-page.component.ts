@@ -3,15 +3,15 @@ import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/fo
 import { ActivatedRoute, Router } from '@angular/router';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
+import { AppRoutes } from '@app/models/app-routes';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
-import { TimeService } from '@services/time.service';
 import { VirtualPlayersService } from '@app/services/virtual-players.service';
-import { GameTimeOptions } from '@common/models/game-time-options';
-import { GameDifficulty } from '@common/models/game-difficulty';
-import { AppRoutes } from '@app/models/app-routes';
 import { DictionaryEvents } from '@common/models/dictionary-events';
+import { GameDifficulty } from '@common/models/game-difficulty';
+import { GameTimeOptions } from '@common/models/game-time-options';
 import { SnackBarService } from '@services/snack-bar.service';
+import { TimeService } from '@services/time.service';
 
 @Component({
     selector: 'app-multiplayer-create-page',
