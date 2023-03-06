@@ -15,6 +15,11 @@
         },
         "label": {
             "username": "Username"
+        },
+        "play_dialog": {
+            "solo": "Solo",
+            "create": "Create",
+            "join": "Join"
         }
     },
     "admin": {
@@ -37,7 +42,8 @@
         "refresh": "Refresh",
         "reset": "Reset",
         "modify": "Modify",
-        "delete": "Delete"
+        "delete": "Delete",
+        "back": "Back"
     },
     "file": {
         "title": "Title",

@@ -15,6 +15,11 @@
         },
         "label": {
             "username": "Nom d'utilisateur"
+        },
+        "play_dialog": {
+            "solo": "Solo",
+            "create": "Créer",
+            "join": "Rejoindre"
         }
     },
     "admin": {
@@ -37,7 +42,8 @@
         "refresh": "Rafraîchir",
         "reset": "Réinitialiser",
         "modify": "Modifier",
-        "delete": "Supprimer"
+        "delete": "Supprimer",
+        "back": "Retour"
     },
     "file": {
         "title": "Titre",
