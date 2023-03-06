@@ -9,7 +9,7 @@
         "login": "Se connecter",
         "logout": "Se déconnecter",
         "tooltip": {
-            "game_instructions": "Des instructions pour le jeu",
+            "game_instructions": "Instructions pour le jeu",
             "play": "Mode classique de Scrabble",
             "scores": "Classement des meilleurs scores pour chacun des modes de jeu"
         },
@@ -49,6 +49,24 @@
             "solo": "Rejoindre une partie en solo"
         }
     },
+    "game_page": {
+        "informations": {
+            "letters_available": "lettres disponibles",
+            "letters_remaining": "lettres restantes",
+            "points": "points",
+            "objectives": "Objectifs",
+            "ongoing": "En cours",
+            "completed": "Complétés",
+            "opponent_completed": "Complétés par l'adversaire"
+        },
+        "play_area": {
+            "font_size": "Taille de police"
+        },
+        "rack": {
+            "skip_round": "Passer",
+            "switch_letters": "Échanger"
+        }
+    },
     "virtual_player": {
         "difficulty": {
             "beginner": "Débutant",
@@ -64,7 +82,11 @@
         "reset": "Réinitialiser",
         "modify": "Modifier",
         "delete": "Supprimer",
-        "back": "Retour"
+        "back": "Retour",
+        "abandon": "Abandonner",
+        "quit": "Quitter",
+        "cancel": "Annuler",
+        "play": "Jouer"
     },
     "file": {
         "title": "Titre",
@@ -83,10 +105,13 @@
             "classic": "Classique"
         },
         "state": {
+            "loading": "Chargement en cours...",
             "abandoned": "Abandonnée",
             "found_opponent": "Adversaire trouvé",
             "searching_opponent": "En attente d'un adversaire...",
-            "waiting_opponent": "En attente de confirmation..."
+            "waiting_opponent": "En attente de confirmation...",
+            "equality": "Égalité! Vous avez le même score que votre adversaire!",
+            "winned": "Victoire à {{playerName}}! Bravo!"
         }
     },
     "header": {
@@ -94,6 +119,7 @@
         "admin": "Admin"
     },
     "chat": {
+        "message_box": "Entrez un message",
         "disconnected": "Vous devez vous connecter afin d'avoir accès au clavardage"
     },
     "footer": {

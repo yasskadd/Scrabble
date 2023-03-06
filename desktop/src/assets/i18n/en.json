@@ -49,6 +49,24 @@
             "solo": "Join a solo game"
         }
     },
+    "game_page": {
+        "informations": {
+            "letters_available": "available letters",
+            "letters_remaining": "remaining letters",
+            "points": "points",
+            "objectives": "Objectives",
+            "ongoing": "Ongoing",
+            "completed": "Completed",
+            "opponent_completed": "Completed by opponent"
+        },
+        "play_area": {
+            "font_size": "Font size"
+        },
+        "rack": {
+            "skip_round": "Skip",
+            "switch_letters": "Swap"
+        }
+    },
     "virtual_player": {
         "difficulty": {
             "beginner": "Beginner",
@@ -64,7 +82,11 @@
         "reset": "Reset",
         "modify": "Modify",
         "delete": "Delete",
-        "back": "Back"
+        "back": "Back",
+        "abandon": "Abandon",
+        "quit": "Quit",
+        "cancel": "Cancel",
+        "play": "Play"
     },
     "file": {
         "title": "Title",
@@ -83,10 +105,13 @@
             "classic": "Classic"
         },
         "state": {
+            "loading": "Loading...",
             "abandoned": "Abandoned",
             "found_opponent": "Opponent found",
             "searching_opponent": "Searching for opponent...",
-            "waiting_opponent": "Waiting for opponent..."
+            "waiting_opponent": "Waiting for opponent...",
+            "equality": "Equality! You got the same scores!",
+            "winned": "Victory of {{playerName}}! Congratulations!"
         }
     },
     "header": {
@@ -94,6 +119,7 @@
         "admin": "Admin"
     },
     "chat": {
+        "message_box": "Enter a message",
         "disconnected": "You need to be connected to access the chat rooms"
     },
     "footer": {
