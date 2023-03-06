@@ -1,14 +1,14 @@
 <div class="container" mat-dialog-content>
     <div class="wrapper">
         <div class="scoreInfo classique">
-            <mat-card-title>Partie Classique</mat-card-title>
+            <mat-card-title> {{ "game.type.classic" | translate }} </mat-card-title>
             <mat-card class="highScoreTableClassic">
                 <table>
                     <thead class="tableContainer">
                         <tr>
                             <th></th>
-                            <th>Scores</th>
-                            <th>Joueurs</th>
+                            <th>{{ "game.info.scores" | translate }}</th>
+                            <th>{{ "game.info.players" | translate }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -18,8 +18,8 @@
                                     ng
                                     [ngClass]="{ first: highScore.position === 1, second: highScore.position === 2, third: highScore.position === 3 }"
                                     *ngIf="highScore.position === 1 || highScore.position === 2 || highScore.position === 3"
-                                    >emoji_events</mat-icon
-                                >
+                                    >emoji_events
+                                </mat-icon>
                             </td>
 
                             <td class="tableData">
@@ -33,7 +33,7 @@
                 </table>
             </mat-card>
         </div>
-        <div class="scoreInfo log2990">
+        <!-- <div class="scoreInfo log2990">
             <mat-card-title>Partie LOG2990</mat-card-title>
             <mat-card class="highScoreTableLOG2990">
                 <table>
@@ -65,6 +65,6 @@
                     </tbody>
                 </table>
             </mat-card>
-        </div>
+        </div> -->
     </div>
 </div>

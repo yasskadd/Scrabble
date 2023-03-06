@@ -17,6 +17,48 @@
             "username": "Nom d'utilisateur"
         }
     },
+    "admin": {
+        "dictionnary_list": "Liste des dictionnaires disponibles",
+        "tabs": {
+            "dictionaries": "Dictionnaires",
+            "virtual_players": "Joueurs virtuels",
+            "game_historic": "Historique de jeu",
+            "highscores": "Meilleurs scores"
+        }
+    },
+    "virtual_player": {
+        "difficulty": {
+            "beginner": "Débutant",
+            "expert": "Expert"
+        },
+        "add": "Add a virtual player"
+    },
+    "action": {
+        "refresh": "Rafraîchir",
+        "reset": "Réinitialiser",
+        "modify": "Modifier",
+        "delete": "Supprimer"
+    },
+    "file": {
+        "title": "Titre",
+        "description": "Description",
+        "choose": "Choisir un fichier"
+    },
+    "dictionary": {
+        "add": "Ajouter un dictionnaire"
+    },
+    "game": {
+        "info": {
+            "scores": "Scores",
+            "players": "Joueurs"
+        },
+        "type": {
+            "classic": "Classique"
+        },
+        "state": {
+            "abandoned": "Abandonnée"
+        }
+    },
     "header": {
         "welcome": "Bienvenue"
     },
@@ -31,6 +73,12 @@
             "usernameAlreadyExists": "Le nom d'utilisateur existe déjà",
             "roomFull": "Impossible de se connecter à la salle",
             "empty": "Le nom ne peut pas être vide"
+        },
+        "file": {
+            "not_json": "Le fichier n'est pas de type .json",
+            "reading": "Le fichier n'a pas pu être lu",
+            "verifying": "En vérification, veuillez patienter...",
+            "none": "Aucun fichier sélectionné"
         }
     },
     "snackbar": {

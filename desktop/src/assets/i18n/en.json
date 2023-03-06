@@ -17,6 +17,48 @@
             "username": "Username"
         }
     },
+    "admin": {
+        "dictionnary_list": "List of available dictionaries",
+        "tabs": {
+            "dictionaries": "Dictionaries",
+            "virtual_players": "Virtual players",
+            "game_historic": "Games history",
+            "highscores": "Highscores"
+        }
+    },
+    "virtual_player": {
+        "difficulty": {
+            "beginner": "Beginner",
+            "expert": "Expert"
+        },
+        "add": "Add a virtual player"
+    },
+    "action": {
+        "refresh": "Refresh",
+        "reset": "Reset",
+        "modify": "Modify",
+        "delete": "Delete"
+    },
+    "file": {
+        "title": "Title",
+        "description": "Description",
+        "choose": "Choose a file"
+    },
+    "dictionary": {
+        "add": "Add a dictionary"
+    },
+    "game": {
+        "info": {
+            "scores": "Scores",
+            "players": "Players"
+        },
+        "type": {
+            "classic": "Classic"
+        },
+        "state": {
+            "abandoned": "Abandoned"
+        }
+    },
     "header": {
         "welcome": "Welcome"
     },
@@ -31,6 +73,12 @@
             "usernameAlreadyExists": "Username already exists",
             "roomFull": "Can't connect to the room",
             "empty": "Username cannot be empty"
+        },
+        "file": {
+            "not_json": "File is not of type .json",
+            "reading": "An error occured during reading",
+            "verifying": "Verifying, please wait...",
+            "none": "No file selected"
         }
     },
     "snackbar": {
