@@ -6,13 +6,13 @@
 
 app-header {
     display: flex;
-    background-color: #7fa99b;
+    // background-color: #7fa99b;
     height: 10%;
 }
 
 mat-drawer-container {
     height: 75%;
-    background-color: #c2e5da;
+    // background-color: #c2e5da;
     display: flex;
     justify-content: center; // for horizontal
     align-items: center;
@@ -65,8 +65,8 @@ mat-drawer {
 app-footer {
     height: 15%;
     text-align: center;
-    color: #23501f;
-    background-color: #7fa99b;
+    // color: #23501f;
+    // background-color: #7fa99b;
 }
 
 .justified {
@@ -84,8 +84,8 @@ app-footer {
 .mat-card {
     padding: 30px;
     width: 40%;
-    box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
-    background-color: #7fa99b;
+    // box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+    // background-color: #7fa99b;
 }
 
 .mat-raised-button:hover {
@@ -102,8 +102,8 @@ app-footer {
     font-family: system-ui;
     text-align: center;
 
-    color: #cff3e8;
-    background-color: #23501f;
+    // color: #cff3e8;
+    // background-color: #23501f;
 }
 
 .buttons-columns {
@@ -133,19 +133,19 @@ app-footer {
 }
 
 #scores > * {
-    color: #23501f;
+    // color: #23501f;
     font-weight: 800;
     font-family: system-ui;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #fbd7a3;
+    // background-color: #fbd7a3;
     border-radius: 3px;
     margin: 2px;
     margin-top: 30px;
     width: 35px;
     height: 35px;
-    box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+    // box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
     text-align: center;
 }
 
@@ -172,3 +172,5 @@ app-footer {
 ::ng-deep .mat-drawer-content {
     width: 100%;
 }
+
+// TODO: take out all commented lines

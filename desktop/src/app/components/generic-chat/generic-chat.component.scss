@@ -1,6 +1,6 @@
 mat-card {
     height: 86%;
-    background: rgb(255 255 255 / 70%);
+    // background: rgb(255 255 255 / 70%);
     margin-bottom: 4%;
 }
 
@@ -48,18 +48,18 @@ mat-form-field {
 }
 
 .current-user {
-    color: #ffffff;
+    // color: #ffffff;
     text-align: right;
 }
 
 .current-user > span {
-    background: #23501f;
+    // background: #23501f;
     border-radius: 6px;
     padding: 5px 10px;
 }
 
 .opponent-user {
-    color: #ffffff;
+    // color: #ffffff;
     text-align: left;
 }
 
@@ -70,12 +70,12 @@ mat-form-field {
 }
 
 ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
-    background-color: #fff;
+    // background-color: #fff;
     border-radius: 5px;
 }
 
 .system-message {
-    color: #23501f;
+    // color: #23501f;
     text-align: center;
 }
 
@@ -84,11 +84,11 @@ mat-form-field {
 }
 
 .max {
-    color: red;
+    // color: red;
 }
 
 ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
-    background: rgba(255, 255, 255, 0.889);
+    // background: rgba(255, 255, 255, 0.889);
 }
 
 ::ng-deep .mat-mdc-form-field-bottom-align {
@@ -101,7 +101,7 @@ mat-form-field {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #7fa99b !important;
+    // background: #7fa99b !important;
 }
 
 ::-webkit-scrollbar {
@@ -109,5 +109,5 @@ mat-form-field {
 }
 
 ::-webkit-scrollbar-track {
-    background-color: rgb(255, 255, 255) !important;
+    // background-color: rgb(255, 255, 255) !important;
 }

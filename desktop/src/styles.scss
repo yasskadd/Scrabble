@@ -11,6 +11,7 @@ $angular-default-theme: mat.define-light-theme(
             accent: mat.define-palette(mat.$teal-palette, 700),
             warn: $angular-warn,
         ),
+        app-footer: mat.define-palette(mat.$green-palette, 700),
     )
 );
 

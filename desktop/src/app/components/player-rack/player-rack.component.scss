@@ -2,9 +2,9 @@
     margin: 10px auto;
     padding: 10px;
     border-radius: 4px;
-    background-color: #7fa99b;
+    // background-color: #7fa99b;
     width: 320px;
-    box-shadow: 1px 3px 2px -2px rgba(0, 0, 0, 0.2), 1px 2px 2px 1px rgba(0, 0, 0, 0.14), 1px 2px 4px 1px rgba(0, 0, 0, 0.12);
+    // box-shadow: 1px 3px 2px -2px rgba(0, 0, 0, 0.2), 1px 2px 2px 1px rgba(0, 0, 0, 0.14), 1px 2px 4px 1px rgba(0, 0, 0, 0.12);
 }
 
 .justified {
@@ -20,8 +20,8 @@
 .rack-letter {
     cursor: pointer;
     border-collapse: collapse;
-    background-color: #fbd7a3;
-    box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+    // background-color: #fbd7a3;
+    // box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
     border-radius: 4px;
     width: 40px;
     height: 40px;
@@ -30,7 +30,7 @@
 .rack-letter-exchange-selected {
     cursor: pointer;
     border-collapse: collapse;
-    background-color: #8456d9;
+    // background-color: #8456d9;
     border: 2px solid black;
     width: 40px;
     height: 40px;
@@ -39,7 +39,7 @@
 
 .rack-letter-manipulate-selected {
     border-collapse: collapse;
-    background-color: #76ca92;
+    // background-color: #76ca92;
     border: 2px solid black;
     width: 40px;
     height: 40px;
@@ -68,8 +68,8 @@ button {
     font-family: system-ui;
     text-align: center;
 
-    color: #cff3e8;
-    background-color: #23501f;
+    // color: #cff3e8;
+    // background-color: #23501f;
 }
 
 button:hover {

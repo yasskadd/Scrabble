@@ -3,13 +3,13 @@ app-header {
     display: flex;
     flex-direction: row;
     justify-content: space-around;
-    background-color: #7fa99b;
+    // background-color: #7fa99b;
 }
 
 body {
     min-height: 100%;
     width: 100%;
-    background-color: #c2e5da;
+    // background-color: #c2e5da;
     align-items: center;
     flex-direction: column;
 }
@@ -24,11 +24,11 @@ body {
     bottom: 120px;
     justify-content: flex-start;
     border-radius: 5px;
-    background-color: #7fa99b;
+    // background-color: #7fa99b;
 }
 
 ::ng-deep .mat-tab-label {
-    color: #163414;
+    // color: #163414;
     font-family: system-ui;
     font-weight: 500;
     font-size: 18px;
@@ -41,15 +41,15 @@ body {
 
 ::ng-deep .mat-tab-group.mat-primary .mat-ink-bar,
 .mat-tab-nav-bar.mat-primary .mat-ink-bar {
-    background-color: #163414;
+    // background-color: #163414;
 }
 
 ::ng-deep .mat-tab-body-content::-webkit-scrollbar {
     width: 4px;
 }
 ::ng-deep .mat-tab-body-content::-webkit-scrollbar-track {
-    background-color: #c2e5da !important;
+    // background-color: #c2e5da !important;
 }
 ::ng-deep .mat-tab-body-content::-webkit-scrollbar-thumb {
-    background: #23501f !important;
+    // background: #23501f !important;
 }
