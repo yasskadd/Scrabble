@@ -67,11 +67,11 @@
             "switch_letters": "Échanger"
         }
     },
+    "difficulty": {
+        "beginner": "Débutant",
+        "expert": "Expert"
+    },
     "virtual_player": {
-        "difficulty": {
-            "beginner": "Débutant",
-            "expert": "Expert"
-        },
         "add": "Add a virtual player"
     },
     "action": {
@@ -136,6 +136,20 @@
             "reading": "Le fichier n'a pas pu être lu",
             "verifying": "En vérification, veuillez patienter...",
             "none": "Aucun fichier sélectionné"
+        }
+    },
+    "event": {
+        "dictionary": {
+            "not_dictionnary": "Le fichier téléversé n'est pas un dictionnaire. Les champs title, description ou words sont manquant.",
+            "found": "Le dictionnaire existe déjà dans la base de données.",
+            "no_title": "Le dictionnaire n'a pas de titre.",
+            "no_description": "Le dictionnaire n'a pas de description.",
+            "no_words": "Le dictionnaire n'a pas une liste de mots.",
+            "added": "Ajout avec succès du nouveau dictionnaire",
+            "unavailable": "Le dictionnaire n'est plus disponible. Veuillez en choisir un autre",
+            "title_too_long": "Le titre du dictionnaire est trop long!",
+            "title_invalid": "Le titre du dictionnaire contient des espaces!",
+            "description_too_long": "La description du dictionnaire est trop long!"
         }
     },
     "snackbar": {

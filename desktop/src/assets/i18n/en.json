@@ -67,11 +67,11 @@
             "switch_letters": "Swap"
         }
     },
+    "difficulty": {
+        "beginner": "Beginner",
+        "expert": "Expert"
+    },
     "virtual_player": {
-        "difficulty": {
-            "beginner": "Beginner",
-            "expert": "Expert"
-        },
         "add": "Add a virtual player"
     },
     "action": {
@@ -136,6 +136,20 @@
             "reading": "An error occured during reading",
             "verifying": "Verifying, please wait...",
             "none": "No file selected"
+        }
+    },
+    "event": {
+        "dictionary": {
+            "not_dictionnary": "Le selected file is not a dictionary. The title, the description or the words are missing.",
+            "found": "The dictionary already exists in the database.",
+            "no_title": "The dictionary doesn't have a title.",
+            "no_description": "The dictionary doesn't have a description.",
+            "no_words": "The dictionary doesn't have a word list.",
+            "added": "Added the dictionary!",
+            "unavailable": "This dictionary is now unavailable. Please select another one",
+            "title_too_long": "Title too long!",
+            "title_invalid": "No spaces allowed!",
+            "description_too_long": "Description too long!"
         }
     },
     "snackbar": {

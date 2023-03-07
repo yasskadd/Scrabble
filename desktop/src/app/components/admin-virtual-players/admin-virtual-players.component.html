@@ -12,7 +12,7 @@
 <div class="Parent">
     <div class="child1">
         <mat-card-title>
-            {{ "virtual_player.difficulty.beginner" | translate }}
+            {{ "difficulty.beginner" | translate }}
         </mat-card-title>
         <mat-selection-list id="expertList" #beginnerNames [multiple]="false">
             <mat-list-option *ngFor="let bot of beginnerBots" [value]="bot.username">
@@ -51,7 +51,7 @@
     </div>
 
     <div class="child2">
-        <mat-card-title> {{ "virtual_player.difficulty.expert" | translate }}</mat-card-title>
+        <mat-card-title> {{ "difficulty.expert" | translate }}</mat-card-title>
         <mat-selection-list id="expertList" #expertNames [multiple]="false">
             <mat-list-option *ngFor="let bot of expertBots" [value]="bot.username">
                 <div class="justified">
