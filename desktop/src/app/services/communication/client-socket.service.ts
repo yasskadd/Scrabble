@@ -1,12 +1,12 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { RustCommand, RustEvent } from '@app/models/rust-command';
+import { LanguageService } from '@services/language.service';
 import { SnackBarService } from '@services/snack-bar.service';
 import * as tauri from '@tauri-apps/api';
 import { Event } from '@tauri-apps/api/event';
 import { Subject } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
-import { LanguageService } from '../language.service';
 
 @Injectable({
     providedIn: 'root',
