@@ -2,7 +2,7 @@
     <app-header></app-header>
     <mat-drawer-container>
         <div class="always-visible-content">
-            <button *ngIf="!chatIsOpen" class="open-chat-button" mat-button (click)="drawer.toggle()" (click)="openChat()">
+            <button *ngIf="!chatIsOpen" class="open-chat-button" mat-raised-button color="primary" (click)="drawer.toggle()" (click)="openChat()">
                 <mat-icon>chat_bubble_outline</mat-icon>
                 Open Chat
             </button>
