@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { GameClientService } from '@app/services/game-client.service';
 import { first } from 'rxjs/operators';
+
 @Component({
     selector: 'app-game-page',
     templateUrl: './game-page.component.html',
@@ -8,6 +9,7 @@ import { first } from 'rxjs/operators';
 })
 export class GamePageComponent implements OnInit {
     isLoading: boolean;
+
     constructor(private gameClientService: GameClientService) {
         this.isLoading = true;
     }

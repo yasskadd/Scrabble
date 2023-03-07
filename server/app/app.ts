@@ -8,6 +8,7 @@ import * as logger from 'morgan';
 import * as swaggerJSDoc from 'swagger-jsdoc';
 import * as swaggerUi from 'swagger-ui-express';
 import { Service } from 'typedi';
+import { AuthentificationController } from './controllers/authentification.controller';
 import { DictionaryController } from './controllers/dictionary.controller';
 import { HistoryController } from './controllers/history.controller';
 import { VirtualPlayerController } from './controllers/virtual-players.controller';
@@ -23,6 +24,7 @@ export class Application {
         private readonly virtualPlayerController: VirtualPlayerController,
         private readonly historyController: HistoryController,
         private readonly dictionaryController: DictionaryController,
+        private readonly authentificationController: AuthentificationController,
     ) {
         this.app = express();
 
@@ -48,6 +50,8 @@ export class Application {
         this.app.use('/history', this.historyController.router);
         this.app.use('/dictionary', this.dictionaryController.router);
         this.app.use('/virtualPlayer', this.virtualPlayerController.router);
+        this.app.use('/auth', this.authentificationController.router);
+        this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerJSDoc(this.swaggerOptions)));
         this.app.use('/', (req, res) => {
             res.redirect('/docs');
         });

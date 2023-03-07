@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { AppRoutes } from '@app/models/app-routes';
 
 @Component({
     selector: 'app-header',
@@ -7,18 +8,25 @@ import { Router } from '@angular/router';
     styleUrls: ['./header.component.scss'],
 })
 export class HeaderComponent {
-    buttonText: string[];
     readonly homePage: string[] = ['A', 'C', 'C', 'U', 'E', 'I', 'L'];
     readonly adminPage: string[] = ['A', 'D', 'M', 'I', 'N'];
-    constructor(private router: Router) {}
+    isHomePage: boolean;
+
+    constructor(private router: Router) {
+        this.isHomePage = this.checkIfHomePage();
+    }
+
+    checkIfHomePage() {
+        return this.router.url === AppRoutes.HomePage;
+    }
 
     redirectHome() {
-        this.router.navigate(['/home']);
-        this.buttonText = this.adminPage;
+        this.isHomePage = true;
+        this.router.navigate([AppRoutes.HomePage]).then();
     }
 
     redirectAdmin() {
-        this.router.navigate(['/admin']);
-        this.buttonText = this.homePage;
+        this.isHomePage = false;
+        this.router.navigate([AppRoutes.AdminPage]).then();
     }
 }

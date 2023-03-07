@@ -47,7 +47,7 @@ describe('VirtualPlayersService', () => {
     });
 
     it('should call getBeginnerBots and getExpertBots when calling getBotNames', () => {
-        service.getBotNames();
+        service.updateBotNames();
         expect(httpHandlerSpy.getBeginnerBots).toHaveBeenCalled();
         expect(httpHandlerSpy.getExpertBots).toHaveBeenCalled();
     });

@@ -1,8 +1,8 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { Dictionary } from '@app/interfaces/dictionary';
-import { DictionaryInfo } from '@app/interfaces/dictionary-info';
-import { HttpHandlerService } from '@app/services/communication/http-handler.service';
-import { DictionaryVerificationService } from '@app/services/dictionary-verification.service';
+import { Subject } from 'rxjs';
+import { FileStatus } from '@common/models/file-status';
+import { DictionaryService } from '@services/dictionary.service';
 
 @Component({
     selector: 'app-import-dictionary',
@@ -11,61 +11,65 @@ import { DictionaryVerificationService } from '@app/services/dictionary-verifica
 })
 export class ImportDictionaryComponent {
     @ViewChild('file', { static: false }) file: ElementRef;
-    @ViewChild('fileError', { static: false }) fileError: ElementRef;
-    dictionaryList: DictionaryInfo[];
     selectedFile: Dictionary | null;
+    errorMessage: string;
 
-    constructor(private readonly httpHandler: HttpHandlerService, private dictionaryVerification: DictionaryVerificationService) {
+    constructor(private dictionaryService: DictionaryService) {
         this.selectedFile = null;
+        this.errorMessage = '';
     }
 
-    async uploadDictionary() {
+    uploadDictionary() {
         if (this.file.nativeElement.files.length === 0) {
-            this.updateDictionaryMessage("Il n'y a aucun fichier séléctioné", 'red');
+            this.errorMessage = FileStatus.NONE_SELECTED;
             return;
         }
+
         const selectedFile = this.file.nativeElement.files[0];
         const fileReader = new FileReader();
-        const content = await this.readFile(selectedFile, fileReader);
-        this.updateDictionaryMessage('En vérification, veuillez patienter...', 'red');
-        await this.fileOnLoad(content);
+
+        this.errorMessage = FileStatus.VERIFYING;
+        this.readFile(selectedFile, fileReader).subscribe((content: string) => {
+            if (content === FileStatus.READING_ERROR) {
+                this.errorMessage = FileStatus.READING_ERROR;
+                return;
+            }
+
+            try {
+                this.fileOnLoad(JSON.parse(content));
+            } catch (e) {
+                this.errorMessage = FileStatus.NOT_JSON_ERROR;
+            }
+        });
     }
 
-    async fileOnLoad(newDictionary: Record<string, unknown>) {
-        const globalVerification = await this.dictionaryVerification.globalVerification(newDictionary);
-        if (globalVerification !== 'Passed') {
-            this.updateDictionaryMessage(globalVerification, 'red');
-            return;
-        }
-        this.selectedFile = newDictionary as unknown as Dictionary;
-        this.httpHandler
-            .addDictionary(this.selectedFile)
-            .toPromise()
-            .then(() => {
-                this.httpHandler.getDictionaries().subscribe((dictionaries) => (this.dictionaryList = dictionaries));
-                this.updateDictionaryMessage('Ajout avec succès du nouveau dictionnaire', 'black');
-            });
+    fileOnLoad(newDictionary: Dictionary) {
+        this.dictionaryService.addDictionary(newDictionary).subscribe((res: string | Dictionary) => {
+            if (typeof res === 'string') {
+                this.errorMessage = res;
+            }
+
+            this.file.nativeElement.value = '';
+        });
     }
 
     detectImportFile() {
-        this.fileError.nativeElement.textContent = '';
-        if (this.file.nativeElement.files.length === 0) this.selectedFile = null;
+        this.errorMessage = '';
+        if (this.file.nativeElement.files.length === 0) {
+            this.selectedFile = null;
+        }
     }
 
-    updateDictionaryMessage(message: string, color: string) {
-        this.fileError.nativeElement.textContent = message;
-        this.fileError.nativeElement.style.color = color;
-    }
+    private readFile(selectedFile: File, fileReader: FileReader): Subject<string> {
+        const subject = new Subject<string>();
+        fileReader.readAsText(selectedFile, 'UTF-8');
+        fileReader.onload = () => {
+            subject.next(fileReader.result as string);
+        };
+        fileReader.onerror = () => {
+            subject.next(FileStatus.READING_ERROR);
+        };
 
-    private async readFile(selectedFile: File, fileReader: FileReader): Promise<Record<string, unknown>> {
-        return new Promise((resolve, reject) => {
-            fileReader.readAsText(selectedFile, 'UTF-8');
-            fileReader.onload = () => {
-                resolve(JSON.parse(fileReader.result as string));
-            };
-            fileReader.onerror = () => {
-                reject(Error('File is not a JSON'));
-            };
-        });
+        return subject;
     }
 }

@@ -3,13 +3,14 @@ import { ElementRef } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { PlayerRackComponent } from '@app/components/player-rack/player-rack.component';
 import * as constants from '@app/constants/board-view';
-import { ChatboxHandlerService } from '@app/services/chatbox-handler.service';
+import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
 import { GameClientService } from '@app/services/game-client.service';
 import { GridService } from '@app/services/grid.service';
 import { LetterPlacementService } from '@app/services/letter-placement.service';
 import { of, Subject } from 'rxjs';
 
 const LETTER_SIZE = 5;
+
 class MockElementRef extends ElementRef {}
 
 describe('PlayerRackComponent', () => {

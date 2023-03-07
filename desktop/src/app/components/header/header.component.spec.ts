@@ -2,6 +2,7 @@ import { Location } from '@angular/common';
 import { Component } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import { AppRoutes } from '@app/models/app-routes';
 import { HeaderComponent } from './header.component';
 
 @Component({
@@ -19,8 +20,8 @@ describe('HeaderComponent', () => {
             declarations: [HeaderComponent],
             imports: [
                 RouterTestingModule.withRoutes([
-                    { path: 'home', component: StubComponent },
-                    { path: 'admin', component: StubComponent },
+                    { path: AppRoutes.HomePage, component: StubComponent },
+                    { path: AppRoutes.AdminPage, component: StubComponent },
                 ]),
             ],
         }).compileComponents();

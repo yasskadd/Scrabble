@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import * as constants from '@common/constants/board-info';
 import { Coordinate } from '@common/interfaces/coordinate';
 import { Letter } from '@common/interfaces/letter';
-import { ChatboxHandlerService } from './chatbox-handler.service';
+import { ChatboxHandlerService } from './chat/chatbox-handler.service';
 import { GameClientService } from './game-client.service';
 import { GridService } from './grid.service';
 

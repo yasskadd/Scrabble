@@ -1,24 +1,26 @@
-<div id="reserve">
-    <div id="number-letters">{{ this.gameClientService.letterReserveLength }}</div>
+<div id='reserve'>
+    <div id='number-letters'>{{ gameClientService.letterReserveLength }}</div>
     lettres disponibles dans la réserve
 </div>
 
-<mat-card class="container-wrapper">
-    <div #container class="message-container">
-        <div *ngFor="let message of messages" [class]="'message ' + message.type">
-            <span *ngIf="!isPlacementCommand(message.data)">{{ message.data }}</span>
-            <span *ngIf="isPlacementCommand(message.data)" class="placement" (click)="submitMessage(message.data)">{{ message.data }}</span>
+<mat-card class='container-wrapper'>
+    <div #container class='message-container'>
+        <div *ngFor='let message of messages' [class]="'message ' + message.type">
+            <span *ngIf='!isPlacementCommand(message.message)'>{{ message.message }}</span>
+            <span *ngIf='isPlacementCommand(message.message)' class='placement'
+                  (click)='submitMessage(message.message)'>{{ message.message }}</span>
         </div>
     </div>
 </mat-card>
-<mat-form-field appearance="outline" (keydown.enter)="submit()" class="user-input">
+<mat-form-field appearance='outline' (keydown.enter)='submit()' class='user-input'>
     <mat-label>Entrez un message</mat-label>
-    <input id="input" matInput maxlength="512" type="text" [formControl]="input" placeholder="Ex. Salut!" #chatbox />
+    <input id='input' matInput maxlength='512' type='text' [formControl]='input' placeholder='Ex. Salut!' #chatbox />
     <mat-hint
-        [ngClass]="{
+        [ngClass]='{
             max: input.value?.length === 512
-        }"
-        align="end"
-        >{{ input.value?.length || 0 }}/512</mat-hint
+        }'
+        align='end'
+    >{{ input.value?.length || 0 }}/512
+    </mat-hint
     >
 </mat-form-field>

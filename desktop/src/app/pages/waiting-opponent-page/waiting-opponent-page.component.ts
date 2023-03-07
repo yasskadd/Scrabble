@@ -1,22 +1,21 @@
-import { Component, OnInit } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AppRoutes } from '@app/models/app-routes';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
-
-const TIMEOUT = 3000;
+import { SnackBarService } from '@services/snack-bar.service';
 
 @Component({
     selector: 'app-waiting-opponent-page',
     templateUrl: './waiting-opponent-page.component.html',
     styleUrls: ['./waiting-opponent-page.component.scss'],
 })
-export class WaitingOpponentPageComponent implements OnInit {
+export class WaitingOpponentPageComponent implements OnInit, OnDestroy {
     gameMode: string;
 
     constructor(
         public gameConfiguration: GameConfigurationService,
         private router: Router,
-        private snackBar: MatSnackBar,
+        private snackBarService: SnackBarService,
         private activatedRoute: ActivatedRoute,
     ) {
         this.gameMode = this.activatedRoute.snapshot.params.id;
@@ -26,10 +25,15 @@ export class WaitingOpponentPageComponent implements OnInit {
         this.listenToServerResponse();
     }
 
+    ngOnDestroy() {
+        this.gameConfiguration.errorReason.unsubscribe();
+        this.gameConfiguration.isRoomJoinable.unsubscribe();
+    }
+
     listenToServerResponse() {
-        this.gameConfiguration.errorReason.subscribe((reason) => {
-            if (reason !== '') {
-                this.openSnackBar(reason);
+        this.gameConfiguration.errorReason.subscribe((error: string) => {
+            if (error !== '') {
+                this.snackBarService.openError(error);
                 this.exitRoom();
             }
             this.exitRoom(false);
@@ -42,36 +46,23 @@ export class WaitingOpponentPageComponent implements OnInit {
         });
     }
 
-    soloMode() {
+    joinSoloMode() {
         this.gameConfiguration.removeRoom();
-        this.router.navigate([`/solo/${this.gameMode}`]);
-    }
-
-    rejectOpponent() {
-        this.gameConfiguration.rejectOpponent();
-    }
-
-    startGame() {
-        this.gameConfiguration.beginScrabbleGame();
+        this.router.navigate([`${AppRoutes.SoloGameCreationPage}/${this.gameMode}`]).then();
     }
 
     joinGamePage() {
-        this.router.navigate(['/game']);
+        this.router.navigate([AppRoutes.GamePage]).then();
     }
+
     exitRoom(exitByIsOwn?: boolean) {
         if (this.gameConfiguration.roomInformation.isCreator) {
-            this.router.navigate([`/multijoueur/creer/${this.gameMode}`]);
+            this.router.navigate([`${AppRoutes.MultiGameCreationPage}/${this.gameMode}`]).then();
             this.gameConfiguration.removeRoom();
         } else {
-            this.router.navigate([`/multijoueur/rejoindre/${this.gameMode}`]);
+            this.router.navigate([`${AppRoutes.MultiJoinPage}/${this.gameMode}`]).then();
             if (!exitByIsOwn) return;
             this.gameConfiguration.exitWaitingRoom();
         }
-    }
-    openSnackBar(reason: string): void {
-        this.snackBar.open(reason, 'fermer', {
-            duration: TIMEOUT,
-            verticalPosition: 'top',
-        });
     }
 }

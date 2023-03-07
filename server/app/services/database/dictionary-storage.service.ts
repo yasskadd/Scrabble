@@ -6,7 +6,7 @@ import { Service } from 'typedi';
 
 @Service()
 export class DictionaryStorageService {
-    async dictionaryIsInDb(fileName: string) {
+    async dictionaryIsInDb(fileName: string): Promise<void> {
         return await fs.promises.access(`./assets/${fileName}.json`, fs.constants.R_OK);
     }
 

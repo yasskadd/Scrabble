@@ -1,7 +1,7 @@
 import { AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { ChatboxMessage } from '@app/interfaces/chatbox-message';
-import { ChatboxHandlerService } from '@app/services/chatbox-handler.service';
+import { FormControl, Validators } from '@angular/forms';
+import { ChatboxMessage } from '@common/interfaces/chatbox-message';
+import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
 import { GameClientService } from '@app/services/game-client.service';
 
 const PLACEMENT_COMMAND = '^!placer [a-o][0-9]{1,2}(v|h){0,1} [a-zA-Z]{1,7}$';
@@ -18,10 +18,13 @@ export class ChatboxComponent implements AfterViewInit, AfterViewChecked {
     @ViewChild('chatbox', { static: false }) chatbox: ElementRef;
     @ViewChild('container') private scrollBox: ElementRef;
 
-    input = new FormControl(ChatboxComponent.inputInitialState);
+    protected input: FormControl;
     private lastMessage: ChatboxMessage;
 
-    constructor(public gameClientService: GameClientService, private chatboxHandler: ChatboxHandlerService) {}
+    constructor(public gameClientService: GameClientService, private chatboxHandler: ChatboxHandlerService) {
+        // TODO : Add empty string validator
+        this.input = new FormControl(ChatboxComponent.inputInitialState, Validators.required);
+    }
 
     get messages() {
         return this.chatboxHandler.messages;
@@ -34,14 +37,17 @@ export class ChatboxComponent implements AfterViewInit, AfterViewChecked {
 
     ngAfterViewInit() {
         setTimeout(() => {
-            this.chatboxHandler.resetMessage();
-            this.chatbox.nativeElement.focus();
+            //     this.chatboxHandler.resetMessage();
+            //     this.chatbox.nativeElement.focus();
         }, 0);
     }
 
     submit() {
-        this.chatboxHandler.submitMessage(this.input.value);
-        this.resetInput();
+        if (this.input.valid) {
+            this.chatboxHandler.submitMessage(this.input.value);
+            this.resetInput();
+        }
+        this.input.markAsTouched();
     }
 
     isPlacementCommand(message: string): boolean {

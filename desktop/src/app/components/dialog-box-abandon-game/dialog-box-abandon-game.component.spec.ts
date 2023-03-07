@@ -7,12 +7,14 @@ import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { GameClientService } from '@app/services/game-client.service';
 import { DialogBoxAbandonGameComponent } from './dialog-box-abandon-game.component';
-const MULTIPLAYER_HOME_PAGE = 'home';
-const TIMEOUT = 3000;
+import { AppRoutes } from '@app/models/app-routes';
+import { SNACKBAR_TIMEOUT } from '@common/constants/ui-events';
+
 @Component({
     template: '',
 })
 export class StubComponent {}
+
 describe('AbandonGameDialogBoxComponent', () => {
     let router: Router;
     let component: DialogBoxAbandonGameComponent;
@@ -28,7 +30,7 @@ describe('AbandonGameDialogBoxComponent', () => {
                 MatSnackBarModule,
                 MatIconModule,
                 BrowserAnimationsModule,
-                RouterTestingModule.withRoutes([{ path: MULTIPLAYER_HOME_PAGE, component: StubComponent }]),
+                RouterTestingModule.withRoutes([{ path: AppRoutes.HomePage, component: StubComponent }]),
             ],
             providers: [{ provide: GameClientService, useValue: gameClientServiceSpy }],
         }).compileComponents();
@@ -55,7 +57,7 @@ describe('AbandonGameDialogBoxComponent', () => {
         expect(args[0]).toBe(message);
         expect(args[1]).toBe('fermer');
         expect(args[2]).toEqual({
-            duration: TIMEOUT,
+            duration: SNACKBAR_TIMEOUT,
             verticalPosition: 'top',
         });
     });
@@ -68,7 +70,7 @@ describe('AbandonGameDialogBoxComponent', () => {
 
     it('navigatePage should navigate to /classique/multijoueur/salleAttente', () => {
         const spyRouter = spyOn(router, 'navigate');
-        const expectedURL = '/' + MULTIPLAYER_HOME_PAGE;
+        const expectedURL = '/' + AppRoutes.HomePage;
         component.abandonGame();
         expect(spyRouter).toHaveBeenCalledWith([expectedURL]);
     });

@@ -30,8 +30,10 @@ describe('AdminDictionariesComponent', () => {
             'getDictionary',
         ]);
 
-        dictionaryServiceSpy.getDictionaries.and.resolveTo([]);
+        // @ts-ignore
+        dictionaryServiceSpy.updateDictionariesInfos.and.resolveTo([]);
         dictionaryServiceSpy.modifyDictionary.and.resolveTo();
+        // @ts-ignore
         dictionaryServiceSpy.getDictionary.and.resolveTo({} as Dictionary);
         dictionaryServiceSpy.deleteDictionary.and.resolveTo();
         dictionaryServiceSpy.resetDictionaries.and.resolveTo();
@@ -143,7 +145,7 @@ describe('AdminDictionariesComponent', () => {
                 newDescription: 'Nouvelle Description',
             });
             expect(dictionaryServiceSpy.modifyDictionary).toHaveBeenCalled();
-            expect(dictionaryServiceSpy.getDictionaries).toHaveBeenCalled();
+            expect(dictionaryServiceSpy.updateDictionariesInfos).toHaveBeenCalled();
         });
 
         it('modifyDictionary() should not call updateDictionaryList if the title or the description is blank', () => {

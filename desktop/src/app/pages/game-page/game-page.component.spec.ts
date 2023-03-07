@@ -17,6 +17,7 @@ import { ChatboxComponent } from '@app/components/chatbox/chatbox.component';
 import { InformationPanelComponent } from '@app/components/information-panel/information-panel.component';
 import { PlayAreaComponent } from '@app/components/play-area/play-area.component';
 import { PlayerRackComponent } from '@app/components/player-rack/player-rack.component';
+import { AppRoutes } from '@app/models/app-routes';
 import { GameClientService } from '@app/services/game-client.service';
 import { of, Subject } from 'rxjs';
 import { GamePageComponent } from './game-page.component';
@@ -33,6 +34,7 @@ export class MatDialogMock {
         };
     }
 }
+
 describe('GamePageComponent', () => {
     let component: GamePageComponent;
     let fixture: ComponentFixture<GamePageComponent>;
@@ -55,7 +57,7 @@ describe('GamePageComponent', () => {
                 MatInputModule,
                 BrowserAnimationsModule,
                 BrowserModule,
-                RouterTestingModule.withRoutes([{ path: 'home', component: StubComponent }]),
+                RouterTestingModule.withRoutes([{ path: AppRoutes.HomePage, component: StubComponent }]),
             ],
             declarations: [GamePageComponent, PlayAreaComponent, PlayerRackComponent, ChatboxComponent, InformationPanelComponent],
 

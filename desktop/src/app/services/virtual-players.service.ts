@@ -1,13 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Bot } from '@app/interfaces/bot';
+import { Bot } from '@common/interfaces/bot';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
-
-type BotNameInfo = { currentName: string; newName: string; difficulty: string };
-
-export enum VirtualPlayer {
-    Beginner = 'beginner',
-    Expert = 'expert',
-}
+import { BotNameSwitcher } from '@common/interfaces/bot-name-switcher';
+import { VirtualPlayerDifficulty } from '@common/models/virtual-player-difficulty';
+import { Subject } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
@@ -15,44 +11,43 @@ export enum VirtualPlayer {
 export class VirtualPlayersService {
     beginnerBotNames: Bot[];
     expertBotNames: Bot[];
-    botType: VirtualPlayer;
+
     constructor(private readonly httpHandler: HttpHandlerService) {}
 
-    addBotName(newName: string, type: VirtualPlayer) {
+    addBotName(newName: string, difficulty: VirtualPlayerDifficulty): void {
         this.httpHandler
-            .addBot({ username: newName, difficulty: type === VirtualPlayer.Beginner ? 'debutant' : 'Expert' })
-            .toPromise()
-            .then(async () => this.getBotNames());
+            .addBot({
+                username: newName,
+                difficulty,
+            })
+            .subscribe(() => this.updateBotNames());
     }
 
-    deleteBotName(toRemove: string, difficulty: string) {
-        this.httpHandler
-            .deleteBot({ username: toRemove, difficulty })
-            .toPromise()
-            .then(async () => this.getBotNames());
+    deleteBotName(toRemove: string, difficulty: VirtualPlayerDifficulty) {
+        this.httpHandler.deleteBot({ username: toRemove, difficulty }).subscribe(() => this.updateBotNames());
     }
 
     resetBotNames() {
-        this.httpHandler
-            .resetBot()
-            .toPromise()
-            .then(async () => this.getBotNames());
+        this.httpHandler.resetBot().subscribe(() => this.updateBotNames());
     }
 
-    replaceBotName(nameBotToReplace: BotNameInfo) {
-        this.httpHandler
-            .replaceBot(nameBotToReplace)
-            .toPromise()
-            .then(async () => this.getBotNames());
+    replaceBotName(nameBotToReplace: BotNameSwitcher) {
+        this.httpHandler.replaceBot(nameBotToReplace).subscribe(() => this.updateBotNames());
     }
 
-    async getBotNames() {
-        this.httpHandler.getBeginnerBots().subscribe((beginnerBot) => {
+    updateBotNames(): Subject<void> {
+        const subject: Subject<void> = new Subject<void>();
+        const beginnerSub = this.httpHandler.getBeginnerBots().subscribe((beginnerBot) => {
             this.beginnerBotNames = beginnerBot;
+            subject.next();
+            beginnerSub.unsubscribe();
         });
-        this.httpHandler.getExpertBots().subscribe((expertBot) => {
+        const expertSub = this.httpHandler.getExpertBots().subscribe((expertBot) => {
             this.expertBotNames = expertBot;
+            subject.next();
+            expertSub.unsubscribe();
         });
-        return this.httpHandler.getBeginnerBots().toPromise();
+
+        return subject;
     }
 }

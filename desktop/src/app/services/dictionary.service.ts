@@ -3,40 +3,75 @@ import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
 import { HttpHandlerService } from './communication/http-handler.service';
-
-export interface FileError {
-    message: string;
-    color: string;
-}
+import { Observable, Subject } from 'rxjs';
+import { DictionaryEvents } from '@common/models/dictionary-events';
+import { DictionaryVerificationService } from '@services/dictionary-verification.service';
+import { SnackBarService } from '@services/snack-bar.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class DictionaryService {
-    constructor(private readonly httpHandler: HttpHandlerService) {}
+    dictionary: Dictionary;
+    dictionariesInfos: DictionaryInfo[];
 
-    async addDictionary(dictionary: Dictionary): Promise<DictionaryInfo[]> {
-        this.httpHandler.addDictionary(dictionary).subscribe();
-        return this.getDictionaries();
+    constructor(
+        private snackBarService: SnackBarService,
+        private readonly httpHandler: HttpHandlerService,
+        private dictionaryVerificationService: DictionaryVerificationService,
+    ) {}
+
+    addDictionary(dictionary: Dictionary): Subject<string> {
+        const subject: Subject<string> = new Subject<string>();
+        const subscription = this.dictionaryVerificationService.verificationStatus.subscribe((error: string) => {
+            if (error) {
+                subject.next(error);
+            } else {
+                subject.next('');
+                this.httpHandler.addDictionary(dictionary).subscribe(() => {
+                    // TODO : Language
+                    this.snackBarService.openInfo(DictionaryEvents.ADDED);
+                });
+                this.updateDictionariesInfos();
+            }
+
+            subscription.unsubscribe();
+        });
+
+        this.dictionaryVerificationService.globalVerification(dictionary);
+        return subject;
     }
 
-    async deleteDictionary(dictionarytoRemove: DictionaryInfo): Promise<void> {
-        return this.httpHandler.deleteDictionary(dictionarytoRemove.title).toPromise();
+    deleteDictionary(dictionarytoRemove: DictionaryInfo): Observable<void> {
+        return this.httpHandler.deleteDictionary(dictionarytoRemove.title);
     }
 
-    async modifyDictionary(dictionaryInfo: ModifiedDictionaryInfo): Promise<void> {
-        return this.httpHandler.modifyDictionary(dictionaryInfo).toPromise();
+    modifyDictionary(dictionaryInfo: ModifiedDictionaryInfo): Observable<void> {
+        return this.httpHandler.modifyDictionary(dictionaryInfo);
     }
 
-    async resetDictionaries(): Promise<Dictionary[]> {
-        return this.httpHandler.resetDictionaries().toPromise();
+    resetDictionaries(): Observable<Dictionary[]> {
+        return this.httpHandler.resetDictionaries();
     }
 
-    async getDictionaries(): Promise<DictionaryInfo[]> {
-        return this.httpHandler.getDictionaries().toPromise();
+    updateDictionariesInfos(): Subject<void> {
+        const subject: Subject<void> = new Subject<void>();
+        const subscription = this.httpHandler.getDictionaries().subscribe((dictionaryInfos: DictionaryInfo[]) => {
+            this.dictionariesInfos = dictionaryInfos;
+            subscription.unsubscribe();
+        });
+
+        return subject;
     }
 
-    async getDictionary(title: string): Promise<Dictionary> {
-        return this.httpHandler.getDictionary(title).toPromise();
+    getDictionary(title: string): Observable<Dictionary> {
+        const subject: Subject<Dictionary> = new Subject<Dictionary>();
+        const subscription = this.httpHandler.getDictionary(title).subscribe((dictionary: Dictionary) => {
+            this.dictionary = dictionary;
+            subject.next(this.dictionary);
+            subscription.unsubscribe();
+        });
+
+        return subject;
     }
 }

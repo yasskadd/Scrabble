@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mobile/components/chatbox-widget.dart';
+import 'package:mobile/domain/services/chat-service.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key, required this.title});
@@ -20,10 +22,8 @@ class _ChatScreenState extends State<ChatScreen> {
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[Chatbox(), ChatInput()],
+            children: const <Widget>[Chatbox(), ChatInput()],
           ),
         ));
   }
 }
-
-

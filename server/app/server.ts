@@ -12,6 +12,7 @@ export class Server {
     // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     private static readonly baseTen: number = 10;
     private server: http.Server;
+
     constructor(
         private readonly application: Application,
         private socketManager: SocketManager,
@@ -29,8 +30,10 @@ export class Server {
             return false;
         }
     }
+
     async init(): Promise<void> {
         this.application.app.set('port', Server.appPort);
+
         this.server = http.createServer(this.application.app);
         this.socketManager.init(this.server);
         this.socketManager.handleSockets();

@@ -1,6 +1,8 @@
+/* eslint-disable deprecation/deprecation */
+// TODO : Handle deprecation
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { Bot } from '@app/interfaces/bot';
+import { Bot } from '@common/interfaces/bot';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
 import { HighScores } from '@app/interfaces/high-score-parameters';
@@ -30,7 +32,15 @@ describe('HttpHandlerService', () => {
     });
 
     it('should return expected highScoreClassique list (HttpClient called once)', () => {
-        const expectedMessage: HighScores[] = [{ _id: '245isfdhhsdf', username: 'Vincent', type: 'classique', score: 20, position: 1 }];
+        const expectedMessage: HighScores[] = [
+            {
+                _id: '245isfdhhsdf',
+                username: 'Vincent',
+                type: 'classique',
+                score: 20,
+                position: 1,
+            },
+        ];
         service.getClassicHighScore().subscribe((response: HighScores[]) => {
             expect(response).toEqual(expectedMessage);
         }, fail);
@@ -86,7 +96,15 @@ describe('HttpHandlerService', () => {
     });
 
     it('should return expected highScoreLOG2990 list (HttpClient called once)', () => {
-        const expectedMessage: HighScores[] = [{ _id: '245isfdhhsdf', username: 'Vincent', type: 'LOG2990', score: 50, position: 1 }];
+        const expectedMessage: HighScores[] = [
+            {
+                _id: '245isfdhhsdf',
+                username: 'Vincent',
+                type: 'LOG2990',
+                score: 50,
+                position: 1,
+            },
+        ];
 
         service.getLOG2990HighScore().subscribe((response: HighScores[]) => {
             expect(response).toEqual(expectedMessage);
@@ -100,7 +118,13 @@ describe('HttpHandlerService', () => {
 
     describe('Dictionary tests', () => {
         it('should return expected dictionaries list (HttpClient called once)', () => {
-            const expectedMessage: Dictionary[] = [{ title: 'Mon dictionnaire', description: 'Une description', words: ['string'] }];
+            const expectedMessage: Dictionary[] = [
+                {
+                    title: 'Mon dictionnaire',
+                    description: 'Une description',
+                    words: ['string'],
+                },
+            ];
 
             service.getDictionaries().subscribe((dictionaries: DictionaryInfo[]) => {
                 expect(dictionaries).toEqual(expectedMessage);
@@ -113,7 +137,11 @@ describe('HttpHandlerService', () => {
         });
 
         it('should not return any message when sending a POST request (HttpClient called once)', () => {
-            const sentMessage: Dictionary = { title: 'Mon dictionnaire', description: 'Une description', words: ['string'] };
+            const sentMessage: Dictionary = {
+                title: 'Mon dictionnaire',
+                description: 'Une description',
+                words: ['string'],
+            };
             // Reason : subscribe to the mocked call
             // eslint-disable-next-line @typescript-eslint/no-empty-function -- We explicitly need an empty function
             service.addDictionary(sentMessage).subscribe(() => {}, fail);
