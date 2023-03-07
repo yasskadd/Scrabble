@@ -2,12 +2,15 @@
 
 <body class="justified">
     <form [formGroup]="formGroup" class="justified connection-form">
-        <mat-form-field appearance="fill">
+        <button #avatarSelector mat-fab color="primary" (click)="openAvatarSelector()" class="avatar-selector">
+            <mat-icon>person</mat-icon>
+        </button>
+        <mat-form-field appearance="outline">
             <!-- TODO : Language -->
             <mat-label>Nom d'utilisateur</mat-label>
-            <input matInput [formControl]="usernameForm" />
+            <input type="text" matInput name="username" [formControl]="usernameForm" />
         </mat-form-field>
-        <mat-form-field appearance="fill">
+        <mat-form-field appearance="outline">
             <!-- TODO : Language -->
             <mat-label>Email</mat-label>
             <input matInput type="email" [formControl]="emailForm" />
@@ -16,15 +19,15 @@
                 Please enter a valid email address
             </mat-error>
         </mat-form-field>
-        <mat-form-field appearance="fill">
+        <mat-form-field appearance="outline">
             <!-- TODO : Language -->
             <mat-label>Mot de passe</mat-label>
-            <input matInput [formControl]="passwordForm" />
+            <input type="password" matInput [formControl]="passwordForm" />
         </mat-form-field>
-        <mat-form-field>
+        <mat-form-field appearance="outline">
             <!-- TODO : Language -->
             <mat-label>Confirmation de mot de passe</mat-label>
-            <input matInput [formControl]="passwordCopyForm" />
+            <input type="password" matInput [formControl]="passwordCopyForm" />
         </mat-form-field>
         <ngx-recaptcha2 #captchaElem [siteKey]="siteKey" [useGlobalDomain]="false" formControlName="recaptcha"> </ngx-recaptcha2>
         <!-- TODO : something to choose theme -->

@@ -6,6 +6,11 @@ app-header {
     background-color: #7fa99b;
 }
 
+.avatar-selector {
+    margin-bottom: 20px;
+    align-self: center;
+}
+
 .sticky {
     position: fixed;
     top: 0;
@@ -28,4 +33,8 @@ body {
 .connection-form {
     align-items: normal;
     margin-bottom: 16px;
+}
+
+.dialog-backdrop {
+    background: red;
 }

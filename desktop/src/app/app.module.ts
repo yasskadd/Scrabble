@@ -46,6 +46,7 @@ import { GameCreationPageComponent } from './pages/multiplayer-create-page/game-
 import { MultiplayerJoinPageComponent } from './pages/multiplayer-join-page/multiplayer-join-page.component';
 import { UserAccountComponent } from './pages/user-account/user-account.component';
 import { WaitingOpponentPageComponent } from './pages/waiting-opponent-page/waiting-opponent-page.component';
+import { DialogBoxAvatarSelectorComponent } from './components/dialog-box-avatar-selector/dialog-box-avatar-selector.component';
 
 /**
  * Main module that is used in main.ts.
@@ -84,6 +85,7 @@ import { WaitingOpponentPageComponent } from './pages/waiting-opponent-page/wait
         GenericChatComponent,
         ErrorSnackBarComponent,
         InfoSnackBarComponent,
+        DialogBoxAvatarSelectorComponent,
     ],
     imports: [
         CommonModule,
