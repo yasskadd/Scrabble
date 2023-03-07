@@ -12,3 +12,4 @@ export const TIME_SKIP = 20;
 export const SECOND_3 = 3000;
 export const SECOND_1 = 1000;
 export const letterReserveMinQuantity = 7;
+export const BOT_BEGINNER_DIFFICULTY = 'Débutant';

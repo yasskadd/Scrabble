@@ -1,12 +1,11 @@
 import { ReplaySubject } from 'rxjs';
 import { Player } from './player/player.class';
 
-const NUMBER_PLAYER = 2;
 const SECOND = 1000;
 
 export class Turn {
     activePlayer: string | undefined;
-    inactivePlayer: string | undefined;
+    inactivePlayers: string[] | undefined;
     endTurn: ReplaySubject<string | undefined>;
     countdown: ReplaySubject<number | undefined>;
     skipCounter: number;
@@ -32,24 +31,30 @@ export class Turn {
         }, SECOND);
     }
 
-    determinePlayer(player1: Player, player2: Player): void {
-        const randomNumber: number = Math.floor(Math.random() * NUMBER_PLAYER);
-        this.activePlayer = randomNumber === 0 ? player1.name : player2.name;
-        this.inactivePlayer = randomNumber === 0 ? player2.name : player1.name;
+    determineStartingPlayer(players: Player[]): void {
+        const randomNumber: number = Math.floor(Math.random() * players.length);
+        this.activePlayer = players[randomNumber].name;
+        const inactivePlayers = players.filter((player) => {
+            return player.name !== this.activePlayer;
+        });
+        const inactivePlayersName = inactivePlayers.map((player) => {
+            return player.name;
+        });
+        this.inactivePlayers = inactivePlayersName;
     }
 
     end(endGame?: boolean): void {
         clearInterval(this.timeOut as number);
         if (!endGame) {
-            const tempInactivePlayer: string | undefined = this.inactivePlayer;
-            this.inactivePlayer = this.activePlayer;
+            const tempInactivePlayer: string | undefined = (this.inactivePlayers as string[]).shift();
+            this.inactivePlayers?.push(this.activePlayer as string);
             this.activePlayer = tempInactivePlayer;
             this.start();
             this.endTurn.next(this.activePlayer);
             return;
         }
         this.activePlayer = undefined;
-        this.inactivePlayer = undefined;
+        this.inactivePlayers = undefined;
         this.endTurn.next(this.activePlayer);
     }
 
