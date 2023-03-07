@@ -72,7 +72,9 @@
         "expert": "Expert"
     },
     "virtual_player": {
-        "add": "Add a virtual player"
+        "name": "Name",
+        "add": "Add a virtual player",
+        "new_name": "New name"
     },
     "action": {
         "start": "Start",
@@ -86,7 +88,11 @@
         "abandon": "Abandon",
         "quit": "Quit",
         "cancel": "Cancel",
-        "play": "Play"
+        "play": "Play",
+        "no_thanks": "No thanks",
+        "ok": "Ok",
+        "yes": "Yes",
+        "no": "No"
     },
     "file": {
         "title": "Title",
@@ -94,7 +100,8 @@
         "choose": "Choose a file"
     },
     "dictionary": {
-        "add": "Add a dictionary"
+        "add": "Add a dictionary",
+        "modify": "Modify the dictionary"
     },
     "game": {
         "info": {
@@ -112,6 +119,15 @@
             "waiting_opponent": "Waiting for opponent...",
             "equality": "Equality! You got the same scores!",
             "winned": "Victory of {{playerName}}! Congratulations!"
+        },
+        "history": {
+            "mode": "Mode",
+            "start": "Start of game (jj/mm/aaaa)",
+            "end": "End of game (jj/mm/aaaa)",
+            "time": "Time (m:s)",
+            "first_player": "First player",
+            "second_player": "Second player",
+            "score": "Score"
         }
     },
     "header": {
