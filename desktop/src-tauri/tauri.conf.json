@@ -29,13 +29,7 @@
                 "depends": []
             },
             "externalBin": [],
-            "icon": [
-                "icons/32x32.png",
-                "icons/128x128.png",
-                "icons/128x128@2x.png",
-                "icons/icon.icns",
-                "icons/icon.ico"
-            ],
+            "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"],
             "identifier": "com.polyscrabble.dev",
             "longDescription": "",
             "macOS": {
@@ -55,7 +49,7 @@
             }
         },
         "security": {
-            "csp": null
+            "csp": "default-src blob: data: filesystem: ws: wss: http: https: tauri: 'unsafe-eval' 'unsafe-inline' 'self' img-src: 'self'; script-src https: 'unsafe-inline'"
         },
         "updater": {
             "active": false
