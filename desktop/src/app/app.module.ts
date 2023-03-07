@@ -20,6 +20,7 @@ import { AppRoutingModule } from '@app/modules/app-routing.module';
 import { AppMaterialModule } from '@app/modules/material.module';
 import { AppComponent } from '@app/pages/app/app.component';
 import { GamePageComponent } from '@app/pages/game-page/game-page.component';
+import { NgxCaptchaModule } from 'ngx-captcha';
 import { AdminDictionariesComponent } from './components/admin-dictionaries/admin-dictionaries.component';
 import { AdminGameHistoryComponent } from './components/admin-game-history/admin-game-history.component';
 import { AdminHighScoresComponent } from './components/admin-high-scores/admin-high-scores.component';
@@ -87,6 +88,7 @@ import { WaitingOpponentPageComponent } from './pages/waiting-opponent-page/wait
         MatFormFieldModule,
         MatListModule,
         MatSelectModule,
+        NgxCaptchaModule,
         ReactiveFormsModule,
         BrowserAnimationsModule,
         BrowserModule,
