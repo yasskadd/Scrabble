@@ -9,6 +9,7 @@ import { Player } from '@app/classes/player/player.class';
 import { RealPlayer } from '@app/classes/player/real-player.class';
 import { Turn } from '@app/classes/turn.class';
 import { WordSolver } from '@app/classes/word-solver.class';
+import { BOT_BEGINNER_DIFFICULTY } from '@app/constants/bot';
 import { NUMBER_OF_PLAYERS } from '@app/constants/players';
 import { Behavior } from '@app/interfaces/behavior';
 import { GameScrabbleInformation } from '@app/interfaces/game-scrabble-information';
@@ -53,7 +54,7 @@ export class GamesStateService {
     }
 
     async createGame(this: this, gameInfo: GameScrabbleInformation) {
-        const players = this.setAndGetPlayer(gameInfo);
+        const players = this.initPlayers(gameInfo);
         const game = this.createNewGame(gameInfo);
         const gameCreator = players[0];
 
@@ -127,7 +128,7 @@ export class GamesStateService {
         }
     }
 
-    private setAndGetPlayer(gameInfo: GameScrabbleInformation): Player[] {
+    private initPlayers(gameInfo: GameScrabbleInformation): Player[] {
         const players: Player[] = [];
         gameInfo.socketId.forEach((socket, i) => {
             const newPlayer: Player = new RealPlayer(gameInfo.playerName[i]);
@@ -143,7 +144,7 @@ export class GamesStateService {
             if (gameInfo.botDifficulty !== undefined) {
                 const dictionaryValidation = (this.gamesHandler.dictionaries.get(gameInfo.dictionary) as Behavior).dictionaryValidation;
                 let newPlayer: Player;
-                if (gameInfo.botDifficulty === 'Débutant') {
+                if (gameInfo.botDifficulty === BOT_BEGINNER_DIFFICULTY) {
                     newPlayer = new BeginnerBot(false, gameInfo.playerName[players.length], {
                         timer: gameInfo.timer,
                         roomId: gameInfo.roomId,

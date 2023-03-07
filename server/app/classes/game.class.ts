@@ -52,7 +52,7 @@ export class Game {
             this.letterReserve.generateLetters(MAX_QUANTITY, player.rack);
         });
 
-        this.turn.determinePlayer(players);
+        this.turn.determineStartingPlayer(players);
         this.turn.start();
     }
 

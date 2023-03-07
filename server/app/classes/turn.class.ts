@@ -31,7 +31,7 @@ export class Turn {
         }, SECOND);
     }
 
-    determinePlayer(players: Player[]): void {
+    determineStartingPlayer(players: Player[]): void {
         const randomNumber: number = Math.floor(Math.random() * players.length);
         this.activePlayer = players[randomNumber].name;
         const inactivePlayers = players.filter((player) => {
