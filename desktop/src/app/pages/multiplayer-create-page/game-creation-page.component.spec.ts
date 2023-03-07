@@ -125,7 +125,7 @@ describe('MultiplayerCreatePageComponent', () => {
             expertBotNames: BOT_EXPERT_LIST,
         });
 
-        virtualPlayersServiceSpy.getBotNames.and.resolveTo();
+        virtualPlayersServiceSpy.updateBotNames.and.resolveTo();
 
         await TestBed.configureTestingModule({
             imports: [

@@ -21,8 +21,8 @@
             <mat-form-field appearance='fill'>
                 <mat-label>Temps</mat-label>
                 <mat-select id='timer-select' formControlName='timer'>
-                    <mat-option id='timer-options' *ngFor='let time of this.timerList' [value]='time'>
-                        {{ this.timer.getTimeStamp(time) }}
+                    <mat-option id='timer-options' *ngFor='let time of timerList' [value]='time'>
+                        {{ timer.getTimeStamp(time) }}
                     </mat-option>
                 </mat-select>
             </mat-form-field>
@@ -33,7 +33,7 @@
             <mat-form-field appearance='fill'>
                 <mat-label>Liste</mat-label>
                 <mat-select (click)='downloadDictionaries()' formControlName='dictionary'>
-                    <mat-option *ngFor='let dictionary of this.dictionaryList'
+                    <mat-option *ngFor='let dictionary of dictionaryList'
                                 [value]='dictionary.title'>
                         {{ dictionary.title.charAt(0).toUpperCase() + dictionary.title.slice(1) }}
                         <span matTooltip='{{dictionary.description}}' id='dict-info'>ⓘ</span>
@@ -53,7 +53,7 @@
             <mat-form-field appearance='fill'>
                 <mat-label>Difficulté</mat-label>
                 <mat-select id='difficulty-select' formControlName='difficultyBot'>
-                    <mat-option id='difficulty-options' *ngFor='let difficulty of this.difficultyList'
+                    <mat-option id='difficulty-options' *ngFor='let difficulty of difficultyList'
                                 [value]='difficulty'>
                         {{ difficulty }}
                     </mat-option>
@@ -63,7 +63,7 @@
 
         <form *ngIf='isSoloMode()' class='soloMode'>
             <mat-card-title>Nom Adversaire</mat-card-title>
-            <mat-label> {{ this.botName }} </mat-label>
+            <mat-label> {{ botName }} </mat-label>
         </form>
 
         <div class='container-button'>

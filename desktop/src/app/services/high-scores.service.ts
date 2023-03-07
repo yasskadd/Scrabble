@@ -1,5 +1,3 @@
-/* eslint-disable deprecation/deprecation */
-// TODO : Handle deprecation
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { HighScores } from '@app/interfaces/high-score-parameters';
@@ -32,9 +30,8 @@ export class HighScoresService {
     }
 
     resetHighScores() {
-        this.httpHandler
-            .resetHighScores()
-            .toPromise()
-            .then(() => this.getHighScores());
+        this.httpHandler.resetHighScores().subscribe(() => {
+            this.getHighScores();
+        });
     }
 }

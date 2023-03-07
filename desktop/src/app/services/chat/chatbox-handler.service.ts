@@ -139,7 +139,6 @@ export class ChatboxHandlerService implements OnDestroy {
 
     private sendCommand(command: string): void {
         if (this.isValidCommand(command)) {
-            console.log('sending');
             this.commandHandler.sendCommand(command);
             this.messages.push({ type: 'system', message: command });
         }

@@ -29,18 +29,26 @@ export class AdminDictionariesComponent {
     }
 
     deleteDictionary(dictionaryToDelete: DictionaryInfo) {
-        this.dictionaryService.deleteDictionary(dictionaryToDelete).then(() => this.updateDictionaryList());
+        this.dictionaryService.deleteDictionary(dictionaryToDelete).subscribe(() => this.updateDictionaryList());
     }
 
     openModifyDictionaryDialog(dictionaryToModify: DictionaryInfo) {
         const dialogRef = this.modifyDictionaryDialog.open(DialogBoxModifyDictionaryComponent, {
             width: '50%',
-            data: { title: dictionaryToModify.title, newTitle: dictionaryToModify.title, description: dictionaryToModify.description },
+            data: {
+                title: dictionaryToModify.title,
+                newTitle: dictionaryToModify.title,
+                description: dictionaryToModify.description,
+            },
             disableClose: true,
         });
 
         dialogRef.afterClosed().subscribe((result) => {
-            this.modifyDictionary({ title: dictionaryToModify.title, newTitle: result.title, newDescription: result.description });
+            this.modifyDictionary({
+                title: dictionaryToModify.title,
+                newTitle: result.title,
+                newDescription: result.description,
+            });
         });
     }
 
@@ -50,22 +58,22 @@ export class AdminDictionariesComponent {
 
     modifyDictionary(modifiedDictionaryInfo: ModifiedDictionaryInfo) {
         if (modifiedDictionaryInfo.newTitle === '' || modifiedDictionaryInfo.newDescription === '') return;
-        this.dictionaryService.getDictionaries();
+        this.dictionaryService.updateDictionariesInfos();
         if (!(modifiedDictionaryInfo.title === modifiedDictionaryInfo.newTitle || !this.isUniqueTitle(modifiedDictionaryInfo.newTitle))) return;
-        this.dictionaryService.modifyDictionary(modifiedDictionaryInfo).then(() => this.updateDictionaryList());
+        this.dictionaryService.modifyDictionary(modifiedDictionaryInfo).subscribe(() => this.updateDictionaryList());
     }
 
     downloadJson(dictionary: DictionaryInfo) {
-        this.dictionaryService.getDictionary(dictionary.title).then((fullDictionary) => this.downloadFile(fullDictionary));
+        this.dictionaryService.getDictionary(dictionary.title).subscribe(() => this.downloadFile(this.dictionaryService.dictionary));
     }
 
     resetDictionaries() {
-        this.dictionaryService.resetDictionaries().then(() => this.updateDictionaryList());
+        this.dictionaryService.resetDictionaries().subscribe(() => this.updateDictionaryList());
     }
 
     updateDictionaryList() {
-        this.dictionaryService.getDictionaries().then((dictionaries) => {
-            this.dictionaryList = [...dictionaries];
+        this.dictionaryService.updateDictionariesInfos().subscribe(() => {
+            this.dictionaryList = this.dictionaryService.dictionariesInfos;
         });
     }
 

@@ -1,6 +1,6 @@
 /* eslint-disable dot-notation*/
 import { DatabaseCollection } from '@app/classes/database-collection.class';
-import * as constants from '@common/constants/bots';
+import * as constants from '@common/constants/bots-names';
 import { expect } from 'chai';
 import * as Sinon from 'sinon';
 import { stub } from 'sinon';

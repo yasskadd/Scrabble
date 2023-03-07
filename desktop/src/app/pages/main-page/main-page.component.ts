@@ -22,6 +22,7 @@ export class MainPageComponent implements OnDestroy {
     protected homeConnectionResponse: SocketResponse;
     protected connectionSubject: Subject<SocketResponse>;
     protected disconnectionSubject: Subject<void>;
+
     protected chatIsOpen: boolean;
 
     private readonly dialogWidth: string = '500px';

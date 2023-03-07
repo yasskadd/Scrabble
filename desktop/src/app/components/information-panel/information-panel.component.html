@@ -4,61 +4,61 @@
         width='250'
         height='50'
         alt='Logo Scrabble'
-        *ngIf='!this.gameClientService.isGameFinish'
+        *ngIf='!gameClientService.isGameFinish'
         (click)='abandonGame()'
     />
     <img src='https://bit.ly/3m206ss' width='250' height='50' alt='Logo Scrabble'
-         *ngIf='this.gameClientService.isGameFinish' (click)='leaveGame()' />
+         *ngIf='gameClientService.isGameFinish' (click)='leaveGame()' />
 </h1>
 
 <div class='players'>
-    <section class='player' [ngClass]='{ active: this.gameClientService.playerOneTurn }' id='player-1'>
+    <section class='player' [ngClass]='{ active: gameClientService.playerOneTurn }' id='player-1'>
         <mat-card-title-group class='playerInfo'>
-            <mat-card-title>{{ this.gameClientService.playerOne.name }}</mat-card-title>
-            <mat-card-subtitle class='score'>{{ this.gameClientService.playerOne.score }} POINTS</mat-card-subtitle>
-            <mat-card-subtitle class='rack-letters' *ngIf='this.gameClientService.playerOne.rack.length < 7'>
-                {{ this.gameClientService.playerOne.rack?.length }} lettres disponibles sur le chevalet
+            <mat-card-title>{{ gameClientService.playerOne.name }}</mat-card-title>
+            <mat-card-subtitle class='score'>{{ gameClientService.playerOne.score }} POINTS</mat-card-subtitle>
+            <mat-card-subtitle class='rack-letters' *ngIf='gameClientService.playerOne.rack.length < 7'>
+                {{ gameClientService.playerOne.rack?.length }} lettres disponibles sur le chevalet
             </mat-card-subtitle
             >
         </mat-card-title-group>
         <mat-card-content>
             <div
-                [ngClass]="[this.gameClientService.timer < 10 ? 'countdown' : 'time']"
+                [ngClass]="[gameClientService.timer < 10 ? 'countdown' : 'time']"
                 id='playerOneTimer'
-                *ngIf='this.gameClientService.playerOneTurn'
+                *ngIf='gameClientService.playerOneTurn'
             >
                 <mat-icon>timer</mat-icon>
-                {{ this.timer.secondsToMinute(this.gameClientService.timer) }}:{{
-                this.timer.timerToSecond(this.gameClientService.timer)
+                {{ timer.secondsToMinute(gameClientService.timer) }}:{{
+                timer.timerToSecond(gameClientService.timer)
                 }}
             </div>
         </mat-card-content>
     </section>
 
-    <section class='player' [ngClass]='{ active: !this.gameClientService.playerOneTurn }' id='player-2'>
+    <section class='player' [ngClass]='{ active: !gameClientService.playerOneTurn }' id='player-2'>
         <mat-card-title-group class='playerInfo'>
-            <mat-card-title>{{ this.gameClientService.secondPlayer.name }}</mat-card-title>
-            <mat-card-subtitle class='score'>{{ this.gameClientService.secondPlayer.score }} POINTS</mat-card-subtitle>
-            <mat-card-subtitle class='rack-letters' *ngIf='this.gameClientService.secondPlayer.rack.length < 7'>
-                {{ this.gameClientService.secondPlayer.rack?.length }} lettres disponibles sur le chevalet
+            <mat-card-title>{{ gameClientService.secondPlayer.name }}</mat-card-title>
+            <mat-card-subtitle class='score'>{{ gameClientService.secondPlayer.score }} POINTS</mat-card-subtitle>
+            <mat-card-subtitle class='rack-letters' *ngIf='gameClientService.secondPlayer.rack.length < 7'>
+                {{ gameClientService.secondPlayer.rack?.length }} lettres disponibles sur le chevalet
             </mat-card-subtitle>
         </mat-card-title-group>
         <mat-card-content>
             <div
-                [ngClass]="[this.gameClientService.timer < 10 ? 'countdown' : 'time']"
+                [ngClass]="[gameClientService.timer < 10 ? 'countdown' : 'time']"
                 id='playerTwoTimer'
-                *ngIf='!this.gameClientService.playerOneTurn'
+                *ngIf='!gameClientService.playerOneTurn'
             >
                 <mat-icon>timer</mat-icon>
-                {{ this.timer.secondsToMinute(this.gameClientService.timer) }}:{{
-                this.timer.timerToSecond(this.gameClientService.timer)
+                {{ timer.secondsToMinute(gameClientService.timer) }}:{{
+                timer.timerToSecond(gameClientService.timer)
                 }}
             </div>
         </mat-card-content>
     </section>
 </div>
 
-<div class='objectives' *ngIf='this.gameClientService.playerOne.objective'>
+<div class='objectives' *ngIf='gameClientService.playerOne.objective'>
     <mat-expansion-panel [expanded]='true'>
         <mat-expansion-panel-header>
             <mat-panel-title>
@@ -67,7 +67,7 @@
             </mat-panel-title>
         </mat-expansion-panel-header>
         <p class='obj-paragraph'>En cours</p>
-        <tr class='objective-tr' *ngFor='let objective of this.filterNotCompletedObjectives()'>
+        <tr class='objective-tr' *ngFor='let objective of filterNotCompletedObjectives()'>
             <mat-card *ngIf='!objective.complete'>
                 <td [ngClass]='{ complete: objective.complete }' [matTooltip]='objective.description' id='td-objective'>
                     <p *ngIf='objective.isPublic && !objective.complete' class='isPublic-obj'>
@@ -90,8 +90,8 @@
             </mat-card>
         </tr>
         <p class='obj-paragraph'>Complétés (Vous)</p>
-        <tr class='objective-tr' *ngFor='let objective of this.filterCompletedObjectives(true)'>
-            <mat-card *ngIf='objective.complete && objective.user === this.gameClientService.playerOne.name'
+        <tr class='objective-tr' *ngFor='let objective of filterCompletedObjectives(true)'>
+            <mat-card *ngIf='objective.complete && objective.user === gameClientService.playerOne.name'
                       class='objective-completed'>
                 <p *ngIf='objective.isPublic && objective.complete' class='isPublic-obj'>
                     <mat-icon>people</mat-icon>
@@ -114,8 +114,8 @@
             </mat-card>
         </tr>
         <p class='obj-paragraph'>Complétés (Adversaire)</p>
-        <tr class='objective-tr' *ngFor='let objective of this.filterCompletedObjectives(false)'>
-            <mat-card *ngIf='objective.complete && objective.user === this.gameClientService.secondPlayer.name'
+        <tr class='objective-tr' *ngFor='let objective of filterCompletedObjectives(false)'>
+            <mat-card *ngIf='objective.complete && objective.user === gameClientService.secondPlayer.name'
                       class='objective-completed'>
                 <p *ngIf='objective.isPublic && objective.complete' class='isPublic-obj'>
                     <mat-icon>people</mat-icon>
@@ -141,11 +141,11 @@
 </div>
 
 <div id='combined'>
-    <button id='abandonButton' *ngIf='!this.gameClientService.isGameFinish' (click)='abandonGame()' mat-raised-button
+    <button id='abandonButton' *ngIf='!gameClientService.isGameFinish' (click)='abandonGame()' mat-raised-button
             color='warn'>Abandonner
     </button>
 
-    <button id='quitGame' *ngIf='this.gameClientService.isGameFinish' (click)='leaveGame()' mat-raised-button>Quitter
+    <button id='quitGame' *ngIf='gameClientService.isGameFinish' (click)='leaveGame()' mat-raised-button>Quitter
     </button>
     <button
         mat-fab

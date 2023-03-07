@@ -58,6 +58,7 @@ export class SocketManager {
                 }
             }
             socket.on('disconnect', () => {
+                // eslint-disable-next-line no-console
                 console.log('Disconnection of client with id = ' + socket.id + ' from : ' + socket.handshake.headers.origin);
             });
         });
