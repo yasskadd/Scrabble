@@ -35,6 +35,8 @@ body {
     margin-bottom: 16px;
 }
 
-.dialog-backdrop {
-    background: red;
+::ng-deep mat-dialog-container div.mat-mdc-dialog-surface {
+    box-shadow: none !important;
+    border-radius: 6px;
+    border-style: ridge;
 }

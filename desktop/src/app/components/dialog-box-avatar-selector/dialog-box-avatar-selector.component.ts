@@ -6,7 +6,10 @@ import { Component } from '@angular/core';
     styleUrls: ['./dialog-box-avatar-selector.component.scss'],
 })
 export class DialogBoxAvatarSelectorComponent {
-    protected images: ImageData;
+    protected imageSources: string[];
 
-    constructor() {}
+    constructor() {
+        this.imageSources = [];
+        this.imageSources.push('https://th.bing.com/th/id/OIP.xnUJy4yaRKK12eb2g-ZceQHaFo?pid=ImgDet&rs=1');
+    }
 }
