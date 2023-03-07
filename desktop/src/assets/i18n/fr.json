@@ -136,6 +136,11 @@
             "reading": "Le fichier n'a pas pu être lu",
             "verifying": "En vérification, veuillez patienter...",
             "none": "Aucun fichier sélectionné"
+        },
+        "socket": {
+            "connection_failed": "La connection au socket a échouée.",
+            "disconnection_failed": "La déconnection du socket a échouée.",
+            "send_failed": "L'envoi au socket a échoué."
         }
     },
     "event": {

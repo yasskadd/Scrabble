@@ -1,11 +1,12 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { RustCommand, RustEvent } from '@app/models/rust-command';
+import { SnackBarService } from '@services/snack-bar.service';
 import * as tauri from '@tauri-apps/api';
+import { Event } from '@tauri-apps/api/event';
 import { Subject } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
-import { Event } from '@tauri-apps/api/event';
-import { SnackBarService } from '@services/snack-bar.service';
+import { LanguageService } from '../language.service';
 
 @Injectable({
     providedIn: 'root',
@@ -16,7 +17,7 @@ export class ClientSocketService implements OnDestroy {
 
     private readonly useTauriSocket: boolean;
 
-    constructor(private snackBarService: SnackBarService) {
+    constructor(private snackBarService: SnackBarService, private languageService: LanguageService) {
         this.updateSubject = new Subject<void>();
         // eslint-disable-next-line no-underscore-dangle
         this.useTauriSocket = !!window.__TAURI_IPC__;
@@ -41,8 +42,9 @@ export class ClientSocketService implements OnDestroy {
             tauri.tauri.invoke(RustCommand.EstablishConnection, { address: environment.serverUrl }).then(() => {
                 tauri.event
                     .listen(RustEvent.SocketConnectionFailed, (event: Event<unknown>) => {
-                        // TODO : Language
-                        this.snackBarService.openError(('Socket connection failed : ' + event.payload) as string);
+                        this.languageService.getWord('error.socket.connection_failed').subscribe((word: string) => {
+                            this.snackBarService.openError((word + ' : ' + event.payload) as string);
+                        });
                     })
                     .then();
             });
@@ -56,8 +58,9 @@ export class ClientSocketService implements OnDestroy {
             tauri.tauri.invoke(RustCommand.Disconnect).then(() => {
                 tauri.event
                     .listen(RustEvent.SocketDisconnectionFailed, (error: Event<unknown>) => {
-                        // TODO : Language
-                        this.snackBarService.openError(('Socket disconnection failed : ' + error.payload) as string);
+                        this.languageService.getWord('error.socket.disconnection_failed').subscribe((word: string) => {
+                            this.snackBarService.openError((word + ' : ' + error.payload) as string);
+                        });
                     })
                     .then();
             });
@@ -85,8 +88,9 @@ export class ClientSocketService implements OnDestroy {
                 tauri.tauri.invoke(RustCommand.Send, { eventName: event, data: JSON.stringify(data) }).then(() => {
                     tauri.event
                         .listen(RustEvent.SocketSendFailed, (error: Event<unknown>) => {
-                            // TODO : Language
-                            this.snackBarService.openError(('Socket send failed : ' + error.payload) as string);
+                            this.languageService.getWord('error.socket.send_failed').subscribe((word: string) => {
+                                this.snackBarService.openError((word + ' : ' + error.payload) as string);
+                            });
                         })
                         .then();
                 });
@@ -94,8 +98,9 @@ export class ClientSocketService implements OnDestroy {
                 tauri.tauri.invoke(RustCommand.Send, { eventName: event }).then(() => {
                     tauri.event
                         .listen(RustEvent.SocketSendFailed, (error: Event<unknown>) => {
-                            // TODO : Language
-                            this.snackBarService.openError(('Socket send failed : ' + error.payload) as string);
+                            this.languageService.getWord('error.socket.send_failed').subscribe((word: string) => {
+                                this.snackBarService.openError((word + ' : ' + error.payload) as string);
+                            });
                         })
                         .then();
                 });

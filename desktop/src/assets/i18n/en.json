@@ -136,6 +136,11 @@
             "reading": "An error occured during reading",
             "verifying": "Verifying, please wait...",
             "none": "No file selected"
+        },
+        "socket": {
+            "connection_failed": "Socket connection failed",
+            "disconnection_failed": "Socket disconnection failed",
+            "send_failed": "Socket send failed"
         }
     },
     "event": {

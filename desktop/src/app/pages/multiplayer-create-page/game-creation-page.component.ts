@@ -91,7 +91,6 @@ export class GameCreationPageComponent implements OnInit {
         const dictionnaryTitleSelected = (this.form.get('dictionary') as AbstractControl).value;
 
         if (!this.dictionaryAvailable(dictionnaryTitleSelected)) {
-            // TODO : Language
             this.languageService.getWord(DictionaryEvents.UNAVAILABLE).subscribe((word: string) => {
                 this.snackBarService.openError(word);
             });
