@@ -251,8 +251,8 @@
             }
         }
     ],
-    "settings": {
-        "import/resolver": {
+"settings": {
+    "import/resolver": {
             "typescript": {} // this loads <root dir>/tsconfig.json to eslint
         },
         "import/parser": {

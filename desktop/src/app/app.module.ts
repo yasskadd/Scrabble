@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -44,6 +44,11 @@ import { MultiplayerJoinPageComponent } from './pages/multiplayer-join-page/mult
 import { WaitingOpponentPageComponent } from './pages/waiting-opponent-page/waiting-opponent-page.component';
 import { ErrorSnackBarComponent } from './components/snack-bar/error/error-snack-bar.component';
 import { InfoSnackBarComponent } from './components/snack-bar/info/info-snack-bar.component';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(http, '../assets/i18n/', '.json');
 
 /**
  * Main module that is used in main.ts.
@@ -101,6 +106,14 @@ import { InfoSnackBarComponent } from './components/snack-bar/info/info-snack-ba
         MatStepperModule,
         MatAutocompleteModule,
         MatSidenavModule,
+        TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory,
+                deps: [HttpClient],
+            },
+            defaultLanguage: 'fr',
+        }),
     ],
     providers: [ImportDictionaryComponent],
     bootstrap: [AppComponent],

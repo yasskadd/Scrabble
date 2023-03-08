@@ -1,0 +1,179 @@
+{
+    "main_page": {
+        "chat": {
+            "open": "Ouvrir le chat",
+            "close": "Fermer le chat"
+        },
+        "play": "Jouer",
+        "connected_w_username": "Connecté en tant que",
+        "login": "Se connecter",
+        "logout": "Se déconnecter",
+        "tooltip": {
+            "game_instructions": "Instructions pour le jeu",
+            "play": "Mode classique de Scrabble",
+            "scores": "Classement des meilleurs scores pour chacun des modes de jeu"
+        },
+        "label": {
+            "username": "Nom d'utilisateur"
+        },
+        "play_dialog": {
+            "solo": "Solo"
+        }
+    },
+    "new_game_page": {
+        "game_settings": "Paramètres de jeu",
+        "opponent_name": "Nom d'adversaire",
+        "available_games": "Parties disponibles",
+        "no_available_games": "Aucunes parties disponibles",
+        "label": {
+            "name": "Nom de joueur",
+            "difficulty": "Difficulté",
+            "timer": "Minuterie",
+            "dictionary": "Dictionnaire"
+        },
+        "random": "Aléatoire"
+    },
+    "admin_page": {
+        "dictionary_list": "Liste des dictionnaires disponibles",
+        "tabs": {
+            "dictionaries": "Dictionnaires",
+            "virtual_players": "Joueurs virtuels",
+            "game_historic": "Historique de jeu",
+            "highscores": "Meilleurs scores"
+        }
+    },
+    "waiting_page": {
+        "start": "Démarrer",
+        "reject": "Rejeter",
+        "join": {
+            "solo": "Rejoindre une partie en solo"
+        }
+    },
+    "game_page": {
+        "informations": {
+            "letters_available": "lettres disponibles",
+            "letters_remaining": "lettres restantes",
+            "points": "points",
+            "objectives": "Objectifs",
+            "ongoing": "En cours",
+            "completed": "Complétés",
+            "opponent_completed": "Complétés par l'adversaire"
+        },
+        "play_area": {
+            "font_size": "Taille de police"
+        },
+        "rack": {
+            "skip_round": "Passer",
+            "switch_letters": "Échanger"
+        }
+    },
+    "difficulty": {
+        "beginner": "Débutant",
+        "expert": "Expert"
+    },
+    "virtual_player": {
+        "name": "Nom",
+        "add": "Ajouter un joueur virtuel",
+        "new_name": "Nouveau nom"
+    },
+    "action": {
+        "start": "Démarrer",
+        "join": "Rejoindre",
+        "create": "Créer",
+        "refresh": "Rafraîchir",
+        "reset": "Réinitialiser",
+        "modify": "Modifier",
+        "delete": "Supprimer",
+        "back": "Retour",
+        "abandon": "Abandonner",
+        "quit": "Quitter",
+        "cancel": "Annuler",
+        "play": "Jouer",
+        "no_thanks": "Non merci",
+        "ok": "Ok",
+        "yes": "Oui",
+        "no": "Non"
+    },
+    "file": {
+        "title": "Titre",
+        "description": "Description",
+        "choose": "Choisir un fichier"
+    },
+    "dictionary": {
+        "add": "Ajouter un dictionnaire",
+        "modify": "Modifier le dictionnaire"
+    },
+    "game": {
+        "info": {
+            "scores": "Scores",
+            "players": "Joueurs"
+        },
+        "type": {
+            "classic": "Classique"
+        },
+        "state": {
+            "loading": "Chargement en cours...",
+            "abandoned": "Abandonnée",
+            "found_opponent": "Adversaire trouvé",
+            "searching_opponent": "En attente d'un adversaire...",
+            "waiting_opponent": "En attente de confirmation...",
+            "equality": "Égalité! Vous avez le même score que votre adversaire!",
+            "winned": "Victoire à {{playerName}}! Bravo!"
+        },
+        "history": {
+            "mode": "Mode",
+            "start": "Début de jeu (jj/mm/aaaa)",
+            "end": "Fin de jeu (jj/mm/aaaa)",
+            "time": "Durée (m:s)",
+            "first_player": "Premier joueur",
+            "second_player": "Deuxième joueur",
+            "first_score": "Score"
+        }
+    },
+    "header": {
+        "home": "Acceuil",
+        "admin": "Admin"
+    },
+    "chat": {
+        "message_box": "Entrez un message",
+        "disconnected": "Vous devez vous connecter afin d'avoir accès au clavardage"
+    },
+    "footer": {
+        "team": "Équipe"
+    },
+    "error": {
+        "connection": {
+            "usernameAlreadyExists": "Le nom d'utilisateur existe déjà",
+            "roomFull": "Impossible de se connecter à la salle",
+            "empty": "Le nom ne peut pas être vide"
+        },
+        "file": {
+            "not_json": "Le fichier n'est pas de type .json",
+            "reading": "Le fichier n'a pas pu être lu",
+            "verifying": "En vérification, veuillez patienter...",
+            "none": "Aucun fichier sélectionné"
+        },
+        "socket": {
+            "connection_failed": "La connection au socket a échouée.",
+            "disconnection_failed": "La déconnection du socket a échouée.",
+            "send_failed": "L'envoi au socket a échoué."
+        }
+    },
+    "event": {
+        "dictionary": {
+            "not_dictionnary": "Le fichier téléversé n'est pas un dictionnaire. Les champs title, description ou words sont manquant.",
+            "found": "Le dictionnaire existe déjà dans la base de données.",
+            "no_title": "Le dictionnaire n'a pas de titre.",
+            "no_description": "Le dictionnaire n'a pas de description.",
+            "no_words": "Le dictionnaire n'a pas une liste de mots.",
+            "added": "Ajout avec succès du nouveau dictionnaire",
+            "unavailable": "Le dictionnaire n'est plus disponible. Veuillez en choisir un autre",
+            "title_too_long": "Le titre du dictionnaire est trop long!",
+            "title_invalid": "Le titre du dictionnaire contient des espaces!",
+            "description_too_long": "La description du dictionnaire est trop long!"
+        }
+    },
+    "snackbar": {
+        "close": "Fermer"
+    }
+}

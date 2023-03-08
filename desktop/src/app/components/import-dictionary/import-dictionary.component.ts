@@ -1,8 +1,8 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { Dictionary } from '@app/interfaces/dictionary';
-import { Subject } from 'rxjs';
 import { FileStatus } from '@common/models/file-status';
 import { DictionaryService } from '@services/dictionary.service';
+import { Subject } from 'rxjs';
 
 @Component({
     selector: 'app-import-dictionary',
@@ -13,6 +13,8 @@ export class ImportDictionaryComponent {
     @ViewChild('file', { static: false }) file: ElementRef;
     selectedFile: Dictionary | null;
     errorMessage: string;
+
+    protected fileStatus: typeof FileStatus = FileStatus;
 
     constructor(private dictionaryService: DictionaryService) {
         this.selectedFile = null;
@@ -66,10 +68,7 @@ export class ImportDictionaryComponent {
         fileReader.onload = () => {
             subject.next(fileReader.result as string);
         };
-        fileReader.onerror = () => {
-            subject.next(FileStatus.READING_ERROR);
-        };
-
+        fileReader.onerror = () => subject.next(FileStatus.READING_ERROR);
         return subject;
     }
 }

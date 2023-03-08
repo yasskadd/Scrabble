@@ -1,8 +1,11 @@
-<button mat-raised-button onclick="document.getElementById('selectFiles').click()">Choisir un fichier</button>
-<input hidden #file (change)='detectImportFile()' type='file' id='selectFiles' accept='.json' value='Import' /><br />
+<button mat-raised-button onclick="document.getElementById('selectFiles').click()">
+	{{ "file.choose" | translate }}
+</button>
+<input hidden #file (change)="detectImportFile()" type="file" id="selectFiles" accept=".json" value="Import" /><br />
 <p>{{ file.value }}</p>
 
-<button mat-raised-button (click)='uploadDictionary()' id='import'>Ajouter le dictionnaire</button>
+<button mat-raised-button (click)="uploadDictionary()" id="import">
+	{{ "dictionary.add" | translate }}
+</button>
 
-
-<mat-error>{{errorMessage}}</mat-error>
+<mat-error>{{ errorMessage | translate }}</mat-error>

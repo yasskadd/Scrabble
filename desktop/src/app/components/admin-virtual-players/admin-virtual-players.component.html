@@ -1,11 +1,19 @@
 <div class="action-buttons">
-    <button mat-raised-button color="basic" (click)="updateBotList()">Rafraîchir <mat-icon>refresh</mat-icon></button>
-    <button mat-raised-button color="warn" (click)="resetBot()">Reinitialiser <mat-icon>delete</mat-icon></button>
+    <button mat-raised-button color="basic" (click)="updateBotList()">
+        {{ "action.refresh" | translate }}
+        <mat-icon>refresh</mat-icon>
+    </button>
+    <button mat-raised-button color="warn" (click)="resetBot()">
+        {{ "action.reset" | translate }}
+        <mat-icon>delete</mat-icon>
+    </button>
 </div>
 
 <div class="Parent">
     <div class="child1">
-        <mat-card-title>Joueurs virtuels débutants</mat-card-title>
+        <mat-card-title>
+            {{ "difficulty.beginner" | translate }}
+        </mat-card-title>
         <mat-selection-list id="expertList" #beginnerNames [multiple]="false">
             <mat-list-option *ngFor="let bot of beginnerBots" [value]="bot.username">
                 <div class="justified">
@@ -25,7 +33,7 @@
                 maxlength="20"
                 type="text"
                 appearance="outline"
-                placeholder="Ajouter un joueur virtuel débutant"
+                placeholder="{{ 'virtual_player.add' | translate }}"
                 (keydown.enter)="addBeginnerName()"
                 [(ngModel)]="beginnerInput"
             />
@@ -43,7 +51,7 @@
     </div>
 
     <div class="child2">
-        <mat-card-title>Joueurs virtuels experts</mat-card-title>
+        <mat-card-title> {{ "difficulty.expert" | translate }}</mat-card-title>
         <mat-selection-list id="expertList" #expertNames [multiple]="false">
             <mat-list-option *ngFor="let bot of expertBots" [value]="bot.username">
                 <div class="justified">
@@ -63,7 +71,7 @@
                 maxlength="20"
                 type="text"
                 appearance="outline"
-                placeholder="Ajouter un joueur virtuel expert"
+                placeholder="{{ 'virtual_player.add' | translate }}"
                 (keydown.enter)="addExpertName()"
                 [(ngModel)]="expertInput"
             />

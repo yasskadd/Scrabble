@@ -1,0 +1,179 @@
+{
+    "main_page": {
+        "chat": {
+            "open": "Close chat",
+            "close": "Open chat"
+        },
+        "play": "Play",
+        "connected_w_username": "Connected as",
+        "login": "Login",
+        "logout": "Logout",
+        "tooltip": {
+            "game_instructions": "Game's instructions",
+            "play": "Scrabble as you know it",
+            "scores": "Leaderboard of all the best scores"
+        },
+        "label": {
+            "username": "Username"
+        },
+        "play_dialog": {
+            "solo": "Solo"
+        }
+    },
+    "new_game_page": {
+        "game_settings": "Game's settings",
+        "opponent_name": "Opponent name",
+        "available_games": "Available games",
+        "no_available_games": "No available games",
+        "label": {
+            "name": "Player name",
+            "difficulty": "Difficulty",
+            "timer": "Timer",
+            "dictionary": "Dictionary"
+        },
+        "random": "Random"
+    },
+    "admin_page": {
+        "dictionary_list": "List of available dictionaries",
+        "tabs": {
+            "dictionaries": "Dictionaries",
+            "virtual_players": "Virtual players",
+            "game_historic": "Games history",
+            "highscores": "Highscores"
+        }
+    },
+    "waiting_page": {
+        "start": "Start",
+        "reject": "Reject",
+        "join": {
+            "solo": "Join a solo game"
+        }
+    },
+    "game_page": {
+        "informations": {
+            "letters_available": "available letters",
+            "letters_remaining": "remaining letters",
+            "points": "points",
+            "objectives": "Objectives",
+            "ongoing": "Ongoing",
+            "completed": "Completed",
+            "opponent_completed": "Completed by opponent"
+        },
+        "play_area": {
+            "font_size": "Font size"
+        },
+        "rack": {
+            "skip_round": "Skip",
+            "switch_letters": "Swap"
+        }
+    },
+    "difficulty": {
+        "beginner": "Beginner",
+        "expert": "Expert"
+    },
+    "virtual_player": {
+        "name": "Name",
+        "add": "Add a virtual player",
+        "new_name": "New name"
+    },
+    "action": {
+        "start": "Start",
+        "join": "Join",
+        "create": "Create",
+        "refresh": "Refresh",
+        "reset": "Reset",
+        "modify": "Modify",
+        "delete": "Delete",
+        "back": "Back",
+        "abandon": "Abandon",
+        "quit": "Quit",
+        "cancel": "Cancel",
+        "play": "Play",
+        "no_thanks": "No thanks",
+        "ok": "Ok",
+        "yes": "Yes",
+        "no": "No"
+    },
+    "file": {
+        "title": "Title",
+        "description": "Description",
+        "choose": "Choose a file"
+    },
+    "dictionary": {
+        "add": "Add a dictionary",
+        "modify": "Modify the dictionary"
+    },
+    "game": {
+        "info": {
+            "scores": "Scores",
+            "players": "Players"
+        },
+        "type": {
+            "classic": "Classic"
+        },
+        "state": {
+            "loading": "Loading...",
+            "abandoned": "Abandoned",
+            "found_opponent": "Opponent found",
+            "searching_opponent": "Searching for opponent...",
+            "waiting_opponent": "Waiting for opponent...",
+            "equality": "Equality! You got the same scores!",
+            "winned": "Victory of {{playerName}}! Congratulations!"
+        },
+        "history": {
+            "mode": "Mode",
+            "start": "Start of game (jj/mm/aaaa)",
+            "end": "End of game (jj/mm/aaaa)",
+            "time": "Time (m:s)",
+            "first_player": "First player",
+            "second_player": "Second player",
+            "score": "Score"
+        }
+    },
+    "header": {
+        "home": "Home",
+        "admin": "Admin"
+    },
+    "chat": {
+        "message_box": "Enter a message",
+        "disconnected": "You need to be connected to access the chat rooms"
+    },
+    "footer": {
+        "team": "Team"
+    },
+    "error": {
+        "connection": {
+            "usernameAlreadyExists": "Username already exists",
+            "roomFull": "Can't connect to the room",
+            "empty": "Username cannot be empty"
+        },
+        "file": {
+            "not_json": "File is not of type .json",
+            "reading": "An error occured during reading",
+            "verifying": "Verifying, please wait...",
+            "none": "No file selected"
+        },
+        "socket": {
+            "connection_failed": "Socket connection failed",
+            "disconnection_failed": "Socket disconnection failed",
+            "send_failed": "Socket send failed"
+        }
+    },
+    "event": {
+        "dictionary": {
+            "not_dictionnary": "Le selected file is not a dictionary. The title, the description or the words are missing.",
+            "found": "The dictionary already exists in the database.",
+            "no_title": "The dictionary doesn't have a title.",
+            "no_description": "The dictionary doesn't have a description.",
+            "no_words": "The dictionary doesn't have a word list.",
+            "added": "Added the dictionary!",
+            "unavailable": "This dictionary is now unavailable. Please select another one",
+            "title_too_long": "Title too long!",
+            "title_invalid": "No spaces allowed!",
+            "description_too_long": "Description too long!"
+        }
+    },
+    "snackbar": {
+        "close": "Close"
+    }
+}
