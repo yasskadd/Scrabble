@@ -55,6 +55,14 @@ mat-drawer-container {
     top: 5px;
 }
 
+.language-selector {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    padding: 8px;
+    width: 130px;
+}
+
 mat-drawer {
     left: 0;
     height: 100%;

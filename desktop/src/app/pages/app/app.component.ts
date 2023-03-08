@@ -2,8 +2,6 @@ import { ChangeDetectorRef, Component, ElementRef } from '@angular/core';
 import { ClientSocketService } from '@app/services/communication/client-socket.service';
 import { ThemeService } from '@services/theme.service';
 
-// import * as tauri from '@tauri-apps/api';
-
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
