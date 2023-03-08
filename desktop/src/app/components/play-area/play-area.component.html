@@ -1,6 +1,6 @@
 <div class="container-wrapper">
     <b id="winning-message" *ngIf="gameClientService.isGameFinish">
-        gameClientService.winningMessage | translate : { playerName: gameClientService.winner }
+        {{ gameClientService.winningMessage | translate : { playerName: gameClientService.winner } }}
     </b>
     <div class="container">
         <div id="police">
