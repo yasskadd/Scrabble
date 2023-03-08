@@ -2,11 +2,12 @@ import { Injectable } from '@angular/core';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
-import { HttpHandlerService } from './communication/http-handler.service';
-import { Observable, Subject } from 'rxjs';
 import { DictionaryEvents } from '@common/models/dictionary-events';
 import { DictionaryVerificationService } from '@services/dictionary-verification.service';
 import { SnackBarService } from '@services/snack-bar.service';
+import { Observable, Subject } from 'rxjs';
+import { HttpHandlerService } from './communication/http-handler.service';
+import { LanguageService } from './language.service';
 
 @Injectable({
     providedIn: 'root',
@@ -19,6 +20,7 @@ export class DictionaryService {
         private snackBarService: SnackBarService,
         private readonly httpHandler: HttpHandlerService,
         private dictionaryVerificationService: DictionaryVerificationService,
+        private languageService: LanguageService,
     ) {}
 
     addDictionary(dictionary: Dictionary): Subject<string> {
@@ -29,8 +31,9 @@ export class DictionaryService {
             } else {
                 subject.next('');
                 this.httpHandler.addDictionary(dictionary).subscribe(() => {
-                    // TODO : Language
-                    this.snackBarService.openInfo(DictionaryEvents.ADDED);
+                    this.languageService.getWord(DictionaryEvents.ADDED).subscribe((word: string) => {
+                        this.snackBarService.openInfo(word);
+                    });
                 });
                 this.updateDictionariesInfos();
             }

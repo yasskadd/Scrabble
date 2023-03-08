@@ -1,5 +1,5 @@
 <div class="load" *ngIf="isLoading">
-    <h1>Chargement en cours ...</h1>
+    <h1>{{ "game.state.loading" | translate }}</h1>
     <mat-spinner diameter="200"></mat-spinner>
 </div>
 <body *ngIf="!isLoading">
