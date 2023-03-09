@@ -7,8 +7,15 @@
         </button>
         <img
             mat-fab-button
-            *ngIf="imageSrcForm.valid"
-            [src]="imageSrcForm.value"
+            *ngIf="imageSrcForm.valid && imageSrcForm.value.type === imageTypes.Url"
+            [src]="imageSrcForm.value.src"
+            (click)="openAvatarSelector()"
+            class="selecter-avatar mat-elevation-z5"
+        />
+        <img
+            mat-fab-button
+            *ngIf="imageSrcForm.valid && imageSrcForm.value.type === imageTypes.ImageData"
+            [src]="imageSrcForm.value.data"
             (click)="openAvatarSelector()"
             class="selecter-avatar mat-elevation-z5"
         />

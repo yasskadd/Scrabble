@@ -8,7 +8,9 @@ import { DialogBoxAvatarSelectorComponent } from '@app/components/dialog-box-ava
 import { equalStringValidator } from '@app/directives/custom-validators';
 import { AppRoutes } from '@app/models/app-routes';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
+import { AvatarData } from '@common/interfaces/avatar-data';
 import { IUser } from '@common/interfaces/user';
+import { ImageType } from '@common/models/image-type';
 
 @Component({
     selector: 'app-user-account',
@@ -19,13 +21,16 @@ export class UserAccountComponent {
     @ViewChild('avatarSelector', { static: false }) protected selector: any;
     readonly siteKey: string = '6Lf7L98kAAAAAJolI_AENbQSq32e_Wcv5dYBQA6D';
 
-    formGroup: FormGroup;
-    imageSrcForm: FormControl;
-    usernameForm: FormControl;
-    emailForm: FormControl;
-    passwordForm: FormControl;
-    passwordCopyForm: FormControl;
-    connectionError: string;
+    protected formGroup: FormGroup;
+    protected imageSrcForm: FormControl;
+    protected usernameForm: FormControl;
+    protected emailForm: FormControl;
+    protected passwordForm: FormControl;
+    protected passwordCopyForm: FormControl;
+    protected connectionError: string;
+    protected imageData: string;
+
+    protected imageTypes: typeof ImageType = ImageType;
 
     constructor(private httpHandlerService: HttpHandlerService, private router: Router, private formBuilder: FormBuilder, private dialog: MatDialog) {
         this.imageSrcForm = new FormControl('', Validators.required);
@@ -53,19 +58,18 @@ export class UserAccountComponent {
                 width: '360px',
                 height: '420px',
                 backdropClass: 'dialog-backdrop',
-                data: {
-                    src: this.imageSrcForm.value,
-                },
+                data: this.imageSrcForm.value,
             })
             .afterClosed()
-            .subscribe((src: string) => {
-                if (src) {
-                    this.imageSrcForm.setValue(src);
+            .subscribe((data: AvatarData) => {
+                if (data) {
+                    this.imageSrcForm.setValue(data);
                 }
             });
     }
 
     protected submitNewAccount(): void {
+        // TODO : Also send email and image data to server
         this.httpHandlerService
             .signUp({
                 username: this.usernameForm.value,
@@ -86,7 +90,7 @@ export class UserAccountComponent {
 
     private addPasswordValidator(): void {
         let equalValidatorFn: ValidatorFn;
-        this.passwordCopyForm.valueChanges.subscribe((newValue: string) => {
+        this.passwordCopyForm.valueChanges.subscribe(() => {
             this.passwordCopyForm.removeValidators(equalValidatorFn);
             equalValidatorFn = equalStringValidator(this.passwordForm.value);
             this.passwordCopyForm.addValidators(equalValidatorFn);
