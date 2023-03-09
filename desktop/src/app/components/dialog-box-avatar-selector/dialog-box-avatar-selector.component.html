@@ -1,8 +1,9 @@
 <mat-card>
 	<mat-card-content>
 		<mat-grid-list gutterSize="16" cols="4" height="fit">
-			<mat-grid-tile *ngFor="let imageSource of imageSources">
-				<img src="{{ imageSource }}" />
+			<mat-grid-tile [mat-dialog-close]="imageSource" *ngFor="let imageSource of imageSources">
+				<mat-icon *ngIf="isImageSelected(imageSource)">check</mat-icon>
+				<img [ngClass]="isImageSelected(imageSource) ? 'selected-image' : ''" src="{{ imageSource }}" />
 			</mat-grid-tile>
 		</mat-grid-list>
 	</mat-card-content>

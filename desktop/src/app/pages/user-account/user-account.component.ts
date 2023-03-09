@@ -20,6 +20,7 @@ export class UserAccountComponent {
     readonly siteKey: string = '6Lf7L98kAAAAAJolI_AENbQSq32e_Wcv5dYBQA6D';
 
     formGroup: FormGroup;
+    imageSrcForm: FormControl;
     usernameForm: FormControl;
     emailForm: FormControl;
     passwordForm: FormControl;
@@ -27,6 +28,7 @@ export class UserAccountComponent {
     connectionError: string;
 
     constructor(private httpHandlerService: HttpHandlerService, private router: Router, private formBuilder: FormBuilder, private dialog: MatDialog) {
+        this.imageSrcForm = new FormControl('', Validators.required);
         this.usernameForm = new FormControl('', Validators.required);
         this.emailForm = new FormControl('', [Validators.required, Validators.email]);
         this.passwordForm = new FormControl('', Validators.required);
@@ -34,6 +36,7 @@ export class UserAccountComponent {
         this.connectionError = '';
 
         this.formGroup = this.formBuilder.group({
+            imageSrcForm: this.imageSrcForm,
             usernameForm: this.usernameForm,
             emailForm: this.emailForm,
             passwordForm: this.passwordForm,
@@ -45,11 +48,21 @@ export class UserAccountComponent {
     }
 
     protected openAvatarSelector(): void {
-        this.dialog.open(DialogBoxAvatarSelectorComponent, {
-            width: '360px',
-            height: '420px',
-            backdropClass: 'dialog-backdrop',
-        });
+        this.dialog
+            .open(DialogBoxAvatarSelectorComponent, {
+                width: '360px',
+                height: '420px',
+                backdropClass: 'dialog-backdrop',
+                data: {
+                    src: this.imageSrcForm.value,
+                },
+            })
+            .afterClosed()
+            .subscribe((src: string) => {
+                if (src) {
+                    this.imageSrcForm.setValue(src);
+                }
+            });
     }
 
     protected submitNewAccount(): void {

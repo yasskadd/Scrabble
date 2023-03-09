@@ -20,3 +20,16 @@ mat-grid-tile {
 		height: inherit;
 	}
 }
+
+.selected-image {
+	filter: blur(2px);
+}
+
+mat-grid-tile mat-icon {
+	z-index: 10;
+	// TODO : Color
+	color: green;
+	mix-blend-mode: difference;
+	position: absolute;
+	transform: scale(1.8);
+}
