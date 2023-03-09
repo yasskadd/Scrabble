@@ -28,12 +28,17 @@
             <!-- TODO : Language -->
             <mat-label>Confirmation de mot de passe</mat-label>
             <input type="password" matInput [formControl]="passwordCopyForm" />
+            <mat-error *ngIf="passwordCopyForm.hasError('equalString')">
+                <!-- TODO : Language -->
+                Passwords aren't equal
+            </mat-error>
         </mat-form-field>
         <ngx-recaptcha2 #captchaElem [siteKey]="siteKey" [useGlobalDomain]="false" formControlName="recaptcha"> </ngx-recaptcha2>
         <!-- TODO : something to choose theme -->
     </form>
+    <mat-error>{{ connectionError }}</mat-error>
     <!-- TODO : Language -->
-    <button mat-raised-button *ngIf="formGroup.valid">Connecter</button>
+    <button mat-raised-button *ngIf="formGroup.valid" (click)="submitNewAccount()">Connecter</button>
     <!-- TODO : Language -->
     <button mat-raised-button *ngIf="formGroup.invalid" disabled>Connecter</button>
 </body>

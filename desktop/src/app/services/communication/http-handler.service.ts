@@ -1,15 +1,16 @@
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Bot } from '@common/interfaces/bot';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
 import { HighScores } from '@app/interfaces/high-score-parameters';
+import { Bot } from '@common/interfaces/bot';
+import { BotNameSwitcher } from '@common/interfaces/bot-name-switcher';
 import { GameHistoryInfo } from '@common/interfaces/game-history-info';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
+import { IUser } from '@common/interfaces/user';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { BotNameSwitcher } from '@common/interfaces/bot-name-switcher';
 
 @Injectable({
     providedIn: 'root',
@@ -105,6 +106,10 @@ export class HttpHandlerService {
 
     deleteBot(bot: Bot): Observable<void> {
         return this.http.patch<void>(`${this.baseUrl}/virtualPlayer/remove`, bot).pipe(catchError(this.handleError<void>('deleteBot')));
+    }
+
+    signUp(newUser: IUser): Observable<string> {
+        return this.http.post<string>(`${this.baseUrl}/auth/signUp`, newUser);
     }
 
     private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
