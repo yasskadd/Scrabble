@@ -6,7 +6,6 @@
                 <mat-icon>chat_bubble_outline</mat-icon>
                 {{ "main_page.chat.open" | translate }}
             </button>
-            <button mat-fab (click)="redirectUserPage()"><mat-icon>person</mat-icon></button>
             <button *ngIf="chatIsOpen" class="open-chat-button" mat-button (click)="drawer.toggle()" (click)="closeChat()">
                 <mat-icon>keyboard_arrow_left</mat-icon>
                 {{ "main_page.chat.close" | translate }}

@@ -1,7 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { Router } from '@angular/router';
 import { DialogBoxGameTypeComponent } from '@app/components/dialog-box-game-type/dialog-box-game-type.component';
 import { DialogBoxHighScoresComponent } from '@app/components/dialog-box-high-scores/dialog-box-high-scores.component';
 import { DialogGameHelpComponent } from '@app/components/dialog-game-help/dialog-game-help.component';
@@ -36,7 +35,6 @@ export class MainPageComponent implements OnDestroy {
         protected languageService: LanguageService,
         private dialog: MatDialog,
         private highScore: MatDialog,
-        private router: Router,
     ) {
         this.homeConnectionResponse = { validity: false };
         this.userNameForm = new FormControl('', Validators.required);
@@ -72,9 +70,6 @@ export class MainPageComponent implements OnDestroy {
         this.dialog.open(DialogGameHelpComponent, { width: '50%' });
     }
 
-    redirectUserPage() {
-        this.router.navigate(['/user']);
-    }
     sendMessage(): void {
         this.chatBoxHandlerService.submitMessage('test');
     }

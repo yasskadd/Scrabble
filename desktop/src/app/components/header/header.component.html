@@ -17,3 +17,11 @@
         <mat-option [value]="languageChoices.English">{{ languageChoices.English.toString().toLocaleUpperCase() }}</mat-option>
     </mat-select>
 </mat-form-field>
+
+<button mat-fab color="primary" [matMenuTriggerFor]="accountMenu"><mat-icon>person</mat-icon></button>
+<mat-menu #accountMenu="matMenu">
+    <!-- Language -->
+    <button mat-menu-item (click)="redirectUserPage()">Sign Up</button>
+    <!-- Language -->
+    <button mat-menu-item>Sign In</button>
+</mat-menu>
