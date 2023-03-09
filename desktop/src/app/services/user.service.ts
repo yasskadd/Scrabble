@@ -8,6 +8,7 @@ import { HttpHandlerService } from './communication/http-handler.service';
     providedIn: 'root',
 })
 export class UserService {
+    user: IUser;
     userName: string;
 
     constructor(private httpHandlerService: HttpHandlerService) {}
@@ -18,7 +19,11 @@ export class UserService {
     // 3. On utilise le token comme cookie avec chaque requette de socket
     // 4. Capturer la réponse si connexion invalide
 
-    connect(user: IUser): Subject<string> {
+    isConnected(): boolean {
+        return this.user ? true : false;
+    }
+
+    login(user: IUser): Subject<string> {
         const subject = new Subject<string>();
 
         // TODO : Also get image data from server
@@ -26,6 +31,7 @@ export class UserService {
             next: (res: any) => {
                 // TODO : Store jwt token and place it in a middleware
                 subject.next('');
+                this.user = user;
             },
             error: (error: HttpErrorResponse) => {
                 // TODO : Language
@@ -34,5 +40,9 @@ export class UserService {
         });
 
         return subject;
+    }
+
+    logout(): void {
+        return;
     }
 }

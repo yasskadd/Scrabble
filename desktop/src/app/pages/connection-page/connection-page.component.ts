@@ -27,8 +27,8 @@ export class ConnectionPageComponent {
         });
     }
 
-    protected connect(): void {
-        const connectionSubject: Subject<string> = this.userService.connect({ username: this.usernameForm.value, password: this.passwordForm.value });
+    protected login(): void {
+        const connectionSubject: Subject<string> = this.userService.login({ username: this.usernameForm.value, password: this.passwordForm.value });
         connectionSubject.subscribe((res: string) => {
             if (res) {
                 // TODO : Language
