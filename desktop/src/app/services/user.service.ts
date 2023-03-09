@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { IUser } from '@common/interfaces/user';
 import { Subject } from 'rxjs';
+import { AppCookieService } from './communication/app-cookie.service';
 import { HttpHandlerService } from './communication/http-handler.service';
 
 @Injectable({
@@ -11,7 +12,7 @@ export class UserService {
     user: IUser;
     userName: string;
 
-    constructor(private httpHandlerService: HttpHandlerService) {
+    constructor(private httpHandlerService: HttpHandlerService, private cookieService: AppCookieService) {
         this.initUser();
     }
 
@@ -32,11 +33,14 @@ export class UserService {
         this.httpHandlerService.login(user).subscribe({
             next: (res: any) => {
                 // TODO : Store jwt token and place it in a middleware
+                console.log(res);
+                this.cookieService.updateUserSessionCookie();
                 this.user = user;
                 subject.next('');
             },
             error: (error: HttpErrorResponse) => {
                 // TODO : Language
+                console.log(error);
                 subject.next(JSON.parse(error.error).message);
             },
         });

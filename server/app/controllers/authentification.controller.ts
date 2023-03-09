@@ -37,11 +37,7 @@ export class AuthentificationController {
                 const isLoginValid = await this.accountStorage.loginValidator(user);
                 if (isLoginValid) {
                     const token = this.createJWToken(user.username);
-                    res.status(SUCCESS)
-                        .cookie('session_token', token, {
-                            httpOnly: true,
-                        })
-                        .send('Cookie sent');
+                    res.status(SUCCESS).cookie('session_token', token).json({ message: 'Cookie sent' });
                     return;
                 }
             }

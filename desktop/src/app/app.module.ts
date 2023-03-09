@@ -24,6 +24,7 @@ import { GamePageComponent } from '@app/pages/game-page/game-page.component';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { NgxCaptchaModule } from 'ngx-captcha';
+import { CookieModule } from 'ngx-cookie';
 import { AdminDictionariesComponent } from './components/admin-dictionaries/admin-dictionaries.component';
 import { AdminGameHistoryComponent } from './components/admin-game-history/admin-game-history.component';
 import { AdminHighScoresComponent } from './components/admin-high-scores/admin-high-scores.component';
@@ -44,12 +45,12 @@ import { PlayerRackComponent } from './components/player-rack/player-rack.compon
 import { ErrorSnackBarComponent } from './components/snack-bar/error/error-snack-bar.component';
 import { InfoSnackBarComponent } from './components/snack-bar/info/info-snack-bar.component';
 import { AdminPageComponent } from './pages/admin-page/admin-page.component';
+import { ConnectionPageComponent } from './pages/connection-page/connection-page.component';
 import { MainPageComponent } from './pages/main-page/main-page.component';
 import { GameCreationPageComponent } from './pages/multiplayer-create-page/game-creation-page.component';
 import { MultiplayerJoinPageComponent } from './pages/multiplayer-join-page/multiplayer-join-page.component';
 import { UserAccountComponent } from './pages/user-account/user-account.component';
 import { WaitingOpponentPageComponent } from './pages/waiting-opponent-page/waiting-opponent-page.component';
-import { ConnectionPageComponent } from './pages/connection-page/connection-page.component';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(http, '../assets/i18n/', '.json');
@@ -96,6 +97,7 @@ export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(h
     ],
     imports: [
         CommonModule,
+        CookieModule.withOptions(),
         AppMaterialModule,
         AppRoutingModule,
         MatSnackBarModule,

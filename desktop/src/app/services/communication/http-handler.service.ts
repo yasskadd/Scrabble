@@ -1,4 +1,4 @@
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
@@ -112,10 +112,15 @@ export class HttpHandlerService {
         return this.http.post<string>(`${this.baseUrl}/auth/signUp`, newUser);
     }
 
-    login(user: IUser): Observable<string | ArrayBuffer> {
-        return this.http.delete<string | ArrayBuffer>(`${this.baseUrl}/auth/login`, {
+    login(user: IUser): Observable<any> {
+        const header: HttpHeaders = new HttpHeaders();
+        header.append('Content-Type', 'application/json');
+
+        return this.http.delete(`${this.baseUrl}/auth/login`, {
+            headers: header,
+            withCredentials: true,
             body: user,
-            responseType: 'text' as 'json',
+            observe: 'response' as 'response',
         });
     }
 
