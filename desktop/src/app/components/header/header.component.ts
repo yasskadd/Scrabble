@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { LanguageChoice } from '@app/models/language-choice';
 import { LanguageService } from '@app/services/language.service';
+import { UserService } from '@app/services/user.service';
 
 @Component({
     selector: 'app-header',
@@ -16,7 +17,7 @@ export class HeaderComponent {
     protected languageForm: FormControl;
     protected languageChoices: typeof LanguageChoice = LanguageChoice;
 
-    constructor(private languageService: LanguageService, private router: Router) {
+    constructor(protected userService: UserService, private languageService: LanguageService, private router: Router) {
         this.isHomePage = this.checkIfHomePage();
 
         this.languageForm = new FormControl(this.languageService.language, Validators.required);

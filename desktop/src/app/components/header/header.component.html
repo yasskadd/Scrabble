@@ -23,5 +23,7 @@
     <!-- Language -->
     <button mat-menu-item (click)="redirectUserPage()">Sign Up</button>
     <!-- Language -->
-    <button mat-menu-item (click)="redirectLoginPage()">Sign In</button>
+    <button mat-menu-item (click)="redirectLoginPage()" *ngIf="!userService.isConnected()">Sign In</button>
+    <!-- Language -->
+    <button mat-menu-item (click)="userService.logout()" *ngIf="userService.isConnected()">Sign Out</button>
 </mat-menu>

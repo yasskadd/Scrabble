@@ -11,7 +11,9 @@ export class UserService {
     user: IUser;
     userName: string;
 
-    constructor(private httpHandlerService: HttpHandlerService) {}
+    constructor(private httpHandlerService: HttpHandlerService) {
+        this.initUser();
+    }
 
     // TODO
     // 1. Prendre un JWT token avec les infos du user
@@ -20,7 +22,7 @@ export class UserService {
     // 4. Capturer la réponse si connexion invalide
 
     isConnected(): boolean {
-        return this.user ? true : false;
+        return this.user.username && this.user.password ? true : false;
     }
 
     login(user: IUser): Subject<string> {
@@ -30,12 +32,12 @@ export class UserService {
         this.httpHandlerService.login(user).subscribe({
             next: (res: any) => {
                 // TODO : Store jwt token and place it in a middleware
-                subject.next('');
                 this.user = user;
+                subject.next('');
             },
             error: (error: HttpErrorResponse) => {
                 // TODO : Language
-                subject.next(error.error.message);
+                subject.next(JSON.parse(error.error).message);
             },
         });
 
@@ -43,6 +45,15 @@ export class UserService {
     }
 
     logout(): void {
-        return;
+        this.httpHandlerService.logout().subscribe(() => {
+            this.initUser();
+        });
+    }
+
+    private initUser(): void {
+        this.user = {
+            username: '',
+            password: '',
+        };
     }
 }

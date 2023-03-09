@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
@@ -114,11 +114,13 @@ export class HttpHandlerService {
 
     login(user: IUser): Observable<string | ArrayBuffer> {
         return this.http.delete<string | ArrayBuffer>(`${this.baseUrl}/auth/login`, {
-            headers: new HttpHeaders({
-                'Content-Type': 'application/json',
-            }),
             body: user,
+            responseType: 'text' as 'json',
         });
+    }
+
+    logout(): Observable<any> {
+        return this.http.post<void>(`${this.baseUrl}/auth/login`, null).pipe(catchError(this.handleError<void>('logout')));
     }
 
     private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
