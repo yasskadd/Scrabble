@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
+import { ConnectionPageComponent } from '@app/pages/connection-page/connection-page.component';
 import { GamePageComponent } from '@app/pages/game-page/game-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { GameCreationPageComponent } from '@app/pages/multiplayer-create-page/game-creation-page.component';
@@ -14,8 +15,8 @@ const routes: Routes = [
     { path: AppRoutes.AdminPage, component: AdminPageComponent },
     { path: AppRoutes.HomePage, component: MainPageComponent },
     { path: AppRoutes.GamePage, component: GamePageComponent },
-    // TODO : AppRoutes
-    { path: 'user', component: UserAccountComponent },
+    { path: AppRoutes.UserCreationPage, component: UserAccountComponent },
+    { path: AppRoutes.ConnectionPage, component: ConnectionPageComponent },
     { path: `${AppRoutes.SoloGameCreationPage}/:id`, component: GameCreationPageComponent },
     { path: `${AppRoutes.MultiJoinPage}/:id`, component: MultiplayerJoinPageComponent },
     { path: `${AppRoutes.MultiGameCreationPage}/:id`, component: GameCreationPageComponent },

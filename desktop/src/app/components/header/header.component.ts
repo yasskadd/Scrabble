@@ -38,6 +38,10 @@ export class HeaderComponent {
         this.router.navigate(['/user']);
     }
 
+    redirectLoginPage() {
+        this.router.navigate(['/login']);
+    }
+
     redirectAdmin() {
         this.isHomePage = false;
         this.router.navigate([AppRoutes.AdminPage]).then();

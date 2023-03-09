@@ -25,6 +25,7 @@ export class AuthentificationController {
                 res.sendStatus(SUCCESS);
                 return;
             }
+            // TODO : Language
             res.status(ERROR).json({
                 message: 'Username already exists',
             });
@@ -44,6 +45,7 @@ export class AuthentificationController {
                     return;
                 }
             }
+            // TODO : Language
             res.status(ERROR).json({
                 message: 'invalid login credentials',
             });
