@@ -1,6 +1,6 @@
-<mat-card class="mat-app-background">
+<mat-card>
 	<mat-card-content>
-		<mat-grid-list cols="2" rowHeight="2:1">
+		<mat-grid-list gutterSize="16" cols="4" height="fit">
 			<mat-grid-tile *ngFor="let imageSource of imageSources">
 				<img src="{{ imageSource }}" />
 			</mat-grid-tile>

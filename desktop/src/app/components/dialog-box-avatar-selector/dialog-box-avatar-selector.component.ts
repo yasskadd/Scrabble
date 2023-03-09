@@ -10,6 +10,8 @@ export class DialogBoxAvatarSelectorComponent {
 
     constructor() {
         this.imageSources = [];
-        this.imageSources.push('https://th.bing.com/th/id/OIP.xnUJy4yaRKK12eb2g-ZceQHaFo?pid=ImgDet&rs=1');
+        for (let i = 0; i < 16; i++) {
+            this.imageSources.push('https://th.bing.com/th/id/OIP.xnUJy4yaRKK12eb2g-ZceQHaFo?pid=ImgDet&rs=1');
+        }
     }
 }

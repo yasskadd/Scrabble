@@ -46,13 +46,9 @@ export class UserAccountComponent {
 
     protected openAvatarSelector(): void {
         this.dialog.open(DialogBoxAvatarSelectorComponent, {
-            width: '200px',
-            height: '200px',
+            width: '360px',
+            height: '420px',
             backdropClass: 'dialog-backdrop',
-            position: {
-                left: this.selector._elementRef.nativeElement.offsetLeft + 200 + 'px',
-                top: this.selector._elementRef.nativeElement.offsetTop - 50 - 28 + 'px',
-            },
         });
     }
 

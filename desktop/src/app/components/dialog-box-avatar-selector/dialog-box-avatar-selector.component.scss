@@ -11,3 +11,12 @@ mat-card-content {
 mat-card-actions {
 	justify-content: center;
 }
+
+mat-grid-tile {
+	border-radius: 50%;
+	// height: -webkit-fill-available;
+
+	img {
+		height: inherit;
+	}
+}
