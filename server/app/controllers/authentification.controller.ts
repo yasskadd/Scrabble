@@ -31,9 +31,9 @@ export class AuthentificationController {
             });
         });
 
-        this.router.delete('/login', async (req: Request, res: Response) => {
+        this.router.post('/login', async (req: Request, res: Response) => {
             const user: IUser = req.body;
-            if (await this.accountStorage.isUserRegistered(req.body.username)) {
+            if (await this.accountStorage.isUserRegistered(user.username)) {
                 const isLoginValid = await this.accountStorage.loginValidator(user);
                 if (isLoginValid) {
                     const token = this.createJWToken(user.username);
@@ -48,8 +48,11 @@ export class AuthentificationController {
         });
 
         this.router.post('/logout', async (req: Request, res: Response) => {
-            res.clearCookie('session_token');
-            res.redirect('/login');
+            res.clearCookie('session_token', {
+                domain: 'localhost',
+                path: '/',
+            });
+            res.redirect(307, '/auth/login');
         });
     }
 

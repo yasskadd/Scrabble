@@ -33,7 +33,6 @@ export class UserService {
         this.httpHandlerService.login(user).subscribe({
             next: (res: any) => {
                 // TODO : Store jwt token and place it in a middleware
-                console.log(res);
                 this.cookieService.updateUserSessionCookie();
                 this.user = user;
                 subject.next('');
@@ -41,7 +40,7 @@ export class UserService {
             error: (error: HttpErrorResponse) => {
                 // TODO : Language
                 console.log(error);
-                subject.next(JSON.parse(error.error).message);
+                subject.next(error.error.message);
             },
         });
 
