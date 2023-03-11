@@ -1,7 +1,9 @@
-import { BoardTileType, BoardTileState } from '@app/models/board-tile';
+import { AlphabetLetter } from '@app/models/alphabet-letter';
+import { BoardTileState, BoardTileType } from '@app/models/board-tile';
 
 export interface BoardTileInfo {
-	type: BoardTileType;
-	state: BoardTileState;
-	letter: string;
+    content: AlphabetLetter;
+    type: BoardTileType;
+    state: BoardTileState;
+    letter: string;
 }

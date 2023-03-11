@@ -1,10 +1,19 @@
-.board {
-	height: 570px;
-	width: 570px;
-}
-
-.pending-tile {
+.tile {
+	padding: 1px !important;
+	height: 38px;
+	background-color: lightgrey;
 }
 
 .tile-background {
+	border-radius: 0px;
+	box-shadow: none;
+}
+
+.tile-content {
+	text-align: center;
+	font-size: x-small;
+}
+
+.empty-tile {
+	// background-color: #bdaba5;
 }

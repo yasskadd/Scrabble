@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
-import { BoardTileInfo } from '@app/interfaces/board-tile-info';
-import { BOARD_TILES } from '@app/constants/board-tiles';
 import { BoardTileState, BoardTileType } from '@app/models/board-tile';
+import { LetterPlacementService } from '@app/services/letter-placement.service';
 
 @Component({
     selector: 'app-game-board',
@@ -9,14 +8,9 @@ import { BoardTileState, BoardTileType } from '@app/models/board-tile';
     styleUrls: ['./game-board.component.scss'],
 })
 export class GameBoardComponent {
-    protected boardTiles: BoardTileInfo[];
+    protected boardTileStates: typeof BoardTileState = BoardTileState;
 
-    constructor() {
-        this.boardTiles = [];
-        BOARD_TILES.forEach((type: BoardTileType) => {
-            this.boardTiles.push({ type, state: BoardTileState.Empty, letter: '' });
-        });
-    }
+    constructor(protected letterPlacementService: LetterPlacementService) {}
 
     protected getTileText(tileType: BoardTileType): string {
         switch (tileType) {
@@ -38,6 +32,30 @@ export class GameBoardComponent {
             }
             default: {
                 return '';
+            }
+        }
+    }
+
+    protected getBackgroundColor(tileType: BoardTileType): any {
+        switch (tileType) {
+            // TODO : Language
+            case BoardTileType.Center: {
+                return '#FFEA4F';
+            }
+            case BoardTileType.DoubleLetter: {
+                return '#B9E0FC';
+            }
+            case BoardTileType.DoubleWord: {
+                return '#F49999';
+            }
+            case BoardTileType.TripleLetter: {
+                return '#37A6FA';
+            }
+            case BoardTileType.TripleWord: {
+                return '#D1292A';
+            }
+            default: {
+                return '#BDABA5';
             }
         }
     }

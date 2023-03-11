@@ -1,4 +1,8 @@
 import { Injectable } from '@angular/core';
+import { BOARD_TILES } from '@app/constants/board-tiles';
+import { BoardTileInfo } from '@app/interfaces/board-tile-info';
+import { AlphabetLetter } from '@app/models/alphabet-letter';
+import { BoardTileState, BoardTileType } from '@app/models/board-tile';
 import * as constants from '@common/constants/board-info';
 import { Coordinate } from '@common/interfaces/coordinate';
 import { Letter } from '@common/interfaces/letter';
@@ -12,6 +16,8 @@ const ASCII_ALPHABET_START = 96;
     providedIn: 'root',
 })
 export class LetterPlacementService {
+    boardTiles: BoardTileInfo[];
+
     private startTile: Coordinate;
     private placedLetters: Letter[];
     private isHorizontal: boolean;
@@ -19,6 +25,12 @@ export class LetterPlacementService {
     private hasPlacingEnded: boolean;
 
     constructor(private gridService: GridService, private gameClientService: GameClientService, private chatboxService: ChatboxHandlerService) {
+        this.boardTiles = [];
+        const state: BoardTileState = BoardTileState.Empty;
+        BOARD_TILES.forEach((type: BoardTileType) => {
+            this.boardTiles.push({ content: AlphabetLetter.None, type, state, letter: '' });
+        });
+
         this.setPropreties();
         this.gameClientService.gameboardUpdated.subscribe(() => {
             this.resetView();
