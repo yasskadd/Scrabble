@@ -11,7 +11,7 @@ import { UserService } from '@app/services/user.service';
 })
 export class HeaderComponent {
     isHomePage: boolean;
-    constructor(protected userService: UserService, private languageService: LanguageService, private router: Router) {
+    constructor(protected userService: UserService, private router: Router, private languageService: LanguageService) {
         this.isHomePage = this.checkIfHomePage();
     }
 
