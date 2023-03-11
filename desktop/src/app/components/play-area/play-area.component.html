@@ -9,7 +9,14 @@
                 <input matSliderThumb [formControl]="sliderForm" />
             </mat-slider>
         </div>
-        <canvas id="canvas" #gridCanvas (click)="mouseHitDetect($event)" [attr.width]="width" [attr.height]="height"></canvas>
+        <mat-grid-list cols="15" rowHeigh="15:1">
+            <mat-grid-tile *ngFor="let tile of boardTiles">
+                <mat-card>
+                    {{ getTileText(tile) }}
+                </mat-card>
+            </mat-grid-tile>
+        </mat-grid-list>
+        <!-- <canvas id="canvas" #gridCanvas (click)="mouseHitDetect($event)" [attr.width]="width" [attr.height]="height"></canvas> -->
     </div>
     <app-player-rack [keyboardParentSubject]="keyboardParentSubject" class="player-rack"></app-player-rack>
 </div>

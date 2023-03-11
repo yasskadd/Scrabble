@@ -1,7 +1,9 @@
 import { AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
+import { BOARD_TILES } from '@app/constants/board-tiles';
 import * as constants from '@app/constants/board-view';
 import { Vec2 } from '@app/interfaces/vec2';
+import { BoardTileType } from '@app/models/board-tile-type';
 import { GameClientService } from '@app/services/game-client.service';
 import { GridService } from '@app/services/grid.service';
 import { LetterPlacementService } from '@app/services/letter-placement.service';
@@ -25,12 +27,14 @@ export class PlayAreaComponent implements AfterViewInit {
     mousePosition: Vec2;
     buttonPressed;
     protected sliderForm: FormControl;
+    protected boardTiles: BoardTileType[];
 
     constructor(
         private readonly gridService: GridService,
         private letterService: LetterPlacementService,
         public gameClientService: GameClientService,
     ) {
+        this.boardTiles = BOARD_TILES;
         this.sliderForm = new FormControl(this.gridService.letterSize);
         this.keyboardParentSubject = new Subject();
         this.mousePosition = { x: 0, y: 0 };
@@ -94,5 +98,29 @@ export class PlayAreaComponent implements AfterViewInit {
         this.gridService.letterSize = this.sliderForm.value;
         this.gameClientService.updateGameboard();
         this.letterService.resetGameBoardView();
+    }
+
+    protected getTileText(tileType: BoardTileType): string {
+        switch (tileType) {
+            // TODO : Language
+            case BoardTileType.Center: {
+                return '';
+            }
+            case BoardTileType.DoubleLetter: {
+                return 'DOUBLE LETTRE';
+            }
+            case BoardTileType.DoubleWord: {
+                return 'DOUBLE WORD';
+            }
+            case BoardTileType.TripleLetter: {
+                return 'TRIPLE LETTER';
+            }
+            case BoardTileType.TripleWord: {
+                return 'TRIPLE WORD';
+            }
+            default: {
+                return '';
+            }
+        }
     }
 }
