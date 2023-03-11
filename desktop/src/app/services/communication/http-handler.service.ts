@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpEvent, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
@@ -8,7 +8,7 @@ import { BotNameSwitcher } from '@common/interfaces/bot-name-switcher';
 import { GameHistoryInfo } from '@common/interfaces/game-history-info';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
 import { IUser } from '@common/interfaces/user';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
@@ -137,10 +137,10 @@ export class HttpHandlerService {
             .pipe(catchError(this.handleError<void>('deleteBot')));
     }
 
-    signUp(newUser: IUser): Observable<string> {
+    signUp(newUser: IUser): Observable<string | HttpEvent<string>> {
         return this.http
-            .post<string>(`${this.baseUrl}/auth/signUp`, newUser, { withCredentials: true })
-            .pipe(catchError(this.handleError<string>('signUp')));
+            .post<string>(`${this.baseUrl}/auth/signUp`, newUser, { withCredentials: true, observe: 'events' })
+            .pipe(catchError(this.throwError<string>));
     }
 
     login(user: IUser): Observable<any> {
@@ -171,5 +171,9 @@ export class HttpHandlerService {
 
     private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
         return () => of(result as T);
+    }
+
+    private throwError<T>(error: HttpErrorResponse): Observable<T> {
+        return throwError(() => new HttpErrorResponse(error));
     }
 }

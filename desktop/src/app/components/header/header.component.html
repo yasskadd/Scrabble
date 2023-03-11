@@ -18,7 +18,25 @@
     </mat-select>
 </mat-form-field>
 
-<button mat-fab color="primary" [matMenuTriggerFor]="accountMenu"><mat-icon>person</mat-icon></button>
+<button mat-fab color="primary" *ngIf="!userService.isConnected()" [matMenuTriggerFor]="accountMenu">
+    <mat-icon>person</mat-icon>
+</button>
+<!-- TODO : The avatar type will need to only be ImageData -->
+<img
+    mat-fab-button
+    *ngIf="userService.isConnected() && userService.user.avatar.type === 'url'"
+    [src]="userService.user.avatar.src"
+    [matMenuTriggerFor]="accountMenu"
+    class="selecter-avatar mat-elevation-z5"
+/>
+<img
+    mat-fab-button
+    *ngIf="userService.isConnected() && userService.user.avatar.type === 'imageData'"
+    [src]="userService.user.avatar.data"
+    [matMenuTriggerFor]="accountMenu"
+    class="selecter-avatar mat-elevation-z5"
+/>
+
 <mat-menu #accountMenu="matMenu">
     <!-- Language -->
     <button mat-menu-item (click)="redirectUserPage()">Sign Up</button>

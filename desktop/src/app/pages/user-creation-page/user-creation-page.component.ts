@@ -8,6 +8,7 @@ import { DialogBoxAvatarSelectorComponent } from '@app/components/dialog-box-ava
 import { equalStringValidator } from '@app/directives/custom-validators';
 import { AppRoutes } from '@app/models/app-routes';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
+import { UserService } from '@app/services/user.service';
 import { AvatarData } from '@common/interfaces/avatar-data';
 import { IUser } from '@common/interfaces/user';
 import { ImageType } from '@common/models/image-type';
@@ -32,7 +33,13 @@ export class UserCreationPageComponent {
 
     protected imageTypes: typeof ImageType = ImageType;
 
-    constructor(private httpHandlerService: HttpHandlerService, private router: Router, private formBuilder: FormBuilder, private dialog: MatDialog) {
+    constructor(
+        private userService: UserService,
+        private httpHandlerService: HttpHandlerService,
+        private router: Router,
+        private formBuilder: FormBuilder,
+        private dialog: MatDialog,
+    ) {
         this.imageSrcForm = new FormControl('', Validators.required);
         this.usernameForm = new FormControl('', Validators.required);
         this.emailForm = new FormControl('', [Validators.required, Validators.email]);
@@ -78,6 +85,15 @@ export class UserCreationPageComponent {
             .subscribe({
                 next: () => {
                     this.connectionError = '';
+
+                    // TODO : For testing only, user creating an account will
+                    // need to connect after creating it
+                    this.userService.user = {
+                        username: this.usernameForm.value,
+                        password: this.passwordForm.value,
+                        avatar: this.imageSrcForm.value,
+                    };
+
                     this.router.navigate([AppRoutes.HomePage]).then();
                 },
                 error: (error: HttpErrorResponse) => {
