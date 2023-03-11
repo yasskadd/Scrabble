@@ -35,6 +35,10 @@ export class HeaderComponent {
         this.router.navigate([AppRoutes.HomePage]).then();
     }
 
+    redirectSettingsPage() {
+        this.router.navigate(['/settings']);
+    }
+
     redirectUserPage() {
         this.router.navigate(['/user']);
     }
