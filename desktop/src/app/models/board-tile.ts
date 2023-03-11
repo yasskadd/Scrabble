@@ -6,3 +6,10 @@ export enum BoardTileType {
     TripleLetter = 'triple_letter',
     TripleWord = 'triple_word',
 }
+
+export enum BoardTileState {
+    Empty = 'empty',
+    Temp = 'temp',
+    Pending = 'pending',
+    Confirmed = 'confirmed',
+}

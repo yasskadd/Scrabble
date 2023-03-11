@@ -1,0 +1,7 @@
+<mat-grid-list cols='15'>
+    <mat-grid-tile *ngFor='let tile of boardTiles'>
+        <mat-card class='pending-tile' *ngIf="tile.state === 'empty'">
+            {{ getTileText(tile.type) }}
+        </mat-card>
+    </mat-grid-tile>
+</mat-grid-list>

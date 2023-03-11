@@ -1,4 +1,4 @@
-import { BoardTileType } from '@app/models/board-tile-type';
+import { BoardTileType } from '@app/models/board-tile';
 
 export const BOARD_TILES: BoardTileType[] = [
     BoardTileType.TripleWord,
