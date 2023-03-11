@@ -13,11 +13,11 @@ import { IUser } from '@common/interfaces/user';
 import { ImageType } from '@common/models/image-type';
 
 @Component({
-    selector: 'app-user-account',
-    templateUrl: './user-account.component.html',
-    styleUrls: ['./user-account.component.scss'],
+    selector: 'app-user-creation-page',
+    templateUrl: './user-creation-page.component.html',
+    styleUrls: ['./user-creation-page.component.scss'],
 })
-export class UserAccountComponent {
+export class UserCreationPageComponent {
     @ViewChild('avatarSelector', { static: false }) protected selector: any;
     readonly siteKey: string = '6Lf7L98kAAAAAJolI_AENbQSq32e_Wcv5dYBQA6D';
 

@@ -49,7 +49,7 @@ import { ConnectionPageComponent } from './pages/connection-page/connection-page
 import { MainPageComponent } from './pages/main-page/main-page.component';
 import { GameCreationPageComponent } from './pages/multiplayer-create-page/game-creation-page.component';
 import { MultiplayerJoinPageComponent } from './pages/multiplayer-join-page/multiplayer-join-page.component';
-import { UserAccountComponent } from './pages/user-account/user-account.component';
+import { UserCreationPageComponent } from './pages/user-creation-page/user-creation-page.component';
 import { WaitingOpponentPageComponent } from './pages/waiting-opponent-page/waiting-opponent-page.component';
 import { SettingsPageComponent } from './pages/settings-page/settings-page.component';
 
@@ -89,7 +89,7 @@ export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(h
         DialogGameHelpComponent,
         HighScoresComponent,
         ImportDictionaryComponent,
-        UserAccountComponent,
+        UserCreationPageComponent,
         GenericChatComponent,
         ErrorSnackBarComponent,
         InfoSnackBarComponent,
