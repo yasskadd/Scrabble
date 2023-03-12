@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/naming-convention */
-/* eslint-disable no-unused-vars */
 import { FileRequest } from '@app/interfaces/file-request';
 import { uploadImage } from '@app/middlewares/multer-middleware';
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Request, Response, Router } from 'express';
+import { StatusCodes } from 'http-status-codes';
 import { Service } from 'typedi';
 import * as uuid from 'uuid';
 
@@ -29,7 +28,7 @@ export class ProfilePictureController {
 
         this.router.post('/profilePicture', uploadImage.single('image'), async (req: FileRequest, res: Response) => {
             if (req.fileValidationError) {
-                res.status(400).send({
+                res.status(StatusCodes.BAD_REQUEST).send({
                     message: 'No file received or invalid file type',
                     success: false,
                 });
@@ -41,7 +40,7 @@ export class ProfilePictureController {
             // Get the signed_url
             const getImageCommand = this.createGetImageCommand(imageKey as string);
             const signedURL = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 25000 });
-            res.send({ signedURL });
+            res.status(StatusCodes.CREATED).send({ signedURL });
         });
 
         /* TODO: GET request to get image request params: JWT TOKEN with username, so we can get the signedURL from the client. 
