@@ -31,6 +31,11 @@ export class AccountStorageService {
         return (await this.database.users.collection.findOne({ username: name })) !== null;
     }
 
+    async handleImageRequest(username: string) {
+        const userDocument = (await this.database.users.collection.findOne({ username })) as Document;
+        console.log(userDocument);
+    }
+
     private async generateHash(password: string): Promise<string> {
         const salt: string = await genSalt();
         const hashPassWord: string = await hash(password, salt);
