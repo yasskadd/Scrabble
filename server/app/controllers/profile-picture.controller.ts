@@ -2,6 +2,7 @@
 import { FileRequest } from '@app/interfaces/file-request';
 import { uploadImage } from '@app/middlewares/multer-middleware';
 import { verifyToken } from '@app/middlewares/token-verification-middleware';
+import { AccountStorageService } from '@app/services/database/account-storage.service';
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { ImageInfo } from '@common/interfaces/image-info';
@@ -20,7 +21,7 @@ export class ProfilePictureController {
     router: Router;
     private s3Client: S3Client;
 
-    constructor() {
+    constructor(private readonly accountStorage: AccountStorageService) {
         this.configureRouter();
         this.s3Client = this.configureS3Client();
     }
@@ -52,10 +53,13 @@ export class ProfilePictureController {
 
         /* TODO: GET request to get image request params: JWT TOKEN with username, so we can get the signedURL from the client. 
           IF the signedURL is expired, we need to create another one and override it in the database.
-          Handle errors if image is not in bucket anymore, */
+          Handle errors if image is not in bucket anymore */
 
         this.router.get('/profilePicture', verifyToken, (req: Request, res: Response) => {
-            // Extract token from cookies and get username
+            console.log(res.locals.user);
+            const username = res.locals.user.name;
+            this.accountStorage.handleImageRequest(username);
+            res.send(StatusCodes.ACCEPTED);
         });
 
         /* TODO: PUT request to modify existing profile picture, we need to get imageKey in database and to PutCommand to override
