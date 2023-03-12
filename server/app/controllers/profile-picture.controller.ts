@@ -3,6 +3,7 @@ import { FileRequest } from '@app/interfaces/file-request';
 import { uploadImage } from '@app/middlewares/multer-middleware';
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { ImageInfo } from '@common/interfaces/image-info';
 import { Request, Response, Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { Service } from 'typedi';
@@ -40,7 +41,11 @@ export class ProfilePictureController {
             // Get the signed_url
             const getImageCommand = this.createGetImageCommand(imageKey as string);
             const signedURL = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 25000 });
-            res.status(StatusCodes.CREATED).send({ signedURL });
+            const imageInfo: ImageInfo = {
+                key: imageKey,
+                signedUrl: signedURL,
+            };
+            res.status(StatusCodes.CREATED).send(imageInfo);
         });
 
         /* TODO: GET request to get image request params: JWT TOKEN with username, so we can get the signedURL from the client. 
