@@ -5,6 +5,7 @@ import * as cors from 'cors';
 import * as express from 'express';
 import { StatusCodes } from 'http-status-codes';
 import * as logger from 'morgan';
+import * as multer from 'multer';
 import * as swaggerJSDoc from 'swagger-jsdoc';
 import * as swaggerUi from 'swagger-ui-express';
 import { Service } from 'typedi';
@@ -75,6 +76,15 @@ export class Application {
         this.app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
             const err: HttpException = new HttpException('Not Found');
             next(err);
+        });
+
+        this.app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+            if (err instanceof multer.MulterError) {
+                res.status(StatusCodes.BAD_REQUEST).send({
+                    message: 'Error uploading file',
+                    error: err.message,
+                });
+            } else next(err);
         });
 
         // development error handler
