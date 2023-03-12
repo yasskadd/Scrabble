@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { FileRequest } from '@app/interfaces/file-request';
 import { uploadImage } from '@app/middlewares/multer-middleware';
+import { verifyToken } from '@app/middlewares/token-verification-middleware';
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { ImageInfo } from '@common/interfaces/image-info';
@@ -42,6 +43,7 @@ export class ProfilePictureController {
             const getImageCommand = this.createGetImageCommand(imageKey as string);
             const signedURL = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 25000 });
             const imageInfo: ImageInfo = {
+                name: req.file?.originalname as string,
                 key: imageKey,
                 signedUrl: signedURL,
             };
@@ -51,6 +53,10 @@ export class ProfilePictureController {
         /* TODO: GET request to get image request params: JWT TOKEN with username, so we can get the signedURL from the client. 
           IF the signedURL is expired, we need to create another one and override it in the database.
           Handle errors if image is not in bucket anymore, */
+
+        this.router.get('/profilePicture', verifyToken, (req: Request, res: Response) => {
+            // Extract token from cookies and get username
+        });
 
         /* TODO: PUT request to modify existing profile picture, we need to get imageKey in database and to PutCommand to override
             the image in the bucket. Then create a new signed URL and send it to client */
@@ -83,6 +89,4 @@ export class ProfilePictureController {
             Key: key,
         });
     }
-
-    // TODO: Create method to create SignedURL
 }

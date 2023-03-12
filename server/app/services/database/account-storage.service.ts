@@ -1,4 +1,5 @@
-import { IUser } from '@app/interfaces/user';
+import { ImageInfo } from '@common/interfaces/image-info';
+import { IUser } from '@common/interfaces/user';
 import { compare, genSalt, hash } from 'bcrypt';
 import { Document } from 'mongodb';
 import { Service } from 'typedi';
@@ -11,8 +12,11 @@ export class AccountStorageService {
     async addNewUser(user: Document): Promise<void> {
         const hashedPassword = await this.generateHash(user.password);
         const newUser: IUser = {
+            email: user.email,
             username: user.username,
             password: hashedPassword,
+            hasDefaultPicture: user.hasDefaultPicture,
+            profilePicture: user.profilePicture as ImageInfo,
         };
         await this.database.users.addDocument(newUser);
     }
