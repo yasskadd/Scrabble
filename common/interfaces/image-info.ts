@@ -1,4 +1,5 @@
 export interface ImageInfo {
-    key: string;
-    signedUrl: string;
+    name: string;
+    key?: string;
+    signedUrl?: string;
 }
