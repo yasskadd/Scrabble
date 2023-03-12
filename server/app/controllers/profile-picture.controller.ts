@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable no-unused-vars */
+import { FileRequest } from '@app/interfaces/file-request';
 import { uploadImage } from '@app/middlewares/multer-middleware';
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -25,7 +27,14 @@ export class ProfilePictureController {
     private configureRouter(): void {
         this.router = Router();
 
-        this.router.post('/profilePicture', uploadImage.single('image'), async (req: Request, res: Response) => {
+        this.router.post('/profilePicture', uploadImage.single('image'), async (req: FileRequest, res: Response) => {
+            if (req.fileValidationError) {
+                res.status(400).send({
+                    message: 'No file received or invalid file type',
+                    success: false,
+                });
+                return;
+            }
             const imageKey = uuid.v4() + req.file?.originalname;
             const s3UploadCommand = this.createS3UploadCommand(req, imageKey as string);
             await this.s3Client.send(s3UploadCommand);
