@@ -30,7 +30,7 @@ export class AuthentificationController {
             });
         });
 
-        this.router.delete('/login', async (req: Request, res: Response) => {
+        this.router.post('/login', async (req: Request, res: Response) => {
             const user: IUser = req.body;
             if (await this.accountStorage.isUserRegistered(req.body.username)) {
                 const isLoginValid = await this.accountStorage.loginValidator(user);
