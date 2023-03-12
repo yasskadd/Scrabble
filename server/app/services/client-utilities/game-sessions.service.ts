@@ -55,8 +55,13 @@ export class GameSessions {
         this.socketManager.on(SocketEvents.JoinRoom, (socket, roomID: string) => {
             this.joinRoom(socket, roomID);
         });
+
         this.socketManager.io(SocketEvents.RejectByOtherPlayer, (sio, socket, parameters: JoinGameRoomParameters) => {
             this.rejectByOtherPlayer(sio, socket, parameters);
+        });
+
+        this.socketManager.on(SocketEvents.Invite, (socket, inviteeId: string, parameters: JoinGameRoomParameters) => {
+            this.invitePlayer(socket, inviteeId, parameters);
         });
 
         this.socketManager.io(SocketEvents.StartScrabbleGame, (sio, socket, roomId: string) => {
@@ -66,6 +71,10 @@ export class GameSessions {
         this.socketManager.io(SocketEvents.Disconnect, (sio, socket) => {
             this.disconnect(sio, socket);
         });
+    }
+
+    private invitePlayer(this: this, socket: Socket, inviteeId: string, parameters: JoinGameRoomParameters): void {
+        socket.broadcast.to(inviteeId).emit(SocketEvents.Invite, parameters);
     }
 
     private joinRoom(this: this, socket: Socket, roomID: string): void {
@@ -94,8 +103,8 @@ export class GameSessions {
         }, SECOND);
     }
     private playerJoinGameAvailable(this: this, sio: Server, socket: Socket, parameters: JoinGameRoomParameters): void {
-        const roomId = parameters.id;
-        const username = parameters.name;
+        const roomId = parameters.roomId;
+        const username = parameters.username;
         const roomPassword = parameters.password?.length ? parameters.password : '';
 
         const roomIsAvailable = this.roomStatus(roomId);
@@ -116,8 +125,8 @@ export class GameSessions {
     }
 
     private exitWaitingRoom(this: this, socket: Socket, parameters: JoinGameRoomParameters): void {
-        const roomId = parameters.id;
-        const playerName = parameters.name;
+        const roomId = parameters.roomId;
+        const playerName = parameters.username;
         socket.broadcast.to(roomId).emit(SocketEvents.OpponentLeave);
         socket.leave(roomId);
         socket.join(PLAYERS_JOINING_ROOM);
@@ -125,8 +134,8 @@ export class GameSessions {
     }
 
     private rejectByOtherPlayer(this: this, sio: Server, socket: Socket, parameters: JoinGameRoomParameters): void {
-        const roomId = parameters.id;
-        const playerName = parameters.name;
+        const roomId = parameters.roomId;
+        const playerName = parameters.username;
         socket.leave(roomId);
         socket.join(PLAYERS_JOINING_ROOM);
         this.removeUserFromRoom(playerName, socket.id, roomId);

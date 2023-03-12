@@ -1,5 +1,5 @@
 export interface JoinGameRoomParameters {
-    id: string;
-    name: string;
+    roomId: string;
+    username: string;
     password?: string;
 }
