@@ -33,7 +33,7 @@ export class AccountStorageService {
         return (await this.database.users.collection.findOne({ username: name })) !== null;
     }
 
-    async userHasGenericPic(username: string): Promise<ProfilePictureInfo> {
+    async getProfilePicInfo(username: string): Promise<ProfilePictureInfo> {
         const userDocument = (await this.database.users.collection.findOne({ username })) as Document;
         return { hasDefaultPicture: userDocument.hasDefaultPicture, imageKey: userDocument.profilePicture.key } as ProfilePictureInfo;
     }
