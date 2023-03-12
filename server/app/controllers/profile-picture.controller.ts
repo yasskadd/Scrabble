@@ -4,6 +4,7 @@ import { uploadImage } from '@app/middlewares/multer-middleware';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Request, Response, Router } from 'express';
 import { Service } from 'typedi';
+import * as uuid from 'uuid';
 
 const BUCKET_NAME = 'scrabble-images';
 const BUCKET_REGION = 'ca-central-1';
@@ -26,7 +27,8 @@ export class ProfilePictureController {
         this.router.post('/profilePicture', uploadImage.single('image'), async (req: Request, res: Response) => {
             console.log(req.body);
             console.log(req.file);
-            const s3UploadCommand = this.createS3UploadCommand(req);
+            const imageKey = uuid.v4() + req.file?.originalname;
+            const s3UploadCommand = this.createS3UploadCommand(req, imageKey);
             await this.s3Client.send(s3UploadCommand);
             res.send({});
         });
@@ -42,10 +44,10 @@ export class ProfilePictureController {
         });
     }
 
-    private createS3UploadCommand(req: Request): PutObjectCommand {
+    private createS3UploadCommand(req: Request, imageKey: string): PutObjectCommand {
         return new PutObjectCommand({
             Bucket: BUCKET_NAME,
-            Key: req.file?.originalname,
+            Key: imageKey,
             Body: req.file?.buffer,
             ContentType: req.file?.mimetype,
         });
