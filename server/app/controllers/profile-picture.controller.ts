@@ -34,6 +34,15 @@ export class ProfilePictureController {
             const signedURL = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 25000 });
             res.send({ signedURL });
         });
+
+        /* TODO: GET request to get image request params: JWT TOKEN with username, so we can get the signedURL from the client. 
+          IF the signedURL is expired, we need to create another one and override it in the database.
+          Handle errors if image is not in bucket anymore, */
+
+        /* TODO: PUT request to modify existing profile picture, we need to get imageKey in database and to PutCommand to override
+            the image in the bucket. Then create a new signed URL and send it to client */
+
+        /* TODO: DELETE request to delete image from bucket. Happens if the user modified his profile picture to a generic one */
     }
 
     private configureS3Client(): S3Client {
@@ -61,4 +70,6 @@ export class ProfilePictureController {
             Key: key,
         });
     }
+
+    // TODO: Create method to create SignedURL
 }
