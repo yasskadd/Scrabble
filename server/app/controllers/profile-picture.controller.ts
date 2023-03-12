@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable no-unused-vars */
 import { uploadImage } from '@app/middlewares/multer-middleware';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Request, Response, Router } from 'express';
 import { Service } from 'typedi';
-import * as uuid from 'uuid';
 
 const BUCKET_NAME = 'scrabble-images';
 const BUCKET_REGION = 'ca-central-1';
-const ACCESS_KEY = 'AKIA5IBYO7WF6AJNCTTP';
-const SECRET_ACCESS_KEY = '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';
+const ACCESS_KEY = 'AKIA5IBYO7WFXIYKAMR6';
+const SECRET_ACCESS_KEY = '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';
 
 @Service()
 export class ProfilePictureController {
@@ -25,12 +25,13 @@ export class ProfilePictureController {
         this.router = Router();
 
         this.router.post('/profilePicture', uploadImage.single('image'), async (req: Request, res: Response) => {
-            console.log(req.body);
-            console.log(req.file);
-            const imageKey = uuid.v4() + req.file?.originalname;
-            const s3UploadCommand = this.createS3UploadCommand(req, imageKey);
+            const imageKey = req.file?.originalname;
+            const s3UploadCommand = this.createS3UploadCommand(req, imageKey as string);
             await this.s3Client.send(s3UploadCommand);
-            res.send({});
+            // Get the signed_url
+            const getImageCommand = this.createGetImageCommand(imageKey as string);
+            const signedURL = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 25000 });
+            res.send({ signedURL });
         });
     }
 
@@ -50,6 +51,13 @@ export class ProfilePictureController {
             Key: imageKey,
             Body: req.file?.buffer,
             ContentType: req.file?.mimetype,
+        });
+    }
+
+    private createGetImageCommand(key: string): GetObjectCommand {
+        return new GetObjectCommand({
+            Bucket: BUCKET_NAME,
+            Key: key,
         });
     }
 }
