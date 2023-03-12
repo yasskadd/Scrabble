@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import * as constants from '@app/constants/board-view';
 import { Vec2 } from '@app/interfaces/vec2';
@@ -18,9 +18,7 @@ export enum MouseButton {
     templateUrl: './play-area.component.html',
     styleUrls: ['./play-area.component.scss'],
 })
-export class PlayAreaComponent implements AfterViewInit {
-    @ViewChild('gridCanvas', { static: false }) private gridCanvas!: ElementRef<HTMLCanvasElement>;
-
+export class PlayAreaComponent {
     keyboardParentSubject: Subject<KeyboardEvent>;
     mousePosition: Vec2;
     buttonPressed;
@@ -67,16 +65,11 @@ export class PlayAreaComponent implements AfterViewInit {
             }
             default: {
                 if (this.buttonPressed.length > 1) break;
-                this.letterService.handlePlacement(this.buttonPressed);
+                // this.letterService.handlePlacement(this.buttonPressed);
                 break;
             }
         }
         this.keyboardParentSubject.next(event);
-    }
-
-    @HostListener('document:click', ['$event'])
-    mouseClickOutside(event: MouseEvent) {
-        if (!this.gridCanvas.nativeElement.contains(event.target as Node)) this.letterService.undoEverything();
     }
 
     mouseHitDetect(event: MouseEvent) {
@@ -84,10 +77,6 @@ export class PlayAreaComponent implements AfterViewInit {
             this.mousePosition = { x: event.offsetX, y: event.offsetY };
             this.letterService.placeLetterStartPosition(this.mousePosition);
         }
-    }
-
-    ngAfterViewInit(): void {
-        this.gridService.gridContext = this.gridCanvas.nativeElement.getContext('2d') as CanvasRenderingContext2D;
     }
 
     updateFontSize(): void {

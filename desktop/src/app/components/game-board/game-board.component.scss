@@ -1,6 +1,7 @@
 .tile {
-	padding: 1px !important;
+	padding: 2px !important;
 	height: 38px;
+	width: 38px;
 	background-color: lightgrey;
 }
 
@@ -10,8 +11,13 @@
 }
 
 .tile-content {
+	margin: 4px !important;
 	text-align: center;
 	font-size: x-small;
+	min-width: 36px;
+	min-height: 36px;
+	display: flex;
+	align-items: center;
 }
 
 .empty-tile {

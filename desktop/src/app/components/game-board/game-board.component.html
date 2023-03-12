@@ -1,13 +1,13 @@
-<mat-grid-list cols="15" class="board">
+<mat-grid-list cols="15" class="board" cdkDropList>
     <mat-grid-tile *ngFor="let tile of letterPlacementService.boardTiles" class="tile">
-        <mat-card class="tile-background" *ngIf="tile.state === 'empty'">
-            <mat-card-content
+        <div class="tile-background" *ngIf="tile.state === 'empty'">
+            <div
                 *ngIf="tile.state === boardTileStates.Empty"
                 class="empty-tile tile-content"
                 [style.background-color]="getBackgroundColor(tile.type)"
             >
                 {{ getTileText(tile.type) }}
-            </mat-card-content>
+            </div>
             <!--             <mat-card-content *ngIf="tile.state === boardTileStates.Temp" class="temp-tile">
                 {{ getTileText(tile.type) }}
             </mat-card-content>
@@ -17,6 +17,6 @@
             <mat-card-content *ngIf="tile.state === boardTileStates.Confirmed" class="confirmed-tile">
                 {{ getTileText(tile.type) }}
             </mat-card-content> -->
-        </mat-card>
+        </div>
     </mat-grid-tile>
 </mat-grid-list>

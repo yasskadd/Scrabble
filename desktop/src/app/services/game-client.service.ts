@@ -37,7 +37,7 @@ export class GameClientService {
         this.timer = 0;
         this.letterReserveLength = 0;
         this.playerOne = {} as Player;
-        this.secondPlayer = {} as Player;
+        this.secondPlayer = undefined;
         this.winningMessage = '';
         this.playerOneTurn = false;
         this.isGameFinish = false;
@@ -106,7 +106,38 @@ export class GameClientService {
     resetGameInformation() {
         this.timer = 0;
         this.gameboard = [];
-        this.playerOne = { name: '', score: 0, rack: [], objective: undefined };
+        this.playerOne = {
+            name: '',
+            score: 0,
+            rack: [
+                {
+                    value: 'A',
+                    quantity: 5,
+                    points: 3,
+                },
+                {
+                    value: 'B',
+                    quantity: 5,
+                    points: 3,
+                },
+                {
+                    value: 'C',
+                    quantity: 5,
+                    points: 3,
+                },
+                {
+                    value: 'D',
+                    quantity: 5,
+                    points: 3,
+                },
+                {
+                    value: 'E',
+                    quantity: 5,
+                    points: 3,
+                },
+            ],
+            objective: undefined,
+        };
         this.secondPlayer = { name: '', score: 0, rack: [], objective: undefined };
         this.playerOneTurn = false;
         this.letterReserveLength = 0;
