@@ -5,6 +5,7 @@ import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Request, Response, Router } from 'express';
 import { Service } from 'typedi';
+import * as uuid from 'uuid';
 
 const BUCKET_NAME = 'scrabble-images';
 const BUCKET_REGION = 'ca-central-1';
@@ -25,7 +26,7 @@ export class ProfilePictureController {
         this.router = Router();
 
         this.router.post('/profilePicture', uploadImage.single('image'), async (req: Request, res: Response) => {
-            const imageKey = req.file?.originalname;
+            const imageKey = uuid.v4() + req.file?.originalname;
             const s3UploadCommand = this.createS3UploadCommand(req, imageKey as string);
             await this.s3Client.send(s3UploadCommand);
             // Get the signed_url
