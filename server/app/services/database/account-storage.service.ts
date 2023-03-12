@@ -5,6 +5,8 @@ import { Document } from 'mongodb';
 import { Service } from 'typedi';
 import { DatabaseService } from './database.service';
 
+export type ProfilePictureInfo = { hasDefaultPicture: boolean; imageKey?: string };
+
 @Service()
 export class AccountStorageService {
     constructor(private database: DatabaseService) {}
@@ -31,9 +33,9 @@ export class AccountStorageService {
         return (await this.database.users.collection.findOne({ username: name })) !== null;
     }
 
-    async handleImageRequest(username: string) {
+    async userHasGenericPic(username: string): Promise<ProfilePictureInfo> {
         const userDocument = (await this.database.users.collection.findOne({ username })) as Document;
-        console.log(userDocument);
+        return { hasDefaultPicture: userDocument.hasDefaultPicture, imageKey: userDocument.profilePicture.key } as ProfilePictureInfo;
     }
 
     private async generateHash(password: string): Promise<string> {
