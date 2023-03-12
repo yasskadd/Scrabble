@@ -42,7 +42,7 @@ export class ProfilePictureController {
             await this.s3Client.send(s3UploadCommand);
             // Get the signed_url
             const getImageCommand = this.createGetImageCommand(imageKey as string);
-            const signedURL = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 25000 });
+            const signedURL = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 3600 });
             const imageInfo: ImageInfo = {
                 name: req.file?.originalname as string,
                 key: imageKey,
@@ -51,15 +51,17 @@ export class ProfilePictureController {
             res.status(StatusCodes.CREATED).send(imageInfo);
         });
 
-        /* TODO: GET request to get image request params: JWT TOKEN with username, so we can get the signedURL from the client. 
-          IF the signedURL is expired, we need to create another one and override it in the database.
-          Handle errors if image is not in bucket anymore */
-
-        this.router.get('/profilePicture', verifyToken, (req: Request, res: Response) => {
-            console.log(res.locals.user);
+        this.router.get('/profilePicture', verifyToken, async (req: Request, res: Response) => {
             const username = res.locals.user.name;
-            this.accountStorage.handleImageRequest(username);
-            res.send(StatusCodes.ACCEPTED);
+            const profilePicInfo = await this.accountStorage.getProfilePicInfo(username);
+            if (profilePicInfo.hasDefaultPicture) {
+                res.status(StatusCodes.BAD_REQUEST).send({ message: 'User has a generic profile picture, invalid request' });
+                return;
+            }
+            // Create new signed_url
+            const getImageCommand = this.createGetImageCommand(profilePicInfo.imageKey as string);
+            const signedURL = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 3600 });
+            res.status(StatusCodes.ACCEPTED).send({ signedURL });
         });
 
         /* TODO: PUT request to modify existing profile picture, we need to get imageKey in database and to PutCommand to override
