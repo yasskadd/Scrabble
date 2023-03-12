@@ -1,3 +1,4 @@
+import { uploadImage } from '@app/middlewares/multer-middleware';
 import { Request, Response, Router } from 'express';
 import { Service } from 'typedi';
 
@@ -12,6 +13,6 @@ export class ProfilePictureController {
     private configureRouter(): void {
         this.router = Router();
 
-        this.router.post('/profilePicture', async (req: Request, res: Response) => {});
+        this.router.post('/profilePicture', uploadImage.single('image'), async (req: Request, res: Response) => {});
     }
 }
