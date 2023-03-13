@@ -1,21 +1,45 @@
 <div class="action-buttons">
-    <button mat-raised-button color="basic" (click)="updateHistory()">Rafraîchir <mat-icon>refresh</mat-icon></button>
-    <button mat-raised-button color="warn" (click)="deleteHistory()">Reinitialiser <mat-icon>delete</mat-icon></button>
+    <button mat-raised-button color="basic" (click)="updateHistory()">
+        {{ "action.refresh" | translate }}
+        <mat-icon>refresh</mat-icon>
+    </button>
+    <button mat-raised-button color="warn" (click)="deleteHistory()">
+        {{ "action.reset" | translate }}
+        <mat-icon>delete</mat-icon>
+    </button>
 </div>
 <mat-expansion-panel *ngFor="let gameHistory of gamesHistory">
     <mat-expansion-panel-header>
         <mat-panel-title>
-            <div>[{{ gameHistory.endTime | date: 'MM/dd/yyyy, h:mm a' }}]</div>
-            <div>{{ gameHistory.firstPlayerName }} VS {{ gameHistory.secondPlayerName }}</div>
-            <div><mat-panel-description *ngIf="gameHistory.abandoned">Partie Abandonnée </mat-panel-description></div>
+            <div>[{{ gameHistory.endTime | date : "MM/dd/yyyy, h:mm a" }}]</div>
+            <div>{{ gameHistory.firstPlayerName }} vs. {{ gameHistory.secondPlayerName }}</div>
+            <div>
+                <mat-panel-description *ngIf="gameHistory.abandoned"> {{ "game.state.abandoned" | translate }} </mat-panel-description>
+            </div>
         </mat-panel-title>
     </mat-expansion-panel-header>
-    <p><b>Mode :</b> {{ gameHistory.mode }}</p>
-    <p><b>Debut du jeu (MM/dd/yyyy) :</b> {{ gameHistory.beginningTime | date: 'MM/dd/yyyy, h:mm a' }}</p>
-    <p><b>Fin du jeu (MM/dd/yyyy) :</b> {{ gameHistory.endTime | date: 'MM/dd/yyyy, h:mm a' }}</p>
-    <p><b>Durée (Minutes:Secondes) :</b> {{ gameHistory.duration }}</p>
-    <p><b>Joueur :</b> {{ gameHistory.firstPlayerName }}</p>
-    <p><b>Score :</b> {{ gameHistory.firstPlayerScore }}</p>
-    <p><b>Joueur :</b> {{ gameHistory.secondPlayerName }}</p>
-    <p><b>Score :</b> {{ gameHistory.secondPlayerScore }}</p>
+    <p>
+        <b> {{ "game.history.mode" | translate }} :</b> {{ gameHistory.mode }}
+    </p>
+    <p>
+        <b> {{ "game.history.start" | translate }} :</b> {{ gameHistory.beginningTime | date : "dd/MM/yyyy, h:mm a" }}
+    </p>
+    <p>
+        <b> {{ "game.history.end" | translate }} :</b> {{ gameHistory.endTime | date : "dd/MM/yyyy, h:mm a" }}
+    </p>
+    <p>
+        <b> {{ "game.history.time" | translate }} :</b> {{ gameHistory.duration }}
+    </p>
+    <p>
+        <b> {{ "game.history.first_player" | translate }} :</b> {{ gameHistory.firstPlayerName }}
+    </p>
+    <p>
+        <b> {{ "game.history.score" | translate }} :</b> {{ gameHistory.firstPlayerScore }}
+    </p>
+    <p>
+        <b> {{ "game.history.second_player" | translate }} :</b> {{ gameHistory.secondPlayerName }}
+    </p>
+    <p>
+        <b> {{ "game.history.score" | translate }} :</b> {{ gameHistory.secondPlayerScore }}
+    </p>
 </mat-expansion-panel>
