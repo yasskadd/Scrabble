@@ -1,10 +1,10 @@
-import { Component } from '@angular/core';
-import { BoardTileState, BoardTileType } from '@app/models/board-tile';
-import { LetterPlacementService } from '@app/services/letter-placement.service';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { Letter } from '@common/interfaces/letter';
+import { Component } from '@angular/core';
 import { BoardTileInfo } from '@app/interfaces/board-tile-info';
+import { BoardTileState, BoardTileType } from '@app/models/board-tile';
 import { PlayDirection } from '@app/models/play-direction';
+import { LetterPlacementService } from '@app/services/letter-placement.service';
+import { Letter } from '@common/interfaces/letter';
 import { AlphabetLetter } from '@common/models/alphabet-letter';
 
 @Component({
@@ -23,6 +23,7 @@ export class GameBoardComponent {
     }
 
     protected drop(event: CdkDragDrop<Letter[]>, tile: BoardTileInfo): void {
+        console.log(event.container);
         if (event.previousContainer.id === 'player-rack') {
             this.letterPlacementService.handleDragPlacement(event.previousIndex, event.previousContainer.data[event.previousIndex], tile);
         }
@@ -100,6 +101,6 @@ export class GameBoardComponent {
     }
 
     protected tileEmpty(tile: BoardTileInfo): boolean {
-        return tile.letter.value === AlphabetLetter.None;
+        return tile.letter?.value === AlphabetLetter.None;
     }
 }
