@@ -1,5 +1,5 @@
-export const TOTAL_COLUMNS = 15;
-export const TOTAL_ROWS = 15;
+export const TOTAL_COLUMNS = 16;
+export const TOTAL_ROWS = 16;
 
 export const GRID_CANVAS_WIDTH = 560;
 export const GRID_CANVAS_HEIGHT = 560;
@@ -12,7 +12,6 @@ export const LETTER_TILE_RATIO = 0.8;
 export const LETTER_WEIGHT_RATIO = 0.75;
 
 export const MIDDLE_POSITION = 8;
-export const CENTER_TILE = 112;
 
 export const CANVAS_HEIGHT = 75;
 export const CANVAS_WIDTH = 500;

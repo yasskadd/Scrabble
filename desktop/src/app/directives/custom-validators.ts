@@ -1,4 +1,3 @@
-/* eslint-disable prefer-arrow/prefer-arrow-functions */
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
 export function equalStringValidator(value: string): ValidatorFn {

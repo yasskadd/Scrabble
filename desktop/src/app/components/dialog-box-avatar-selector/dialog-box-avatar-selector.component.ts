@@ -15,8 +15,7 @@ export class DialogBoxAvatarSelectorComponent {
 
     constructor(@Inject(MAT_DIALOG_DATA) private data: AvatarData, private dialogRef: MatDialogRef<DialogBoxAvatarSelectorComponent>) {
         this.imageSources = [];
-        const numberOfImages = 2 ** (2 ** 2);
-        for (let i = 0; i < numberOfImages; i++) {
+        for (let i = 0; i < 16; i++) {
             // TODO : Add default images
             // this.imageSources.push(`https://source.unsplash.com/random/?cat?sig=${Math.floor(Math.random() * 10)}`);
             this.imageSources.push('https://th.bing.com/th/id/OIP.xnUJy4yaRKK12eb2g-ZceQHaFo?pid=ImgDet&rs=1');

@@ -12,7 +12,7 @@ import { UserCreationPageComponent } from '@app/pages/user-creation-page/user-cr
 import { WaitingOpponentPageComponent } from '@app/pages/waiting-opponent-page/waiting-opponent-page.component';
 
 const routes: Routes = [
-    { path: '', redirectTo: AppRoutes.GamePage, pathMatch: 'full' },
+    { path: '', redirectTo: AppRoutes.HomePage, pathMatch: 'full' },
     { path: AppRoutes.AdminPage, component: AdminPageComponent },
     { path: AppRoutes.HomePage, component: MainPageComponent },
     { path: AppRoutes.GamePage, component: GamePageComponent },
@@ -23,7 +23,7 @@ const routes: Routes = [
     { path: `${AppRoutes.MultiJoinPage}/:id`, component: MultiplayerJoinPageComponent },
     { path: `${AppRoutes.MultiGameCreationPage}/:id`, component: GameCreationPageComponent },
     { path: `${AppRoutes.MultiWaitingPage}/:id`, component: WaitingOpponentPageComponent },
-    { path: '**', redirectTo: AppRoutes.GamePage },
+    { path: '**', redirectTo: AppRoutes.HomePage },
 ];
 
 @NgModule({

@@ -7,7 +7,6 @@ import { Service } from 'typedi';
 
 const SUCCESS = 200;
 const ERROR = 401;
-const TEMP_REDIRECT = 307;
 
 @Service()
 export class AuthentificationController {
@@ -53,7 +52,7 @@ export class AuthentificationController {
                 domain: 'localhost',
                 path: '/',
             });
-            res.redirect(TEMP_REDIRECT, '/auth/login');
+            res.redirect(307, '/auth/login');
         });
     }
 

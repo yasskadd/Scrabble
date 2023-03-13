@@ -1,4 +1,4 @@
 export enum GameDifficulty {
-    Easy = 'difficulty.beginner',
+    Easy = 'difficulty.beginnner',
     Hard = 'difficulty.expert',
 }

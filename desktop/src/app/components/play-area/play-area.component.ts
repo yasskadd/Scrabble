@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import * as constants from '@app/constants/board-view';
 import { Vec2 } from '@app/interfaces/vec2';
@@ -18,9 +18,12 @@ export enum MouseButton {
     templateUrl: './play-area.component.html',
     styleUrls: ['./play-area.component.scss'],
 })
-export class PlayAreaComponent {
+export class PlayAreaComponent implements AfterViewInit {
+    @ViewChild('gridCanvas', { static: false }) private gridCanvas!: ElementRef<HTMLCanvasElement>;
+
     keyboardParentSubject: Subject<KeyboardEvent>;
     mousePosition: Vec2;
+    buttonPressed;
     protected sliderForm: FormControl;
 
     constructor(
@@ -31,10 +34,11 @@ export class PlayAreaComponent {
         this.sliderForm = new FormControl(this.gridService.letterSize);
         this.keyboardParentSubject = new Subject();
         this.mousePosition = { x: 0, y: 0 };
+        this.buttonPressed = '';
 
-        // this.sliderForm.valueChanges.subscribe(() => {
-        //     this.updateFontSize();
-        // });
+        this.sliderForm.valueChanges.subscribe(() => {
+            this.updateFontSize();
+        });
     }
 
     get width(): number {
@@ -47,7 +51,8 @@ export class PlayAreaComponent {
 
     @HostListener('keydown', ['$event'])
     buttonDetect(event: KeyboardEvent) {
-        switch (event.key) {
+        this.buttonPressed = event.key;
+        switch (this.buttonPressed) {
             case 'Backspace': {
                 this.letterService.undoPlacement();
                 break;
@@ -61,12 +66,28 @@ export class PlayAreaComponent {
                 break;
             }
             default: {
-                if (event.key.length > 1) break;
-                this.letterService.handleKeyPlacement(event.key);
+                if (this.buttonPressed.length > 1) break;
+                this.letterService.handlePlacement(this.buttonPressed);
                 break;
             }
         }
         this.keyboardParentSubject.next(event);
+    }
+
+    @HostListener('document:click', ['$event'])
+    mouseClickOutside(event: MouseEvent) {
+        if (!this.gridCanvas.nativeElement.contains(event.target as Node)) this.letterService.undoEverything();
+    }
+
+    mouseHitDetect(event: MouseEvent) {
+        if (event.button === MouseButton.Left) {
+            this.mousePosition = { x: event.offsetX, y: event.offsetY };
+            this.letterService.placeLetterStartPosition(this.mousePosition);
+        }
+    }
+
+    ngAfterViewInit(): void {
+        this.gridService.gridContext = this.gridCanvas.nativeElement.getContext('2d') as CanvasRenderingContext2D;
     }
 
     updateFontSize(): void {

@@ -10,7 +10,7 @@
             <mat-card-subtitle class="score"
                 >{{ gameClientService.playerOne.score }} {{ "game_page.informations.points" | translate }}</mat-card-subtitle
             >
-            <mat-card-subtitle class="rack-letters" *ngIf="gameClientService.playerOne.rack?.length < 7">
+            <mat-card-subtitle class="rack-letters" *ngIf="gameClientService.playerOne.rack.length < 7">
                 {{ gameClientService.playerOne.rack?.length }} {{ "game_page.informations.letters_available" | translate }}
             </mat-card-subtitle>
         </mat-card-title-group>
@@ -28,7 +28,7 @@
             <mat-card-subtitle class="score"
                 >{{ gameClientService.secondPlayer.score }} {{ "game_page.informations.points" | translate }}</mat-card-subtitle
             >
-            <mat-card-subtitle class="rack-letters" *ngIf="gameClientService.secondPlayer.rack?.length < 7">
+            <mat-card-subtitle class="rack-letters" *ngIf="gameClientService.secondPlayer.rack.length < 7">
                 {{ gameClientService.secondPlayer.rack?.length }} {{ "game_page.informations.letters_available" | translate }}
             </mat-card-subtitle>
         </mat-card-title-group>
@@ -112,23 +112,21 @@
     </mat-expansion-panel>
 </div>
 
-<div>
-    <div id="combined">
-        <button id="abandonButton" *ngIf="!gameClientService.isGameFinish" (click)="abandonGame()" mat-raised-button color="warn">
-            {{ "action.abandon" | translate }}
-        </button>
+<div id="combined">
+    <button id="abandonButton" *ngIf="!gameClientService.isGameFinish" (click)="abandonGame()" mat-raised-button color="warn">
+        {{ "action.abandon" | translate }}
+    </button>
 
-        <button id="quitGame" *ngIf="gameClientService.isGameFinish" (click)="leaveGame()" mat-raised-button>{{ "action.quit" | translate }}</button>
-        <button
-            mat-fab
-            color="accent"
-            (click)="openHelpDialog()"
-            class="help-button"
-            matTooltip="{{ 'main_page.tooltip.game_instructions' | translate }}"
-            matTooltipPosition="right"
-            matTooltipClass="toolMainPage"
-        >
-            <mat-icon color="white">help_outline</mat-icon>
-        </button>
-    </div>
+    <button id="quitGame" *ngIf="gameClientService.isGameFinish" (click)="leaveGame()" mat-raised-button>{{ "action.quit" | translate }}</button>
+    <button
+        mat-fab
+        color="accent"
+        (click)="openHelpDialog()"
+        class="help-button"
+        matTooltip="{{ 'main_page.tooltip.game_instructions' | translate }}"
+        matTooltipPosition="right"
+        matTooltipClass="toolMainPage"
+    >
+        <mat-icon color="white">help_outline</mat-icon>
+    </button>
 </div>
