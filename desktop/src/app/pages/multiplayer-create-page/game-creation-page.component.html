@@ -54,7 +54,7 @@
                 <button class="return-button" mat-icon-button routerLink="/home">
                     <mat-icon>navigate_before</mat-icon>
                 </button>
-                <button class="start-button" (click)="createGame()" mat-raised-button [disabled]="!playerName">
+                <button class="start-button" (click)="createGame()" mat-raised-button [disabled]="form.invalid || !userService.user.username">
                     {{ "action.create" | translate }}
                 </button>
             </div>
