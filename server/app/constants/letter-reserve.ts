@@ -1,164 +1,165 @@
 import { Letter } from '@common/interfaces/letter';
+import { AlphabetLetter } from '@common/models/alphabet-letter';
 
 export const LETTERS: Letter[] = [
     {
-        value: 'a',
+        value: AlphabetLetter.A,
         quantity: 9,
         points: 1,
     },
 
     {
-        value: 'b',
+        value: AlphabetLetter.B,
         quantity: 2,
         points: 3,
     },
 
     {
-        value: 'c',
+        value: AlphabetLetter.C,
         quantity: 2,
         points: 3,
     },
 
     {
-        value: 'd',
+        value: AlphabetLetter.D,
         quantity: 3,
         points: 2,
     },
 
     {
-        value: 'e',
+        value: AlphabetLetter.E,
         quantity: 15,
         points: 1,
     },
 
     {
-        value: 'f',
+        value: AlphabetLetter.F,
         quantity: 2,
         points: 4,
     },
 
     {
-        value: 'g',
+        value: AlphabetLetter.G,
         quantity: 2,
         points: 2,
     },
 
     {
-        value: 'h',
+        value: AlphabetLetter.H,
         quantity: 2,
         points: 4,
     },
 
     {
-        value: 'i',
+        value: AlphabetLetter.I,
         quantity: 8,
         points: 1,
     },
 
     {
-        value: 'j',
+        value: AlphabetLetter.J,
         quantity: 1,
         points: 8,
     },
 
     {
-        value: 'k',
+        value: AlphabetLetter.K,
         quantity: 1,
         points: 10,
     },
 
     {
-        value: 'l',
+        value: AlphabetLetter.L,
         quantity: 5,
         points: 1,
     },
 
     {
-        value: 'm',
+        value: AlphabetLetter.M,
         quantity: 3,
         points: 2,
     },
 
     {
-        value: 'n',
+        value: AlphabetLetter.N,
         quantity: 6,
         points: 1,
     },
 
     {
-        value: 'o',
+        value: AlphabetLetter.O,
         quantity: 6,
         points: 1,
     },
 
     {
-        value: 'p',
+        value: AlphabetLetter.P,
         quantity: 2,
         points: 3,
     },
 
     {
-        value: 'q',
+        value: AlphabetLetter.Q,
         quantity: 1,
         points: 8,
     },
 
     {
-        value: 'r',
+        value: AlphabetLetter.R,
         quantity: 6,
         points: 1,
     },
 
     {
-        value: 's',
+        value: AlphabetLetter.S,
         quantity: 6,
         points: 1,
     },
 
     {
-        value: 't',
+        value: AlphabetLetter.T,
         quantity: 6,
         points: 1,
     },
 
     {
-        value: 'u',
+        value: AlphabetLetter.U,
         quantity: 6,
         points: 1,
     },
 
     {
-        value: 'v',
+        value: AlphabetLetter.V,
         quantity: 2,
         points: 4,
     },
 
     {
-        value: 'w',
+        value: AlphabetLetter.W,
         quantity: 1,
         points: 10,
     },
 
     {
-        value: 'x',
+        value: AlphabetLetter.X,
         quantity: 1,
         points: 10,
     },
 
     {
-        value: 'y',
+        value: AlphabetLetter.Y,
         quantity: 1,
         points: 10,
     },
 
     {
-        value: 'z',
+        value: AlphabetLetter.Z,
         quantity: 1,
         points: 10,
     },
 
     {
-        value: '*',
+        value: AlphabetLetter.Any,
         quantity: 2,
         points: 0,
     },

@@ -1,5 +1,6 @@
 export enum AlphabetLetter {
     None = '',
+    Any = '*',
     A = 'A',
     B = 'B',
     C = 'C',

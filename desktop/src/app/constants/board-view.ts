@@ -12,6 +12,7 @@ export const LETTER_TILE_RATIO = 0.8;
 export const LETTER_WEIGHT_RATIO = 0.75;
 
 export const MIDDLE_POSITION = 8;
+export const CENTER_TILE = 112;
 
 export const CANVAS_HEIGHT = 75;
 export const CANVAS_WIDTH = 500;
