@@ -9,23 +9,25 @@ import { ThemeService } from '@services/theme.service';
     styleUrls: ['./header.component.scss'],
 })
 export class HeaderComponent {
-    isHomePage: boolean;
+    // isHomePage: boolean;
 
     constructor(private router: Router, protected themeService: ThemeService) {
-        this.isHomePage = this.checkIfHomePage();
+        //this.isHomePage = this.checkIfHomePage();
     }
 
-    checkIfHomePage() {
-        return this.router.url.includes(AppRoutes.HomePage);
-    }
+    // checkIfHomePage() {
+    //     return this.router.url.includes(AppRoutes.HomePage);
+    // }
 
     redirectHome() {
-        this.isHomePage = true;
+        //this.isHomePage = true;
         this.router.navigate([AppRoutes.HomePage]).then();
     }
 
-    redirectAdmin() {
-        this.isHomePage = false;
-        this.router.navigate([AppRoutes.AdminPage]).then();
-    }
+    // redirectAdmin() {
+    //     this.isHomePage = false;
+    //     this.router.navigate([AppRoutes.AdminPage]).then();
+    // }
 }
+
+// TODO: removed commented code or implement home and admin button for authorised users
