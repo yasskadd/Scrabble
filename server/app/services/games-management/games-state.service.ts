@@ -28,6 +28,7 @@ const SECOND = 1000;
 @Service()
 export class GamesStateService {
     gameEnded: Subject<string>;
+
     constructor(
         private socketManager: SocketManager,
         private gamesHandler: GamesHandler,
@@ -111,8 +112,11 @@ export class GamesStateService {
 
     private endGameScore(roomID: string) {
         const players = this.gamesHandler.gamePlayers.get(roomID)?.players as Player[];
+        if (!players) {
+            return;
+        }
         const game = players[0].game;
-        if (players[0].game.turn.skipCounter === MAX_SKIP) {
+        if (game.turn.skipCounter === MAX_SKIP) {
             players.forEach((player) => {
                 player.deductPoints();
             });
@@ -292,7 +296,11 @@ export class GamesStateService {
 
     private async sendHighScore(socketId: string) {
         const player = this.gamesHandler.players.get(socketId) as Player;
-        await this.scoreStorage.addTopScores({ username: player.name, type: player.game.gameMode, score: player.score });
+        await this.scoreStorage.addTopScores({
+            username: player.name,
+            type: player.game.gameMode,
+            score: player.score,
+        });
     }
 
     private async userConnected(socketId: string[], roomId: string) {

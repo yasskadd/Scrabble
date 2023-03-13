@@ -127,12 +127,12 @@ describe('PlayerRackComponent', () => {
         const expectedManipulate: number[] = [];
         const expectedExchange: number[] = [0, 2, 1];
         const indexLetter = 1;
-        component.lettersToManipulate = [1];
+        component.selectedLetters = [1];
         component.lettersToExchange = [0, 2];
         const mockClick = new MouseEvent('oncontextmenu');
         component.onRightClick(mockClick, indexLetter);
         fixture.detectChanges();
-        expect(component.lettersToManipulate).toEqual(expectedManipulate);
+        expect(component.selectedLetters).toEqual(expectedManipulate);
         expect(component.lettersToExchange).toEqual(expectedExchange);
     });
 
@@ -218,7 +218,7 @@ describe('PlayerRackComponent', () => {
         component.onLeftClick(mockClick, indexLetter);
         fixture.detectChanges();
         expect(spy).toHaveBeenCalled();
-        expect(component.lettersToManipulate.includes(indexLetter)).toBeTruthy();
+        expect(component.selectedLetters.includes(indexLetter)).toBeTruthy();
     });
 
     it('onRightClick should deselect a letter already selected on right click ', () => {
@@ -234,13 +234,13 @@ describe('PlayerRackComponent', () => {
 
     it('onRightClick should select a letter that was selected for manipulation', () => {
         const index = 3;
-        component.lettersToManipulate = [index];
+        component.selectedLetters = [index];
         expect(component.lettersToExchange.length).toEqual(0);
         const mockClick = new MouseEvent('oncontextmenu');
         component.onLeftClick(mockClick, index);
         component.onRightClick(mockClick, index);
         fixture.detectChanges();
-        expect(component.lettersToManipulate.length).toEqual(0);
+        expect(component.selectedLetters.length).toEqual(0);
         expect(component.lettersToExchange.length).toEqual(1);
     });
 
@@ -271,13 +271,13 @@ describe('PlayerRackComponent', () => {
 
     it('exchange should call submitMessage of chatBoxHandler with the letters to exchange as argument', () => {
         component.lettersToExchange = [0];
-        component.exchange();
+        component.exchangeLetters();
         expect(chatBoxHandlerSpy.submitMessage).toHaveBeenCalledWith('!échanger a');
     });
 
     it('exchange should call cancel', () => {
         const spy = spyOn(component, 'cancel');
-        component.exchange();
+        component.exchangeLetters();
         expect(spy).toHaveBeenCalled();
     });
 
@@ -324,14 +324,8 @@ describe('PlayerRackComponent', () => {
 
     it('cancel should return set lettersToExchange to an empty array', () => {
         component.lettersToExchange = [0];
-        component.cancel();
+        component.cancelSelection();
         expect(component.lettersToExchange.length).toEqual(0);
-    });
-
-    it('noPlacedLetters should return noLettersPlaced from letterPlacementService', () => {
-        const VALUE = true;
-        letterPlacementServiceSpy.noLettersPlaced.and.returnValue(VALUE);
-        expect(component.noPlacedLetters).toBeTruthy();
     });
 
     it('playPlacedLetters should call letterPlacementService.submitPlacement', () => {
@@ -406,7 +400,7 @@ describe('PlayerRackComponent', () => {
         const empty = 0;
         component.buttonPressed = 'q';
         component.selectManipulation();
-        expect(component.lettersToManipulate.length).toEqual(empty);
+        expect(component.selectedLetters.length).toEqual(empty);
     });
 
     it('selectManipulation should manipulate second iteration of a letter when the key has been pressed twice', () => {
