@@ -39,10 +39,10 @@ export class ProfilePictureController {
                 return;
             }
             const imageKey = uuid.v4() + req.file?.originalname;
-            const s3UploadCommand = this.createS3UploadCommand(req, imageKey as string);
+            const s3UploadCommand = this.createPutCommand(req, imageKey as string);
             await this.s3Client.send(s3UploadCommand);
             // Get the signed_url
-            const getImageCommand = this.createGetImageCommand(imageKey as string);
+            const getImageCommand = this.CreateGetCommand(imageKey as string);
             const signedURL = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 3600 });
             const imageInfo: ImageInfo = {
                 name: req.file?.originalname as string,
@@ -57,13 +57,13 @@ export class ProfilePictureController {
 
         this.router.get('/profile-picture', verifyToken, async (req: Request, res: Response) => {
             const username = res.locals.user.name;
-            const profilePicInfo = await this.accountStorage.getProfilePicInfo(username);
+            const profilePicInfo: ImageInfo = await this.accountStorage.getProfilePicInfo(username);
             if (profilePicInfo.isDefaultPicture) {
                 res.status(StatusCodes.OK).send({ isDefaultImage: true, url: profilePicInfo.name });
                 return;
             }
             // Create new signed_url
-            const getImageCommand = this.createGetImageCommand(profilePicInfo.key as string);
+            const getImageCommand = this.CreateGetCommand(profilePicInfo.key as string);
             const signedURL = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 3600 });
             res.status(StatusCodes.OK).send({ isDefaultImage: false, url: signedURL });
         });
@@ -74,26 +74,20 @@ export class ProfilePictureController {
         this.router.put('/profile-picture', verifyToken, uploadImage.single('image'), async (req: Request, res: Response) => {
             const username = res.locals.user.name;
             const oldImageKey = (await this.accountStorage.getProfilePicInfo(username)).key;
-            const imageKey = uuid.v4() + req.file?.originalname;
-            const putCommand = this.createS3UploadCommand(req, imageKey as string);
+            const newImageKey = uuid.v4() + req.file?.originalname;
+            const putCommand = this.createPutCommand(req, newImageKey as string);
             this.s3Client
                 .send(putCommand)
                 .then(async () => {
-                    // Store Image key in DB
-                    await this.accountStorage.storeImageKey(username, imageKey as string, req.file?.originalname as string);
                     // Delete the old image in the bucket (like an override)
                     if (oldImageKey?.length) {
-                        this.s3Client
-                            .send(
-                                new DeleteObjectCommand({
-                                    Bucket: BUCKET_NAME,
-                                    Key: oldImageKey,
-                                }),
-                            )
-                            .catch((err) => {
-                                console.error(err);
-                            });
+                        const deleteImageCommand = this.createDeleteCommand(oldImageKey);
+                        this.s3Client.send(deleteImageCommand).catch((err) => {
+                            console.error(err);
+                        });
                     }
+                    // Update image in DB
+                    await this.accountStorage.updateUploadedImage(username, newImageKey as string, req.file?.originalname as string);
                     res.status(StatusCodes.OK).send();
                 })
                 .catch((err) => {
@@ -104,6 +98,8 @@ export class ProfilePictureController {
                 });
         });
 
+        /* PATCH route only do modify profile picture to a default one, delete image in bucket if it exists and return file name */
+
         this.router.patch('/profile-picture', verifyToken, async (req: Request, res: Response) => {
             // We just need to put hasDefaultImage to true and modify the image name, and delete the image in the bucket if it exists
             const username = res.locals.user.name;
@@ -111,16 +107,10 @@ export class ProfilePictureController {
 
             if (!profilePicInfo.isDefaultPicture) {
                 if (profilePicInfo.key?.length) {
-                    this.s3Client
-                        .send(
-                            new DeleteObjectCommand({
-                                Bucket: BUCKET_NAME,
-                                Key: profilePicInfo.key,
-                            }),
-                        )
-                        .catch((err) => {
-                            console.error(err);
-                        });
+                    const deleteImageCommand = this.createDeleteCommand(profilePicInfo.key);
+                    this.s3Client.send(deleteImageCommand).catch((err) => {
+                        console.error(err);
+                    });
                 }
             }
             // Update DB (ImageKey to empty string and hasDefaultPicture to true and name to req.body.name)
@@ -147,7 +137,7 @@ export class ProfilePictureController {
         });
     }
 
-    private createS3UploadCommand(req: Request, imageKey: string): PutObjectCommand {
+    private createPutCommand(req: Request, imageKey: string): PutObjectCommand {
         return new PutObjectCommand({
             Bucket: BUCKET_NAME,
             Key: imageKey,
@@ -156,8 +146,15 @@ export class ProfilePictureController {
         });
     }
 
-    private createGetImageCommand(key: string): GetObjectCommand {
+    private CreateGetCommand(key: string): GetObjectCommand {
         return new GetObjectCommand({
+            Bucket: BUCKET_NAME,
+            Key: key,
+        });
+    }
+
+    private createDeleteCommand(key: string): DeleteObjectCommand {
+        return new DeleteObjectCommand({
             Bucket: BUCKET_NAME,
             Key: key,
         });

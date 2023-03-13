@@ -36,7 +36,7 @@ export class AccountStorageService {
         return userDocument.profilePicture as ImageInfo;
     }
 
-    async storeImageKey(username: string, imageKey: string, fileName: string): Promise<void> {
+    async updateUploadedImage(username: string, imageKey: string, fileName: string): Promise<void> {
         await this.database.users.collection.updateOne(
             { username },
             { $set: { 'profilePicture.key': imageKey, 'profilePicture.name': fileName, 'profilePicture.isDefaultPicture': false } },
