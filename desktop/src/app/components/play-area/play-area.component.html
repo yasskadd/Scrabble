@@ -1,4 +1,4 @@
-<b id="winning-message" *ngIf="gameClientService.isGameFinish">
+<b id='winning-message' *ngIf='gameClientService.isGameFinish'>
     {{ gameClientService.winningMessage | translate : { playerName: gameClientService.winner } }}
 </b>
 <!--<div class="container">
@@ -8,7 +8,9 @@
                 <input matSliderThumb [formControl]="sliderForm" />
             </mat-slider>
         </div> -->
-<app-game-board></app-game-board>
-<!-- <canvas id="canvas" #gridCanvas (click)="mouseHitDetect($event)" [attr.width]="width" [attr.height]="height"></canvas> -->
-<!-- </div> -->
-<app-player-rack [keyboardParentSubject]="keyboardParentSubject" class="player-rack"></app-player-rack>
+<div cdkDropListGroup>
+    <app-game-board></app-game-board>
+    <!-- <canvas id="canvas" #gridCanvas (click)="mouseHitDetect($event)" [attr.width]="width" [attr.height]="height"></canvas> -->
+    <!-- </div> -->
+    <app-player-rack [keyboardParentSubject]='keyboardParentSubject' class='player-rack'></app-player-rack>
+</div>

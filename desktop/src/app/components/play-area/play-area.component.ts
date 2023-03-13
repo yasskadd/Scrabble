@@ -21,7 +21,6 @@ export enum MouseButton {
 export class PlayAreaComponent {
     keyboardParentSubject: Subject<KeyboardEvent>;
     mousePosition: Vec2;
-    buttonPressed;
     protected sliderForm: FormControl;
 
     constructor(
@@ -32,7 +31,6 @@ export class PlayAreaComponent {
         this.sliderForm = new FormControl(this.gridService.letterSize);
         this.keyboardParentSubject = new Subject();
         this.mousePosition = { x: 0, y: 0 };
-        this.buttonPressed = '';
 
         this.sliderForm.valueChanges.subscribe(() => {
             this.updateFontSize();
@@ -49,8 +47,7 @@ export class PlayAreaComponent {
 
     @HostListener('keydown', ['$event'])
     buttonDetect(event: KeyboardEvent) {
-        this.buttonPressed = event.key;
-        switch (this.buttonPressed) {
+        switch (event.key) {
             case 'Backspace': {
                 this.letterService.undoPlacement();
                 break;
@@ -64,19 +61,12 @@ export class PlayAreaComponent {
                 break;
             }
             default: {
-                if (this.buttonPressed.length > 1) break;
-                // this.letterService.handlePlacement(this.buttonPressed);
+                if (event.key.length > 1) break;
+                this.letterService.handleKeyPlacement(event.key);
                 break;
             }
         }
         this.keyboardParentSubject.next(event);
-    }
-
-    mouseHitDetect(event: MouseEvent) {
-        if (event.button === MouseButton.Left) {
-            this.mousePosition = { x: event.offsetX, y: event.offsetY };
-            this.letterService.placeLetterStartPosition(this.mousePosition);
-        }
     }
 
     updateFontSize(): void {
