@@ -12,6 +12,16 @@
             </button>
             <mat-card class="justified">
                 <mat-card-content class="justified">
+                    <div
+                        id="scores"
+                        (click)="openHighScoreDialog()"
+                        matTooltip="{{ 'main_page.tooltip.scores' | translate }}"
+                        matTooltipPosition="right"
+                        matTooltipClass="toolMainPage"
+                    >
+                        <div *ngFor="let letter of ['S', 'C', 'O', 'R', 'E', 'S']">{{ letter }}</div>
+                        <mat-icon class="scores-icon">emoji_events</mat-icon>
+                    </div>
                     <button
                         id="classique"
                         mat-raised-button
@@ -21,6 +31,7 @@
                         matTooltip="{{ 'main_page.tooltip.play' | translate }}"
                         matTooltipPosition="right"
                         matTooltipClass="toolMainPage"
+                        [disabled]="!userService.isConnected()"
                     >
                         {{ "main_page.play" | translate }}
                     </button>
@@ -37,18 +48,6 @@
                         Scrabble LOG2990
                     </button>
                     <!-- TODO : DO NOT DELETE!!! -->
-                    <div
-                        id="scores"
-                        (click)="openHighScoreDialog()"
-                        matTooltip="{{ 'main_page.tooltip.scores' | translate }}"
-                        matTooltipPosition="right"
-                        matTooltipClass="toolMainPage"
-                    >
-                        <div *ngFor="let letter of ['S', 'C', 'O', 'R', 'E', 'S']">{{ letter }}</div>
-                        <div id="icon">
-                            <mat-icon>emoji_events</mat-icon>
-                        </div>
-                    </div>
                     <!-- <button
                         mat-fab
                         (click)="openHelpDialog()"
@@ -60,20 +59,6 @@
                         <mat-icon>help_outline</mat-icon>
                     </button> -->
                     <div *ngIf="loggedIn">{{ "main_page.connected_w_username" | translate }} : {{ userService.userName }}</div>
-                    <mat-form-field class="text-input">
-                        <mat-label>{{ "main_page.label.username" | translate }}</mat-label>
-                        <input matInput (keydown.enter)="logIn()" [formControl]="userNameForm" />
-                        <mat-icon matSuffix>person</mat-icon>
-                        <mat-error *ngIf="(!homeConnectionResponse.validity || userNameForm.invalid) && !chatBoxHandlerService.loggedIn">
-                            {{ getErrorMessage() }}
-                        </mat-error>
-                    </mat-form-field>
-                    <div class="buttons-columns">
-                        <button mat-raised-button *ngIf="!loggedIn" (click)="logIn()">{{ "main_page.login" | translate }}</button>
-                        <button mat-raised-button *ngIf="loggedIn" disabled>{{ "main_page.login" | translate }}</button>
-                        <button mat-raised-button *ngIf="loggedIn" (click)="logOut()">{{ "main_page.logout" | translate }}</button>
-                        <button mat-raised-button *ngIf="!loggedIn" disabled>{{ "main_page.logout" | translate }}</button>
-                    </div>
                 </mat-card-content>
             </mat-card>
         </div>
