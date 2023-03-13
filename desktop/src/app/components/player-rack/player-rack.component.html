@@ -14,14 +14,18 @@
         </button>
     </div>
 
-    <div class='rack-info justified' cdkDropList
-         [cdkDropListData]='rack'
+    <div class='rack-info justified'
+         id='player-rack'
+         cdkDropList
+         [cdkDropListData]='gameClient.playerOne.rack'
          (cdkDropListDropped)='drop($event)'
          cdkDropListOrientation='horizontal'
     >
         <div
             cdkDrag
-            *ngFor='let letter of rack; index as i'
+            [cdkDragData]='letter'
+            (cdkDragStarted)='letterPlacementService.currentSelection = letter'
+            *ngFor='let letter of gameClient.playerOne.rack; index as i'
             (click)='onSelection($event, i)'
             class='rack'
         >

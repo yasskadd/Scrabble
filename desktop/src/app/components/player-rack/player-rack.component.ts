@@ -21,7 +21,6 @@ export class PlayerRackComponent implements OnInit {
     previousSelection: number;
     lettersToExchange: number[];
     duplicates: number[];
-    rack: Letter[];
 
     constructor(
         private chatBoxHandler: ChatboxHandlerService,
@@ -34,34 +33,6 @@ export class PlayerRackComponent implements OnInit {
         this.previousSelection = board.INVALID_INDEX;
         this.lettersToExchange = [];
         this.duplicates = [];
-
-        this.rack = [
-            {
-                value: 'A',
-                quantity: 5,
-                points: 3,
-            },
-            {
-                value: 'B',
-                quantity: 5,
-                points: 3,
-            },
-            {
-                value: 'C',
-                quantity: 5,
-                points: 3,
-            },
-            {
-                value: 'D',
-                quantity: 5,
-                points: 3,
-            },
-            {
-                value: 'E',
-                quantity: 5,
-                points: 3,
-            },
-        ];
     }
 
     @HostListener('window: click', ['$event'])
@@ -133,9 +104,6 @@ export class PlayerRackComponent implements OnInit {
     }
 
     protected drop(event: CdkDragDrop<Letter[]>): void {
-        console.log(event.currentIndex);
-        console.log(event);
-
         if (event.previousContainer === event.container) {
             moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
         } else {
