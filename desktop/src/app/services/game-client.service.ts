@@ -7,6 +7,7 @@ import { LetterTileInterface } from '@common/interfaces/letter-tile-interface';
 import { Objective } from '@common/interfaces/objective';
 import { ReplaySubject, Subject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
+import { AlphabetLetter } from '@common/models/alphabet-letter';
 
 type CompletedObjective = { objective: Objective; name: string };
 type InitObjective = { objectives1: Objective[]; objectives2: Objective[]; playerName: string };
@@ -90,6 +91,7 @@ export class GameClientService {
             this.timerClientUpdateEvent(newTimer);
         });
     }
+
     updateGameboard() {
         this.gameboardUpdated.next(true);
     }
@@ -111,27 +113,27 @@ export class GameClientService {
             score: 0,
             rack: [
                 {
-                    value: 'A',
+                    value: AlphabetLetter.A,
                     quantity: 5,
                     points: 3,
                 },
                 {
-                    value: 'B',
+                    value: AlphabetLetter.B,
                     quantity: 5,
                     points: 3,
                 },
                 {
-                    value: 'C',
+                    value: AlphabetLetter.C,
                     quantity: 5,
                     points: 3,
                 },
                 {
-                    value: 'D',
+                    value: AlphabetLetter.D,
                     quantity: 5,
                     points: 3,
                 },
                 {
-                    value: 'E',
+                    value: AlphabetLetter.E,
                     quantity: 5,
                     points: 3,
                 },
@@ -139,7 +141,11 @@ export class GameClientService {
             objective: undefined,
         };
         this.secondPlayer = { name: '', score: 0, rack: [], objective: undefined };
-        this.playerOneTurn = false;
+
+        // TODO : change that back
+        this.playerOneTurn = true;
+        // this.playerOneTurn = false;
+
         this.letterReserveLength = 0;
         this.isGameFinish = false;
         this.winningMessage = '';
