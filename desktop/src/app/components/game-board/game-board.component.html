@@ -1,22 +1,47 @@
-<mat-grid-list cols="15" class="board" cdkDropList>
-    <mat-grid-tile *ngFor="let tile of letterPlacementService.boardTiles" class="tile">
-        <div class="tile-background" *ngIf="tile.state === 'empty'">
+<mat-grid-list cols='15' class='board' id='board'>
+    <mat-grid-tile *ngFor='let tile of letterPlacementService.boardTiles; trackBy:identify' class='tile'>
+        <div
+            cdkDropList
+            cdkDropListOrientation='horizontal'
+            (cdkDropListDropped)='drop($event, tile)'
+            (mouseenter)='entered($event, tile)'
+            (mouseleave)='exited($event, tile)'
+            (click)='handleCenterClick(tile)'
+            class='empty-tile tile-content'
+            [style.background-color]='getBackgroundColor(tile.type)'
+            [cdkDropListSortingDisabled]='true'
+        >
             <div
-                *ngIf="tile.state === boardTileStates.Empty"
-                class="empty-tile tile-content"
-                [style.background-color]="getBackgroundColor(tile.type)"
-            >
-                {{ getTileText(tile.type) }}
+                [ngClass]="[
+                    tile.letter?.value ? 'board-letter': 'blank-letter',
+                    tile.state === boardTileStates.Temp ? 'temp-letter' :'',
+                    tile.state === boardTileStates.Confirmed ? 'confirmed-letter': ''
+                ]"
+                cdkDrag>
+                <div class='letter-value'>
+                    {{ tile.letter?.value.toUpperCase() }}
+                </div>
+                <div class='letter-points'>{{ tile.letter?.points }}</div>
+                <div class='tile-text' *ngIf='!tile.letter?.value'>
+                    {{ getTileText(tile.type) }}
+                </div>
+                <div class='current-position' *ngIf='tile.coord === letterPlacementService.currentPosition'>
+                    <div [ngSwitch]='letterPlacementService.direction'>
+                        <mat-icon class='direction' *ngSwitchCase='playDirection.Left'>chevron_left</mat-icon>
+                        <mat-icon class='direction' *ngSwitchCase='playDirection.Right'>chevron_right</mat-icon>
+                        <mat-icon class='direction' *ngSwitchCase='playDirection.Up'>expand_less</mat-icon>
+                        <mat-icon class='direction' *ngSwitchCase='playDirection.Down'>expand_more</mat-icon>
+                    </div>
+                </div>
             </div>
-            <!--             <mat-card-content *ngIf="tile.state === boardTileStates.Temp" class="temp-tile">
-                {{ getTileText(tile.type) }}
-            </mat-card-content>
-            <mat-card-content *ngIf="tile.state === boardTileStates.Pending" class="pending-tile">
-                {{ getTileText(tile.type) }}
-            </mat-card-content>
-            <mat-card-content *ngIf="tile.state === boardTileStates.Confirmed" class="confirmed-tile">
-                {{ getTileText(tile.type) }}
-            </mat-card-content> -->
         </div>
+
+        <!--
+        <mat-card-content *ngIf="tile.state === boardTileStates.Pending" class="pending-tile">
+            {{ getTileText(tile.type) }}
+        </mat-card-content>
+        <mat-card-content *ngIf="tile.state === boardTileStates.Confirmed" class="confirmed-tile">
+            {{ getTileText(tile.type) }}
+        </mat-card-content> -->
     </mat-grid-tile>
 </mat-grid-list>
