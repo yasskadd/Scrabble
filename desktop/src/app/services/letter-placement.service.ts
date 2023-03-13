@@ -54,7 +54,7 @@ export class LetterPlacementService {
     }
 
     handleDragPlacement(index: number, letter: Letter, tile: BoardTileInfo): void {
-        if (this.placeLetter.length === 0) {
+        if (this.placedLetters.length === 0) {
             this.placingMode = PlacingState.Drag;
         }
 
@@ -69,7 +69,7 @@ export class LetterPlacementService {
     }
 
     handleKeyPlacement(keyPressed: string) {
-        if (this.placeLetter.length === 0) {
+        if (this.placedLetters.length === 0) {
             this.placingMode = PlacingState.Keyboard;
         }
         if (this.placingMode !== PlacingState.Keyboard || this.hasPlacingEnded || !this.gameClientService.playerOneTurn) {
