@@ -7,7 +7,7 @@ const fileStorage = multer.memoryStorage();
 export const uploadImage = multer({
     storage: fileStorage,
     fileFilter: (req: FileRequest, file: Express.Multer.File, cb) => {
-        if (acceptedFiles.includes(file.mimetype)) cb(null, true);
+        if (file && acceptedFiles.includes(file.mimetype)) cb(null, true);
         else {
             req.fileValidationError = 'Invalid Extension';
             return cb(null, false);

@@ -31,7 +31,7 @@ export class ProfilePictureController {
         this.router = Router();
 
         this.router.post('/profile-picture', uploadImage.single('image'), async (req: FileRequest, res: Response) => {
-            if (req.fileValidationError) {
+            if (req.fileValidationError || !req.file) {
                 res.status(StatusCodes.BAD_REQUEST).send({
                     message: 'No file received or invalid file type',
                     success: false,
@@ -71,7 +71,14 @@ export class ProfilePictureController {
         /*  PUT request to UPLOAD modify existing profile picture, we need to get imageKey in database and to PutCommand to override
             the image in the bucket. Then create a new signed URL and send it to client */
 
-        this.router.put('/profile-picture', verifyToken, uploadImage.single('image'), async (req: Request, res: Response) => {
+        this.router.put('/profile-picture', verifyToken, uploadImage.single('image'), async (req: FileRequest, res: Response) => {
+            if (req.fileValidationError || !req.file) {
+                res.status(StatusCodes.BAD_REQUEST).send({
+                    message: 'No file received or invalid file type',
+                    success: false,
+                });
+                return;
+            }
             const username = res.locals.user.name;
             const oldImageKey = (await this.accountStorage.getProfilePicInfo(username)).key;
             const newImageKey = uuid.v4() + req.file?.originalname;
