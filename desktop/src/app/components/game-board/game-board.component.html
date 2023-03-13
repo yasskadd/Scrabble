@@ -23,7 +23,7 @@
                     {{ tile.letter?.value.toUpperCase() }}
                 </div>
                 <div class='letter-points'>{{ tile.letter?.points }}</div>
-                <div class='tile-text' *ngIf='!tile.letter?.value'>
+                <div class='tile-text' *ngIf='tileEmpty(tile)'>
                     {{ getTileText(tile.type) }}
                 </div>
                 <div class='current-position'

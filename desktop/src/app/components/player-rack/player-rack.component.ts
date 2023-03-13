@@ -109,7 +109,9 @@ export class PlayerRackComponent implements OnInit {
         } else {
             this.letterPlacementService.resetTile(event.item.data.coord);
             this.gameClient.playerOne.rack.push(event.item.data.letter);
-            // transferArrayItem(event.previousContainer.data, event.container.data, event.previousIndex, event.currentIndex);
+            this.letterPlacementService.currentSelection = undefined;
+
+            // TODO : Revert selection arrow
         }
     }
 }

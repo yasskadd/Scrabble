@@ -45,6 +45,8 @@
     padding: 2px !important;
     margin: 0;
     background-color: #8a765a;
+    opacity: 70%;
+    z-index: 0;
     height: 32px;
     width: 32px;
     transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);

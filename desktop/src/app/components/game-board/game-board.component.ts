@@ -4,8 +4,8 @@ import { LetterPlacementService } from '@app/services/letter-placement.service';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Letter } from '@common/interfaces/letter';
 import { BoardTileInfo } from '@app/interfaces/board-tile-info';
-import { CENTER_TILE } from '@app/constants/board-view';
 import { PlayDirection } from '@app/models/play-direction';
+import { AlphabetLetter } from '@common/models/alphabet-letter';
 
 @Component({
     selector: 'app-game-board',
@@ -19,9 +19,7 @@ export class GameBoardComponent {
     constructor(protected letterPlacementService: LetterPlacementService) {}
 
     handleCenterClick(tile: BoardTileInfo): void {
-        if (tile.coord === CENTER_TILE) {
-            this.letterPlacementService.rotateDirection();
-        }
+        this.letterPlacementService.rotateDirection(tile);
     }
 
     protected drop(event: CdkDragDrop<Letter[]>, tile: BoardTileInfo): void {
@@ -99,5 +97,9 @@ export class GameBoardComponent {
                 return '#BDABA5';
             }
         }
+    }
+
+    protected tileEmpty(tile: BoardTileInfo): boolean {
+        return tile.letter.value === AlphabetLetter.None;
     }
 }

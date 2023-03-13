@@ -11,7 +11,7 @@
     position: absolute;
     font-size: x-small;
     text-align: center;
-    z-index: 0;
+    z-index: 1;
 }
 
 .tile-content {
@@ -46,6 +46,7 @@
     font-size: 15px;
     right: 4px;
     bottom: 8px;
+    z-index: 0;
 }
 
 .board-letter {
@@ -86,9 +87,11 @@
 }
 
 .temp-letter {
-    background-color: #B89D77;
+    background-color: #b89d77;
     transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
     justify-content: center;
+    z-index: 0;
+    opacity: 90%;
 }
 
 .placeholder {

@@ -21,6 +21,10 @@ const ASCII_ALPHABET_START = 96;
 })
 export class LetterPlacementService {
     boardTiles: BoardTileInfo[];
+
+    // TODO : Fill when placing confirmed by server
+    // placedBoardTiles: BoardTileInfo[];
+
     defaultBoardTiles: BoardTileInfo[];
     currentSelection: Letter;
     selectionPositions: SelectionPosition[];
@@ -30,11 +34,12 @@ export class LetterPlacementService {
         letter: Letter;
         tile: BoardTileInfo;
     }[];
-    // private isHorizontal: boolean;
+    private origin: number;
     private hasPlacingEnded: boolean;
 
     constructor(private gridService: GridService, private gameClientService: GameClientService, private chatboxService: ChatboxHandlerService) {
         this.boardTiles = [];
+        this.placingMode = PlacingState.Keyboard;
 
         this.setPropreties();
         this.gameClientService.gameboardUpdated.subscribe(() => {
@@ -63,11 +68,13 @@ export class LetterPlacementService {
     }
 
     handleKeyPlacement(keyPressed: string) {
+        console.log(keyPressed);
         if (this.placingMode !== PlacingState.Keyboard || this.hasPlacingEnded || !this.gameClientService.playerOneTurn) {
             return;
         }
 
         const indexOfLetter: number = this.findLetterFromRack(this.normalizeLetter(keyPressed));
+        console.log(indexOfLetter);
         if (indexOfLetter === constants.INVALID_INDEX) {
             return;
         }
@@ -177,10 +184,12 @@ export class LetterPlacementService {
         return this.placedLetters.length === 0;
     }
 
-    rotateDirection() {
-        if (this.placingMode === PlacingState.Keyboard) {
-            this.selectionPositions[0].direction += 1;
-            this.selectionPositions[0].direction %= 4;
+    rotateDirection(tile: BoardTileInfo) {
+        if (tile.coord === this.origin && this.placedLetters.length > 0) {
+            if (this.placingMode === PlacingState.Keyboard) {
+                this.selectionPositions[0].direction += 1;
+                this.selectionPositions[0].direction %= 4;
+            }
         }
     }
 
@@ -242,11 +251,11 @@ export class LetterPlacementService {
     // }
 
     private setPropreties() {
+        this.origin = CENTER_TILE;
         this.selectionPositions = [{ coord: CENTER_TILE, direction: PlayDirection.Right }];
         this.placedLetters = [];
         // this.isHorizontal = true;
         // this.placingMode = PlacingState.Drag;
-        this.placingMode = PlacingState.Keyboard;
         this.hasPlacingEnded = false;
         this.initTiles();
     }
@@ -273,29 +282,32 @@ export class LetterPlacementService {
     }
 
     private isPositionOutOfBound(): boolean {
-        if (this.selectionPositions[0].coord < 0 || this.selectionPositions[0].coord > 15 * 15 - 1) {
-            return true;
-        }
+        let outOfBound = false;
 
-        switch (this.selectionPositions[0].direction) {
-            case PlayDirection.Right: {
-                if (Math.floor(this.selectionPositions[0].coord / 15) !== Math.floor((this.selectionPositions[0].coord - 1) / 15)) {
-                    return true;
+        this.selectionPositions.forEach((selection: SelectionPosition) => {
+            if (selection.coord < 0 || selection.coord > 15 * 15 - 1) {
+                outOfBound = true;
+            }
+            switch (selection.direction) {
+                case PlayDirection.Right: {
+                    if (Math.floor(this.selectionPositions[0].coord / 15) !== Math.floor((this.selectionPositions[0].coord - 1) / 15)) {
+                        outOfBound = true;
+                    }
+                    break;
                 }
-                break;
-            }
-            case PlayDirection.Left: {
-                if (Math.floor(this.selectionPositions[0].coord - 1 / 15) !== Math.floor(this.selectionPositions[0].coord / 15)) {
-                    return true;
+                case PlayDirection.Left: {
+                    if (Math.floor((this.selectionPositions[0].coord - 1) / 15) !== Math.floor(this.selectionPositions[0].coord / 15)) {
+                        outOfBound = true;
+                    }
+                    break;
                 }
-                break;
+                default: {
+                    break;
+                }
             }
-            default: {
-                break;
-            }
-        }
+        });
 
-        return false;
+        return outOfBound;
     }
 
     // private getArrayIndex(coordinate: Coordinate): number {
