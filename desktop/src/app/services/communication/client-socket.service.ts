@@ -33,24 +33,48 @@ export class ClientSocketService implements OnDestroy {
         return this.socket && this.socket.connected;
     }
 
-    connect() {
-        this.socket = io(environment.serverUrl, { transports: ['websocket'], upgrade: false });
+    connect(cookie?: string) {
+        if (cookie) {
+            this.socket = io(environment.serverUrl, {
+                transports: ['websocket'],
+                upgrade: false,
+                extraHeaders: { Cookie: `session_token=${cookie}` },
+            });
+        } else {
+            this.socket = io(environment.serverUrl, { transports: ['websocket'], upgrade: false });
+        }
     }
 
-    establishConnection() {
+    establishConnection(cookie?: string) {
         if (this.useTauriSocket) {
-            tauri.tauri.invoke(RustCommand.EstablishConnection, { address: environment.serverUrl }).then(() => {
-                tauri.event
-                    .listen(RustEvent.SocketConnectionFailed, (event: Event<unknown>) => {
-                        this.languageService.getWord('error.socket.connection_failed').subscribe((word: string) => {
-                            this.snackBarService.openError((word + ' : ' + event.payload) as string);
-                        });
-                    })
-                    .then();
-            });
+            if (cookie) {
+                tauri.tauri
+                    .invoke(RustCommand.EstablishConnection, { address: environment.serverUrl, cookie: `session_token=${cookie}` })
+                    .then(() => {
+                        this.listenToTauriEvents();
+                    });
+            } else {
+                tauri.tauri.invoke(RustCommand.EstablishConnection, { address: environment.serverUrl }).then(() => {
+                    this.listenToTauriEvents();
+                });
+            }
         } else if (!this.isSocketAlive()) {
-            this.connect();
+            if (cookie) {
+                this.connect(cookie);
+            } else {
+                this.connect();
+            }
         }
+    }
+
+    listenToTauriEvents(): void {
+        tauri.event
+            .listen(RustEvent.SocketConnectionFailed, (event: Event<unknown>) => {
+                this.languageService.getWord('error.socket.connection_failed').subscribe((word: string) => {
+                    this.snackBarService.openError((word + ' : ' + event.payload) as string);
+                });
+            })
+            .then();
     }
 
     disconnect() {
