@@ -58,16 +58,16 @@ export class GameBoardComponent {
                 return '';
             }
             case BoardTileType.DoubleLetter: {
-                return 'DOUBLE LETTRE';
+                return 'LETTER x2';
             }
             case BoardTileType.DoubleWord: {
-                return 'DOUBLE WORD';
+                return 'WORD x2';
             }
             case BoardTileType.TripleLetter: {
-                return 'TRIPLE LETTER';
+                return 'LETTER x3';
             }
             case BoardTileType.TripleWord: {
-                return 'TRIPLE WORD';
+                return 'WORD x3';
             }
             default: {
                 return '';
