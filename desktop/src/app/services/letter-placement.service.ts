@@ -1,18 +1,19 @@
+/* eslint-disable max-lines */
 import { Injectable } from '@angular/core';
 import { BOARD_TILES } from '@app/constants/board-tiles';
 import { BoardTileInfo } from '@app/interfaces/board-tile-info';
-import { AlphabetLetter } from '@common/models/alphabet-letter';
 import { BoardTileState, BoardTileType } from '@app/models/board-tile';
 import * as constants from '@common/constants/board-info';
+import { AlphabetLetter } from '@common/models/alphabet-letter';
 // import { Coordinate } from '@common/interfaces/coordinate';
+import { CENTER_TILE } from '@app/constants/board-view';
+import { SelectionPosition } from '@app/interfaces/selection-position';
+import { PlacingState } from '@app/models/placing-state';
+import { PlayDirection } from '@app/models/play-direction';
 import { Letter } from '@common/interfaces/letter';
 import { ChatboxHandlerService } from './chat/chatbox-handler.service';
 import { GameClientService } from './game-client.service';
 import { GridService } from './grid.service';
-import { PlacingState } from '@app/models/placing-state';
-import { CENTER_TILE } from '@app/constants/board-view';
-import { SelectionPosition } from '@app/interfaces/selection-position';
-import { PlayDirection } from '@app/models/play-direction';
 
 const ASCII_ALPHABET_START = 96;
 
@@ -30,10 +31,7 @@ export class LetterPlacementService {
     selectionPositions: SelectionPosition[];
     placingMode: PlacingState;
 
-    private placedLetters: {
-        letter: Letter;
-        tile: BoardTileInfo;
-    }[];
+    private placedLetters: BoardTileInfo[];
     private origin: number;
     private hasPlacingEnded: boolean;
 
@@ -104,21 +102,31 @@ export class LetterPlacementService {
         if (this.noLettersPlaced()) return;
 
         // this.resetGameBoardView();
-        const removedLetter = this.placedLetters.pop();
-        this.gameClientService.playerOne.rack.push(removedLetter.letter);
-        this.resetTile(removedLetter.tile.coord);
+        const removedBoardTile = this.placedLetters[this.placedLetters.length - 1];
+        this.gameClientService.playerOne.rack.push(removedBoardTile.letter);
 
-        this.computeNewPosition(undefined, true);
-        this.hasPlacingEnded = this.isPositionOutOfBound();
-        this.currentSelection = undefined;
+        this.resetTile(removedBoardTile.coord);
+
+        this.resetSelectionPositions(removedBoardTile);
     }
 
     undoEverything() {
         this.placedLetters.forEach((letter) => {
             this.gameClientService.playerOne.rack.push(letter.letter);
-            this.resetTile(letter.tile.coord);
+            this.resetTile(letter.coord);
         });
         this.resetView();
+    }
+
+    resetSelectionPositions(removedBoardTile: BoardTileInfo): void {
+        this.placedLetters.pop();
+        this.computeNewPosition(removedBoardTile.coord, true);
+        this.hasPlacingEnded = this.isPositionOutOfBound();
+        this.currentSelection = undefined;
+    }
+
+    isRemoveValid(boardTile: BoardTileInfo): boolean {
+        return boardTile.coord === this.placedLetters[this.placedLetters.length - 1].coord;
     }
 
     // placeLetterStartPosition() {
@@ -141,33 +149,35 @@ export class LetterPlacementService {
     //     this.updateLettersView();
     // }
 
-    placeLetter(letter: Letter, tile: BoardTileInfo) {
-        if (!this.isValidPlacing(tile.coord)) {
+    placeLetter(letter: Letter, boardTile: BoardTileInfo) {
+        if (!this.isValidPlacing(boardTile.coord)) {
             return;
         }
 
-        this.boardTiles[tile.coord] = {
-            type: tile.type,
+        const playedTile: BoardTileInfo = {
+            type: boardTile.type,
             state: BoardTileState.Pending,
             letter,
-            coord: tile.coord,
+            coord: boardTile.coord,
         };
+        this.boardTiles[boardTile.coord] = playedTile;
+
         this.gameClientService.playerOne.rack.splice(
             this.gameClientService.playerOne.rack.findIndex((letterElement: Letter) => {
                 return letterElement.value === letter.value;
             }),
             1,
         );
-        this.placedLetters.push({ letter, tile });
+        this.placedLetters.push(playedTile);
 
         if (this.isPositionOutOfBound()) {
             this.hasPlacingEnded = true;
         }
         if (this.placedLetters.length === 2 && this.placingMode === PlacingState.Drag) {
-            this.computeDirection(tile.coord);
+            this.computeDirection(playedTile.coord);
         }
 
-        this.computeNewPosition(tile.coord, false);
+        this.computeNewPosition(playedTile.coord, false);
     }
 
     resetView() {
@@ -185,7 +195,7 @@ export class LetterPlacementService {
     }
 
     rotateDirection(tile: BoardTileInfo) {
-        if (tile.coord === this.origin && this.placedLetters.length > 0) {
+        if (tile.coord === this.origin && this.placedLetters.length === 0) {
             if (this.placingMode === PlacingState.Keyboard) {
                 this.selectionPositions[0].direction += 1;
                 this.selectionPositions[0].direction %= 4;
@@ -317,20 +327,32 @@ export class LetterPlacementService {
 
     private computeNewPosition(playedCoord: number, revert: boolean) {
         const factor = 1;
-        if (this.placingMode === PlacingState.Drag && this.placedLetters.length === 1) {
-            this.selectionPositions = [
-                {
-                    coord: playedCoord + 1,
-                    direction: PlayDirection.Right,
-                },
-                {
-                    coord: playedCoord + 15,
-                    direction: PlayDirection.Down,
-                },
-                { coord: playedCoord - 1, direction: PlayDirection.Left },
-                { coord: playedCoord - 15, direction: PlayDirection.Up },
-            ];
-            return;
+
+        if (this.placingMode === PlacingState.Drag) {
+            if (this.placedLetters.length === 0) {
+                this.selectionPositions = [
+                    {
+                        coord: this.origin,
+                        direction: PlayDirection.Right,
+                    },
+                ];
+                return;
+            }
+            if (this.placedLetters.length === 1) {
+                this.selectionPositions = [
+                    {
+                        coord: this.origin + 1,
+                        direction: PlayDirection.Right,
+                    },
+                    {
+                        coord: this.origin + 15,
+                        direction: PlayDirection.Down,
+                    },
+                    { coord: this.origin - 1, direction: PlayDirection.Left },
+                    { coord: this.origin - 15, direction: PlayDirection.Up },
+                ];
+                return;
+            }
         }
 
         switch (this.selectionPositions[0].direction) {

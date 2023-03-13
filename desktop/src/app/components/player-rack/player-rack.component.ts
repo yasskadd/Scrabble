@@ -104,14 +104,18 @@ export class PlayerRackComponent implements OnInit {
     }
 
     protected drop(event: CdkDragDrop<Letter[]>): void {
+        if (!this.letterPlacementService.isRemoveValid(event.item.data)) {
+            return;
+        }
+
         if (event.previousContainer === event.container) {
             moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
         } else {
             this.letterPlacementService.resetTile(event.item.data.coord);
             this.gameClient.playerOne.rack.push(event.item.data.letter);
-            this.letterPlacementService.currentSelection = undefined;
-
-            // TODO : Revert selection arrow
+            this.letterPlacementService.resetSelectionPositions(event.item.data);
         }
+
+        this.letterPlacementService.currentSelection = undefined;
     }
 }
