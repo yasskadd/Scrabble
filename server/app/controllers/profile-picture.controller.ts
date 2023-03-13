@@ -3,7 +3,7 @@ import { FileRequest } from '@app/interfaces/file-request';
 import { uploadImage } from '@app/middlewares/multer-middleware';
 import { verifyToken } from '@app/middlewares/token-verification-middleware';
 import { AccountStorageService } from '@app/services/database/account-storage.service';
-import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { ImageInfo } from '@common/interfaces/image-info';
 import { Request, Response, Router } from 'express';
@@ -29,7 +29,7 @@ export class ProfilePictureController {
     private configureRouter(): void {
         this.router = Router();
 
-        this.router.post('/profilePicture', uploadImage.single('image'), async (req: FileRequest, res: Response) => {
+        this.router.post('/profile-picture-upload', uploadImage.single('image'), async (req: FileRequest, res: Response) => {
             if (req.fileValidationError) {
                 res.status(StatusCodes.BAD_REQUEST).send({
                     message: 'No file received or invalid file type',
@@ -51,21 +51,50 @@ export class ProfilePictureController {
             res.status(StatusCodes.CREATED).send(imageInfo);
         });
 
-        this.router.get('/profilePicture', verifyToken, async (req: Request, res: Response) => {
+        this.router.get('/profile-picture', verifyToken, async (req: Request, res: Response) => {
             const username = res.locals.user.name;
             const profilePicInfo = await this.accountStorage.getProfilePicInfo(username);
             if (profilePicInfo.hasDefaultPicture) {
-                res.status(StatusCodes.BAD_REQUEST).send({ message: 'User has a generic profile picture, invalid request' });
+                res.status(StatusCodes.OK).send({ isDefaultImage: true, url: profilePicInfo.name });
                 return;
             }
             // Create new signed_url
             const getImageCommand = this.createGetImageCommand(profilePicInfo.imageKey as string);
             const signedURL = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 3600 });
-            res.status(StatusCodes.ACCEPTED).send({ signedURL });
+            res.status(StatusCodes.OK).send({ isDefaultImage: false, url: signedURL });
         });
 
-        /* TODO: PUT request to modify existing profile picture, we need to get imageKey in database and to PutCommand to override
+        /* TODO: PUT request to UPLOAD modify existing profile picture, we need to get imageKey in database and to PutCommand to override
             the image in the bucket. Then create a new signed URL and send it to client */
+
+        this.router.put('/profile-picture-upload', uploadImage.single('image'), verifyToken, async (req: Request, res: Response) => {
+            const username = res.locals.user.name;
+            const oldImageKey = (await this.accountStorage.getProfilePicInfo(username)).imageKey;
+            const imageKey = uuid.v4() + req.file?.originalname;
+            const putCommand = this.createS3UploadCommand(req, imageKey as string);
+            this.s3Client
+                .send(putCommand)
+                .then(async () => {
+                    // Store Image key in DB
+                    await this.accountStorage.storeImageKey(username, imageKey as string, req.file?.originalname as string);
+                    // Delete the old image in the bucket (like an override)
+                    this.s3Client.send(
+                        new DeleteObjectCommand({
+                            Bucket: BUCKET_NAME,
+                            Key: oldImageKey,
+                        }),
+                    );
+                    res.status(StatusCodes.OK).send();
+                })
+                .catch((err) => {
+                    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
+                        message: 'Internal server error',
+                        error: err.message,
+                    });
+                });
+        });
+
+        /* TODO: PATCH request to modify hasDefaultImage to true and image name */
 
         /* TODO: DELETE request to delete image from bucket. Happens if the user modified his profile picture to a generic one */
     }
