@@ -338,7 +338,12 @@ export class LetterPlacementService {
 
     private isValidPlacing(coord: number): boolean {
         if (this.placingMode === PlacingState.Drag && this.placedLetters.length === 1) {
-            return true;
+            return (
+                coord === this.currentPosition + 1 ||
+                coord === this.currentPosition - 1 ||
+                coord === this.currentPosition + 15 ||
+                coord === this.currentPosition - 15
+            );
         }
 
         return coord === this.currentPosition;
