@@ -30,7 +30,7 @@ export class ProfilePictureController {
     private configureRouter(): void {
         this.router = Router();
 
-        this.router.post('/profile-picture-upload', uploadImage.single('image'), async (req: FileRequest, res: Response) => {
+        this.router.post('/profile-picture', uploadImage.single('image'), async (req: FileRequest, res: Response) => {
             if (req.fileValidationError) {
                 res.status(StatusCodes.BAD_REQUEST).send({
                     message: 'No file received or invalid file type',
@@ -71,7 +71,7 @@ export class ProfilePictureController {
         /*  PUT request to UPLOAD modify existing profile picture, we need to get imageKey in database and to PutCommand to override
             the image in the bucket. Then create a new signed URL and send it to client */
 
-        this.router.put('/profile-picture-upload', verifyToken, uploadImage.single('image'), async (req: Request, res: Response) => {
+        this.router.put('/profile-picture', verifyToken, uploadImage.single('image'), async (req: Request, res: Response) => {
             const username = res.locals.user.name;
             const oldImageKey = (await this.accountStorage.getProfilePicInfo(username)).key;
             const imageKey = uuid.v4() + req.file?.originalname;
@@ -104,7 +104,7 @@ export class ProfilePictureController {
                 });
         });
 
-        this.router.patch('/profile-picture-default', verifyToken, async (req: Request, res: Response) => {
+        this.router.patch('/profile-picture', verifyToken, async (req: Request, res: Response) => {
             // We just need to put hasDefaultImage to true and modify the image name, and delete the image in the bucket if it exists
             const username = res.locals.user.name;
             const profilePicInfo = await this.accountStorage.getProfilePicInfo(username);
