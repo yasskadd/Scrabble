@@ -6,6 +6,7 @@ import * as jwt from 'jsonwebtoken';
 import { Service } from 'typedi';
 
 const SUCCESS = 200;
+const TEMP_REDIRECT = 307;
 const ERROR = 401;
 
 @Service()
@@ -52,7 +53,7 @@ export class AuthentificationController {
                 domain: 'localhost',
                 path: '/',
             });
-            res.redirect(307, '/auth/login');
+            res.redirect(TEMP_REDIRECT, '/auth/login');
         });
     }
 
