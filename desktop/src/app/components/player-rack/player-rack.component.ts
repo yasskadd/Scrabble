@@ -1,4 +1,4 @@
-import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component, ElementRef, HostListener, Input, OnInit } from '@angular/core';
 import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
 import { GameClientService } from '@app/services/game-client.service';
@@ -107,7 +107,9 @@ export class PlayerRackComponent implements OnInit {
         if (event.previousContainer === event.container) {
             moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
         } else {
-            transferArrayItem(event.previousContainer.data, event.container.data, event.previousIndex, event.currentIndex);
+            this.letterPlacementService.resetTile(event.item.data.coord);
+            this.gameClient.playerOne.rack.push(event.item.data.letter);
+            // transferArrayItem(event.previousContainer.data, event.container.data, event.previousIndex, event.currentIndex);
         }
     }
 }

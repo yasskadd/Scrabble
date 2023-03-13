@@ -9,9 +9,10 @@ import { Letter } from '@common/interfaces/letter';
 import { ChatboxHandlerService } from './chat/chatbox-handler.service';
 import { GameClientService } from './game-client.service';
 import { GridService } from './grid.service';
-import { PlayDirection } from '@app/models/play-direction';
 import { PlacingState } from '@app/models/placing-state';
 import { CENTER_TILE } from '@app/constants/board-view';
+import { SelectionPosition } from '@app/interfaces/selection-position';
+import { PlayDirection } from '@app/models/play-direction';
 
 const ASCII_ALPHABET_START = 96;
 
@@ -22,8 +23,7 @@ export class LetterPlacementService {
     boardTiles: BoardTileInfo[];
     defaultBoardTiles: BoardTileInfo[];
     currentSelection: Letter;
-    direction: PlayDirection;
-    currentPosition: number;
+    selectionPositions: SelectionPosition[];
     placingMode: PlacingState;
 
     private placedLetters: {
@@ -77,15 +77,17 @@ export class LetterPlacementService {
             placedLetter.value = keyPressed.toUpperCase() as AlphabetLetter;
         }
 
-        this.placeLetter(placedLetter, this.boardTiles[this.currentPosition]);
+        this.placeLetter(placedLetter, this.boardTiles[this.selectionPositions[0].coord]);
     }
 
     submitPlacement() {
         if (this.noLettersPlaced()) return;
 
-        const verticalPlacement = String.fromCharCode(this.currentPosition + ASCII_ALPHABET_START);
+        const verticalPlacement = String.fromCharCode(this.selectionPositions[0].coord + ASCII_ALPHABET_START);
         const lettersToSubmit = this.placedLetters.map((letter) => letter.letter.value).join('');
-        this.chatboxService.submitMessage(`!placer ${verticalPlacement}${this.currentPosition}${this.direction} ${lettersToSubmit}`);
+        this.chatboxService.submitMessage(
+            `!placer ${verticalPlacement}${this.selectionPositions[0].coord}${this.selectionPositions[0].direction} ${lettersToSubmit}`,
+        );
     }
 
     undoPlacement() {
@@ -177,8 +179,8 @@ export class LetterPlacementService {
 
     rotateDirection() {
         if (this.placingMode === PlacingState.Keyboard) {
-            this.direction += 1;
-            this.direction %= 4;
+            this.selectionPositions[0].direction += 1;
+            this.selectionPositions[0].direction %= 4;
         }
     }
 
@@ -240,10 +242,9 @@ export class LetterPlacementService {
     // }
 
     private setPropreties() {
-        this.currentPosition = CENTER_TILE;
+        this.selectionPositions = [{ coord: CENTER_TILE, direction: PlayDirection.Right }];
         this.placedLetters = [];
         // this.isHorizontal = true;
-        this.direction = PlayDirection.Right;
         // this.placingMode = PlacingState.Drag;
         this.placingMode = PlacingState.Keyboard;
         this.hasPlacingEnded = false;
@@ -272,19 +273,19 @@ export class LetterPlacementService {
     }
 
     private isPositionOutOfBound(): boolean {
-        if (this.currentPosition < 0 || this.currentPosition > 15 * 15 - 1) {
+        if (this.selectionPositions[0].coord < 0 || this.selectionPositions[0].coord > 15 * 15 - 1) {
             return true;
         }
 
-        switch (this.direction) {
+        switch (this.selectionPositions[0].direction) {
             case PlayDirection.Right: {
-                if (Math.floor(this.currentPosition / 15) !== Math.floor((this.currentPosition - 1) / 15)) {
+                if (Math.floor(this.selectionPositions[0].coord / 15) !== Math.floor((this.selectionPositions[0].coord - 1) / 15)) {
                     return true;
                 }
                 break;
             }
             case PlayDirection.Left: {
-                if (Math.floor(this.currentPosition - 1 / 15) !== Math.floor(this.currentPosition / 15)) {
+                if (Math.floor(this.selectionPositions[0].coord - 1 / 15) !== Math.floor(this.selectionPositions[0].coord / 15)) {
                     return true;
                 }
                 break;
@@ -303,31 +304,42 @@ export class LetterPlacementService {
     // }
 
     private computeNewPosition(playedCoord: number, revert: boolean) {
-        let factor = 1;
+        const factor = 1;
         if (this.placingMode === PlacingState.Drag && this.placedLetters.length === 1) {
-            this.currentPosition = playedCoord;
+            this.selectionPositions = [
+                {
+                    coord: playedCoord + 1,
+                    direction: PlayDirection.Right,
+                },
+                {
+                    coord: playedCoord + 15,
+                    direction: PlayDirection.Down,
+                },
+                { coord: playedCoord - 1, direction: PlayDirection.Left },
+                { coord: playedCoord - 15, direction: PlayDirection.Up },
+            ];
             return;
         }
 
-        if (this.placingMode === PlacingState.Drag && this.placedLetters.length === 2) {
-            factor = 2;
-        }
-
-        switch (this.direction) {
+        switch (this.selectionPositions[0].direction) {
             case PlayDirection.Up: {
-                this.currentPosition = revert ? this.currentPosition + factor * 15 : this.currentPosition - factor * 15;
+                this.selectionPositions[0].coord = revert
+                    ? this.selectionPositions[0].coord + factor * 15
+                    : this.selectionPositions[0].coord - factor * 15;
                 break;
             }
             case PlayDirection.Down: {
-                this.currentPosition = revert ? this.currentPosition - factor * 15 : this.currentPosition + factor * 15;
+                this.selectionPositions[0].coord = revert
+                    ? this.selectionPositions[0].coord - factor * 15
+                    : this.selectionPositions[0].coord + factor * 15;
                 break;
             }
             case PlayDirection.Right: {
-                this.currentPosition = revert ? this.currentPosition - factor : this.currentPosition + factor;
+                this.selectionPositions[0].coord = revert ? this.selectionPositions[0].coord - factor : this.selectionPositions[0].coord + factor;
                 break;
             }
             case PlayDirection.Left: {
-                this.currentPosition = revert ? this.currentPosition + factor : this.currentPosition - factor;
+                this.selectionPositions[0].coord = revert ? this.selectionPositions[0].coord + factor : this.selectionPositions[0].coord - factor;
                 break;
             }
             default: {
@@ -337,40 +349,26 @@ export class LetterPlacementService {
     }
 
     private isValidPlacing(coord: number): boolean {
-        if (this.placingMode === PlacingState.Drag && this.placedLetters.length === 1) {
-            return (
-                coord === this.currentPosition + 1 ||
-                coord === this.currentPosition - 1 ||
-                coord === this.currentPosition + 15 ||
-                coord === this.currentPosition - 15
-            );
-        }
+        let validity = false;
+        this.selectionPositions.forEach((selection: SelectionPosition) => {
+            if (selection.coord === coord) {
+                validity = true;
+            }
+        });
 
-        return coord === this.currentPosition;
+        return validity;
     }
 
-    private computeDirection(playedCoord: number) {
-        switch (playedCoord) {
-            case this.currentPosition + 1: {
-                this.direction = PlayDirection.Right;
-
-                break;
+    private computeDirection(playedCoord: number): void {
+        this.selectionPositions.forEach((selection: SelectionPosition) => {
+            if (playedCoord === selection.coord) {
+                this.selectionPositions[0].direction = selection.direction;
             }
-            case this.currentPosition - 1: {
-                this.direction = PlayDirection.Left;
+        });
 
-                break;
-            }
-            case this.currentPosition + 15: {
-                this.direction = PlayDirection.Down;
-
-                break;
-            }
-            case this.currentPosition - 15: {
-                this.direction = PlayDirection.Up;
-
-                break;
-            }
-        }
+        this.selectionPositions[0].coord = playedCoord;
+        this.selectionPositions.pop();
+        this.selectionPositions.pop();
+        this.selectionPositions.pop();
     }
 }

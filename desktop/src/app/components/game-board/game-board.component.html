@@ -17,7 +17,8 @@
                     tile.state === boardTileStates.Temp ? 'temp-letter' :'',
                     tile.state === boardTileStates.Confirmed ? 'confirmed-letter': ''
                 ]"
-                cdkDrag>
+                cdkDrag
+                [cdkDragData]='tile'>
                 <div class='letter-value'>
                     {{ tile.letter?.value.toUpperCase() }}
                 </div>
@@ -25,8 +26,9 @@
                 <div class='tile-text' *ngIf='!tile.letter?.value'>
                     {{ getTileText(tile.type) }}
                 </div>
-                <div class='current-position' *ngIf='tile.coord === letterPlacementService.currentPosition'>
-                    <div [ngSwitch]='letterPlacementService.direction'>
+                <div class='current-position'
+                     *ngFor='let selection of letterPlacementService.selectionPositions'>
+                    <div *ngIf='selection.coord === tile.coord' [ngSwitch]='selection.direction'>
                         <mat-icon class='direction' *ngSwitchCase='playDirection.Left'>chevron_left</mat-icon>
                         <mat-icon class='direction' *ngSwitchCase='playDirection.Right'>chevron_right</mat-icon>
                         <mat-icon class='direction' *ngSwitchCase='playDirection.Up'>expand_less</mat-icon>

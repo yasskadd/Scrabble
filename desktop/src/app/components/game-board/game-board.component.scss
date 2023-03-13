@@ -99,12 +99,14 @@
 }
 
 .current-position {
+    position: absolute;
     padding-top: 6px;
     display: flex;
     width: 36px;
     height: 38px;
     justify-content: center;
-    align-items: flex-end;
+    align-items: center;
     scale: 1.5;
     color: green;
+    z-index: 0;
 }
