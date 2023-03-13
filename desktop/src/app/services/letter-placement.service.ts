@@ -22,22 +22,21 @@ const ASCII_ALPHABET_START = 96;
 })
 export class LetterPlacementService {
     boardTiles: BoardTileInfo[];
+    defaultBoardTiles: BoardTileInfo[];
 
     // TODO : Fill when placing confirmed by server
     // placedBoardTiles: BoardTileInfo[];
 
-    defaultBoardTiles: BoardTileInfo[];
     currentSelection: Letter;
     selectionPositions: SelectionPosition[];
-    placingMode: PlacingState;
 
     private placedLetters: BoardTileInfo[];
+    private placingMode: PlacingState;
     private origin: number;
     private hasPlacingEnded: boolean;
 
     constructor(private gridService: GridService, private gameClientService: GameClientService, private chatboxService: ChatboxHandlerService) {
         this.boardTiles = [];
-        this.placingMode = PlacingState.Keyboard;
 
         this.setPropreties();
         this.gameClientService.gameboardUpdated.subscribe(() => {
@@ -55,6 +54,10 @@ export class LetterPlacementService {
     }
 
     handleDragPlacement(index: number, letter: Letter, tile: BoardTileInfo): void {
+        if (this.placeLetter.length === 0) {
+            this.placingMode = PlacingState.Drag;
+        }
+
         if (this.placingMode !== PlacingState.Drag || this.hasPlacingEnded || !this.gameClientService.playerOneTurn) {
             return;
         }
@@ -66,19 +69,20 @@ export class LetterPlacementService {
     }
 
     handleKeyPlacement(keyPressed: string) {
-        console.log(keyPressed);
+        if (this.placeLetter.length === 0) {
+            this.placingMode = PlacingState.Keyboard;
+        }
         if (this.placingMode !== PlacingState.Keyboard || this.hasPlacingEnded || !this.gameClientService.playerOneTurn) {
             return;
         }
 
         const indexOfLetter: number = this.findLetterFromRack(this.normalizeLetter(keyPressed));
-        console.log(indexOfLetter);
         if (indexOfLetter === constants.INVALID_INDEX) {
             return;
         }
 
         const placedLetter: Letter = this.gameClientService.playerOne.rack[indexOfLetter];
-        if (placedLetter.value === '*') {
+        if (placedLetter?.value === '*') {
             placedLetter.value = keyPressed.toUpperCase() as AlphabetLetter;
         }
 
@@ -106,7 +110,6 @@ export class LetterPlacementService {
         this.gameClientService.playerOne.rack.push(removedBoardTile.letter);
 
         this.resetTile(removedBoardTile.coord);
-
         this.resetSelectionPositions(removedBoardTile);
     }
 
@@ -201,23 +204,6 @@ export class LetterPlacementService {
                 this.selectionPositions[0].direction %= 4;
             }
         }
-    }
-
-    switchPlacingMode(): boolean {
-        if (this.placedLetters.length) {
-            return false;
-        }
-
-        switch (this.placingMode) {
-            case PlacingState.Drag:
-                this.placingMode = PlacingState.Keyboard;
-                break;
-            case PlacingState.Keyboard:
-                this.placingMode = PlacingState.Drag;
-                break;
-        }
-
-        return true;
     }
 
     // private updateLettersView() {

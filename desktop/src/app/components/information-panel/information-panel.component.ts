@@ -6,9 +6,8 @@ import { DialogGameHelpComponent } from '@app/components/dialog-game-help/dialog
 import { AppRoutes } from '@app/models/app-routes';
 import { GameClientService } from '@app/services/game-client.service';
 import { Objective } from '@common/interfaces/objective';
-import { TimeService } from '@services/time.service';
 import { LetterPlacementService } from '@services/letter-placement.service';
-import { SnackBarService } from '@services/snack-bar.service';
+import { TimeService } from '@services/time.service';
 
 @Component({
     selector: 'app-information-panel',
@@ -22,7 +21,6 @@ export class InformationPanelComponent {
         protected letterPlacementService: LetterPlacementService,
         private dialog: MatDialog,
         private router: Router,
-        private snackBarService: SnackBarService,
     ) {}
 
     abandonGame(): void {
@@ -53,12 +51,5 @@ export class InformationPanelComponent {
     filterNotCompletedObjectives() {
         const objectives: Objective[] = this.gameClientService.playerOne.objective as Objective[];
         return objectives.filter((objective) => !objective.complete);
-    }
-
-    protected switchPlacingMode(): void {
-        if (!this.letterPlacementService.switchPlacingMode()) {
-            // TODO : Language
-            this.snackBarService.openError("Can't switch during placement");
-        }
     }
 }
