@@ -25,11 +25,8 @@ export class GameBoardComponent {
     }
 
     protected drop(event: CdkDragDrop<Letter[]>, tile: BoardTileInfo): void {
-        console.log(event.previousContainer.data[event.previousIndex]);
-        console.log(event.previousContainer.id);
         if (event.previousContainer.id === 'player-rack') {
             this.letterPlacementService.handleDragPlacement(event.previousIndex, event.previousContainer.data[event.previousIndex], tile);
-        } else if (event.previousContainer.id === '') {
         }
 
         this.letterPlacementService.currentSelection = undefined;

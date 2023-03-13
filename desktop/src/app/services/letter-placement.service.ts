@@ -24,13 +24,13 @@ export class LetterPlacementService {
     currentSelection: Letter;
     direction: PlayDirection;
     currentPosition: number;
+    placingMode: PlacingState;
 
     private placedLetters: {
         letter: Letter;
         tile: BoardTileInfo;
     }[];
     // private isHorizontal: boolean;
-    private placingMode: PlacingState;
     private hasPlacingEnded: boolean;
 
     constructor(private gridService: GridService, private gameClientService: GameClientService, private chatboxService: ChatboxHandlerService) {
@@ -101,6 +101,7 @@ export class LetterPlacementService {
 
         this.computeNewPosition(undefined, true);
         this.hasPlacingEnded = this.isPositionOutOfBound();
+        this.currentSelection = undefined;
     }
 
     undoEverything() {
@@ -179,6 +180,23 @@ export class LetterPlacementService {
             this.direction += 1;
             this.direction %= 4;
         }
+    }
+
+    switchPlacingMode(): boolean {
+        if (this.placedLetters.length) {
+            return false;
+        }
+
+        switch (this.placingMode) {
+            case PlacingState.Drag:
+                this.placingMode = PlacingState.Keyboard;
+                break;
+            case PlacingState.Keyboard:
+                this.placingMode = PlacingState.Drag;
+                break;
+        }
+
+        return true;
     }
 
     // private updateLettersView() {

@@ -32,9 +32,9 @@ export class PlayAreaComponent {
         this.keyboardParentSubject = new Subject();
         this.mousePosition = { x: 0, y: 0 };
 
-        this.sliderForm.valueChanges.subscribe(() => {
-            this.updateFontSize();
-        });
+        // this.sliderForm.valueChanges.subscribe(() => {
+        //     this.updateFontSize();
+        // });
     }
 
     get width(): number {

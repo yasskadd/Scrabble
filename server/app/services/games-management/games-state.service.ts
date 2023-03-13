@@ -112,6 +112,9 @@ export class GamesStateService {
 
     private endGameScore(roomID: string) {
         const players = this.gamesHandler.gamePlayers.get(roomID)?.players as Player[];
+        if (!players) {
+            return;
+        }
         const game = players[0].game;
         if (game.turn.skipCounter === MAX_SKIP) {
             players.forEach((player) => {
