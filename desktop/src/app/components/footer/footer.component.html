@@ -1,4 +1,4 @@
-<h4 class="team-name">{{ 'footer.team' | translate }} 110</h4>
+<h4 class="team-name">{{ "footer.team" | translate }} 110</h4>
 <div class="team-members">
     <a href="https://www.linkedin.com/in/michael-roussel-401b0a1b0" target="_blank">Michael Roussel</a>
     <a href="https://www.linkedin.com/in/raphael-tremblay-242961205" target="_blank">Raphael Tremblay</a>
@@ -7,3 +7,11 @@
     <a href="https://www.linkedin.com/in/yasser-kadimi-184a38231" target="_blank">Yasser Kadimi</a>
     <a href="https://www.linkedin.com/in/laurent-nguyen-298b15254" target="_blank">Laurent Quoc Hoa Nguyen</a>
 </div>
+
+<mat-form-field appearance="outline" class="language-selector">
+    <mat-label>Language</mat-label>
+    <mat-select [formControl]="languageForm" required>
+        <mat-option [value]="languageChoices.French">{{ languageChoices.French.toString().toLocaleUpperCase() }}</mat-option>
+        <mat-option [value]="languageChoices.English">{{ languageChoices.English.toString().toLocaleUpperCase() }}</mat-option>
+    </mat-select>
+</mat-form-field>
