@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/naming-convention */
 import { FileRequest } from '@app/interfaces/file-request';
 import { uploadImage } from '@app/middlewares/multer-middleware';
@@ -45,31 +46,34 @@ export class ProfilePictureController {
             const signedURL = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 3600 });
             const imageInfo: ImageInfo = {
                 name: req.file?.originalname as string,
+                isDefaultPicture: false,
                 key: imageKey,
-                signedUrl: signedURL,
             };
-            res.status(StatusCodes.CREATED).send(imageInfo);
+            res.status(StatusCodes.CREATED).send({
+                imageInfo,
+                URL: signedURL,
+            });
         });
 
         this.router.get('/profile-picture', verifyToken, async (req: Request, res: Response) => {
             const username = res.locals.user.name;
             const profilePicInfo = await this.accountStorage.getProfilePicInfo(username);
-            if (profilePicInfo.hasDefaultPicture) {
+            if (profilePicInfo.isDefaultPicture) {
                 res.status(StatusCodes.OK).send({ isDefaultImage: true, url: profilePicInfo.name });
                 return;
             }
             // Create new signed_url
-            const getImageCommand = this.createGetImageCommand(profilePicInfo.imageKey as string);
+            const getImageCommand = this.createGetImageCommand(profilePicInfo.key as string);
             const signedURL = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 3600 });
             res.status(StatusCodes.OK).send({ isDefaultImage: false, url: signedURL });
         });
 
-        /* TODO: PUT request to UPLOAD modify existing profile picture, we need to get imageKey in database and to PutCommand to override
+        /*  PUT request to UPLOAD modify existing profile picture, we need to get imageKey in database and to PutCommand to override
             the image in the bucket. Then create a new signed URL and send it to client */
 
-        this.router.put('/profile-picture-upload', uploadImage.single('image'), verifyToken, async (req: Request, res: Response) => {
+        this.router.put('/profile-picture-upload', verifyToken, uploadImage.single('image'), async (req: Request, res: Response) => {
             const username = res.locals.user.name;
-            const oldImageKey = (await this.accountStorage.getProfilePicInfo(username)).imageKey;
+            const oldImageKey = (await this.accountStorage.getProfilePicInfo(username)).key;
             const imageKey = uuid.v4() + req.file?.originalname;
             const putCommand = this.createS3UploadCommand(req, imageKey as string);
             this.s3Client
@@ -78,12 +82,18 @@ export class ProfilePictureController {
                     // Store Image key in DB
                     await this.accountStorage.storeImageKey(username, imageKey as string, req.file?.originalname as string);
                     // Delete the old image in the bucket (like an override)
-                    this.s3Client.send(
-                        new DeleteObjectCommand({
-                            Bucket: BUCKET_NAME,
-                            Key: oldImageKey,
-                        }),
-                    );
+                    if (oldImageKey?.length) {
+                        this.s3Client
+                            .send(
+                                new DeleteObjectCommand({
+                                    Bucket: BUCKET_NAME,
+                                    Key: oldImageKey,
+                                }),
+                            )
+                            .catch((err) => {
+                                console.error(err);
+                            });
+                    }
                     res.status(StatusCodes.OK).send();
                 })
                 .catch((err) => {
@@ -94,9 +104,37 @@ export class ProfilePictureController {
                 });
         });
 
-        /* TODO: PATCH request to modify hasDefaultImage to true and image name */
+        this.router.patch('/profile-picture-default', verifyToken, async (req: Request, res: Response) => {
+            // We just need to put hasDefaultImage to true and modify the image name, and delete the image in the bucket if it exists
+            const username = res.locals.user.name;
+            const profilePicInfo = await this.accountStorage.getProfilePicInfo(username);
 
-        /* TODO: DELETE request to delete image from bucket. Happens if the user modified his profile picture to a generic one */
+            if (!profilePicInfo.isDefaultPicture) {
+                if (profilePicInfo.key?.length) {
+                    this.s3Client
+                        .send(
+                            new DeleteObjectCommand({
+                                Bucket: BUCKET_NAME,
+                                Key: profilePicInfo.key,
+                            }),
+                        )
+                        .catch((err) => {
+                            console.error(err);
+                        });
+                }
+            }
+            // Update DB (ImageKey to empty string and hasDefaultPicture to true and name to req.body.name)
+            this.accountStorage
+                .updateDefaultImage(username, req.body.fileName)
+                .then(() => {
+                    res.sendStatus(StatusCodes.OK);
+                })
+                .catch((err) => {
+                    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
+                        error: err.message,
+                    });
+                });
+        });
     }
 
     private configureS3Client(): S3Client {
