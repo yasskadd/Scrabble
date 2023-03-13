@@ -1,5 +1,5 @@
-export const TOTAL_COLUMNS = 16;
-export const TOTAL_ROWS = 16;
+export const TOTAL_COLUMNS = 15;
+export const TOTAL_ROWS = 15;
 
 export const GRID_CANVAS_WIDTH = 560;
 export const GRID_CANVAS_HEIGHT = 560;

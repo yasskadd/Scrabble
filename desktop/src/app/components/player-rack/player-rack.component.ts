@@ -1,5 +1,5 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { Component, ElementRef, HostListener, Input, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, Input } from '@angular/core';
 import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
 import { GameClientService } from '@app/services/game-client.service';
 import { LetterPlacementService } from '@app/services/letter-placement.service';
@@ -12,7 +12,7 @@ import { Subject } from 'rxjs';
     templateUrl: './player-rack.component.html',
     styleUrls: ['./player-rack.component.scss'],
 })
-export class PlayerRackComponent implements OnInit {
+export class PlayerRackComponent {
     @Input()
     keyboardParentSubject: Subject<KeyboardEvent>;
 
@@ -44,12 +44,12 @@ export class PlayerRackComponent implements OnInit {
         }
     }
 
-    ngOnInit() {
-        //     this.keyboardParentSubject.subscribe((event) => {
-        //         this.buttonPressed = event.key;
-        //         this.dispatchAction();
-        //     });
-    }
+    // ngOnInit() {
+    //     this.keyboardParentSubject.subscribe((event) => {
+    //         this.buttonPressed = event.key;
+    //         this.dispatchAction();
+    //     });
+    // }
 
     // dispatchAction() {
     //     if (this.currentSelection !== board.INVALID_INDEX) {

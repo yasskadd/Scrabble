@@ -6,7 +6,7 @@ import { BoardTileState, BoardTileType } from '@app/models/board-tile';
 import * as constants from '@common/constants/board-info';
 import { AlphabetLetter } from '@common/models/alphabet-letter';
 // import { Coordinate } from '@common/interfaces/coordinate';
-import { CENTER_TILE } from '@app/constants/board-view';
+import { CENTER_TILE, TOTAL_COLUMNS, TOTAL_ROWS } from '@app/constants/board-view';
 import { SelectionPosition } from '@app/interfaces/selection-position';
 import { PlacingState } from '@app/models/placing-state';
 import { PlayDirection } from '@app/models/play-direction';
@@ -281,18 +281,24 @@ export class LetterPlacementService {
         let outOfBound = false;
 
         this.selectionPositions.forEach((selection: SelectionPosition) => {
-            if (selection.coord < 0 || selection.coord > 15 * 15 - 1) {
+            if (selection.coord < 0 || selection.coord > TOTAL_ROWS * TOTAL_COLUMNS - 1) {
                 outOfBound = true;
             }
             switch (selection.direction) {
                 case PlayDirection.Right: {
-                    if (Math.floor(this.selectionPositions[0].coord / 15) !== Math.floor((this.selectionPositions[0].coord - 1) / 15)) {
+                    if (
+                        Math.floor(this.selectionPositions[0].coord / TOTAL_COLUMNS) !==
+                        Math.floor((this.selectionPositions[0].coord - 1) / TOTAL_COLUMNS)
+                    ) {
                         outOfBound = true;
                     }
                     break;
                 }
                 case PlayDirection.Left: {
-                    if (Math.floor((this.selectionPositions[0].coord - 1) / 15) !== Math.floor(this.selectionPositions[0].coord / 15)) {
+                    if (
+                        Math.floor((this.selectionPositions[0].coord - 1) / TOTAL_COLUMNS) !==
+                        Math.floor(this.selectionPositions[0].coord / TOTAL_COLUMNS)
+                    ) {
                         outOfBound = true;
                     }
                     break;
@@ -331,11 +337,11 @@ export class LetterPlacementService {
                         direction: PlayDirection.Right,
                     },
                     {
-                        coord: this.origin + 15,
+                        coord: this.origin + TOTAL_COLUMNS,
                         direction: PlayDirection.Down,
                     },
                     { coord: this.origin - 1, direction: PlayDirection.Left },
-                    { coord: this.origin - 15, direction: PlayDirection.Up },
+                    { coord: this.origin - TOTAL_COLUMNS, direction: PlayDirection.Up },
                 ];
                 return;
             }
@@ -344,14 +350,14 @@ export class LetterPlacementService {
         switch (this.selectionPositions[0].direction) {
             case PlayDirection.Up: {
                 this.selectionPositions[0].coord = revert
-                    ? this.selectionPositions[0].coord + factor * 15
-                    : this.selectionPositions[0].coord - factor * 15;
+                    ? this.selectionPositions[0].coord + factor * TOTAL_COLUMNS
+                    : this.selectionPositions[0].coord - factor * TOTAL_COLUMNS;
                 break;
             }
             case PlayDirection.Down: {
                 this.selectionPositions[0].coord = revert
-                    ? this.selectionPositions[0].coord - factor * 15
-                    : this.selectionPositions[0].coord + factor * 15;
+                    ? this.selectionPositions[0].coord - factor * TOTAL_COLUMNS
+                    : this.selectionPositions[0].coord + factor * TOTAL_COLUMNS;
                 break;
             }
             case PlayDirection.Right: {

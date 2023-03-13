@@ -31,7 +31,7 @@ export class UserService {
 
         // TODO : Also get image data from server
         this.httpHandlerService.login(user).subscribe({
-            next: (res: any) => {
+            next: () => {
                 // TODO : Store jwt token and place it in a middleware
                 this.cookieService.updateUserSessionCookie();
                 this.user = user;
@@ -39,7 +39,6 @@ export class UserService {
             },
             error: (error: HttpErrorResponse) => {
                 // TODO : Language
-                console.log(error);
                 subject.next(error.error.message);
             },
         });
