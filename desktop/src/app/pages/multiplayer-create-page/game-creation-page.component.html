@@ -8,18 +8,6 @@
                 <mat-label> {{ "new_game_page.opponent_name" | translate }} : {{ botName }} </mat-label>
             </form>
             <br />
-            <mat-form-field appearance="fill">
-                <mat-label> {{ "new_game_page.label.name" | translate }} </mat-label>
-                <input matInput maxlength="20" type="text" [(ngModel)]="playerName" placeholder="Ex. Robert" />
-                <mat-hint
-                    [ngClass]="{
-                        max: playerName?.length === 20
-                    }"
-                    align="end"
-                    >{{ playerName?.length || 0 }}/20
-                </mat-hint>
-            </mat-form-field>
-
             <form *ngIf="isSoloMode()" class="soloMode" [formGroup]="form">
                 <mat-form-field appearance="fill">
                     <mat-label>
