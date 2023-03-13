@@ -1,11 +1,10 @@
+/* eslint-disable quote-props */
 import { ImageInfo } from '@common/interfaces/image-info';
 import { IUser } from '@common/interfaces/user';
 import { compare, genSalt, hash } from 'bcrypt';
 import { Document } from 'mongodb';
 import { Service } from 'typedi';
 import { DatabaseService } from './database.service';
-
-export type ProfilePictureInfo = { hasDefaultPicture: boolean; name: string; imageKey?: string };
 
 @Service()
 export class AccountStorageService {
@@ -17,7 +16,6 @@ export class AccountStorageService {
             email: user.email,
             username: user.username,
             password: hashedPassword,
-            hasDefaultPicture: user.hasDefaultPicture,
             profilePicture: user.profilePicture as ImageInfo,
         };
         await this.database.users.addDocument(newUser);
@@ -33,17 +31,23 @@ export class AccountStorageService {
         return (await this.database.users.collection.findOne({ username: name })) !== null;
     }
 
-    async getProfilePicInfo(username: string): Promise<ProfilePictureInfo> {
+    async getProfilePicInfo(username: string): Promise<ImageInfo> {
         const userDocument = (await this.database.users.collection.findOne({ username })) as Document;
-        return {
-            hasDefaultPicture: userDocument.hasDefaultPicture,
-            name: userDocument.profilePicture.name,
-            imageKey: userDocument.profilePicture.key,
-        } as ProfilePictureInfo;
+        return userDocument.profilePicture as ImageInfo;
     }
 
     async storeImageKey(username: string, imageKey: string, fileName: string): Promise<void> {
-        await this.database.users.collection.updateOne({ username }, { $set: { 'profilePicture.key': imageKey, 'profilePicture.name': fileName } });
+        await this.database.users.collection.updateOne(
+            { username },
+            { $set: { 'profilePicture.key': imageKey, 'profilePicture.name': fileName, 'profilePicture.isDefaultPicture': false } },
+        );
+    }
+
+    async updateDefaultImage(username: string, fileName: string): Promise<void> {
+        await this.database.users.collection.updateOne(
+            { username },
+            { $set: { 'profilePicture.isDefaultPicture': true, 'profilePicture.key': '', 'profilePicture.name': fileName } },
+        );
     }
 
     private async generateHash(password: string): Promise<string> {
