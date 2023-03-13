@@ -199,10 +199,8 @@ export class LetterPlacementService {
 
     rotateDirection(tile: BoardTileInfo) {
         if (tile.coord === this.origin && this.placedLetters.length === 0) {
-            if (this.placingMode === PlacingState.Keyboard) {
-                this.selectionPositions[0].direction += 1;
-                this.selectionPositions[0].direction %= 4;
-            }
+            this.selectionPositions[0].direction += 1;
+            this.selectionPositions[0].direction %= 4;
         }
     }
 
