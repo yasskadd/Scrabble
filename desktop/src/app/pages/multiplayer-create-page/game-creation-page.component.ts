@@ -44,6 +44,7 @@ export class GameCreationPageComponent implements OnInit {
     ) {
         this.gameMode = this.activatedRoute.snapshot.params.id;
         this.selectedFile = null;
+        this.difficultyList = [];
         this.timerList = [];
 
         // Fill arrays of values from enum constants
