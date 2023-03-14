@@ -1,8 +1,10 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MAX_TEXT_LENGTH } from '@app/constants/user';
 import { AppRoutes } from '@app/models/app-routes';
 import { UserService } from '@app/services/user.service';
+import { IUser } from '@common/interfaces/user';
 import { Subject } from 'rxjs';
 
 @Component({
@@ -17,8 +19,8 @@ export class ConnectionPageComponent {
     protected connectionError: string;
 
     constructor(private formBuilder: FormBuilder, private userService: UserService, private router: Router) {
-        this.usernameForm = new FormControl('', Validators.required);
-        this.passwordForm = new FormControl('', Validators.required);
+        this.usernameForm = new FormControl('', [Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]);
+        this.passwordForm = new FormControl('', [Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]);
         this.connectionError = '';
 
         this.formGroup = this.formBuilder.group({
@@ -28,7 +30,10 @@ export class ConnectionPageComponent {
     }
 
     protected login(): void {
-        const connectionSubject: Subject<string> = this.userService.login({ username: this.usernameForm.value, password: this.passwordForm.value });
+        const connectionSubject: Subject<string> = this.userService.login({
+            username: this.usernameForm.value,
+            password: this.passwordForm.value,
+        } as IUser);
         connectionSubject.subscribe((res: string) => {
             if (res) {
                 // TODO : Language

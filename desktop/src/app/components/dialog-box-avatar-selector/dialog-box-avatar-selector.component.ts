@@ -1,5 +1,6 @@
 import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { HttpHandlerService } from '@app/services/communication/http-handler.service';
 import { AvatarData } from '@common/interfaces/avatar-data';
 import { ImageType } from '@common/models/image-type';
 
@@ -11,42 +12,46 @@ import { ImageType } from '@common/models/image-type';
 export class DialogBoxAvatarSelectorComponent {
     @ViewChild('image') private imageFile: ElementRef;
 
-    protected imageSources: string[];
+    protected defaultImages: AvatarData[];
 
-    constructor(@Inject(MAT_DIALOG_DATA) private data: AvatarData, private dialogRef: MatDialogRef<DialogBoxAvatarSelectorComponent>) {
-        this.imageSources = [];
-        for (let i = 0; i < 16; i++) {
-            // TODO : Add default images
-            // this.imageSources.push(`https://source.unsplash.com/random/?cat?sig=${Math.floor(Math.random() * 10)}`);
-            this.imageSources.push('https://th.bing.com/th/id/OIP.xnUJy4yaRKK12eb2g-ZceQHaFo?pid=ImgDet&rs=1');
-        }
-    }
-
-    protected closeDialog(imageSource: string): void {
-        this.dialogRef.close({
-            type: ImageType.Url,
-            src: imageSource,
-        });
+    constructor(
+        @Inject(MAT_DIALOG_DATA) private data: AvatarData,
+        private dialogRef: MatDialogRef<DialogBoxAvatarSelectorComponent>,
+        private httpHandlerService: HttpHandlerService,
+    ) {
+        this.initDefaultImages();
     }
 
     protected isImageSelected(imageSrc: string): boolean {
-        if (this.data.type === ImageType.Url) {
-            return imageSrc === this.data.src;
-        }
-
-        return false;
+        return imageSrc === this.data?.url;
     }
 
     protected uploadImage(): void {
         if (this.imageFile.nativeElement.files) {
             const file: File = this.imageFile.nativeElement.files[0];
+
             const reader: FileReader = new FileReader();
 
             reader.addEventListener('load', (event: any) => {
-                this.dialogRef.close({ type: ImageType.ImageData, src: file.name, data: event.target.result });
+                this.dialogRef.close({
+                    type: ImageType.ImageData,
+                    name: file.name,
+                    rawData: event.target.result,
+                    file,
+                } as AvatarData);
             });
 
             reader.readAsDataURL(file);
         }
+    }
+
+    private initDefaultImages(): void {
+        this.defaultImages = [];
+
+        this.httpHandlerService.getDefaultImages().subscribe((map: Map<string, string[]>) => {
+            Object.entries(map).forEach((entry: [string, string[]]) => {
+                this.defaultImages.push({ type: ImageType.Url, name: entry[0], url: entry[1][0] } as AvatarData);
+            });
+        });
     }
 }

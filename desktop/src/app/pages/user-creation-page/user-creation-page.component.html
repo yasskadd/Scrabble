@@ -2,20 +2,20 @@
 
 <body class="justified">
     <form [formGroup]="formGroup" class="justified connection-form">
-        <button #avatarSelector *ngIf="imageSrcForm.invalid" mat-fab color="primary" (click)="openAvatarSelector()" class="avatar-selector">
+        <button #avatarSelector *ngIf="profilePicForm.invalid" mat-fab color="primary" (click)="openAvatarSelector()" class="avatar-selector">
             <mat-icon>person</mat-icon>
         </button>
         <img
             mat-fab-button
-            *ngIf="imageSrcForm.valid && imageSrcForm.value.type === imageTypes.Url"
-            [src]="imageSrcForm.value.src"
+            *ngIf="profilePicForm.valid && profilePicForm.value.type === imageTypes.Url"
+            [src]="profilePicForm.value.url"
             (click)="openAvatarSelector()"
             class="selecter-avatar mat-elevation-z5"
         />
         <img
             mat-fab-button
-            *ngIf="imageSrcForm.valid && imageSrcForm.value.type === imageTypes.ImageData"
-            [src]="imageSrcForm.value.data"
+            *ngIf="profilePicForm.valid && profilePicForm.value.type === imageTypes.ImageData"
+            [src]="profilePicForm.value.rawData"
             (click)="openAvatarSelector()"
             class="selecter-avatar mat-elevation-z5"
         />

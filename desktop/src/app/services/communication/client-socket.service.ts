@@ -38,6 +38,7 @@ export class ClientSocketService implements OnDestroy {
             this.socket = io(environment.serverUrl, {
                 transports: ['websocket'],
                 upgrade: false,
+                /* eslint-disable-next-line @typescript-eslint/naming-convention*/
                 extraHeaders: { Cookie: `session_token=${cookie}` },
             });
         } else {

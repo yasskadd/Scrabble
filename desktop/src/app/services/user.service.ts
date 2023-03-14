@@ -24,15 +24,13 @@ export class UserService {
 
         // TODO : Also get image data from server
         this.httpHandlerService.login(user).subscribe({
-            next: (res: any) => {
-                // TODO : Store jwt token and place it in a middleware
+            next: () => {
                 this.cookieService.updateUserSessionCookie();
                 this.user = user;
                 subject.next('');
             },
             error: (error: HttpErrorResponse) => {
                 // TODO : Language
-                console.log(error);
                 subject.next(error.error.message);
             },
         });
@@ -48,8 +46,10 @@ export class UserService {
 
     private initUser(): void {
         this.user = {
+            email: '',
             username: '',
             password: '',
+            profilePicture: undefined,
         };
     }
 }

@@ -44,10 +44,11 @@ export class SocketManager {
 
     handleSockets(): void {
         this.sio.on('connection', (socket) => {
-            // eslint-disable-next-line no-console
             if (socket.handshake.headers.cookie) {
+                // eslint-disable-next-line no-console
                 console.log('Connection of authenticated client with id = ' + socket.id + ' from : ' + socket.handshake.headers.host);
             } else {
+                // eslint-disable-next-line no-console
                 console.log('Connection of client with id = ' + socket.id + ' from : ' + socket.handshake.headers.host);
             }
             for (const [event, callbacks] of this.onEvents.entries()) {
