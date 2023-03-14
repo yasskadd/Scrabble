@@ -1,0 +1,16 @@
+<mat-card>
+	<mat-card-content>
+		<mat-grid-list gutterSize="16" cols="4" height="fit">
+			<mat-grid-tile (click)="closeDialog(imageSource)" *ngFor="let imageSource of imageSources">
+				<mat-icon *ngIf="isImageSelected(imageSource)">check</mat-icon>
+				<img [ngClass]="isImageSelected(imageSource) ? 'selected-image' : ''" src="{{ imageSource }}" />
+			</mat-grid-tile>
+		</mat-grid-list>
+	</mat-card-content>
+	<mat-card-actions>
+		<button mat-flat-button (click)="image.click()" color="primary">
+			Importer
+			<input #image hidden (change)="uploadImage()" type="file" accept=".png,.jpg" value="Import" /><br />
+		</button>
+	</mat-card-actions>
+</mat-card>

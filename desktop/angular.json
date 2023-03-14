@@ -65,14 +65,14 @@
                         "development": {
                             "buildOptimizer": false,
                             "optimization": false,
-                            "vendorChunk": true,
+                            "vendorChunk": false,
                             "extractLicenses": false,
-                            "sourceMap": false,
+                            "sourceMap": true,
                             "outputHashing": "none",
-                            "aot": true,
-                            "namedChunks": false,
+                            "aot": false,
+                            "namedChunks": true,
                             "statsJson": false,
-                            "progress": false
+                            "progress": true
                         },
                         "live-development": {
                             "buildOptimizer": false,

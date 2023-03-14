@@ -5,7 +5,8 @@
 }
 
 mat-drawer-container {
-    height: 75%;
+    height: inherit;
+    // background-color: #c2e5da;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -64,7 +65,6 @@ mat-drawer {
 }
 
 app-footer {
-    height: 15%;
     text-align: center;
     display: flex;
     justify-content: space-around;

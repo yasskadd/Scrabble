@@ -18,15 +18,4 @@ export class FooterComponent {
             this.languageService.setLanguage(value as LanguageChoice);
         });
     }
-
-    getLetters(translation: string): string[] {
-        const letters: string[] = [];
-        this.languageService.getWord(translation).subscribe((word: string) => {
-            for (let i = 0; i < word.length; i++) {
-                letters.push(word.charAt(i));
-            }
-        });
-
-        return letters;
-    }
 }

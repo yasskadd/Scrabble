@@ -10,7 +10,6 @@
                 <mat-icon>keyboard_arrow_left</mat-icon>
                 {{ "main_page.chat.close" | translate }}
             </button>
-
             <mat-card class="justified">
                 <mat-card-content class="justified">
                     <button
@@ -69,8 +68,8 @@
                         <mat-label>{{ "main_page.label.username" | translate }}</mat-label>
                         <input matInput (keydown.enter)="logIn()" [formControl]="userNameForm" />
                         <mat-icon matSuffix>person</mat-icon>
-                        <mat-error *ngIf="(!homeConnectionResponse.validity || userNameForm.invalid) && !chatBoxHandlerService.loggedIn"
-                            >{{ getErrorMessage() }}
+                        <mat-error *ngIf="(!homeConnectionResponse.validity || userNameForm.invalid) && !chatBoxHandlerService.loggedIn">
+                            {{ getErrorMessage() }}
                         </mat-error>
                     </mat-form-field>
                     <div class="buttons-columns">

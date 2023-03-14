@@ -1,113 +1,179 @@
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpEvent, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Bot } from '@common/interfaces/bot';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
 import { HighScores } from '@app/interfaces/high-score-parameters';
+import { Bot } from '@common/interfaces/bot';
+import { BotNameSwitcher } from '@common/interfaces/bot-name-switcher';
 import { GameHistoryInfo } from '@common/interfaces/game-history-info';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
-import { Observable, of } from 'rxjs';
+import { IUser } from '@common/interfaces/user';
+import { Observable, of, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { BotNameSwitcher } from '@common/interfaces/bot-name-switcher';
 
 @Injectable({
     providedIn: 'root',
 })
 export class HttpHandlerService {
     private readonly baseUrl: string = environment.serverUrl;
+    private header: HttpHeaders;
 
     constructor(private readonly http: HttpClient) {}
 
     getClassicHighScore(): Observable<HighScores[]> {
         return this.http
-            .get<HighScores[]>(`${this.baseUrl}/highScore/classique`)
+            .get<HighScores[]>(`${this.baseUrl}/highScore/classique`, { withCredentials: true })
             .pipe(catchError(this.handleError<HighScores[]>('getClassicHighScore', [])));
     }
 
     getLOG2990HighScore(): Observable<HighScores[]> {
         return this.http
-            .get<HighScores[]>(`${this.baseUrl}/highScore/log2990`)
+            .get<HighScores[]>(`${this.baseUrl}/highScore/log2990`, { withCredentials: true })
             .pipe(catchError(this.handleError<HighScores[]>('getLOG2990cHighScore', [])));
     }
 
     resetHighScores(): Observable<void> {
-        return this.http.delete<void>(`${this.baseUrl}/highScore/reset`).pipe(catchError(this.handleError<void>('resetHighScores')));
+        return this.http
+            .delete<void>(`${this.baseUrl}/highScore/reset`, { withCredentials: true })
+            .pipe(catchError(this.handleError<void>('resetHighScores')));
     }
 
     getHistory(): Observable<GameHistoryInfo[]> {
-        return this.http.get<GameHistoryInfo[]>(`${this.baseUrl}/history`).pipe(catchError(this.handleError<GameHistoryInfo[]>('getHistory', [])));
+        return this.http
+            .get<GameHistoryInfo[]>(`${this.baseUrl}/history`, { withCredentials: true })
+            .pipe(catchError(this.handleError<GameHistoryInfo[]>('getHistory', [])));
     }
 
     deleteHistory(): Observable<GameHistoryInfo[]> {
-        return this.http.delete<GameHistoryInfo[]>(`${this.baseUrl}/history`).pipe(catchError(this.handleError<GameHistoryInfo[]>('getHistory', [])));
+        return this.http
+            .delete<GameHistoryInfo[]>(`${this.baseUrl}/history`, { withCredentials: true })
+            .pipe(catchError(this.handleError<GameHistoryInfo[]>('getHistory', [])));
     }
 
     getDictionaries(): Observable<DictionaryInfo[]> {
         return this.http
-            .get<DictionaryInfo[]>(`${this.baseUrl}/dictionary/info`)
+            .get<DictionaryInfo[]>(`${this.baseUrl}/dictionary/info`, { withCredentials: true })
             .pipe(catchError(this.handleError<DictionaryInfo[]>('getDictionaries', [])));
     }
 
     getDictionary(title: string): Observable<Dictionary> {
-        return this.http.get<Dictionary>(`${this.baseUrl}/dictionary/all/` + title).pipe(catchError(this.handleError<Dictionary>('getDictionaries')));
+        return this.http
+            .get<Dictionary>(`${this.baseUrl}/dictionary/all/` + title, { withCredentials: true })
+            .pipe(catchError(this.handleError<Dictionary>('getDictionaries')));
     }
 
     resetDictionaries(): Observable<Dictionary[]> {
-        return this.http.delete<Dictionary[]>(`${this.baseUrl}/dictionary`).pipe(catchError(this.handleError<Dictionary[]>('getDictionaries', [])));
+        return this.http
+            .delete<Dictionary[]>(`${this.baseUrl}/dictionary`, { withCredentials: true })
+            .pipe(catchError(this.handleError<Dictionary[]>('getDictionaries', [])));
     }
 
     deleteDictionary(dictionaryTitle: string): Observable<void> {
         return this.http
-            .patch<void>(`${this.baseUrl}/dictionary`, { title: dictionaryTitle })
+            .patch<void>(`${this.baseUrl}/dictionary`, { title: dictionaryTitle }, { withCredentials: true })
             .pipe(catchError(this.handleError<void>('deleteDictionary')));
     }
 
     addDictionary(dictionary: Dictionary): Observable<void> {
         return this.http
-            .post<void>(`${this.baseUrl}/dictionary`, {
-                title: dictionary.title,
-                description: dictionary.description,
-                words: dictionary.words,
-            })
+            .post<void>(
+                `${this.baseUrl}/dictionary`,
+                {
+                    title: dictionary.title,
+                    description: dictionary.description,
+                    words: dictionary.words,
+                },
+                { withCredentials: true },
+            )
             .pipe(catchError(this.handleError<void>('addDictionary')));
     }
 
-    dictionaryIsInDb(title: string): Observable<void | HttpResponse<void>> {
+    dictionaryIsInDb(title: string): Observable<void> {
         return this.http
-            .get<void>(`${this.baseUrl}/dictionary/isindb/${title}`, { observe: 'response' })
+            .get<void>(`${this.baseUrl}/dictionary/isindb/${title}`, { withCredentials: true })
             .pipe(catchError(this.handleError<void>('dictionaryIsInDb')));
     }
 
     modifyDictionary(dictionary: ModifiedDictionaryInfo): Observable<void> {
-        return this.http.put<void>(`${this.baseUrl}/dictionary`, dictionary).pipe(catchError(this.handleError<void>('updateDictionary')));
+        return this.http
+            .put<void>(`${this.baseUrl}/dictionary`, dictionary, { withCredentials: true })
+            .pipe(catchError(this.handleError<void>('updateDictionary')));
     }
 
     getBeginnerBots(): Observable<Bot[]> {
-        return this.http.get<Bot[]>(`${this.baseUrl}/virtualPlayer/beginner`).pipe(catchError(this.handleError<Bot[]>('getBotsBeginner', [])));
+        return this.http
+            .get<Bot[]>(`${this.baseUrl}/virtualPlayer/beginner`, { withCredentials: true })
+            .pipe(catchError(this.handleError<Bot[]>('getBotsBeginner', [])));
     }
 
     getExpertBots(): Observable<Bot[]> {
-        return this.http.get<Bot[]>(`${this.baseUrl}/virtualPlayer/expert`).pipe(catchError(this.handleError<Bot[]>('getBotsExpert', [])));
+        return this.http
+            .get<Bot[]>(`${this.baseUrl}/virtualPlayer/expert`, { withCredentials: true })
+            .pipe(catchError(this.handleError<Bot[]>('getBotsExpert', [])));
     }
 
     addBot(bot: Bot): Observable<void> {
-        return this.http.post<void>(`${this.baseUrl}/virtualPlayer`, bot).pipe(catchError(this.handleError<void>('addBot')));
+        return this.http
+            .post<void>(`${this.baseUrl}/virtualPlayer`, bot, { withCredentials: true })
+            .pipe(catchError(this.handleError<void>('addBot')));
     }
 
     replaceBot(bot: BotNameSwitcher): Observable<void> {
-        return this.http.put<void>(`${this.baseUrl}/virtualPlayer`, bot).pipe(catchError(this.handleError<void>('replaceBot')));
+        return this.http
+            .put<void>(`${this.baseUrl}/virtualPlayer`, bot, { withCredentials: true })
+            .pipe(catchError(this.handleError<void>('replaceBot')));
     }
 
     resetBot(): Observable<void> {
-        return this.http.delete<void>(`${this.baseUrl}/virtualPlayer/reset`).pipe(catchError(this.handleError<void>('resetBot')));
+        return this.http
+            .delete<void>(`${this.baseUrl}/virtualPlayer/reset`, { withCredentials: true })
+            .pipe(catchError(this.handleError<void>('resetBot')));
     }
 
     deleteBot(bot: Bot): Observable<void> {
-        return this.http.patch<void>(`${this.baseUrl}/virtualPlayer/remove`, bot).pipe(catchError(this.handleError<void>('deleteBot')));
+        return this.http
+            .patch<void>(`${this.baseUrl}/virtualPlayer/remove`, bot, { withCredentials: true })
+            .pipe(catchError(this.handleError<void>('deleteBot')));
+    }
+
+    signUp(newUser: IUser): Observable<string | HttpEvent<string>> {
+        return this.http
+            .post<string>(`${this.baseUrl}/auth/signUp`, newUser, { withCredentials: true, observe: 'events' })
+            .pipe(catchError(this.throwError<string>));
+    }
+
+    login(user: IUser): Observable<any> {
+        const header = new HttpHeaders();
+        header.append('Content-Type', 'application/json');
+
+        const httpOptions = {
+            headers: this.header,
+            withCredentials: true,
+            observe: 'response' as 'response',
+        };
+
+        return this.http.post(`${this.baseUrl}/auth/login`, user, httpOptions);
+    }
+
+    logout(): Observable<any> {
+        const header = new HttpHeaders();
+        header.append('Content-Type', 'application/json');
+
+        const httpOptions = {
+            headers: this.header,
+            withCredentials: true,
+            observe: 'response' as 'response',
+        };
+
+        return this.http.post<void>(`${this.baseUrl}/auth/logout`, null, httpOptions).pipe(catchError(this.handleError<void>('logout')));
     }
 
     private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
         return () => of(result as T);
+    }
+
+    private throwError<T>(error: HttpErrorResponse): Observable<T> {
+        return throwError(() => new HttpErrorResponse(error));
     }
 }
