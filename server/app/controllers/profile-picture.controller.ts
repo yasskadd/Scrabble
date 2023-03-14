@@ -37,11 +37,11 @@ export class ProfilePictureController {
         this.router = Router();
 
         this.router.get('/default-pictures', async (req: Request, res: Response) => {
-            const imageUrlsMap: Map<string, string> = new Map();
+            const imageUrlsMap: Map<string, string[]> = new Map();
             for (const image of this.defaultImagesMap.entries()) {
                 const getImageCommand = this.CreateGetCommand(image[1]);
                 const signedUrl = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 3600 });
-                imageUrlsMap.set(image[0], signedUrl);
+                imageUrlsMap.set(image[0], [signedUrl, image[1]]);
             }
             console.log(imageUrlsMap);
             res.status(StatusCodes.OK).send(Object.fromEntries(imageUrlsMap));
