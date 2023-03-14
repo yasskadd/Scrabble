@@ -1,6 +1,6 @@
 import { SECRET_KEY } from '@app/../very-secret-file';
-import { IUser } from '@app/interfaces/user';
 import { AccountStorageService } from '@app/services/database/account-storage.service';
+import { IUser } from '@common/interfaces/user';
 import { Request, Response, Router } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { Service } from 'typedi';
@@ -30,7 +30,7 @@ export class AuthentificationController {
             });
         });
 
-        this.router.delete('/login', async (req: Request, res: Response) => {
+        this.router.post('/login', async (req: Request, res: Response) => {
             const user: IUser = req.body;
             if (await this.accountStorage.isUserRegistered(req.body.username)) {
                 const isLoginValid = await this.accountStorage.loginValidator(user);
