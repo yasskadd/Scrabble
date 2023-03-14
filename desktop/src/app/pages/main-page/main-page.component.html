@@ -58,7 +58,7 @@
                     >
                         <mat-icon>help_outline</mat-icon>
                     </button> -->
-                    <div *ngIf="loggedIn">{{ "main_page.connected_w_username" | translate }} : {{ userService.userName }}</div>
+                    <div *ngIf="loggedIn">{{ "main_page.connected_w_username" | translate }} : {{ userService.user.username }}</div>
                 </mat-card-content>
             </mat-card>
         </div>

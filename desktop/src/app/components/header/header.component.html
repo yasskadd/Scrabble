@@ -15,8 +15,8 @@
 </button>
 <img
     mat-fab-button
-    *ngIf="userService.isConnected()"
-    [src]="userService.user.profilePicture.key"
+    *ngIf="userService.isConnected() && userService.user.profilePicture"
+    [src]="userService.user.profilePicture"
     [matMenuTriggerFor]="accountMenu"
     class="selecter-avatar mat-elevation-z5"
 />

@@ -34,7 +34,7 @@ export class GameCreationPageComponent implements OnInit {
         protected virtualPlayers: VirtualPlayersService,
         protected gameConfiguration: GameConfigurationService,
         protected timer: TimeService,
-        private userService: UserService,
+        protected userService: UserService,
         private languageService: LanguageService,
         private activatedRoute: ActivatedRoute,
         private router: Router,

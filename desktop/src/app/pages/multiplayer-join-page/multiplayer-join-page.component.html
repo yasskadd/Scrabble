@@ -17,7 +17,7 @@
                         <td>{{ gameRoom.mode }}</td>
                         <td>{{ timer.getTimeStamp(gameRoom.timer) }}</td>
                         <td>{{ gameRoom.dictionary }}</td>
-                        <button class="join-game" (click)="joinRoom(gameRoom.id)" mat-raised-button [disabled]="!playerNameForm.value">
+                        <button class="join-game" (click)="joinRoom(gameRoom.id)" mat-raised-button>
                             {{ "action.join" | translate }}
                         </button>
                     </tr>
@@ -35,7 +35,7 @@
                 class="join-random-game-button"
                 (click)="joinRandomGame()"
                 mat-raised-button
-                [disabled]="!playerNameForm.value || availableRooms.length <= 1"
+                [disabled]="availableRooms.length <= 1"
             >
                 {{ "new_game_page.random" | translate }}
             </button>
