@@ -1,7 +1,5 @@
-/* eslint-disable deprecation/deprecation,import/no-deprecated */
 import { AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
-// TODO : Fix deprecated
-import { MatSliderChange } from '@angular/material/slider';
+import { FormControl } from '@angular/forms';
 import * as constants from '@app/constants/board-view';
 import { Vec2 } from '@app/interfaces/vec2';
 import { GameClientService } from '@app/services/game-client.service';
@@ -26,15 +24,21 @@ export class PlayAreaComponent implements AfterViewInit {
     keyboardParentSubject: Subject<KeyboardEvent>;
     mousePosition: Vec2;
     buttonPressed;
+    protected sliderForm: FormControl;
 
     constructor(
         private readonly gridService: GridService,
         private letterService: LetterPlacementService,
         public gameClientService: GameClientService,
     ) {
+        this.sliderForm = new FormControl(this.gridService.letterSize);
         this.keyboardParentSubject = new Subject();
         this.mousePosition = { x: 0, y: 0 };
         this.buttonPressed = '';
+
+        this.sliderForm.valueChanges.subscribe(() => {
+            this.updateFontSize();
+        });
     }
 
     get width(): number {
@@ -86,8 +90,8 @@ export class PlayAreaComponent implements AfterViewInit {
         this.gridService.gridContext = this.gridCanvas.nativeElement.getContext('2d') as CanvasRenderingContext2D;
     }
 
-    updateFontSize(event: MatSliderChange): void {
-        this.gridService.letterSize = event.value as number;
+    updateFontSize(): void {
+        this.gridService.letterSize = this.sliderForm.value;
         this.gameClientService.updateGameboard();
         this.letterService.resetGameBoardView();
     }

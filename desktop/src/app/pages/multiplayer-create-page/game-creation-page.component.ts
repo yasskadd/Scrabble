@@ -3,15 +3,16 @@ import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/fo
 import { ActivatedRoute, Router } from '@angular/router';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
+import { AppRoutes } from '@app/models/app-routes';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
-import { TimeService } from '@services/time.service';
+import { LanguageService } from '@app/services/language.service';
 import { VirtualPlayersService } from '@app/services/virtual-players.service';
-import { GameTimeOptions } from '@common/models/game-time-options';
-import { GameDifficulty } from '@common/models/game-difficulty';
-import { AppRoutes } from '@app/models/app-routes';
 import { DictionaryEvents } from '@common/models/dictionary-events';
+import { GameDifficulty } from '@common/models/game-difficulty';
+import { GameTimeOptions } from '@common/models/game-time-options';
 import { SnackBarService } from '@services/snack-bar.service';
+import { TimeService } from '@services/time.service';
 
 @Component({
     selector: 'app-multiplayer-create-page',
@@ -37,6 +38,7 @@ export class GameCreationPageComponent implements OnInit {
         private fb: FormBuilder,
         private readonly httpHandler: HttpHandlerService,
         private snackBarService: SnackBarService,
+        private languageService: LanguageService,
     ) {
         this.gameMode = this.activatedRoute.snapshot.params.id;
         this.playerName = '';
@@ -44,7 +46,11 @@ export class GameCreationPageComponent implements OnInit {
         this.timerList = [];
 
         // Fill arrays of values from enum constants
-        this.difficultyList = Object.values(GameDifficulty);
+        Object.values(GameDifficulty).forEach((value: GameDifficulty) => {
+            this.languageService.getWord(value as string).subscribe((word: string) => {
+                this.difficultyList.push(word);
+            });
+        });
         Object.values(GameTimeOptions).forEach((value: any) => {
             if (typeof value === 'number') {
                 this.timerList.push(value);
@@ -57,6 +63,7 @@ export class GameCreationPageComponent implements OnInit {
         this.gameConfiguration.resetRoomInformation();
 
         const defaultTimer = this.timerList.find((timerOption) => timerOption === GameTimeOptions.OneMinute);
+
         this.form = this.fb.group({
             timer: [defaultTimer, Validators.required],
             difficultyBot: [this.difficultyList[0], Validators.required],
@@ -84,8 +91,9 @@ export class GameCreationPageComponent implements OnInit {
         const dictionnaryTitleSelected = (this.form.get('dictionary') as AbstractControl).value;
 
         if (!this.dictionaryAvailable(dictionnaryTitleSelected)) {
-            // TODO : Language
-            this.snackBarService.openError(DictionaryEvents.UNAVAILABLE);
+            this.languageService.getWord(DictionaryEvents.UNAVAILABLE).subscribe((word: string) => {
+                this.snackBarService.openError(word);
+            });
             return;
         }
 

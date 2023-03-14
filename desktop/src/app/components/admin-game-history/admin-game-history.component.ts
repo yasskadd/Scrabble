@@ -1,5 +1,3 @@
-/* eslint-disable deprecation/deprecation */
-// TODO : Handle deprecation
 import { Component, OnInit } from '@angular/core';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
 import { GameHistoryInfo } from '@common/interfaces/game-history-info';
@@ -20,10 +18,9 @@ export class AdminGameHistoryComponent implements OnInit {
     }
 
     deleteHistory() {
-        this.httpHandler
-            .deleteHistory()
-            .toPromise()
-            .then(() => this.updateHistory());
+        this.httpHandler.deleteHistory().subscribe(() => {
+            this.updateHistory();
+        });
     }
 
     updateHistory() {

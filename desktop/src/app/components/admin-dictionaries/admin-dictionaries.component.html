@@ -1,14 +1,14 @@
-<h1>Liste des dictionnaires disponibles</h1>
+<h1>{{ "admin_page.dictionary_list" | translate }}</h1>
 <div class="action-buttons">
-    <button mat-raised-button color="basic" (click)="updateDictionaryList()">Rafraîchir <mat-icon>refresh</mat-icon></button>
-    <button mat-raised-button color="warn" (click)="resetDictionaries()">Réinitialiser <mat-icon>delete</mat-icon></button>
+    <button mat-raised-button color="basic" (click)="updateDictionaryList()">{{ "action.refresh" | translate }} <mat-icon>refresh</mat-icon></button>
+    <button mat-raised-button color="warn" (click)="resetDictionaries()">{{ "action.reset" | translate }} <mat-icon>delete</mat-icon></button>
 </div>
 <mat-card class="dictionaryList">
     <table>
         <thead class="tableContainer">
             <tr>
-                <th>Titre</th>
-                <th>Description</th>
+                <th>{{ "file.title" | translate }}</th>
+                <th>{{ "file.description" | translate }}</th>
                 <th></th>
             </tr>
         </thead>
@@ -24,11 +24,13 @@
                             (click)="openModifyDictionaryDialog(dictionary)"
                             *ngIf="!isDefault(dictionary)"
                         >
-                            Modifier
+                            {{ "action.modify" | translate }}
                         </button>
                     </div>
                     <div class="buttons">
-                        <button mat-raised-button (click)="deleteDictionary(dictionary)" *ngIf="!isDefault(dictionary)">Supprimer</button>
+                        <button mat-raised-button (click)="deleteDictionary(dictionary)" *ngIf="!isDefault(dictionary)">
+                            {{ "action.delete" | translate }}
+                        </button>
                     </div>
                     <div class="buttons">
                         <button mat-raised-button (click)="downloadJson(dictionary)">
@@ -40,7 +42,5 @@
         </tbody>
     </table>
 </mat-card>
-
-<h1>Ajouter un dictionnaire (format .json)</h1>
 
 <app-import-dictionary></app-import-dictionary>

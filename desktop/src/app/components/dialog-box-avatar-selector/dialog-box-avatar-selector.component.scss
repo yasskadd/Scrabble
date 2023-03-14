@@ -1,0 +1,35 @@
+mat-card {
+	height: -webkit-fill-available;
+	width: -webkit-fill-available;
+	box-shadow: none !important;
+}
+
+mat-card-content {
+	height: inherit;
+}
+
+mat-card-actions {
+	justify-content: center;
+}
+
+mat-grid-tile {
+	border-radius: 50%;
+	// height: -webkit-fill-available;
+
+	img {
+		height: inherit;
+	}
+}
+
+.selected-image {
+	filter: blur(2px);
+}
+
+mat-grid-tile mat-icon {
+	z-index: 10;
+	// TODO : Color
+	color: green;
+	mix-blend-mode: difference;
+	position: absolute;
+	transform: scale(1.8);
+}

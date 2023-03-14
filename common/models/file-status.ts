@@ -1,7 +1,6 @@
 export enum FileStatus {
-    // TODO : Language
-    NOT_JSON_ERROR = 'File is not a JSON.',
-    READING_ERROR = 'An error occured while reading the file.',
-    VERIFYING = 'En vérification, veuillez patienter...',
-    NONE_SELECTED = "Il n'y a aucun fichier séléctioné",
+    NOT_JSON_ERROR = 'error.file.not_json',
+    READING_ERROR = 'error.file.reading',
+    VERIFYING = 'error.file.verifying',
+    NONE_SELECTED = "error.file.none",
 }

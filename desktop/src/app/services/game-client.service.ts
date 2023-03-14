@@ -28,6 +28,7 @@ export class GameClientService {
     playerOneTurn: boolean;
     letterReserveLength: number;
     isGameFinish: boolean;
+    winner: string;
     winningMessage: string;
     gameboardUpdated: Subject<boolean>;
     turnFinish: ReplaySubject<boolean>;
@@ -111,6 +112,7 @@ export class GameClientService {
         this.letterReserveLength = 0;
         this.isGameFinish = false;
         this.winningMessage = '';
+        this.winner = '';
     }
 
     private completeObjective(completedObjective: CompletedObjective) {
@@ -230,13 +232,11 @@ export class GameClientService {
 
     private findWinnerByScore(): void {
         if (this.playerOne.score === this.secondPlayer.score) {
-            this.winningMessage = 'Égalité! Vous avez le même score que votre adversaire!';
+            this.winningMessage = 'game.state.equality';
             return;
         }
-        this.winningMessage =
-            this.playerOne.score > this.secondPlayer.score
-                ? `Victoire à ${this.playerOne.name}! Bravo!`
-                : `Victoire à ${this.secondPlayer.name}! Bravo!`;
+        this.winningMessage = 'game.state.winned';
+        this.winner = this.playerOne.score > this.secondPlayer.score ? this.playerOne.name : this.secondPlayer.name;
     }
 
     private getAllLetterReserve(lettersReserveUpdated: Letter[]): void {

@@ -3,10 +3,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { DialogBoxAbandonGameComponent } from '@app/components/dialog-box-abandon-game/dialog-box-abandon-game.component';
 import { DialogGameHelpComponent } from '@app/components/dialog-game-help/dialog-game-help.component';
-import { GameClientService } from '@app/services/game-client.service';
-import { TimeService } from '@services/time.service';
-import { Objective } from '@common/interfaces/objective';
 import { AppRoutes } from '@app/models/app-routes';
+import { GameClientService } from '@app/services/game-client.service';
+import { Objective } from '@common/interfaces/objective';
+import { TimeService } from '@services/time.service';
 
 @Component({
     selector: 'app-information-panel',

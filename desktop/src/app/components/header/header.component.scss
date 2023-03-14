@@ -20,7 +20,6 @@
 
 #image {
     margin-right: 30px;
-    justify-content: right;
 }
 
 #home > *,
@@ -37,4 +36,13 @@
     height: 30px;
     box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
     text-align: center;
+}
+
+.selecter-avatar {
+    margin-bottom: 20px;
+    align-self: center;
+    height: 56px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    object-fit: cover;
 }
