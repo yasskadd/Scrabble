@@ -1,8 +1,7 @@
-import { ImageInfo } from './image-info';
+import { AvatarData } from '../interfaces/avatar-data';
 
 export interface IUser {
-    email?: string;
-    username: string;
-    password: string;
-    profilePicture?: ImageInfo;
+	username: string;
+	password: string;
+	avatar?: AvatarData;
 }

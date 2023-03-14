@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
@@ -23,11 +23,17 @@ export class GameCreationPageComponent implements OnInit {
     timerList: number[];
     botName: string;
     playerName: string;
-    form: FormGroup;
     difficultyList: string[];
     dictionaryList: DictionaryInfo[];
     selectedFile: Dictionary | null;
-    private gameMode: string;
+
+    form: FormGroup;
+    playerForm: FormControl;
+    timerForm: FormControl;
+    difficultyForm: FormControl;
+    dictionaryForm: FormControl;
+
+    private readonly gameMode: string;
 
     constructor(
         public virtualPlayers: VirtualPlayersService,
@@ -35,7 +41,7 @@ export class GameCreationPageComponent implements OnInit {
         public timer: TimeService,
         private router: Router,
         private activatedRoute: ActivatedRoute,
-        private fb: FormBuilder,
+        private formBuilder: FormBuilder,
         private readonly httpHandler: HttpHandlerService,
         private snackBarService: SnackBarService,
         private languageService: LanguageService,
@@ -43,18 +49,36 @@ export class GameCreationPageComponent implements OnInit {
         this.gameMode = this.activatedRoute.snapshot.params.id;
         this.playerName = '';
         this.selectedFile = null;
+        this.difficultyList = [];
         this.timerList = [];
+
+        this.playerForm = new FormControl('', Validators.required);
+        this.timerForm = new FormControl('', Validators.required);
+        this.difficultyForm = new FormControl('', Validators.required);
+        // TODO : Set default dictionary from server
+        this.dictionaryForm = new FormControl('Mon dictionnaire', Validators.required);
 
         // Fill arrays of values from enum constants
         Object.values(GameDifficulty).forEach((value: GameDifficulty) => {
             this.languageService.getWord(value as string).subscribe((word: string) => {
                 this.difficultyList.push(word);
+                this.difficultyForm.setValue(this.difficultyList[0]);
             });
         });
         Object.values(GameTimeOptions).forEach((value: any) => {
             if (typeof value === 'number') {
                 this.timerList.push(value);
             }
+
+            const defaultTimer = this.timerList.find((timerOption) => timerOption === GameTimeOptions.OneMinute);
+            this.timerForm.setValue(defaultTimer);
+        });
+
+        this.form = this.formBuilder.group({
+            player: this.playerForm,
+            timer: this.timerForm,
+            difficultyBot: this.difficultyForm,
+            dictionary: this.dictionaryForm,
         });
     }
 
@@ -62,14 +86,7 @@ export class GameCreationPageComponent implements OnInit {
         this.virtualPlayers.updateBotNames();
         this.gameConfiguration.resetRoomInformation();
 
-        const defaultTimer = this.timerList.find((timerOption) => timerOption === GameTimeOptions.OneMinute);
-
-        this.form = this.fb.group({
-            timer: [defaultTimer, Validators.required],
-            difficultyBot: [this.difficultyList[0], Validators.required],
-            dictionary: ['Mon dictionnaire', Validators.required],
-        });
-        (this.form.get('difficultyBot') as AbstractControl).valueChanges.subscribe(() => {
+        this.difficultyForm.valueChanges.subscribe(() => {
             this.updateBotList();
         });
 
