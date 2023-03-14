@@ -21,14 +21,31 @@ const SECRET_ACCESS_KEY = 'BfKjwYI9YxpbgVVvwAgeY+voCr0Bzl1aIWJdUhbo';
 export class ProfilePictureController {
     router: Router;
     private s3Client: S3Client;
+    private defaultImagesMap: Map<string, string>; // Map (key, )
 
     constructor(private readonly accountStorage: AccountStorageService) {
         this.configureRouter();
         this.s3Client = this.configureS3Client();
+        this.defaultImagesMap = new Map([
+            ['default-spongebob', '9e96a2f6-c6f4-4221-bea8-a01f62ba2255default-spongebob.png'],
+            ['default-krabs', '3e912e69-ae07-478c-be6d-e17c361d82c8default-krabs.png'],
+            ['default-patrick', '4b19e0a9-e193-4bdd-b572-dc49d5e94043default-patrick.png'],
+        ]);
     }
 
     private configureRouter(): void {
         this.router = Router();
+
+        this.router.get('/default-pictures', async (req: Request, res: Response) => {
+            const imageUrlsMap: Map<string, string> = new Map();
+            for (const image of this.defaultImagesMap.entries()) {
+                const getImageCommand = this.CreateGetCommand(image[1]);
+                const signedUrl = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 3600 });
+                imageUrlsMap.set(image[0], signedUrl);
+            }
+            console.log(imageUrlsMap);
+            res.status(StatusCodes.OK).send(Object.fromEntries(imageUrlsMap));
+        });
 
         this.router.post('/profile-picture', uploadImage.single('image'), async (req: FileRequest, res: Response) => {
             if (req.fileValidationError || !req.file) {
@@ -80,15 +97,15 @@ export class ProfilePictureController {
                 return;
             }
             const username = res.locals.user.name;
-            const oldImageKey = (await this.accountStorage.getProfilePicInfo(username)).key;
+            const oldProfilePicInfo = await this.accountStorage.getProfilePicInfo(username);
             const newImageKey = uuid.v4() + req.file?.originalname;
             const putCommand = this.createPutCommand(req, newImageKey as string);
             this.s3Client
                 .send(putCommand)
                 .then(async () => {
                     // Delete the old image in the bucket (like an override)
-                    if (oldImageKey?.length) {
-                        const deleteImageCommand = this.createDeleteCommand(oldImageKey);
+                    if (oldProfilePicInfo.key?.length && !oldProfilePicInfo.isDefaultPicture) {
+                        const deleteImageCommand = this.createDeleteCommand(oldProfilePicInfo.key as string);
                         this.s3Client.send(deleteImageCommand).catch((err) => {
                             console.error(err);
                         });
@@ -122,9 +139,11 @@ export class ProfilePictureController {
             }
             // Update DB (ImageKey to empty string and hasDefaultPicture to true and name to req.body.name)
             this.accountStorage
-                .updateDefaultImage(username, req.body.fileName)
-                .then(() => {
-                    res.sendStatus(StatusCodes.OK);
+                .updateDefaultImage(username, req.body.fileName, this.defaultImagesMap.get(req.body.fileName) as string)
+                .then(async () => {
+                    const getImageCommand = this.CreateGetCommand(this.defaultImagesMap.get(req.body.fileName) as string);
+                    const signedURL = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 3600 });
+                    res.status(StatusCodes.OK).send({ signedURL });
                 })
                 .catch((err) => {
                     res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({

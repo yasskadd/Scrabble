@@ -43,10 +43,10 @@ export class AccountStorageService {
         );
     }
 
-    async updateDefaultImage(username: string, fileName: string): Promise<void> {
+    async updateDefaultImage(username: string, fileName: string, imageKey: string): Promise<void> {
         await this.database.users.collection.updateOne(
             { username },
-            { $set: { 'profilePicture.isDefaultPicture': true, 'profilePicture.key': '', 'profilePicture.name': fileName } },
+            { $set: { 'profilePicture.isDefaultPicture': true, 'profilePicture.key': imageKey, 'profilePicture.name': fileName } },
         );
     }
 
