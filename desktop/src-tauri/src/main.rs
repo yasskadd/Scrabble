@@ -5,6 +5,7 @@
 )]
 
 use rust_socketio::{client::Client, ClientBuilder, Payload};
+use tauri::Manager;
 use std::sync::Mutex;
 
 struct SocketClient {
