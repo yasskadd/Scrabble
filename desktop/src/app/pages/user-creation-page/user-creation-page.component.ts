@@ -5,6 +5,7 @@ import { FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@a
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { DialogBoxAvatarSelectorComponent } from '@app/components/dialog-box-avatar-selector/dialog-box-avatar-selector.component';
+import { MAX_EMAIL_LENGTH, MAX_TEXT_LENGTH } from '@app/constants/user';
 import { equalStringValidator } from '@app/directives/custom-validators';
 import { AppRoutes } from '@app/models/app-routes';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
@@ -42,10 +43,10 @@ export class UserCreationPageComponent {
         private dialog: MatDialog,
     ) {
         this.profilePicForm = new FormControl(undefined, [Validators.required]);
-        this.usernameForm = new FormControl('', [Validators.required, Validators.maxLength(32)]);
-        this.emailForm = new FormControl('', [Validators.required, Validators.email, Validators.maxLength(48)]);
-        this.passwordForm = new FormControl('', [Validators.required, Validators.maxLength(32)]);
-        this.passwordCopyForm = new FormControl('', [Validators.required, Validators.maxLength(32)]);
+        this.usernameForm = new FormControl('', [Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]);
+        this.emailForm = new FormControl('', [Validators.required, Validators.email, Validators.maxLength(MAX_EMAIL_LENGTH)]);
+        this.passwordForm = new FormControl('', [Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]);
+        this.passwordCopyForm = new FormControl('', [Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]);
         this.connectionError = '';
 
         this.formGroup = this.formBuilder.group({

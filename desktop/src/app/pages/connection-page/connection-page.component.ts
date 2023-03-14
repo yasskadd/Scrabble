@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MAX_TEXT_LENGTH } from '@app/constants/user';
 import { AppRoutes } from '@app/models/app-routes';
 import { UserService } from '@app/services/user.service';
 import { IUser } from '@common/interfaces/user';
@@ -18,8 +19,8 @@ export class ConnectionPageComponent {
     protected connectionError: string;
 
     constructor(private formBuilder: FormBuilder, private userService: UserService, private router: Router) {
-        this.usernameForm = new FormControl('', [Validators.required, Validators.maxLength(32)]);
-        this.passwordForm = new FormControl('', [Validators.required, Validators.maxLength(32)]);
+        this.usernameForm = new FormControl('', [Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]);
+        this.passwordForm = new FormControl('', [Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]);
         this.connectionError = '';
 
         this.formGroup = this.formBuilder.group({
