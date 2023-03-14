@@ -1,16 +1,5 @@
 <body class="justified">
     <mat-card class="wrapper">
-        <mat-form-field appearance="fill">
-            <mat-label> {{ "new_game_page.label.name" | translate }} </mat-label>
-            <input matInput maxlength="20" type="text" [formControl]="playerNameForm" />
-            <mat-hint
-                [ngClass]="{
-                    max: playerNameForm.value?.length === 20
-                }"
-                align="end"
-                >{{ playerNameForm.value?.length || 0 }}/20
-            </mat-hint>
-        </mat-form-field>
         <mat-card-title> {{ "new_game_page.available_games" | translate }} </mat-card-title>
         <mat-card class="list-container">
             <table class="roomAvailable" *ngIf="availableRooms.length > 0">
@@ -28,7 +17,7 @@
                         <td>{{ gameRoom.mode }}</td>
                         <td>{{ timer.getTimeStamp(gameRoom.timer) }}</td>
                         <td>{{ gameRoom.dictionary }}</td>
-                        <button class="join-game" (click)="joinRoom(gameRoom.id)" mat-raised-button [disabled]="!playerNameForm.value">
+                        <button class="join-game" (click)="joinRoom(gameRoom.id)" mat-raised-button>
                             {{ "action.join" | translate }}
                         </button>
                     </tr>
@@ -46,7 +35,7 @@
                 class="join-random-game-button"
                 (click)="joinRandomGame()"
                 mat-raised-button
-                [disabled]="!playerNameForm.value || availableRooms.length <= 1"
+                [disabled]="availableRooms.length <= 1"
             >
                 {{ "new_game_page.random" | translate }}
             </button>

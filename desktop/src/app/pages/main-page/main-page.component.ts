@@ -78,12 +78,12 @@ export class MainPageComponent implements OnDestroy {
         if (this.chatBoxHandlerService.loggedIn) return;
         this.userNameForm.markAsTouched();
 
-        this.userService.userName = this.userNameForm.value;
-        this.chatBoxHandlerService.joinHomeRoom(this.userService.userName);
+        this.userService.user.username = this.userNameForm.value;
+        this.chatBoxHandlerService.joinHomeRoom(this.userService.user.username);
     }
 
     logOut(): void {
-        this.chatBoxHandlerService.leaveHomeRoom(this.userService.userName);
+        this.chatBoxHandlerService.leaveHomeRoom(this.userService.user.username);
     }
 
     getErrorMessage(): string {
@@ -131,7 +131,7 @@ export class MainPageComponent implements OnDestroy {
 
         this.disconnectionSubject = this.chatBoxHandlerService.subscribeToUserDisconnecting();
         this.disconnectionSubject.subscribe(() => {
-            this.userService.userName = '';
+            this.userService.user.username = '';
             this.userNameForm.setValue('');
         });
     }

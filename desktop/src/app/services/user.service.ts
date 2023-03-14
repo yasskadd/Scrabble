@@ -10,7 +10,6 @@ import { HttpHandlerService } from './communication/http-handler.service';
 })
 export class UserService {
     user: IUser;
-    userName: string;
 
     constructor(private httpHandlerService: HttpHandlerService, private cookieService: AppCookieService) {
         this.initUser();
