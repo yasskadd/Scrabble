@@ -59,17 +59,5 @@
                 </button>
             </div>
         </div>
-
-        <app-import-dictionary></app-import-dictionary>
-
-        <div class='container-button'>
-            <button class='return-button' mat-icon-button routerLink='/home'>
-                <mat-icon>navigate_before</mat-icon>
-            </button>
-            <button class='start-button' (click)='createGame()' mat-raised-button [disabled]='!playerName'>
-                {{ "action.create" | translate }}
-            </button>
-        </div>
-    </div>
-</mat-card>
+    </mat-card>
 </body>

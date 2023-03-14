@@ -53,7 +53,6 @@ export class GameCreationPageComponent implements OnInit {
         this.difficultyList = [];
         this.timerList = [];
 
-        this.playerForm = new FormControl('', Validators.required);
         this.timerForm = new FormControl('', Validators.required);
         this.difficultyForm = new FormControl('', Validators.required);
         // TODO : Set default dictionary from server
@@ -76,7 +75,6 @@ export class GameCreationPageComponent implements OnInit {
         });
 
         this.form = this.formBuilder.group({
-            player: this.playerForm,
             timer: this.timerForm,
             difficultyBot: this.difficultyForm,
             dictionary: this.dictionaryForm,
