@@ -75,10 +75,6 @@ export class ProfilePictureController {
         this.router.get('/profile-picture', verifyToken, async (req: Request, res: Response) => {
             const username = res.locals.user.name;
             const profilePicInfo: ImageInfo = await this.accountStorage.getProfilePicInfo(username);
-            if (profilePicInfo.isDefaultPicture) {
-                res.status(StatusCodes.OK).send({ isDefaultImage: true, url: profilePicInfo.name });
-                return;
-            }
             // Create new signed_url
             const getImageCommand = this.CreateGetCommand(profilePicInfo.key as string);
             const signedURL = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 3600 });
