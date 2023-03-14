@@ -5,9 +5,9 @@ import { SocketEvents } from '@common/constants/socket-events';
 import { Letter } from '@common/interfaces/letter';
 import { LetterTileInterface } from '@common/interfaces/letter-tile-interface';
 import { Objective } from '@common/interfaces/objective';
+import { AlphabetLetter } from '@common/models/alphabet-letter';
 import { ReplaySubject, Subject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
-import { AlphabetLetter } from '@common/models/alphabet-letter';
 
 type CompletedObjective = { objective: Objective; name: string };
 type InitObjective = { objectives1: Objective[]; objectives2: Objective[]; playerName: string };
@@ -144,6 +144,7 @@ export class GameClientService {
 
         // TODO : change that back
         this.playerOneTurn = true;
+        this.playerOne.rack = [];
         // this.playerOneTurn = false;
 
         this.letterReserveLength = 0;
