@@ -36,7 +36,7 @@ fn greet(name: &str) -> String {
 #[tauri::command]
 fn socketEstablishConnection(
     address: &str,
-    cookie: &str,
+    cookie: Option<&str>,
     socketClient: tauri::State<SocketClient>,
     window: tauri::Window,
 ) {
@@ -45,18 +45,34 @@ fn socketEstablishConnection(
         return;
     }
     let socketEventWindow = window.clone();
-    let connection = ClientBuilder::new(address)
-        .opening_header("Cookie", cookie)
-        .on_any(move |event, payload, _raw_client| {
-            // println!("Got event: {:?} {:?}", event, payload);
-            if let Payload::String(payload) = payload {
-                println!("Got payload: {}", payload);
-                socketEventWindow
-                    .emit(&String::from(event), payload)
-                    .expect("Couldn't emit the event to Angular");
-            }
-        })
-        .connect();
+    let connection;
+
+    if cookie.is_some() {
+        connection = ClientBuilder::new(address)
+            .opening_header("Cookie", cookie.unwrap())
+            .on_any(move |event, payload, _raw_client| {
+                // println!("Got event: {:?} {:?}", event, payload);
+                if let Payload::String(payload) = payload {
+                    println!("Got payload: {}", payload);
+                    socketEventWindow
+                        .emit(&String::from(event), payload)
+                        .expect("Couldn't emit the event to Angular");
+                }
+            })
+            .connect();
+    } else {
+        connection = ClientBuilder::new(address)
+            .on_any(move |event, payload, _raw_client| {
+                // println!("Got event: {:?} {:?}", event, payload);
+                if let Payload::String(payload) = payload {
+                    println!("Got payload: {}", payload);
+                    socketEventWindow
+                        .emit(&String::from(event), payload)
+                        .expect("Couldn't emit the event to Angular");
+                }
+            })
+            .connect();
+    }
 
     match connection {
         Ok(client) => {
