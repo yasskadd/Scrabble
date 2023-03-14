@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { LanguageService } from '@app/services/language.service';
+import { ThemeService } from '@app/services/theme.service';
 import { UserService } from '@app/services/user.service';
 
 @Component({
@@ -11,7 +12,12 @@ import { UserService } from '@app/services/user.service';
 })
 export class HeaderComponent {
     isHomePage: boolean;
-    constructor(protected userService: UserService, private router: Router, private languageService: LanguageService) {
+    constructor(
+        protected userService: UserService,
+        private router: Router,
+        private languageService: LanguageService,
+        protected themeService: ThemeService,
+    ) {
         this.isHomePage = this.checkIfHomePage();
     }
 
