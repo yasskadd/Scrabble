@@ -17,8 +17,6 @@ import { Subject } from 'rxjs';
     styleUrls: ['./main-page.component.scss'],
 })
 export class MainPageComponent implements OnDestroy {
-    readonly title: string = "Bienvenue au Scrabble de l'équipe 107!";
-
     protected userNameForm: FormControl;
     protected homeConnectionResponse: SocketResponse;
     protected connectionSubject: Subject<SocketResponse>;
