@@ -82,7 +82,7 @@ export class ProfilePictureController {
             // Create new signed_url
             const getImageCommand = this.CreateGetCommand(profilePicInfo.key as string);
             const signedURL = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 3600 });
-            res.status(StatusCodes.OK).send({ isDefaultImage: false, url: signedURL });
+            res.status(StatusCodes.OK).send({ url: signedURL });
         });
 
         /*  PUT request to UPLOAD modify existing profile picture, we need to get imageKey in database and to PutCommand to override
