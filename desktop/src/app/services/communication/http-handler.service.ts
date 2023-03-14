@@ -169,6 +169,16 @@ export class HttpHandlerService {
         return this.http.post<void>(`${this.baseUrl}/auth/logout`, null, httpOptions).pipe(catchError(this.handleError<void>('logout')));
     }
 
+    getDefaultImages(): Observable<Map<string, string[]>> {
+        const httpOptions = {
+            withCredentials: true,
+        };
+
+        return this.http
+            .get<Map<string, string[]>>(`${this.baseUrl}/image/default-pictures`, httpOptions)
+            .pipe(catchError(this.handleError<Map<string, string[]>>('get-default-images')));
+    }
+
     private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
         return () => of(result as T);
     }

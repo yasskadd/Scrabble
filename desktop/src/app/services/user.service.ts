@@ -10,17 +10,10 @@ import { HttpHandlerService } from './communication/http-handler.service';
 })
 export class UserService {
     user: IUser;
-    userName: string;
 
     constructor(private httpHandlerService: HttpHandlerService, private cookieService: AppCookieService) {
         this.initUser();
     }
-
-    // TODO
-    // 1. Prendre un JWT token avec les infos du user
-    // 2. On store le token
-    // 3. On utilise le token comme cookie avec chaque requette de socket
-    // 4. Capturer la réponse si connexion invalide
 
     isConnected(): boolean {
         return this.user.username && this.user.password ? true : false;
@@ -32,7 +25,6 @@ export class UserService {
         // TODO : Also get image data from server
         this.httpHandlerService.login(user).subscribe({
             next: () => {
-                // TODO : Store jwt token and place it in a middleware
                 this.cookieService.updateUserSessionCookie();
                 this.user = user;
                 subject.next('');
@@ -54,8 +46,10 @@ export class UserService {
 
     private initUser(): void {
         this.user = {
+            email: '',
             username: '',
             password: '',
+            profilePicture: undefined,
         };
     }
 }

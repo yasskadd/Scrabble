@@ -1,9 +1,9 @@
 <mat-card>
 	<mat-card-content>
 		<mat-grid-list gutterSize="16" cols="4" height="fit">
-			<mat-grid-tile (click)="closeDialog(imageSource)" *ngFor="let imageSource of imageSources">
-				<mat-icon *ngIf="isImageSelected(imageSource)">check</mat-icon>
-				<img [ngClass]="isImageSelected(imageSource) ? 'selected-image' : ''" src="{{ imageSource }}" />
+			<mat-grid-tile [mat-dialog-close]="defaultImage" *ngFor="let defaultImage of defaultImages">
+				<mat-icon *ngIf="isImageSelected(defaultImage.url)">check</mat-icon>
+				<img [ngClass]="isImageSelected(defaultImage.url) ? 'selected-image' : ''" [src]="defaultImage.url" />
 			</mat-grid-tile>
 		</mat-grid-list>
 	</mat-card-content>

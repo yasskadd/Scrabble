@@ -5,11 +5,13 @@ import { FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@a
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { DialogBoxAvatarSelectorComponent } from '@app/components/dialog-box-avatar-selector/dialog-box-avatar-selector.component';
+import { MAX_EMAIL_LENGTH, MAX_TEXT_LENGTH } from '@app/constants/user';
 import { equalStringValidator } from '@app/directives/custom-validators';
 import { AppRoutes } from '@app/models/app-routes';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
 import { UserService } from '@app/services/user.service';
 import { AvatarData } from '@common/interfaces/avatar-data';
+import { ImageInfo } from '@common/interfaces/image-info';
 import { IUser } from '@common/interfaces/user';
 import { ImageType } from '@common/models/image-type';
 
@@ -23,7 +25,7 @@ export class UserCreationPageComponent {
     readonly siteKey: string = '6Lf7L98kAAAAAJolI_AENbQSq32e_Wcv5dYBQA6D';
 
     protected formGroup: FormGroup;
-    protected imageSrcForm: FormControl;
+    protected profilePicForm: FormControl;
     protected usernameForm: FormControl;
     protected emailForm: FormControl;
     protected passwordForm: FormControl;
@@ -40,15 +42,15 @@ export class UserCreationPageComponent {
         private formBuilder: FormBuilder,
         private dialog: MatDialog,
     ) {
-        this.imageSrcForm = new FormControl('', Validators.required);
-        this.usernameForm = new FormControl('', Validators.required);
-        this.emailForm = new FormControl('', [Validators.required, Validators.email]);
-        this.passwordForm = new FormControl('', Validators.required);
-        this.passwordCopyForm = new FormControl('', [Validators.required]);
+        this.profilePicForm = new FormControl(undefined, [Validators.required]);
+        this.usernameForm = new FormControl('', [Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]);
+        this.emailForm = new FormControl('', [Validators.required, Validators.email, Validators.maxLength(MAX_EMAIL_LENGTH)]);
+        this.passwordForm = new FormControl('', [Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]);
+        this.passwordCopyForm = new FormControl('', [Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]);
         this.connectionError = '';
 
         this.formGroup = this.formBuilder.group({
-            imageSrcForm: this.imageSrcForm,
+            profilePicForm: this.profilePicForm,
             usernameForm: this.usernameForm,
             emailForm: this.emailForm,
             passwordForm: this.passwordForm,
@@ -65,33 +67,53 @@ export class UserCreationPageComponent {
                 width: '360px',
                 height: '420px',
                 backdropClass: 'dialog-backdrop',
-                data: this.imageSrcForm.value,
+                data: this.profilePicForm.value,
             })
             .afterClosed()
             .subscribe((data: AvatarData) => {
                 if (data) {
-                    this.imageSrcForm.setValue(data);
+                    this.profilePicForm.setValue(data);
                 }
             });
     }
 
     protected submitNewAccount(): void {
-        // TODO : Also send email and image data to server
+        const isDefaultPicture = this.profilePicForm.value.type === ImageType.Url;
+        let profilePicture: ImageInfo;
+        if (isDefaultPicture) {
+            profilePicture = {
+                name: this.profilePicForm.value.name,
+                isDefaultPicture,
+                key: this.profilePicForm.value.url,
+            };
+        } else {
+            profilePicture = {
+                name: this.profilePicForm.value.name,
+                isDefaultPicture,
+            };
+        }
         this.httpHandlerService
             .signUp({
+                email: this.emailForm.value,
                 username: this.usernameForm.value,
                 password: this.passwordForm.value,
+                profilePicture,
             } as IUser)
             .subscribe({
                 next: () => {
                     this.connectionError = '';
 
+                    if (!isDefaultPicture) {
+                        // TODO : Upload new custom image
+                    }
+
                     // TODO : For testing only, user creating an account will
                     // need to connect after creating it
                     this.userService.user = {
+                        email: this.emailForm.value,
                         username: this.usernameForm.value,
                         password: this.passwordForm.value,
-                        avatar: this.imageSrcForm.value,
+                        profilePicture: this.profilePicForm.value,
                     };
 
                     this.router.navigate([AppRoutes.HomePage]).then();

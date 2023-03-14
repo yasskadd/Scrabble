@@ -7,12 +7,13 @@ import { AppRoutes } from '@app/models/app-routes';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
 import { LanguageService } from '@app/services/language.service';
+import { TimeService } from '@app/services/time.service';
+import { UserService } from '@app/services/user.service';
 import { VirtualPlayersService } from '@app/services/virtual-players.service';
 import { DictionaryEvents } from '@common/models/dictionary-events';
 import { GameDifficulty } from '@common/models/game-difficulty';
 import { GameTimeOptions } from '@common/models/game-time-options';
 import { SnackBarService } from '@services/snack-bar.service';
-import { TimeService } from '@services/time.service';
 
 @Component({
     selector: 'app-multiplayer-create-page',
@@ -36,23 +37,22 @@ export class GameCreationPageComponent implements OnInit {
     private readonly gameMode: string;
 
     constructor(
-        public virtualPlayers: VirtualPlayersService,
-        public gameConfiguration: GameConfigurationService,
-        public timer: TimeService,
-        private router: Router,
+        protected virtualPlayers: VirtualPlayersService,
+        protected gameConfiguration: GameConfigurationService,
+        protected timer: TimeService,
+        protected userService: UserService,
+        private languageService: LanguageService,
         private activatedRoute: ActivatedRoute,
         private formBuilder: FormBuilder,
+        private router: Router,
         private readonly httpHandler: HttpHandlerService,
         private snackBarService: SnackBarService,
-        private languageService: LanguageService,
     ) {
         this.gameMode = this.activatedRoute.snapshot.params.id;
-        this.playerName = '';
         this.selectedFile = null;
         this.difficultyList = [];
         this.timerList = [];
 
-        this.playerForm = new FormControl('', Validators.required);
         this.timerForm = new FormControl('', Validators.required);
         this.difficultyForm = new FormControl('', Validators.required);
         // TODO : Set default dictionary from server
@@ -75,7 +75,6 @@ export class GameCreationPageComponent implements OnInit {
         });
 
         this.form = this.formBuilder.group({
-            player: this.playerForm,
             timer: this.timerForm,
             difficultyBot: this.difficultyForm,
             dictionary: this.dictionaryForm,
@@ -148,12 +147,6 @@ export class GameCreationPageComponent implements OnInit {
         return this.dictionaryList.some((dictionaryList) => dictionaryList.title === dictionaryTitle);
     }
 
-    private validateName(): void {
-        while (this.playerName.toLowerCase() === this.botName) {
-            this.setBotName();
-        }
-    }
-
     private getDictionary(title: string): DictionaryInfo {
         if (this.selectedFile !== null) return this.selectedFile;
         return this.dictionaryList.find((dictionary) => dictionary.title === title);
@@ -164,9 +157,8 @@ export class GameCreationPageComponent implements OnInit {
     }
 
     private initGame(dictionaryTitle: string): void {
-        if (this.isSoloMode()) this.validateName();
         this.gameConfiguration.gameInitialization({
-            username: this.playerName,
+            username: this.userService.user.username,
             timer: (this.form.get('timer') as AbstractControl).value,
             dictionary: dictionaryTitle,
             mode: this.gameMode,
