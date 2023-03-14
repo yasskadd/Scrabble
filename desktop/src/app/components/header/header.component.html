@@ -10,10 +10,24 @@
     <img src="https://bit.ly/3m206ss" width="300" height="60" alt="Logo Scrabble" (click)="redirectHome()" />
 </div>
 
-<mat-form-field appearance="outline" class="language-selector">
-    <mat-label>Language</mat-label>
-    <mat-select [formControl]="languageForm" required>
-        <mat-option [value]="languageChoices.French">{{ languageChoices.French.toString().toLocaleUpperCase() }}</mat-option>
-        <mat-option [value]="languageChoices.English">{{ languageChoices.English.toString().toLocaleUpperCase() }}</mat-option>
-    </mat-select>
-</mat-form-field>
+<button mat-fab color="primary" *ngIf="!userService.isConnected() || !userService.user.profilePicture" [matMenuTriggerFor]="accountMenu">
+    <mat-icon>person</mat-icon>
+</button>
+<img
+    mat-fab-button
+    *ngIf="userService.isConnected()"
+    [src]="userService.user.profilePicture.key"
+    [matMenuTriggerFor]="accountMenu"
+    class="selecter-avatar mat-elevation-z5"
+/>
+
+<mat-menu #accountMenu="matMenu">
+    <!-- Language -->
+    <button mat-menu-item (click)="redirectSettingsPage()" *ngIf="userService.isConnected()">Settings</button>
+    <!-- Language -->
+    <button mat-menu-item (click)="redirectUserPage()">Sign Up</button>
+    <!-- Language -->
+    <button mat-menu-item (click)="redirectLoginPage()" *ngIf="!userService.isConnected()">Sign In</button>
+    <!-- Language -->
+    <button mat-menu-item (click)="userService.logout()" *ngIf="userService.isConnected()">Sign Out</button>
+</mat-menu>

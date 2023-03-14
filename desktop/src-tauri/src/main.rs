@@ -36,6 +36,7 @@ fn greet(name: &str) -> String {
 #[tauri::command]
 fn socketEstablishConnection(
     address: &str,
+    cookie: &str,
     socketClient: tauri::State<SocketClient>,
     window: tauri::Window,
 ) {
@@ -45,6 +46,7 @@ fn socketEstablishConnection(
     }
     let socketEventWindow = window.clone();
     let connection = ClientBuilder::new(address)
+        .opening_header("Cookie", cookie)
         .on_any(move |event, payload, _raw_client| {
             // println!("Got event: {:?} {:?}", event, payload);
             if let Payload::String(payload) = payload {

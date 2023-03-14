@@ -68,7 +68,7 @@ export class Application {
         this.app.use(express.json({ limit: '10mb' }));
         this.app.use(express.urlencoded({ extended: true }));
         this.app.use(cookieParser());
-        this.app.use(cors());
+        this.app.use(cors({ credentials: true, origin: ['http://localhost:1420', 'http://localhost:3000'] }));
     }
 
     private errorHandling(): void {
