@@ -42,10 +42,10 @@ export class UserCreationPageComponent {
         private dialog: MatDialog,
     ) {
         this.profilePicForm = new FormControl(undefined, [Validators.required]);
-        this.usernameForm = new FormControl('', [Validators.required, Validators.max(32)]);
-        this.emailForm = new FormControl('', [Validators.required, Validators.email, Validators.max(48)]);
-        this.passwordForm = new FormControl('', [Validators.required, Validators.max(32)]);
-        this.passwordCopyForm = new FormControl('', [Validators.required, Validators.max(32)]);
+        this.usernameForm = new FormControl('', [Validators.required, Validators.maxLength(32)]);
+        this.emailForm = new FormControl('', [Validators.required, Validators.email, Validators.maxLength(48)]);
+        this.passwordForm = new FormControl('', [Validators.required, Validators.maxLength(32)]);
+        this.passwordCopyForm = new FormControl('', [Validators.required, Validators.maxLength(32)]);
         this.connectionError = '';
 
         this.formGroup = this.formBuilder.group({

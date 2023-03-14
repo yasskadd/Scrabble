@@ -18,8 +18,8 @@ export class ConnectionPageComponent {
     protected connectionError: string;
 
     constructor(private formBuilder: FormBuilder, private userService: UserService, private router: Router) {
-        this.usernameForm = new FormControl('', Validators.required);
-        this.passwordForm = new FormControl('', Validators.required);
+        this.usernameForm = new FormControl('', [Validators.required, Validators.maxLength(32)]);
+        this.passwordForm = new FormControl('', [Validators.required, Validators.maxLength(32)]);
         this.connectionError = '';
 
         this.formGroup = this.formBuilder.group({
