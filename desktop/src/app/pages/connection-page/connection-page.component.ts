@@ -3,6 +3,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { UserService } from '@app/services/user.service';
+import { IUser } from '@common/interfaces/user';
 import { Subject } from 'rxjs';
 
 @Component({
@@ -28,7 +29,10 @@ export class ConnectionPageComponent {
     }
 
     protected login(): void {
-        const connectionSubject: Subject<string> = this.userService.login({ username: this.usernameForm.value, password: this.passwordForm.value });
+        const connectionSubject: Subject<string> = this.userService.login({
+            username: this.usernameForm.value,
+            password: this.passwordForm.value,
+        } as IUser);
         connectionSubject.subscribe((res: string) => {
             if (res) {
                 // TODO : Language

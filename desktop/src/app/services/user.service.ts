@@ -47,8 +47,10 @@ export class UserService {
 
     private initUser(): void {
         this.user = {
+            email: '',
             username: '',
             password: '',
+            profilePicture: undefined,
         };
     }
 }

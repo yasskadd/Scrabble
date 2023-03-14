@@ -1,8 +1,8 @@
 import { ImageInfo } from './image-info';
 
 export interface IUser {
-    email: string;
+    email?: string;
     username: string;
     password: string;
-    profilePicture: ImageInfo;
+    profilePicture?: ImageInfo;
 }
