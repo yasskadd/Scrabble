@@ -132,7 +132,8 @@
     },
     "header": {
         "home": "Acceuil",
-        "admin": "Admin"
+        "admin": "Admin",
+        "welcome": ["B", "I", "E", "N", "V", "E", "N", "U", "E"]
     },
     "chat": {
         "message_box": "Entrez un message",

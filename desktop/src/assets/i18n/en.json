@@ -132,7 +132,8 @@
     },
     "header": {
         "home": "Home",
-        "admin": "Admin"
+        "admin": "Admin",
+        "welcome": ["W", "E", "L", "C", "O", "M", "E"]
     },
     "chat": {
         "message_box": "Enter a message",
