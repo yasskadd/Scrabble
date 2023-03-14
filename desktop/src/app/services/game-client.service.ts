@@ -7,7 +7,6 @@ import { LetterTileInterface } from '@common/interfaces/letter-tile-interface';
 import { Objective } from '@common/interfaces/objective';
 import { ReplaySubject, Subject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
-import { AlphabetLetter } from '@common/models/alphabet-letter';
 
 type CompletedObjective = { objective: Objective; name: string };
 type InitObjective = { objectives1: Objective[]; objectives2: Objective[]; playerName: string };
@@ -38,7 +37,7 @@ export class GameClientService {
         this.timer = 0;
         this.letterReserveLength = 0;
         this.playerOne = {} as Player;
-        this.secondPlayer = undefined;
+        this.secondPlayer = {} as Player;
         this.winningMessage = '';
         this.playerOneTurn = false;
         this.isGameFinish = false;
@@ -91,7 +90,6 @@ export class GameClientService {
             this.timerClientUpdateEvent(newTimer);
         });
     }
-
     updateGameboard() {
         this.gameboardUpdated.next(true);
     }
@@ -108,44 +106,9 @@ export class GameClientService {
     resetGameInformation() {
         this.timer = 0;
         this.gameboard = [];
-        this.playerOne = {
-            name: '',
-            score: 0,
-            rack: [
-                {
-                    value: AlphabetLetter.A,
-                    quantity: 5,
-                    points: 3,
-                },
-                {
-                    value: AlphabetLetter.B,
-                    quantity: 5,
-                    points: 3,
-                },
-                {
-                    value: AlphabetLetter.C,
-                    quantity: 5,
-                    points: 3,
-                },
-                {
-                    value: AlphabetLetter.D,
-                    quantity: 5,
-                    points: 3,
-                },
-                {
-                    value: AlphabetLetter.E,
-                    quantity: 5,
-                    points: 3,
-                },
-            ],
-            objective: undefined,
-        };
+        this.playerOne = { name: '', score: 0, rack: [], objective: undefined };
         this.secondPlayer = { name: '', score: 0, rack: [], objective: undefined };
-
-        // TODO : change that back
-        this.playerOneTurn = true;
-        // this.playerOneTurn = false;
-
+        this.playerOneTurn = false;
         this.letterReserveLength = 0;
         this.isGameFinish = false;
         this.winningMessage = '';

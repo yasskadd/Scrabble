@@ -1,13 +1,13 @@
 import { SECRET_KEY } from '@app/../very-secret-file';
-import { IUser } from '@app/interfaces/user';
 import { AccountStorageService } from '@app/services/database/account-storage.service';
+import { IUser } from '@common/interfaces/user';
 import { Request, Response, Router } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { Service } from 'typedi';
 
 const SUCCESS = 200;
-const ERROR = 401;
 const TEMP_REDIRECT = 307;
+const ERROR = 401;
 
 @Service()
 export class AuthentificationController {

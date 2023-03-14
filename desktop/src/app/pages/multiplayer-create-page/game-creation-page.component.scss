@@ -30,7 +30,6 @@ body {
     justify-content: space-between;
     padding: 1%;
 }
-
 .mat-card {
     overflow-y: auto;
 }
@@ -68,7 +67,6 @@ body {
 ::ng-deep .mat-form-field-appearance-fill .mat-form-field-flex {
     background-color: rgb(255 255 255 / 36%);
 }
-
 ::ng-deep .mat-form-field-underline {
     display: none;
 }
@@ -96,18 +94,12 @@ body {
     margin-bottom: 8px;
 }
 
-.soloMode {
-    margin-bottom: 16px;
-}
-
 ::ng-deep .mat-card::-webkit-scrollbar {
     width: 4px;
 }
-
 ::ng-deep .mat-card::-webkit-scrollbar-track {
     background-color: #c2e5da !important;
 }
-
 ::ng-deep .mat-card::-webkit-scrollbar-thumb {
     background: #23501f !important;
 }

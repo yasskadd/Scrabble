@@ -1,4 +1,3 @@
-import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
@@ -38,7 +37,6 @@ import { DialogBoxHighScoresComponent } from './components/dialog-box-high-score
 import { DialogBoxModifyBotNamesComponent } from './components/dialog-box-modify-bot-names/dialog-box-modify-bot-names.component';
 import { DialogBoxModifyDictionaryComponent } from './components/dialog-box-modify-dictionary/dialog-box-modify-dictionary.component';
 import { FooterComponent } from './components/footer/footer.component';
-import { GameBoardComponent } from './components/game-board/game-board.component';
 import { GenericChatComponent } from './components/generic-chat/generic-chat.component';
 import { HeaderComponent } from './components/header/header.component';
 import { ImportDictionaryComponent } from './components/import-dictionary/import-dictionary.component';
@@ -51,9 +49,9 @@ import { ConnectionPageComponent } from './pages/connection-page/connection-page
 import { MainPageComponent } from './pages/main-page/main-page.component';
 import { GameCreationPageComponent } from './pages/multiplayer-create-page/game-creation-page.component';
 import { MultiplayerJoinPageComponent } from './pages/multiplayer-join-page/multiplayer-join-page.component';
-import { SettingsPageComponent } from './pages/settings-page/settings-page.component';
 import { UserCreationPageComponent } from './pages/user-creation-page/user-creation-page.component';
 import { WaitingOpponentPageComponent } from './pages/waiting-opponent-page/waiting-opponent-page.component';
+import { SettingsPageComponent } from './pages/settings-page/settings-page.component';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(http, '../assets/i18n/', '.json');
@@ -98,14 +96,12 @@ export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(h
         DialogBoxAvatarSelectorComponent,
         ConnectionPageComponent,
         SettingsPageComponent,
-        GameBoardComponent,
     ],
     imports: [
         CommonModule,
         CookieModule.withOptions(),
         AppMaterialModule,
         AppRoutingModule,
-        DragDropModule,
         MatSnackBarModule,
         MatInputModule,
         MatTabsModule,

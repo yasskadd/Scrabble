@@ -44,8 +44,8 @@ export class ChatboxHandlerService implements OnDestroy {
         if (this.isCommand(userInput)) {
             this.sendCommand(userInput);
         } else {
-            this.messages.push(message);
             this.sendMessage(message);
+            this.messages.push(message);
         }
     }
 
