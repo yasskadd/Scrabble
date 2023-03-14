@@ -11,8 +11,9 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction) => 
         res.status(UNAUTHORIZED).send('Token not found');
         return;
     }
-    jwt.verify(token, SECRET_KEY, (err: jwt.VerifyErrors) => {
+    jwt.verify(token, SECRET_KEY, (err: jwt.VerifyErrors, decoded: any) => {
         if (err) return res.sendStatus(FORBIDDEN);
+        res.locals.user = decoded;
         next();
         return;
     });

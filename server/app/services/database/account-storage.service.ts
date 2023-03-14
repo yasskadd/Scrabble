@@ -1,4 +1,6 @@
-import { IUser } from '@app/interfaces/user';
+/* eslint-disable quote-props */
+import { ImageInfo } from '@common/interfaces/image-info';
+import { IUser } from '@common/interfaces/user';
 import { compare, genSalt, hash } from 'bcrypt';
 import { Document } from 'mongodb';
 import { Service } from 'typedi';
@@ -11,8 +13,10 @@ export class AccountStorageService {
     async addNewUser(user: Document): Promise<void> {
         const hashedPassword = await this.generateHash(user.password);
         const newUser: IUser = {
+            email: user.email,
             username: user.username,
             password: hashedPassword,
+            profilePicture: user.profilePicture as ImageInfo,
         };
         await this.database.users.addDocument(newUser);
     }
@@ -25,6 +29,25 @@ export class AccountStorageService {
 
     async isUserRegistered(name: string): Promise<boolean> {
         return (await this.database.users.collection.findOne({ username: name })) !== null;
+    }
+
+    async getProfilePicInfo(username: string): Promise<ImageInfo> {
+        const userDocument = (await this.database.users.collection.findOne({ username })) as Document;
+        return userDocument.profilePicture as ImageInfo;
+    }
+
+    async updateUploadedImage(username: string, imageKey: string, fileName: string): Promise<void> {
+        await this.database.users.collection.updateOne(
+            { username },
+            { $set: { 'profilePicture.key': imageKey, 'profilePicture.name': fileName, 'profilePicture.isDefaultPicture': false } },
+        );
+    }
+
+    async updateDefaultImage(username: string, fileName: string, imageKey: string): Promise<void> {
+        await this.database.users.collection.updateOne(
+            { username },
+            { $set: { 'profilePicture.isDefaultPicture': true, 'profilePicture.key': imageKey, 'profilePicture.name': fileName } },
+        );
     }
 
     private async generateHash(password: string): Promise<string> {
