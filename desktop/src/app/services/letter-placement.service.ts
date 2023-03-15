@@ -23,10 +23,6 @@ const ASCII_ALPHABET_START = 96;
 export class LetterPlacementService {
     boardTiles: BoardTileInfo[];
     defaultBoardTiles: BoardTileInfo[];
-
-    // TODO : Fill when placing confirmed by server
-    // placedBoardTiles: BoardTileInfo[];
-
     currentSelection: Letter;
     selectionPositions: SelectionPosition[];
 
@@ -292,15 +288,6 @@ export class LetterPlacementService {
                     }
                     break;
                 }
-                case PlayDirection.Left: {
-                    if (
-                        Math.floor((this.selectionPositions[0].coord - 1) / TOTAL_COLUMNS) !==
-                        Math.floor(this.selectionPositions[0].coord / TOTAL_COLUMNS)
-                    ) {
-                        outOfBound = true;
-                    }
-                    break;
-                }
                 default: {
                     break;
                 }
@@ -338,20 +325,12 @@ export class LetterPlacementService {
                         coord: this.origin + TOTAL_COLUMNS,
                         direction: PlayDirection.Down,
                     },
-                    { coord: this.origin - 1, direction: PlayDirection.Left },
-                    { coord: this.origin - TOTAL_COLUMNS, direction: PlayDirection.Up },
                 ];
                 return;
             }
         }
 
         switch (this.selectionPositions[0].direction) {
-            case PlayDirection.Up: {
-                this.selectionPositions[0].coord = revert
-                    ? this.selectionPositions[0].coord + factor * TOTAL_COLUMNS
-                    : this.selectionPositions[0].coord - factor * TOTAL_COLUMNS;
-                break;
-            }
             case PlayDirection.Down: {
                 this.selectionPositions[0].coord = revert
                     ? this.selectionPositions[0].coord - factor * TOTAL_COLUMNS
@@ -360,10 +339,6 @@ export class LetterPlacementService {
             }
             case PlayDirection.Right: {
                 this.selectionPositions[0].coord = revert ? this.selectionPositions[0].coord - factor : this.selectionPositions[0].coord + factor;
-                break;
-            }
-            case PlayDirection.Left: {
-                this.selectionPositions[0].coord = revert ? this.selectionPositions[0].coord + factor : this.selectionPositions[0].coord - factor;
                 break;
             }
             default: {
