@@ -10,7 +10,7 @@
             cdkDropListOrientation="horizontal"
             cdkdrop
             (cdkDropListDropped)="drop($event, tile)"
-            (click)="handleCenterClick(tile)"
+            (click)="letterPlacementService.handleTileClick(tile)"
             class="empty-tile tile-content"
             [style.background-color]="getBackgroundColor(tile.type)"
             [cdkDropListSortingDisabled]="true"

@@ -193,10 +193,18 @@ export class LetterPlacementService {
         return this.placedLetters.length === 0;
     }
 
-    rotateDirection(tile: BoardTileInfo) {
-        if (tile.coord === this.origin && this.placedLetters.length === 0) {
+    handleTileClick(tile: BoardTileInfo) {
+        if (this.placingMode && this.placingMode === PlacingState.Drag) return;
+
+        if (tile.coord !== this.origin) {
+            this.origin = tile.coord;
+            this.computeNewPosition(tile.coord, false);
+            return;
+        }
+
+        if (this.placedLetters.length === 0) {
             this.selectionPositions[0].direction += 1;
-            this.selectionPositions[0].direction %= 4;
+            this.selectionPositions[0].direction %= 2;
         }
     }
 
@@ -303,16 +311,17 @@ export class LetterPlacementService {
     private computeNewPosition(playedCoord: number, revert: boolean) {
         const factor = 1;
 
+        if (!this.selectionPositions || this.placedLetters.length === 0) {
+            this.selectionPositions = [
+                {
+                    coord: playedCoord,
+                    direction: PlayDirection.Right,
+                },
+            ];
+            return;
+        }
+
         if (this.placingMode === PlacingState.Drag) {
-            if (this.placedLetters.length === 0) {
-                this.selectionPositions = [
-                    {
-                        coord: this.origin,
-                        direction: PlayDirection.Right,
-                    },
-                ];
-                return;
-            }
             if (this.placedLetters.length === 1) {
                 this.selectionPositions = [
                     {
@@ -333,11 +342,11 @@ export class LetterPlacementService {
                 this.selectionPositions[0].coord = revert
                     ? this.selectionPositions[0].coord - factor * TOTAL_COLUMNS
                     : this.selectionPositions[0].coord + factor * TOTAL_COLUMNS;
-                break;
+                return;
             }
             case PlayDirection.Right: {
                 this.selectionPositions[0].coord = revert ? this.selectionPositions[0].coord - factor : this.selectionPositions[0].coord + factor;
-                break;
+                return;
             }
             default: {
                 return;
