@@ -153,6 +153,9 @@ export class LetterPlacementService {
         if (!this.isValidPlacing(boardTile.coord)) {
             return;
         }
+        if (this.isPositionOutOfBound()) {
+            return;
+        }
 
         const playedTile: BoardTileInfo = {
             type: boardTile.type,
@@ -170,9 +173,6 @@ export class LetterPlacementService {
         );
         this.placedLetters.push(playedTile);
 
-        if (this.isPositionOutOfBound()) {
-            this.hasPlacingEnded = true;
-        }
         if (this.placedLetters.length === 2 && this.placingMode === PlacingState.Drag) {
             this.computeDirection(playedTile.coord);
         }
@@ -282,22 +282,8 @@ export class LetterPlacementService {
         let outOfBound = false;
 
         this.selectionPositions.forEach((selection: SelectionPosition) => {
-            if (selection.coord < 0 || selection.coord > TOTAL_ROWS * TOTAL_COLUMNS - 1) {
+            if (this.isTileOutOfBoard(selection.coord) || (this.isTileOutOfRow(selection.coord) && selection.direction === PlayDirection.Right)) {
                 outOfBound = true;
-            }
-            switch (selection.direction) {
-                case PlayDirection.Right: {
-                    if (
-                        Math.floor(this.selectionPositions[0].coord / TOTAL_COLUMNS) !==
-                        Math.floor((this.selectionPositions[0].coord - 1) / TOTAL_COLUMNS)
-                    ) {
-                        outOfBound = true;
-                    }
-                    break;
-                }
-                default: {
-                    break;
-                }
             }
         });
 
@@ -310,8 +296,6 @@ export class LetterPlacementService {
     // }
 
     private computeNewPosition(playedCoord: number, revert: boolean) {
-        const factor = 1;
-
         if (!this.selectionPositions || this.placedLetters.length === 0) {
             this.selectionPositions = [
                 {
@@ -338,14 +322,19 @@ export class LetterPlacementService {
             }
         }
 
+        const factor = 1;
         switch (this.selectionPositions[0].direction) {
             case PlayDirection.Down: {
+                if (this.isTileOutOfBoard(this.selectionPositions[0].coord + factor)) return;
+
                 this.selectionPositions[0].coord = revert
                     ? this.selectionPositions[0].coord - factor * TOTAL_COLUMNS
                     : this.selectionPositions[0].coord + factor * TOTAL_COLUMNS;
                 return;
             }
             case PlayDirection.Right: {
+                if (this.isTileOutOfRow(this.selectionPositions[0].coord + factor)) return;
+
                 this.selectionPositions[0].coord = revert ? this.selectionPositions[0].coord - factor : this.selectionPositions[0].coord + factor;
                 return;
             }
@@ -380,5 +369,13 @@ export class LetterPlacementService {
 
         this.selectionPositions[0].coord = playedCoord;
         this.selectionPositions.pop();
+    }
+
+    private isTileOutOfRow(coord: number): boolean {
+        return Math.floor(coord / TOTAL_COLUMNS) !== Math.floor((coord - 1) / TOTAL_COLUMNS);
+    }
+
+    private isTileOutOfBoard(coord: number): boolean {
+        return coord > TOTAL_ROWS * TOTAL_COLUMNS - 1 || coord < 0;
     }
 }
