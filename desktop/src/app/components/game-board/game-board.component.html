@@ -38,7 +38,7 @@
                         <mat-icon class="direction" *ngSwitchCase="playDirection.Down">expand_more</mat-icon>
                     </div>
                 </div>
-                <div class="icon-tile outlined" *ngIf="isCenterTile(tile.coord) && tile.state === boardTileStates.Empty">
+                <div class="icon-tile outlined" *ngIf="showCenterTile(tile)">
                     <mat-icon>star</mat-icon>
                 </div>
             </div>

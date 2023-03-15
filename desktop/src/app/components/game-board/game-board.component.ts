@@ -1,6 +1,8 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component } from '@angular/core';
+import { CENTER_TILE } from '@app/constants/board-view';
 import { BoardTileInfo } from '@app/interfaces/board-tile-info';
+import { SelectionPosition } from '@app/interfaces/selection-position';
 import { BoardTileState, BoardTileType } from '@app/models/board-tile';
 import { PlayDirection } from '@app/models/play-direction';
 import { LetterPlacementService } from '@app/services/letter-placement.service';
@@ -97,5 +99,17 @@ export class GameBoardComponent {
 
     protected tileEmpty(tile: BoardTileInfo): boolean {
         return tile.letter?.value === AlphabetLetter.None;
+    }
+
+    protected showCenterTile(tile: BoardTileInfo): boolean {
+        let show: boolean = true;
+
+        this.letterPlacementService.selectionPositions.forEach((selectedTile: SelectionPosition) => {
+            if (selectedTile.coord === tile.coord) {
+                show = false;
+            }
+        });
+
+        return tile.coord === CENTER_TILE && tile.state === BoardTileState.Empty && show;
     }
 }
