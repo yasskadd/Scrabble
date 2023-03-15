@@ -62,8 +62,6 @@ export class ProfilePictureController {
          * @return { number } HTTP Status - The return status of the request
          */
         this.router.post('/profile-picture', uploadImage.any(), async (req: FileRequest, res: Response) => {
-            console.log("'files'");
-            console.log(req.files);
             if (!req.files || req.fileValidationError || req.files.length !== 2 || !req.files[0] || !req.files[1]) {
                 res.status(StatusCodes.BAD_REQUEST).send({
                     message: 'No file received or invalid file type',
@@ -172,7 +170,6 @@ export class ProfilePictureController {
     }
 
     private createPutCommand(req: any, imageKey: string): PutObjectCommand {
-        console.log(imageKey);
         return new PutObjectCommand({
             Bucket: BUCKET_NAME,
             Key: imageKey,

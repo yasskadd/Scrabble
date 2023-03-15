@@ -192,7 +192,6 @@ export class HttpHandlerService {
         data.append('data', avatarData.file);
         data.append('imageKey', imageKeyFile);
 
-        console.log(data);
         return this.http
             .post<void>(`${this.baseUrl}/image/profile-picture`, data, httpOptions)
             .pipe(catchError(this.handleError<void>('send-profile-picture')));
