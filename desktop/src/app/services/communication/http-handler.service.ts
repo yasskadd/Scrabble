@@ -187,7 +187,7 @@ export class HttpHandlerService {
         };
 
         // Creation of 2 files because the request only accepts files
-        const imageKeyFile = new File([avatarData.url], 'imageKey', { type: 'text/html' });
+        const imageKeyFile = new File([imageKey], 'imageKey', { type: 'text/html' });
         const data = new FormData();
         data.append('data', avatarData.file);
         data.append('imageKey', imageKeyFile);

@@ -103,7 +103,6 @@ export class UserCreationPageComponent {
                     this.router.navigate([AppRoutes.HomePage]).then();
                 },
                 error: (error: HttpErrorResponse) => {
-                    console.log(error);
                     // TODO : Language
                     this.connectionError = error.error.message;
                     this.usernameForm.reset();

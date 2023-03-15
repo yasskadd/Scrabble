@@ -38,6 +38,7 @@ export class ProfilePictureController {
 
         /**
          * HTTP GET request to get the default pictures informations
+         *
          * @return { Map<string, string[] } send - The informations of all the images arranged in a key, value pair.
          *                       key - The name of the default image
          *                       value[0] - The url of the default image
@@ -56,6 +57,7 @@ export class ProfilePictureController {
 
         /**
          * HTTP POST request to send an image to the S3 bucket
+         *
          * @param { FormatData } files - Container for the files necessary for the request
          *             { image } files[0] - File of the image to post
          *          { imageKey } files[1] - File containing the imageKey in the text/html data
@@ -78,6 +80,7 @@ export class ProfilePictureController {
 
         /**
          * HTTP GET request to request an image in the S3 bucket
+         *
          * @param { string } session_token - String of the connected user token
          * @return {{ url: string }} data - URL of the image usable as a simple source link
          * @return { number } HTTP Status - The return status of the request
@@ -92,8 +95,11 @@ export class ProfilePictureController {
             res.status(StatusCodes.OK).send({ url: signedURL });
         });
 
-        /*  PUT request to UPLOAD modify existing profile picture from an AvatarData object, we need to get imageKey in database and to PutCommand to override
-            the image in the bucket. Then create a new signed URL and send it to client */
+        /** PUT request to UPLOAD modify existing profile picture from an
+         * AvatarData object, we need to get imageKey in database and to PutCommand
+         * to override the image in the bucket. Then create a new signed URL and
+         * send it to client
+         */
         this.router.put('/profile-picture', verifyToken, uploadImage.single('image'), async (req: FileRequest, res: Response) => {
             if (req.fileValidationError || !req.file) {
                 res.status(StatusCodes.BAD_REQUEST).send({
@@ -106,7 +112,7 @@ export class ProfilePictureController {
             const username = res.locals.user.name;
             const oldProfilePicInfo = await this.accountStorage.getProfilePicInfo(username);
             const newImageKey = uuid.v4() + req.file?.originalname;
-            const putCommand = this.createPutCommand(req, newImageKey as string);
+            const putCommand = this.createPutCommand(req.file, newImageKey as string);
             this.s3Client
                 .send(putCommand)
                 .then(async () => {
@@ -169,7 +175,7 @@ export class ProfilePictureController {
         });
     }
 
-    private createPutCommand(req: any, imageKey: string): PutObjectCommand {
+    private createPutCommand(req: Express.Multer.File, imageKey: string): PutObjectCommand {
         return new PutObjectCommand({
             Bucket: BUCKET_NAME,
             Key: imageKey,

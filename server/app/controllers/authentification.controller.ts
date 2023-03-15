@@ -23,6 +23,7 @@ export class AuthentificationController {
 
         /**
          * HTTP POST request to create a new account
+         *
          * @param {{ username: string, password: string, email: string, profilePicture: ImageInfo }} body - The connection infos of the request
          * @return {{ imageKey: string }} send - The key of the selected profile picture
          */
@@ -30,7 +31,7 @@ export class AuthentificationController {
             const user: IUser = req.body;
             if (!(await this.accountStorage.isUserRegistered(user.username))) {
                 // Generating an image key if the profile pic is not a default one
-                let imageKey: string = '';
+                let imageKey = '';
                 if (user.profilePicture && !user.profilePicture.isDefaultPicture) {
                     imageKey = uuid.v4() + user.profilePicture?.name;
                     user.profilePicture.key = imageKey;
@@ -50,6 +51,7 @@ export class AuthentificationController {
 
         /**
          * HTTP POST request to connect an account
+         *
          * @param {{ username: string, password: string }} body - The connection infos of the request
          * @return {{ username: string, password: string, email: string, profilePicture: ImageInfo }} send - The completed user informations
          */
