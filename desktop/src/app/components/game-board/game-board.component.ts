@@ -18,10 +18,6 @@ export class GameBoardComponent {
 
     constructor(protected letterPlacementService: LetterPlacementService) {}
 
-    handleCenterClick(tile: BoardTileInfo): void {
-        this.letterPlacementService.rotateDirection(tile);
-    }
-
     protected drop(event: CdkDragDrop<Letter[]>, tile: BoardTileInfo): void {
         if (event.previousContainer.id === 'player-rack') {
             this.letterPlacementService.handleDragPlacement(event.previousIndex, event.previousContainer.data[event.previousIndex], tile);

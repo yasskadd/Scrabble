@@ -144,7 +144,7 @@ export class GameClientService {
 
         // TODO : change that back
         this.playerOneTurn = true;
-        this.playerOne.rack = [];
+        // this.playerOne.rack = [];
         // this.playerOneTurn = false;
 
         this.letterReserveLength = 0;

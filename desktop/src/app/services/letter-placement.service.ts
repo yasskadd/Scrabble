@@ -6,7 +6,7 @@ import { BoardTileState, BoardTileType } from '@app/models/board-tile';
 import * as constants from '@common/constants/board-info';
 import { AlphabetLetter } from '@common/models/alphabet-letter';
 // import { Coordinate } from '@common/interfaces/coordinate';
-import { CENTER_TILE, TOTAL_COLUMNS, TOTAL_ROWS } from '@app/constants/board-view';
+import { TOTAL_COLUMNS, TOTAL_ROWS } from '@app/constants/board-view';
 import { SelectionPosition } from '@app/interfaces/selection-position';
 import { PlacingState } from '@app/models/placing-state';
 import { PlayDirection } from '@app/models/play-direction';
@@ -25,10 +25,10 @@ export class LetterPlacementService {
     defaultBoardTiles: BoardTileInfo[];
     currentSelection: Letter;
     selectionPositions: SelectionPosition[];
+    origin: number;
 
     private placedLetters: BoardTileInfo[];
     private placingMode: PlacingState;
-    private origin: number;
     private hasPlacingEnded: boolean;
 
     constructor(private gridService: GridService, private gameClientService: GameClientService, private chatboxService: ChatboxHandlerService) {
@@ -241,11 +241,9 @@ export class LetterPlacementService {
     // }
 
     private setPropreties() {
-        this.origin = CENTER_TILE;
-        this.selectionPositions = [{ coord: CENTER_TILE, direction: PlayDirection.Right }];
+        this.origin = undefined;
+        this.selectionPositions = [];
         this.placedLetters = [];
-        // this.isHorizontal = true;
-        // this.placingMode = PlacingState.Drag;
         this.hasPlacingEnded = false;
         this.initTiles();
     }
