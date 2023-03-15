@@ -52,6 +52,7 @@ export class LetterPlacementService {
     handleDragPlacement(index: number, letter: Letter, tile: BoardTileInfo): void {
         if (this.placedLetters.length === 0) {
             this.placingMode = PlacingState.Drag;
+            this.origin = tile.coord;
         }
 
         if (this.placingMode !== PlacingState.Drag || this.hasPlacingEnded || !this.gameClientService.playerOneTurn) {
@@ -356,6 +357,11 @@ export class LetterPlacementService {
 
     private isValidPlacing(coord: number): boolean {
         let validity = false;
+
+        if (this.placingMode === PlacingState.Drag && this.placedLetters.length === 0) {
+            return true;
+        }
+
         this.selectionPositions.forEach((selection: SelectionPosition) => {
             if (selection.coord === coord) {
                 validity = true;
@@ -373,8 +379,6 @@ export class LetterPlacementService {
         });
 
         this.selectionPositions[0].coord = playedCoord;
-        this.selectionPositions.pop();
-        this.selectionPositions.pop();
         this.selectionPositions.pop();
     }
 }
