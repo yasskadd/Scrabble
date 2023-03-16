@@ -126,6 +126,7 @@ export class LetterPlacementService {
     }
 
     isRemoveValid(boardTile: BoardTileInfo): boolean {
+        if (this.placedLetters.length === 0) return true;
         return boardTile.coord === this.placedLetters[this.placedLetters.length - 1].coord;
     }
 
