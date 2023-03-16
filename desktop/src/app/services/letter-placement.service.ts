@@ -10,12 +10,15 @@ import { TOTAL_COLUMNS, TOTAL_ROWS } from '@app/constants/board-view';
 import { SelectionPosition } from '@app/interfaces/selection-position';
 import { PlacingState } from '@app/models/placing-state';
 import { PlayDirection } from '@app/models/play-direction';
+import { SocketEvents } from '@common/constants/socket-events';
+import { CommandInfo } from '@common/interfaces/command-info';
+import { Coordinate } from '@common/interfaces/coordinate';
 import { Letter } from '@common/interfaces/letter';
-import { ChatboxHandlerService } from './chat/chatbox-handler.service';
+import { ClientSocketService } from './communication/client-socket.service';
 import { GameClientService } from './game-client.service';
 import { GridService } from './grid.service';
 
-const ASCII_ALPHABET_START = 96;
+// const ASCII_ALPHABET_START = 96;
 
 @Injectable({
     providedIn: 'root',
@@ -31,7 +34,11 @@ export class LetterPlacementService {
     private placingMode: PlacingState;
     private hasPlacingEnded: boolean;
 
-    constructor(private gridService: GridService, private gameClientService: GameClientService, private chatboxService: ChatboxHandlerService) {
+    constructor(
+        private clientSocketService: ClientSocketService,
+        private gridService: GridService,
+        private gameClientService: GameClientService, // private chatboxService: ChatboxHandlerService,
+    ) {
         this.boardTiles = [];
 
         this.setPropreties();
@@ -89,11 +96,22 @@ export class LetterPlacementService {
     submitPlacement() {
         if (this.noLettersPlaced()) return;
 
-        const verticalPlacement = String.fromCharCode(this.selectionPositions[0].coord + ASCII_ALPHABET_START);
-        const lettersToSubmit = this.placedLetters.map((letter) => letter.letter.value).join('');
-        this.chatboxService.submitMessage(
-            `!placer ${verticalPlacement}${this.selectionPositions[0].coord}${this.selectionPositions[0].direction} ${lettersToSubmit}`,
-        );
+        // const verticalPlacement = String.fromCharCode(this.selectionPositions[0].coord + ASCII_ALPHABET_START);
+        // const lettersToSubmit = this.placedLetters.map((letter) => letter.letter.value).join('');
+
+        const letters: string[] = [];
+        this.placedLetters.forEach((tile: BoardTileInfo) => {
+            letters.push(tile.letter.value);
+        });
+        this.clientSocketService.send(SocketEvents.Play, {
+            firstCoordinate: this.computeCoordinatesFromCoord(),
+            isHorizontal: this.selectionPositions[0].direction === PlayDirection.Right,
+            letters,
+        } as CommandInfo);
+
+        // this.chatboxService.submitMessage(
+        //     `!placer ${verticalPlacement}${this.selectionPositions[0].coord}${this.selectionPositions[0].direction} ${lettersToSubmit}`,
+        // );
     }
 
     undoPlacement() {
@@ -378,5 +396,14 @@ export class LetterPlacementService {
 
     private isTileOutOfBoard(coord: number): boolean {
         return coord > TOTAL_ROWS * TOTAL_COLUMNS - 1 || coord < 0;
+    }
+
+    private computeCoordinatesFromCoord(): Coordinate {
+        const coord: Coordinate = {
+            x: (this.origin % TOTAL_COLUMNS) + 1,
+            y: Math.floor(this.origin / TOTAL_ROWS) + 1,
+        };
+
+        return coord;
     }
 }
