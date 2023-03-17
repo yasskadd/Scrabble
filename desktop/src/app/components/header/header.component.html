@@ -1,25 +1,32 @@
-<!-- <div *ngIf="!isHomePage" id="home" (click)="redirectHome()">
-    <div *ngFor="let letter of getLetters('header.home')">{{ letter }}</div>
-</div>
-
-<div *ngIf="isHomePage" id="admin" (click)="redirectAdmin()">
-    <div *ngFor="let letter of ['B','I','E','N','V','E','N','U','E']">{{ letter }}</div>
-</div> -->
-
 <mat-toolbar>
+    <div *ngIf="!isHomePage" id="home" (click)="redirectHome()">
+        <button mat-flat-button color="accent" *ngFor="let letter of getLetters('header.home')">{{ letter }}</button>
+    </div>
+
+    <div *ngIf="isHomePage" id="admin" (click)="redirectAdmin()">
+        <button mat-flat-button color="accent" *ngFor="let letter of getLetters('header.admin')">{{ letter }}</button>
+    </div>
+
     <div>
         <img id="image" src="https://bit.ly/3m206ss" width="250" height="50" alt="Logo Scrabble" (click)="redirectHome()" />
     </div>
 
-    <button mat-fab color="primary" *ngIf="!userService.isConnected() || !userService.user.profilePicture" [matMenuTriggerFor]="accountMenu">
+    <button
+        id="user-icon"
+        mat-fab
+        color="primary"
+        *ngIf="!userService.isConnected() || !userService.user.profilePicture"
+        [matMenuTriggerFor]="accountMenu"
+    >
         <mat-icon>person</mat-icon>
     </button>
+
     <img
         mat-fab-button
         *ngIf="userService.isConnected() && userService.user.profilePicture"
         [src]="userService.user.profilePicture"
         [matMenuTriggerFor]="accountMenu"
-        class="selecter-avatar mat-elevation-z5"
+        class="selector-avatar mat-elevation-z5"
     />
 
     <mat-menu #accountMenu="matMenu">

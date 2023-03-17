@@ -1,47 +1,49 @@
-// #home,
-// #admin,
+#home,
+#admin,
 #toggle,
 #image {
     cursor: pointer;
 }
 
-// #home,
-// #admin {
-//     margin-left: 30px;
-// }
+#home,
+#admin {
+    display: flex;
+    position: absolute;
+    left: 16px;
+}
 
 #image {
-    justify-content: left;
-    margin-right: 30px;
+    justify-content: center;
+}
+
+#user-icon {
+    position: absolute;
+    right: 16px;
 }
 
 mat-toolbar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
 }
 
-// #home > *,
-// #admin > * {
-//     font-weight: 800;
-//     font-family: system-ui;
-//     display: flex;
-//     align-items: center;
-//     justify-content: center;
-//     background-color: #fbd7a3;
-//     border-radius: 3px;
-//     margin: 2px;
-//     margin-top: 30px;
-//     width: 35px;
-//     height: 35px;
-//     text-align: center;
-// }
-
-.selecter-avatar {
+.selector-avatar {
     margin-bottom: 20px;
     align-self: center;
     height: 56px;
     aspect-ratio: 1;
     border-radius: 50%;
     object-fit: cover;
+}
+
+.mdc-button {
+    font-weight: 800;
+    font-family: system-ui;
+    display: flex;
+    border-radius: 3px;
+    margin: 2px;
+    min-width: 35px;
+    min-height: 35px;
+    max-width: 35px;
+    max-height: 35px;
 }
