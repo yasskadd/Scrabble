@@ -35,6 +35,7 @@
         "game": "Partie"
     },
     "end_game": {
+        "screen_name": "Fin de la partie",
         "game_ended": "Fin de la partie",
         "return_to_menu": "Retour au menu principale"
     },
@@ -76,5 +77,11 @@
         "light_mode": "Thème Mode Clair",
         "dark_mode": "Thème Mode Sombre",
         "language": "Langue"
+    },
+    "board": {
+        "double_letter": "DOUBLE\nLETTRE",
+        "triple_letter": "TRIPLE\nLETTRE",
+        "double_word": "DOUBLE\nMOT",
+        "triple_word": "TRIPLE\nMOT"
     }
 }
