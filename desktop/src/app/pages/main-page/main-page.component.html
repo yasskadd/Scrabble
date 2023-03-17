@@ -1,5 +1,6 @@
 <div class="encapsulating-div">
     <app-header></app-header>
+
     <mat-drawer-container>
         <div class="always-visible-content">
             <button *ngIf="chatIsOpen" class="open-chat-button" mat-button color="primary" (click)="drawer.toggle()" (click)="closeChat()">
@@ -10,6 +11,7 @@
                 <mat-icon>chat_bubble_outline</mat-icon>
                 {{ "main_page.chat.open" | translate }}
             </button>
+
             <mat-card class="justified">
                 <mat-card-content class="justified">
                     <div
@@ -73,5 +75,5 @@
         </mat-drawer>
     </mat-drawer-container>
 
-    <app-footer background-color="primary"></app-footer>
+    <app-footer></app-footer>
 </div>
