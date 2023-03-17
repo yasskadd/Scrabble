@@ -1,12 +1,13 @@
 import { SECRET_KEY } from '@app/../very-secret-file';
-import { IUser } from '@app/interfaces/user';
 import { AccountStorageService } from '@app/services/database/account-storage.service';
+import { IUser } from '@common/interfaces/user';
 import { Request, Response, Router } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { Service } from 'typedi';
 
 const SUCCESS = 200;
 const ERROR = 401;
+const TEMP_REDIRECT = 307;
 
 @Service()
 export class AuthentificationController {
@@ -25,33 +26,34 @@ export class AuthentificationController {
                 res.sendStatus(SUCCESS);
                 return;
             }
+            // TODO : Language
             res.status(ERROR).json({
                 message: 'Username already exists',
             });
         });
 
-        this.router.delete('/login', async (req: Request, res: Response) => {
+        this.router.post('/login', async (req: Request, res: Response) => {
             const user: IUser = req.body;
-            if (await this.accountStorage.isUserRegistered(req.body.username)) {
+            if (await this.accountStorage.isUserRegistered(user.username)) {
                 const isLoginValid = await this.accountStorage.loginValidator(user);
                 if (isLoginValid) {
                     const token = this.createJWToken(user.username);
-                    res.status(SUCCESS)
-                        .cookie('session_token', token, {
-                            httpOnly: true,
-                        })
-                        .send('Cookie sent');
+                    res.status(SUCCESS).cookie('session_token', token).json({ message: 'Cookie sent' });
                     return;
                 }
             }
+            // TODO : Language
             res.status(ERROR).json({
                 message: 'invalid login credentials',
             });
         });
 
         this.router.post('/logout', async (req: Request, res: Response) => {
-            res.clearCookie('session_token');
-            res.redirect('/login');
+            res.clearCookie('session_token', {
+                domain: 'localhost',
+                path: '/',
+            });
+            res.redirect(TEMP_REDIRECT, '/auth/login');
         });
     }
 

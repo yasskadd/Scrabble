@@ -1,16 +1,18 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
+import { AppRoutes } from '@app/models/app-routes';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
-import { TimeService } from '@services/time.service';
+import { LanguageService } from '@app/services/language.service';
+import { TimeService } from '@app/services/time.service';
+import { UserService } from '@app/services/user.service';
 import { VirtualPlayersService } from '@app/services/virtual-players.service';
-import { GameTimeOptions } from '@common/models/game-time-options';
-import { GameDifficulty } from '@common/models/game-difficulty';
-import { AppRoutes } from '@app/models/app-routes';
 import { DictionaryEvents } from '@common/models/dictionary-events';
+import { GameDifficulty } from '@common/models/game-difficulty';
+import { GameTimeOptions } from '@common/models/game-time-options';
 import { SnackBarService } from '@services/snack-bar.service';
 
 @Component({
@@ -22,33 +24,60 @@ export class GameCreationPageComponent implements OnInit {
     timerList: number[];
     botName: string;
     playerName: string;
-    form: FormGroup;
     difficultyList: string[];
     dictionaryList: DictionaryInfo[];
     selectedFile: Dictionary | null;
-    private gameMode: string;
+
+    form: FormGroup;
+    playerForm: FormControl;
+    timerForm: FormControl;
+    difficultyForm: FormControl;
+    dictionaryForm: FormControl;
+
+    private readonly gameMode: string;
 
     constructor(
-        public virtualPlayers: VirtualPlayersService,
-        public gameConfiguration: GameConfigurationService,
-        public timer: TimeService,
-        private router: Router,
+        protected virtualPlayers: VirtualPlayersService,
+        protected gameConfiguration: GameConfigurationService,
+        protected timer: TimeService,
+        protected userService: UserService,
+        private languageService: LanguageService,
         private activatedRoute: ActivatedRoute,
-        private fb: FormBuilder,
+        private formBuilder: FormBuilder,
+        private router: Router,
         private readonly httpHandler: HttpHandlerService,
         private snackBarService: SnackBarService,
     ) {
         this.gameMode = this.activatedRoute.snapshot.params.id;
-        this.playerName = '';
         this.selectedFile = null;
+        this.difficultyList = [];
         this.timerList = [];
 
+        this.timerForm = new FormControl('', Validators.required);
+        this.difficultyForm = new FormControl('', Validators.required);
+        // TODO : Set default dictionary from server
+        this.dictionaryForm = new FormControl('Mon dictionnaire', Validators.required);
+
         // Fill arrays of values from enum constants
-        this.difficultyList = Object.values(GameDifficulty);
+        Object.values(GameDifficulty).forEach((value: GameDifficulty) => {
+            this.languageService.getWord(value as string).subscribe((word: string) => {
+                this.difficultyList.push(word);
+                this.difficultyForm.setValue(this.difficultyList[0]);
+            });
+        });
         Object.values(GameTimeOptions).forEach((value: any) => {
             if (typeof value === 'number') {
                 this.timerList.push(value);
             }
+
+            const defaultTimer = this.timerList.find((timerOption) => timerOption === GameTimeOptions.OneMinute);
+            this.timerForm.setValue(defaultTimer);
+        });
+
+        this.form = this.formBuilder.group({
+            timer: this.timerForm,
+            difficultyBot: this.difficultyForm,
+            dictionary: this.dictionaryForm,
         });
     }
 
@@ -56,13 +85,7 @@ export class GameCreationPageComponent implements OnInit {
         this.virtualPlayers.updateBotNames();
         this.gameConfiguration.resetRoomInformation();
 
-        const defaultTimer = this.timerList.find((timerOption) => timerOption === GameTimeOptions.OneMinute);
-        this.form = this.fb.group({
-            timer: [defaultTimer, Validators.required],
-            difficultyBot: [this.difficultyList[0], Validators.required],
-            dictionary: ['Mon dictionnaire', Validators.required],
-        });
-        (this.form.get('difficultyBot') as AbstractControl).valueChanges.subscribe(() => {
+        this.difficultyForm.valueChanges.subscribe(() => {
             this.updateBotList();
         });
 
@@ -84,8 +107,9 @@ export class GameCreationPageComponent implements OnInit {
         const dictionnaryTitleSelected = (this.form.get('dictionary') as AbstractControl).value;
 
         if (!this.dictionaryAvailable(dictionnaryTitleSelected)) {
-            // TODO : Language
-            this.snackBarService.openError(DictionaryEvents.UNAVAILABLE);
+            this.languageService.getWord(DictionaryEvents.UNAVAILABLE).subscribe((word: string) => {
+                this.snackBarService.openError(word);
+            });
             return;
         }
 
@@ -123,12 +147,6 @@ export class GameCreationPageComponent implements OnInit {
         return this.dictionaryList.some((dictionaryList) => dictionaryList.title === dictionaryTitle);
     }
 
-    private validateName(): void {
-        while (this.playerName.toLowerCase() === this.botName) {
-            this.setBotName();
-        }
-    }
-
     private getDictionary(title: string): DictionaryInfo {
         if (this.selectedFile !== null) return this.selectedFile;
         return this.dictionaryList.find((dictionary) => dictionary.title === title);
@@ -139,9 +157,8 @@ export class GameCreationPageComponent implements OnInit {
     }
 
     private initGame(dictionaryTitle: string): void {
-        if (this.isSoloMode()) this.validateName();
         this.gameConfiguration.gameInitialization({
-            username: this.playerName,
+            username: this.userService.user.username,
             timer: (this.form.get('timer') as AbstractControl).value,
             dictionary: dictionaryTitle,
             mode: this.gameMode,

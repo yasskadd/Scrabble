@@ -1,5 +1,7 @@
+import { AlphabetLetter } from '../models/alphabet-letter';
+
 export interface Letter {
-    value: string;
+    value: AlphabetLetter;
     quantity: number;
     points: number;
 }

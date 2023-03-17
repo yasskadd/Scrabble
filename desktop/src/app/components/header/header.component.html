@@ -1,15 +1,33 @@
-<!-- <div *ngIf="!isHomePage" id="home" (click)="redirectHome()">
-    <div *ngFor="let letter of homePage">{{ letter }}</div>
+<div *ngIf="!isHomePage" id="home" (click)="redirectHome()">
+    <div *ngFor="let letter of getLetters('header.home')">{{ letter }}</div>
 </div>
 
 <div *ngIf="isHomePage" id="admin" (click)="redirectAdmin()">
-    <div *ngFor="let letter of adminPage">{{ letter }}</div>
-</div> -->
-
-<div id="admin">
-    <div *ngFor="let letter of ['B', 'I', 'E', 'N', 'V', 'E', 'N', 'U', 'E']">{{ letter }}</div>
+    <div *ngFor="let letter of getLetters('header.admin')">{{ letter }}</div>
 </div>
 
 <div id="image">
     <img src="https://bit.ly/3m206ss" width="300" height="60" alt="Logo Scrabble" (click)="redirectHome()" />
 </div>
+
+<button mat-fab color="primary" *ngIf="!userService.isConnected() || !userService.user.profilePicture" [matMenuTriggerFor]="accountMenu">
+    <mat-icon>person</mat-icon>
+</button>
+<img
+    mat-fab-button
+    *ngIf="userService.isConnected() && userService.user.profilePicture"
+    [src]="userService.user.profilePicture"
+    [matMenuTriggerFor]="accountMenu"
+    class="selecter-avatar mat-elevation-z5"
+/>
+
+<mat-menu #accountMenu="matMenu">
+    <!-- Language -->
+    <button mat-menu-item (click)="redirectSettingsPage()" *ngIf="userService.isConnected()">Settings</button>
+    <!-- Language -->
+    <button mat-menu-item (click)="redirectUserPage()">Sign Up</button>
+    <!-- Language -->
+    <button mat-menu-item (click)="redirectLoginPage()" *ngIf="!userService.isConnected()">Sign In</button>
+    <!-- Language -->
+    <button mat-menu-item (click)="userService.logout()" *ngIf="userService.isConnected()">Sign Out</button>
+</mat-menu>

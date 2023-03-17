@@ -1,5 +1,4 @@
 export enum GameDifficulty {
-    // TODO : Language
-    Easy = 'Débutant',
-    Hard = 'Expert',
+    Easy = 'difficulty.beginner',
+    Hard = 'difficulty.expert',
 }

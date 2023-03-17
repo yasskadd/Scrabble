@@ -9,10 +9,10 @@ import { ClientSocketService } from '@app/services/communication/client-socket.s
 // import { GameClientService } from '@app/services/game-client.service';
 // import { GameConfigurationService } from '@app/services/game-configuration.service';
 import { SocketResponse } from '@app/interfaces/server-responses';
-import { UserService } from '@app/services/user.service';
-import { Subject } from 'rxjs';
-import { TimeService } from '@services/time.service';
 import { ChatCommand } from '@app/models/chat-command';
+import { UserService } from '@app/services/user.service';
+import { TimeService } from '@services/time.service';
+import { Subject } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
@@ -36,7 +36,7 @@ export class ChatboxHandlerService implements OnDestroy {
     }
 
     ngOnDestroy() {
-        this.leaveHomeRoom(this.userService.userName);
+        this.leaveHomeRoom(this.userService.user.username);
     }
 
     submitMessage(userInput: string): void {
@@ -44,8 +44,8 @@ export class ChatboxHandlerService implements OnDestroy {
         if (this.isCommand(userInput)) {
             this.sendCommand(userInput);
         } else {
-            this.sendMessage(message);
             this.messages.push(message);
+            this.sendMessage(message);
         }
     }
 
@@ -60,24 +60,24 @@ export class ChatboxHandlerService implements OnDestroy {
     subscribeToUserConnection(): Subject<SocketResponse> {
         const roomJoinedSubject: Subject<SocketResponse> = new Subject<SocketResponse>();
         this.clientSocket.on(SocketEvents.UserConnected, (userName: string) => {
-            if (userName === this.userService.userName) {
+            if (userName === this.userService.user.username) {
                 roomJoinedSubject.next({ validity: true });
                 this.loggedIn = true;
             }
         });
         this.clientSocket.on(SocketEvents.UserJoinedRoom, (userName: string) => {
-            if (userName === this.userService.userName) {
+            if (userName === this.userService.user.username) {
                 roomJoinedSubject.next({ validity: true });
                 this.loggedIn = true;
             }
         });
         this.clientSocket.on(SocketEvents.RoomIsFull, (userName: string) => {
-            if (userName === this.userService.userName) {
+            if (userName === this.userService.user.username) {
                 roomJoinedSubject.next({ validity: false, socketMessage: SocketEvents.RoomIsFull });
             }
         });
         this.clientSocket.on(SocketEvents.UsernameTaken, (userName: string) => {
-            if (userName === this.userService.userName) {
+            if (userName === this.userService.user.username) {
                 roomJoinedSubject.next({ validity: false, socketMessage: SocketEvents.UsernameTaken });
             }
         });
@@ -88,7 +88,7 @@ export class ChatboxHandlerService implements OnDestroy {
     subscribeToUserDisconnecting(): Subject<void> {
         const roomLeftSubject: Subject<void> = new Subject<void>();
         this.clientSocket.on(SocketEvents.UserLeftHomeRoom, (userName: string) => {
-            if (userName === this.userService.userName) {
+            if (userName === this.userService.user.username) {
                 roomLeftSubject.next();
                 this.loggedIn = false;
                 this.messages = [];
@@ -171,7 +171,7 @@ export class ChatboxHandlerService implements OnDestroy {
 
     private configureUserMessage(userInput: string): ChatboxMessage {
         return {
-            username: this.userService.userName,
+            username: this.userService.user.username,
             type: 'client',
             message: userInput,
             timeStamp: this.timerService.getTimeStampNow(),

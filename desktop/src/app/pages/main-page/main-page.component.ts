@@ -8,6 +8,7 @@ import { SocketResponse } from '@app/interfaces/server-responses';
 import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
 import { UserService } from '@app/services/user.service';
 import { SocketEvents } from '@common/constants/socket-events';
+import { LanguageService } from '@services/language.service';
 import { Subject } from 'rxjs';
 
 @Component({
@@ -31,6 +32,7 @@ export class MainPageComponent implements OnDestroy {
     constructor(
         protected chatBoxHandlerService: ChatboxHandlerService,
         protected userService: UserService,
+        protected languageService: LanguageService,
         private dialog: MatDialog,
         private highScore: MatDialog,
     ) {
@@ -61,7 +63,6 @@ export class MainPageComponent implements OnDestroy {
         this.highScore.open(DialogBoxHighScoresComponent, {
             width: this.dialogWidthHighScore,
             panelClass: 'highScoreComponent',
-            disableClose: true,
         });
     }
 
@@ -77,29 +78,35 @@ export class MainPageComponent implements OnDestroy {
         if (this.chatBoxHandlerService.loggedIn) return;
         this.userNameForm.markAsTouched();
 
-        this.userService.userName = this.userNameForm.value;
-        this.chatBoxHandlerService.joinHomeRoom(this.userService.userName);
+        this.userService.user.username = this.userNameForm.value;
+        this.chatBoxHandlerService.joinHomeRoom(this.userService.user.username);
     }
 
     logOut(): void {
-        this.chatBoxHandlerService.leaveHomeRoom(this.userService.userName);
+        this.chatBoxHandlerService.leaveHomeRoom(this.userService.user.username);
     }
 
     getErrorMessage(): string {
         let message = '';
         switch (this.homeConnectionResponse.socketMessage) {
             case SocketEvents.UsernameTaken: {
-                message = "Le nom d'utilisateur existe déjà";
+                this.languageService.getWord('error.connection.usernameAlreadyExists').subscribe((word: string) => {
+                    message = word;
+                });
                 break;
             }
             case SocketEvents.RoomIsFull: {
-                message = 'Impossible de se connecter à la salle';
+                this.languageService.getWord('error.connection.roomFull').subscribe((word: string) => {
+                    message = word;
+                });
                 break;
             }
         }
 
         if (this.userNameForm.hasError('required')) {
-            message = 'Le nom ne peut pas être vide';
+            this.languageService.getWord('error.connection.empty').subscribe((word: string) => {
+                message = word;
+            });
         }
 
         return message;
@@ -124,7 +131,7 @@ export class MainPageComponent implements OnDestroy {
 
         this.disconnectionSubject = this.chatBoxHandlerService.subscribeToUserDisconnecting();
         this.disconnectionSubject.subscribe(() => {
-            this.userService.userName = '';
+            this.userService.user.username = '';
             this.userNameForm.setValue('');
         });
     }

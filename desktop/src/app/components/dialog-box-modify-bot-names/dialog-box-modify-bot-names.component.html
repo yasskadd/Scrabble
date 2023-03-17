@@ -1,7 +1,7 @@
 <div mat-dialog-content>
-    <p>Nom a remplacer</p>
+    <p>{{ "virtual_player.name" | translate }}</p>
     <mat-form-field appearance="fill">
-        <mat-label>nouveau Nom</mat-label>
+        <mat-label> {{ "virtual_player.new_name" | translate }} </mat-label>
         <input matInput maxlength="20" [(ngModel)]="data.newName" />
         <mat-hint
             [ngClass]="{
@@ -13,6 +13,6 @@
     </mat-form-field>
 </div>
 <div mat-dialog-actions>
-    <button mat-button (click)="onNoClick()">No Thanks</button>
-    <button mat-button [mat-dialog-close]="data.newName" cdkFocusInitial>Ok</button>
+    <button mat-button (click)="onNoClick()">{{ "action.no_thanks" | translate }}</button>
+    <button mat-button [mat-dialog-close]="data.newName" cdkFocusInitial>{{ "action.ok" | translate }}</button>
 </div>

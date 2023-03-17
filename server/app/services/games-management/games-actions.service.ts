@@ -84,7 +84,7 @@ export class GamesActionsService {
         }
         player.exchangeLetter(letters);
         socket.broadcast.to(player.room).emit(SocketEvents.GameMessage, `!echanger ${lettersToExchange} lettres`);
-        this.gamesHandler.updatePlayerInfo(socket, player.room, player.game);
+        this.gamesHandler.updatePlayerInfo(player.room, player.game);
         this.socketManager.emitRoom(player.room, SocketEvents.Play, player.getInformation(), player.game.turn.activePlayer);
     }
 
@@ -108,7 +108,7 @@ export class GamesActionsService {
             gameboard: play.gameboard.gameboardTiles,
             activePlayer: player.game.turn.activePlayer,
         });
-        this.gamesHandler.updatePlayerInfo(socket, player.room, player.game);
+        this.gamesHandler.updatePlayerInfo(player.room, player.game);
         this.sendValidCommand(play, socket, player.room, commandWrite);
     }
 

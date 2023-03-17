@@ -1,33 +1,28 @@
-<h1 mat-dialog-title>Scrabble {{ gameMode }}</h1>
-<div class='container'>
+<div class="container">
+    <button [routerLink]="singleplayerLink" id="solo" class="button" mat-raised-button color="primary" mat-dialog-close="">
+        {{ "main_page.play_dialog.solo" | translate }}
+        <mat-icon class="button-icon">smart_toy</mat-icon>
+    </button>
     <button
-        [routerLink]='[multiplayerCreateLink]'
-        id='multiplayer-create'
-        class='button multiplayer'
+        [routerLink]="[multiplayerCreateLink]"
+        id="multiplayer-create"
+        class="button multiplayer"
         mat-raised-button
-        color='primary'
-        mat-dialog-close=''
+        color="primary"
+        mat-dialog-close=""
     >
-        Creer une partie multijoueur
-        <mat-icon class='button-icon'>create</mat-icon>
+        {{ "action.create" | translate }}
+        <mat-icon class="button-icon">create</mat-icon>
     </button>
 
-    <button [routerLink]='multiplayerjoinLink' id='multiplayer-join' class='button multiplayer' mat-raised-button
-            color='primary'
-            mat-dialog-close=''>
-        Rejoindre une partie multijoueur
-        <mat-icon class='button-icon'>leak_add</mat-icon>
-    </button>
-
-    <button [routerLink]='singleplayerLink' id='solo' class='button' mat-raised-button color='primary'
-            mat-dialog-close=''>
-        Jouer une partie solo
-        <mat-icon class='button-icon'>smart_toy</mat-icon>
+    <button [routerLink]="multiplayerjoinLink" id="multiplayer-join" class="button multiplayer" mat-raised-button color="primary" mat-dialog-close="">
+        {{ "action.join" | translate }}
+        <mat-icon class="button-icon">leak_add</mat-icon>
     </button>
 </div>
-<div class='action-container' mat-dialog-actions>
-    <button class='return' mat-button mat-dialog-close=''>
+<div class="action-container" mat-dialog-actions>
+    <button class="return" mat-button mat-dialog-close="">
         <mat-icon>navigate_before</mat-icon>
-        retourner
+        {{ "action.back" | translate }}
     </button>
 </div>
