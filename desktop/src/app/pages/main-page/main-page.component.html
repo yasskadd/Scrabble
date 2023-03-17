@@ -2,14 +2,13 @@
     <app-header></app-header>
     <mat-drawer-container>
         <div class="always-visible-content">
-            <!-- <button *ngIf="!chatIsOpen" class="open-chat-button" mat-raised-button color="primary" (click)="drawer.toggle()" (click)="openChat()">
-            <button hidden *ngIf="!chatIsOpen" class="open-chat-button" mat-button (click)="drawer.toggle()" (click)="openChat()"> -->
-            <!-- <mat-icon>chat_bubble_outline</mat-icon>
-                {{ "main_page.chat.open" | translate }}
-            </button> -->
-            <button hidden *ngIf="chatIsOpen" class="open-chat-button" mat-button (click)="drawer.toggle()" (click)="closeChat()">
+            <button *ngIf="chatIsOpen" class="open-chat-button" mat-button color="primary" (click)="drawer.toggle()" (click)="closeChat()">
                 <mat-icon>keyboard_arrow_left</mat-icon>
                 {{ "main_page.chat.close" | translate }}
+            </button>
+            <button *ngIf="!chatIsOpen" class="open-chat-button" mat-button color="primary" (click)="drawer.toggle()" (click)="openChat()">
+                <mat-icon>chat_bubble_outline</mat-icon>
+                {{ "main_page.chat.open" | translate }}
             </button>
             <mat-card class="justified">
                 <mat-card-content class="justified">
