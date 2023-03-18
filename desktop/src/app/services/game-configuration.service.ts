@@ -6,6 +6,7 @@ import { GameStatus } from '@app/models/game-status';
 import { SocketEvents } from '@common/constants/socket-events';
 import { ReplaySubject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
+import { GameClientService } from './game-client.service';
 
 @Injectable({
     providedIn: 'root',
@@ -17,7 +18,7 @@ export class GameConfigurationService {
     isRoomJoinable: ReplaySubject<boolean>;
     errorReason: ReplaySubject<string>;
 
-    constructor(private clientSocket: ClientSocketService) {
+    constructor(private gameClient: GameClientService, private clientSocket: ClientSocketService) {
         this.availableRooms = [];
         this.roomInformation = {
             playerName: [],
@@ -41,8 +42,8 @@ export class GameConfigurationService {
             this.joinValidGameEvent(playerName);
         });
 
-        this.clientSocket.on(SocketEvents.RejectByOtherPlayer, (reason: string) => {
-            this.rejectByOtherPlayerEvent(reason);
+        this.clientSocket.on(SocketEvents.RejectByOtherPlayer, (name: string) => {
+            this.rejectByOtherPlayerEvent(name);
         });
 
         this.clientSocket.on(SocketEvents.GameAboutToStart, (socketIDUserRoom: string[]) => {
@@ -99,8 +100,8 @@ export class GameConfigurationService {
         this.resetRoomInformation();
     }
 
-    rejectOpponent(): void {
-        this.clientSocket.send(SocketEvents.RejectOpponent, this.roomInformation.roomId);
+    rejectOpponent(playerName: string): void {
+        this.clientSocket.send(SocketEvents.RejectOpponent, { id: this.roomInformation.roomId, name: playerName });
         this.roomInformation.statusGame = GameStatus.SearchingOpponent;
         this.roomInformation.playerName.pop();
     }
@@ -162,7 +163,9 @@ export class GameConfigurationService {
     }
 
     private foundAnOpponentEvent(opponentName: string): void {
-        this.roomInformation.playerName[1] = opponentName;
+        if (this.roomInformation.playerName.length < 4) {
+            this.roomInformation.playerName.push(opponentName);
+        }
         this.roomInformation.statusGame = GameStatus.FoundOpponent;
     }
 
@@ -181,10 +184,13 @@ export class GameConfigurationService {
         this.setIsGameStartedSubject();
     }
 
-    private rejectByOtherPlayerEvent(reason: string): void {
+    private rejectByOtherPlayerEvent(name: string): void {
+        if (name !== this.gameClient.playerOne.name) return;
+
         this.clientSocket.send(SocketEvents.RejectByOtherPlayer, { id: this.roomInformation.roomId, name: this.roomInformation.playerName[0] });
         this.resetRoomInformation();
-        this.setErrorSubject(reason);
+        // TODO : Language
+        this.setErrorSubject('Rejected by other player');
     }
 
     private joinValidGameEvent(playerName: string): void {

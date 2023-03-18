@@ -10,7 +10,7 @@ const SECOND = 1000;
 const PLAYERS_JOINING_ROOM = 'joinGameRoom';
 const SAME_USER_IN_ROOM_ERROR = "L'adversaire a le même nom";
 const ROOM_NOT_AVAILABLE_ERROR = "La salle n'est plus disponible";
-const PLAYERS_REJECT_FROM_ROOM_ERROR = "L'adversaire à rejeter votre demande";
+// const PLAYERS_REJECT_FROM_ROOM_ERROR = "L'adversaire à rejeter votre demande";
 
 type Parameters = { id: string; name: string };
 
@@ -45,8 +45,8 @@ export class GameSessions {
             this.removeRoom(sio, roomID);
         });
 
-        this.socketManager.on(SocketEvents.RejectOpponent, (socket, roomId: string) => {
-            this.rejectOpponent(socket, roomId);
+        this.socketManager.on(SocketEvents.RejectOpponent, (socket, data: { roomId: string; name: string }) => {
+            this.rejectOpponent(socket, data);
         });
 
         this.socketManager.on(SocketEvents.JoinRoom, (socket, roomID: string) => {
@@ -69,8 +69,8 @@ export class GameSessions {
         socket.join(roomID);
     }
 
-    private rejectOpponent(this: this, socket: Socket, roomId: string): void {
-        socket.broadcast.to(roomId).emit(SocketEvents.RejectByOtherPlayer, PLAYERS_REJECT_FROM_ROOM_ERROR);
+    private rejectOpponent(this: this, socket: Socket, data: { roomId: string; name: string }): void {
+        socket.broadcast.to(data.roomId).emit(SocketEvents.RejectByOtherPlayer, data.name);
     }
 
     private roomLobby(this: this, sio: Server, socket: Socket): void {
