@@ -6,7 +6,6 @@ import { GameStatus } from '@app/models/game-status';
 import { SocketEvents } from '@common/constants/socket-events';
 import { ReplaySubject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
-import { GameClientService } from './game-client.service';
 
 @Injectable({
     providedIn: 'root',
@@ -18,7 +17,7 @@ export class GameConfigurationService {
     isRoomJoinable: ReplaySubject<boolean>;
     errorReason: ReplaySubject<string>;
 
-    constructor(private gameClient: GameClientService, private clientSocket: ClientSocketService) {
+    constructor(private clientSocket: ClientSocketService) {
         this.availableRooms = [];
         this.roomInformation = {
             playerName: [],
@@ -87,8 +86,10 @@ export class GameConfigurationService {
     }
 
     removeRoom(): void {
-        if (this.roomInformation.playerName[1]) {
-            this.rejectOpponent();
+        if (this.roomInformation.playerName.length > 1) {
+            for (let i = 1; i < this.roomInformation.playerName.length; i++) {
+                this.rejectOpponent(this.roomInformation.playerName[i]);
+            }
         }
         this.clientSocket.send(SocketEvents.RemoveRoom, this.roomInformation.roomId);
         this.roomInformation.roomId = '';
