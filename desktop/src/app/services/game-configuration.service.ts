@@ -104,7 +104,11 @@ export class GameConfigurationService {
     rejectOpponent(playerName: string): void {
         this.clientSocket.send(SocketEvents.RejectOpponent, { id: this.roomInformation.roomId, name: playerName });
         this.roomInformation.statusGame = GameStatus.SearchingOpponent;
-        this.roomInformation.playerName.pop();
+        // this.roomInformation.playerName.pop();
+        this.roomInformation.playerName = this.roomInformation.playerName.filter((name: string) => {
+            // TODO : Is name verification enough here?
+            playerName !== name;
+        });
     }
 
     gameInitialization(parameters: GameParameters): void {
@@ -116,7 +120,7 @@ export class GameConfigurationService {
         this.clientSocket.send(SocketEvents.CreateGame, parameters);
         this.roomInformation.timer = parameters.timer;
         this.roomInformation.dictionary = parameters.dictionary;
-        this.roomInformation.playerName[0] = parameters.username;
+        this.roomInformation.playerName.push(parameters.username);
         this.roomInformation.isCreator = true;
         this.roomInformation.mode = parameters.mode;
     }
