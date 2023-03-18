@@ -159,7 +159,7 @@ export class GameConfigurationService {
 
     private gameCreatedConfirmationEvent(roomId: string): void {
         this.roomInformation.roomId = roomId;
-        if (this.roomInformation.playerName[1]) this.clientSocket.send(SocketEvents.StartScrabbleGame, this.roomInformation.roomId);
+        // if (this.roomInformation.playerName[1]) this.clientSocket.send(SocketEvents.StartScrabbleGame, this.roomInformation.roomId);
     }
 
     private opponentLeaveEvent(): void {
