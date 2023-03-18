@@ -70,7 +70,7 @@ export class GameSessions {
     }
 
     private rejectOpponent(this: this, socket: Socket, parameters: Parameters): void {
-        socket.broadcast.to(parameters.roomId).emit(SocketEvents.RejectByOtherPlayer, parameters.name);
+        socket.broadcast.to(parameters.id).emit(SocketEvents.RejectByOtherPlayer, parameters.name);
     }
 
     private roomLobby(this: this, sio: Server, socket: Socket): void {
