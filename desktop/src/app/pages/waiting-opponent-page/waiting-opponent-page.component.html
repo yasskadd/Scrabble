@@ -14,11 +14,25 @@
         </div>
 
         <mat-card>
-            <div class="waiting-opponent-container">
-                <span>{{ gameConfiguration.roomInformation.playerName[0] }}</span>
-                <span>vs</span>
-                <span>{{ gameConfiguration.roomInformation.playerName[1] }}</span>
-            </div>
+            <mat-card-content class="waiting-opponent-container">
+                <div class="pending-player" *ngFor="let playerName of gameConfiguration.roomInformation.playerName; index as i">
+                    <!-- TODO : Language -->
+                    <span class="player-infos">
+                        <img mat-fab-button [src]="userService.user.profilePicture.key" class="selecter-avatar" />
+                        {{ playerName }}
+                    </span>
+                    <button
+                        *ngIf="gameConfiguration.roomInformation.isCreator"
+                        class="rejectButton"
+                        (click)="gameConfiguration.rejectOpponent(playerName)"
+                        mat-raised-button
+                        [disabled]="!gameConfiguration.roomInformation.playerName[1]"
+                    >
+                        {{ "waiting_page.reject" | translate }}
+                    </button>
+                </div>
+                <div class="pending-cpu" *ngFor="let playerName of gameCon"></div>
+            </mat-card-content>
             <mat-progress-bar
                 mode="indeterminate"
                 *ngIf="!gameConfiguration.roomInformation.playerName[1] || !gameConfiguration.roomInformation.isCreator"
@@ -31,19 +45,10 @@
             <div id="player-decision">
                 <button
                     *ngIf="gameConfiguration.roomInformation.isCreator"
-                    class="rejectButton"
-                    (click)="gameConfiguration.rejectOpponent()"
-                    mat-raised-button
-                    [disabled]="!gameConfiguration.roomInformation.playerName[1]"
-                >
-                    {{ "waiting_page.reject" | translate }}
-                </button>
-                <button
-                    *ngIf="gameConfiguration.roomInformation.isCreator"
                     class="startButton"
                     (click)="gameConfiguration.beginScrabbleGame()"
                     mat-raised-button
-                    [disabled]="!gameConfiguration.roomInformation.playerName[1]"
+                    [disabled]="gameConfiguration.roomInformation.playerName.lenght < 2"
                 >
                     {{ "action.start" | translate }}
                 </button>

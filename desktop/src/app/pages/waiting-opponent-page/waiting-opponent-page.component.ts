@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
+import { UserService } from '@app/services/user.service';
 import { SnackBarService } from '@services/snack-bar.service';
 
 @Component({
@@ -13,7 +14,8 @@ export class WaitingOpponentPageComponent implements OnInit, OnDestroy {
     gameMode: string;
 
     constructor(
-        public gameConfiguration: GameConfigurationService,
+        protected gameConfiguration: GameConfigurationService,
+        protected userService: UserService,
         private router: Router,
         private snackBarService: SnackBarService,
         private activatedRoute: ActivatedRoute,
