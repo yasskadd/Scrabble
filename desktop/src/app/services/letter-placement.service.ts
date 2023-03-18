@@ -214,7 +214,7 @@ export class LetterPlacementService {
     }
 
     handleTileClick(tile: BoardTileInfo) {
-        if (this.placingMode && this.placingMode === PlacingState.Drag) return;
+        if (this.placedLetters.length !== 0) return;
 
         if (tile.coord !== this.origin) {
             this.origin = tile.coord;
