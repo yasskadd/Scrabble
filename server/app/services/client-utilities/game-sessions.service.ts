@@ -45,8 +45,8 @@ export class GameSessions {
             this.removeRoom(sio, roomID);
         });
 
-        this.socketManager.on(SocketEvents.RejectOpponent, (socket, data: { roomId: string; name: string }) => {
-            this.rejectOpponent(socket, data);
+        this.socketManager.on(SocketEvents.RejectOpponent, (socket, parameters: Parameters) => {
+            this.rejectOpponent(socket, parameters);
         });
 
         this.socketManager.on(SocketEvents.JoinRoom, (socket, roomID: string) => {
@@ -69,8 +69,8 @@ export class GameSessions {
         socket.join(roomID);
     }
 
-    private rejectOpponent(this: this, socket: Socket, data: { roomId: string; name: string }): void {
-        socket.broadcast.to(data.roomId).emit(SocketEvents.RejectByOtherPlayer, data.name);
+    private rejectOpponent(this: this, socket: Socket, parameters: Parameters): void {
+        socket.broadcast.to(parameters.roomId).emit(SocketEvents.RejectByOtherPlayer, parameters.name);
     }
 
     private roomLobby(this: this, sio: Server, socket: Socket): void {
@@ -119,11 +119,9 @@ export class GameSessions {
     }
 
     private rejectByOtherPlayer(this: this, sio: Server, socket: Socket, parameters: Parameters): void {
-        const roomId = parameters.id;
-        const playerName = parameters.name;
-        socket.leave(roomId);
+        socket.leave(parameters.id);
         socket.join(PLAYERS_JOINING_ROOM);
-        this.removeUserFromRoom(playerName, socket.id, roomId);
+        this.removeUserFromRoom(parameters.name, socket.id, parameters.id);
         sio.to(PLAYERS_JOINING_ROOM).emit(SocketEvents.UpdateRoomJoinable, this.getAvailableRooms());
     }
 
