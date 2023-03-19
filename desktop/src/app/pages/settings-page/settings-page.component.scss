@@ -29,3 +29,17 @@ body {
     align-items: normal;
     margin-bottom: 16px;
 }
+
+.avatar-selector {
+    margin-bottom: 20px;
+    align-self: center;
+}
+
+.selecter-avatar {
+    margin-bottom: 20px;
+    align-self: center;
+    height: 56px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    object-fit: cover;
+}
