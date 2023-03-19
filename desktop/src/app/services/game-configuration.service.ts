@@ -4,7 +4,7 @@ import { GameRoomClient } from '@app/interfaces/game-room-client';
 import { RoomInformation } from '@app/interfaces/room-information';
 import { GameStatus } from '@app/models/game-status';
 import { SocketEvents } from '@common/constants/socket-events';
-import { ReplaySubject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
 import { IUser } from '@common/interfaces/user';
 import { UserService } from '@services/user.service';
@@ -20,15 +20,22 @@ import { Router } from '@angular/router';
 })
 export class GameConfigurationService {
     roomInformation: RoomInformation;
+    isGameStarted: Subject<boolean>;
+    isRoomJoinable: Subject<boolean>;
+    errorReason: string;
     availableRooms: GameRoomClient[];
-    isGameStarted: ReplaySubject<boolean>;
-    isRoomJoinable: ReplaySubject<boolean>;
-    errorReason: ReplaySubject<string>;
+    gameMode: string;
 
-    constructor(private clientSocket: ClientSocketService) {
+    constructor(
+        private snackBarService: SnackBarService,
+        private userService: UserService,
+        private clientSocket: ClientSocketService,
+        private httpHandlerService: HttpHandlerService,
+        private router: Router,
+    ) {
         this.availableRooms = [];
         this.roomInformation = {
-            playerName: [],
+            players: [],
             roomId: '',
             timer: 0,
             isCreator: false,
@@ -38,9 +45,8 @@ export class GameConfigurationService {
             dictionary: '',
         };
         this.clientSocket.establishConnection();
-        this.isRoomJoinable = new ReplaySubject<boolean>(1);
-        this.isGameStarted = new ReplaySubject<boolean>(1);
-        this.errorReason = new ReplaySubject<string>(1);
+        this.isRoomJoinable = new Subject<boolean>();
+        this.isGameStarted = new Subject<boolean>();
         this.configureBaseSocketFeatures();
     }
 
@@ -66,31 +72,20 @@ export class GameConfigurationService {
         });
 
         this.clientSocket.on(SocketEvents.UpdateRoomJoinable, (gamesToJoin: GameRoomClient[]) => {
-            this.updateAvailableRooms(gamesToJoin);
+            this.availableRooms = this.filterGameMode(this.roomInformation.mode, gamesToJoin);
         });
 
         this.clientSocket.on(SocketEvents.ErrorJoining, (reason: string) => {
-            this.setErrorSubject(reason);
+            if (reason) {
+                this.snackBarService.openError(reason);
+                this.exitRoom(false);
+            }
+            this.exitRoom();
         });
 
-        this.clientSocket.on(SocketEvents.OpponentLeave, () => {
-            this.opponentLeaveEvent();
+        this.clientSocket.on(SocketEvents.OpponentLeave, (player: IUser) => {
+            this.opponentLeaveEvent(player);
         });
-    }
-
-    setIsGameStartedSubject(): void {
-        this.isGameStarted.next(true);
-        this.isGameStarted = new ReplaySubject<boolean>(1);
-    }
-
-    setRoomJoinableSubject(): void {
-        this.isRoomJoinable.next(true);
-        this.isRoomJoinable = new ReplaySubject<boolean>(1);
-    }
-
-    setErrorSubject(reason: string): void {
-        this.errorReason.next(reason);
-        this.errorReason = new ReplaySubject<string>(1);
     }
 
     removeRoom(): void {
@@ -220,7 +215,8 @@ export class GameConfigurationService {
                 botDifficulty: this.roomInformation.botDifficulty,
             } as GameScrabbleInformation);
         }
-        this.setIsGameStartedSubject();
+
+        this.isGameStarted.next(true);
     }
 
     private rejectByOtherPlayerEvent(name: string): void {
@@ -233,7 +229,8 @@ export class GameConfigurationService {
         this.resetRoomInformation();
 
         // TODO : Language
-        this.setErrorSubject('Rejected by other player');
+        this.snackBarService.openError('Rejected by other player');
+        this.exitRoom(false);
     }
 
     private joinValidGameEvent(allPlayers: IUser[]): void {
@@ -241,8 +238,7 @@ export class GameConfigurationService {
         this.roomInformation.statusGame = GameStatus.WaitingOpponentConfirmation;
         this.roomInformation.players = [...allPlayers];
 
-    private updateAvailableRooms(availableRooms: GameRoomClient[]): void {
-        this.availableRooms = this.filterGameMode(this.roomInformation.mode, availableRooms);
+        this.router.navigate([`${AppRoutes.MultiWaitingPage}/${this.gameMode}`]).then();
     }
 
     private filterGameMode(gameMode: string, availableRooms: GameRoomClient[]): GameRoomClient[] {
