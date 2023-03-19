@@ -173,7 +173,8 @@ export class GameConfigurationService {
 
     updateAvailableRooms(): void {
         this.httpHandlerService.getAvailableRooms().subscribe((rooms: GameRoomClient[]) => {
-            this.availableRooms = this.filterGameMode(this.roomInformation.mode, rooms);
+            // this.availableRooms = this.filterGameMode(this.roomInformation.mode, rooms);
+            this.availableRooms = rooms;
         });
     }
 
@@ -257,8 +258,10 @@ export class GameConfigurationService {
     }
 
     private filterGameMode(gameMode: string, availableRooms: GameRoomClient[]): GameRoomClient[] {
-        return availableRooms.filter((element) => {
-            return element.mode === gameMode;
+        if (!gameMode) return availableRooms;
+
+        return availableRooms.filter((element: GameRoomClient) => {
+            return !element.mode || element.mode === gameMode;
         });
     }
 
