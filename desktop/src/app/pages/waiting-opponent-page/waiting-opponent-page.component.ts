@@ -19,6 +19,11 @@ export class WaitingOpponentPageComponent implements OnDestroy, AfterContentChec
         this.gameConfiguration.gameMode = this.activatedRoute.snapshot.params.id;
     }
 
+    @HostListener('window:popstate', ['$event'])
+    onPopState() {
+        this.gameConfiguration.exitRoom(true);
+    }
+
     ngAfterContentChecked(): void {
         this.listenToServerResponse();
     }
@@ -33,11 +38,6 @@ export class WaitingOpponentPageComponent implements OnDestroy, AfterContentChec
                 this.joinGamePage();
             }
         });
-    }
-
-    @HostListener('window:popstate', ['$event'])
-    onPopState() {
-        this.gameConfiguration.exitRoom(true);
     }
 
     joinSoloMode() {
