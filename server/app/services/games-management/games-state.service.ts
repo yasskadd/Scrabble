@@ -10,7 +10,7 @@ import { RealPlayer } from '@app/classes/player/real-player.class';
 import { Turn } from '@app/classes/turn.class';
 import { WordSolver } from '@app/classes/word-solver.class';
 import { BOT_BEGINNER_DIFFICULTY } from '@app/constants/bot';
-import { NUMBER_OF_PLAYERS } from '@app/constants/players';
+import { NUMBER_OF_PLAYERS } from '@common/constants/players';
 import { Behavior } from '@app/interfaces/behavior';
 import { GameScrabbleInformation } from '@common/interfaces/game-scrabble-information';
 import { ScoreStorageService } from '@app/services/database/score-storage.service';

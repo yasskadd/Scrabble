@@ -1,19 +1,20 @@
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { GameParameters } from '@app/interfaces/game-parameters';
 import { GameRoomClient } from '@app/interfaces/game-room-client';
 import { RoomInformation } from '@app/interfaces/room-information';
+import { AppRoutes } from '@app/models/app-routes';
 import { GameStatus } from '@app/models/game-status';
+import { NUMBER_OF_PLAYERS } from '@common/constants/players';
 import { SocketEvents } from '@common/constants/socket-events';
-import { Subject } from 'rxjs';
-import { ClientSocketService } from './communication/client-socket.service';
-import { IUser } from '@common/interfaces/user';
-import { UserService } from '@services/user.service';
-import { PlayerRoomInfo } from '@common/interfaces/player-room-info';
 import { GameScrabbleInformation } from '@common/interfaces/game-scrabble-information';
+import { PlayerRoomInfo } from '@common/interfaces/player-room-info';
+import { IUser } from '@common/interfaces/user';
 import { HttpHandlerService } from '@services/communication/http-handler.service';
 import { SnackBarService } from '@services/snack-bar.service';
-import { AppRoutes } from '@app/models/app-routes';
-import { Router } from '@angular/router';
+import { UserService } from '@services/user.service';
+import { Subject } from 'rxjs';
+import { ClientSocketService } from './communication/client-socket.service';
 
 @Injectable({
     providedIn: 'root',
@@ -197,7 +198,7 @@ export class GameConfigurationService {
     }
 
     private foundAnOpponentEvent(opponent: IUser): void {
-        if (this.roomInformation.players.length < 4) {
+        if (this.roomInformation.players.length < NUMBER_OF_PLAYERS) {
             this.roomInformation.players.push(opponent);
         }
         this.roomInformation.statusGame = GameStatus.FoundOpponent;
