@@ -1,44 +1,48 @@
-<body class="justified">
-    <mat-card class="wrapper">
-        <mat-card-title> {{ "new_game_page.available_games" | translate }} </mat-card-title>
-        <mat-card class="list-container">
-            <table class="roomAvailable" *ngIf="availableRooms.length > 0">
-                <thead class="tableContainer">
-                    <tr>
-                        <th>{{ "new_game_page.label.name" | translate }}</th>
-                        <th>{{ "new_game_page.label.difficulty" | translate }}</th>
-                        <th>{{ "new_game_page.label.timer" | translate }}</th>
-                        <th>{{ "new_game_page.label.dictionary" | translate }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let gameRoom of availableRooms">
-                        <td>{{ gameRoom.users }}</td>
-                        <td>{{ gameRoom.mode }}</td>
-                        <td>{{ timer.getTimeStamp(gameRoom.timer) }}</td>
-                        <td>{{ gameRoom.dictionary }}</td>
-                        <button class="join-game" (click)="joinRoom(gameRoom.id)" mat-raised-button>
-                            {{ "action.join" | translate }}
-                        </button>
-                    </tr>
-                </tbody>
-            </table>
-            <a class="noRoomAvailable" *ngIf="availableRooms.length === 0"> {{ "new_game_page.no_available_games" | translate }} </a>
-        </mat-card>
-
-        <div class="container-button">
-            <button class="return-button" mat-icon-button routerLink="/home">
-                <mat-icon>navigate_before</mat-icon>
-            </button>
-            <button
-                *ngIf="availableRooms.length !== 0"
-                class="join-random-game-button"
-                (click)="joinRandomGame()"
-                mat-raised-button
-                [disabled]="availableRooms.length <= 1"
-            >
-                {{ "new_game_page.random" | translate }}
-            </button>
-        </div>
+<body class='justified'>
+<mat-card class='wrapper'>
+    <mat-card-title> {{ "new_game_page.available_games" | translate }} </mat-card-title>
+    <mat-card class='list-container'>
+        <table class='roomAvailable' *ngIf='availableRooms.length > 0'>
+            <thead class='tableContainer'>
+            <tr>
+                <th>{{ "new_game_page.label.name" | translate }}</th>
+                <th>{{ "new_game_page.label.difficulty" | translate }}</th>
+                <th>{{ "new_game_page.label.timer" | translate }}</th>
+                <th>{{ "new_game_page.label.dictionary" | translate }}</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor='let gameRoom of availableRooms'>
+                <td>{{ gameRoom.users }}</td>
+                <td>{{ gameRoom.mode }}</td>
+                <td>{{ timer.getTimeStamp(gameRoom.timer) }}</td>
+                <td>{{ gameRoom.dictionary }}</td>
+                <button class='join-game' (click)='joinRoom(gameRoom)' mat-raised-button>
+                    {{ "action.join" | translate }}
+                </button>
+            </tr>
+            </tbody>
+        </table>
+        <a class='noRoomAvailable'
+           *ngIf='availableRooms.length === 0'> {{ "new_game_page.no_available_games" | translate }} </a>
     </mat-card>
+
+    <div class='container-button'>
+        <button class='return-button' mat-icon-button routerLink='/home'>
+            <mat-icon>navigate_before</mat-icon>
+        </button>
+        <button class='return-button' mat-icon-button (click)='gameConfiguration.updateAvailableRooms()'>
+            <mat-icon>refresh</mat-icon>
+        </button>
+        <button
+            *ngIf='availableRooms.length !== 0'
+            class='join-random-game-button'
+            (click)='joinRandomGame()'
+            mat-raised-button
+            [disabled]='availableRooms.length <= 1'
+        >
+            {{ "new_game_page.random" | translate }}
+        </button>
+    </div>
+</mat-card>
 </body>
