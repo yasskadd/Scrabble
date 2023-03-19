@@ -103,7 +103,7 @@ export class GameConfigurationService {
     exitWaitingRoom(): void {
         this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
             roomId: this.roomInformation.roomId,
-            player: this.roomInformation.players[0],
+            player: this.userService.user,
         } as PlayerRoomInfo);
         this.resetRoomInformation();
     }
