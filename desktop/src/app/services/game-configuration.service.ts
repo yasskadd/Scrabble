@@ -56,8 +56,8 @@ export class GameConfigurationService {
             this.joinValidGameEvent(allPlayers);
         });
 
-        this.clientSocket.on(SocketEvents.RejectByOtherPlayer, (name: string) => {
-            this.rejectByOtherPlayerEvent(name);
+        this.clientSocket.on(SocketEvents.RejectByOtherPlayer, (user: IUser) => {
+            this.rejectByOtherPlayerEvent(user);
         });
 
         this.clientSocket.on(SocketEvents.GameAboutToStart, (socketIDUserRoom: string[]) => {
@@ -233,12 +233,10 @@ export class GameConfigurationService {
         this.isGameStarted.next(true);
     }
 
-    private rejectByOtherPlayerEvent(name: string): void {
-        if (name !== this.roomInformation.players[0].username) return;
-
+    private rejectByOtherPlayerEvent(user: IUser): void {
         this.clientSocket.send(SocketEvents.RejectByOtherPlayer, {
             roomId: this.roomInformation.roomId,
-            player: this.roomInformation.players[0],
+            player: user,
         } as PlayerRoomInfo);
         this.resetRoomInformation();
 
