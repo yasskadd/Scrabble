@@ -64,6 +64,23 @@ export class GameSessions {
         });
     }
 
+    getAvailableRooms(): GameRoom[] {
+        const roomAvailableArray: GameRoom[] = [];
+        this.gameRooms.forEach((gameRoom) => {
+            if (gameRoom.isAvailable) {
+                const usersWithoutPasswords: IUser[] = [];
+                gameRoom.users.forEach((user: IUser) => {
+                    usersWithoutPasswords.push(this.stripUserPassword(user));
+                });
+                gameRoom.users = usersWithoutPasswords;
+
+                roomAvailableArray.push(gameRoom);
+            }
+        });
+
+        return roomAvailableArray;
+    }
+
     private joinRoom(this: this, socket: Socket, roomID: string): void {
         socket.join(roomID);
     }
@@ -141,14 +158,6 @@ export class GameSessions {
     private getNewId(): string {
         const id = this.idCounter++;
         return id.toString();
-    }
-
-    private getAvailableRooms(): GameRoom[] {
-        const roomAvailableArray: GameRoom[] = [];
-        this.gameRooms.forEach((gameRoom) => {
-            if (gameRoom.isAvailable === true) roomAvailableArray.push(gameRoom);
-        });
-        return roomAvailableArray;
     }
 
     private roomStatus(roomID: string): boolean {

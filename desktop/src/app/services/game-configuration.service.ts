@@ -150,6 +150,7 @@ export class GameConfigurationService {
         this.roomInformation.timer = room.timer;
         this.roomInformation.mode = room.mode;
     }
+
     joinPage(gameMode: string): void {
         this.clientSocket.send(SocketEvents.RoomLobby);
         this.roomInformation.mode = gameMode;
@@ -168,9 +169,16 @@ export class GameConfigurationService {
         this.roomInformation.isCreator = false;
 
         this.availableRooms = [];
+        this.updateAvailableRooms();
     }
 
-    joinRandomRoom(playerName: string): void {
+    updateAvailableRooms(): void {
+        this.httpHandlerService.getAvailableRooms().subscribe((rooms: GameRoomClient[]) => {
+            this.availableRooms = this.filterGameMode(this.roomInformation.mode, rooms);
+        });
+    }
+
+    joinRandomRoom(): void {
         const random = Math.floor(Math.random() * this.availableRooms.length);
         const roomToJoinId = this.availableRooms[random].id;
         this.roomInformation.players = [this.userService.user];

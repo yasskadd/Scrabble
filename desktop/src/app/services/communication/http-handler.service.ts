@@ -12,6 +12,7 @@ import { IUser } from '@common/interfaces/user';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { GameRoomClient } from '@app/interfaces/game-room-client';
 
 @Injectable({
     providedIn: 'root',
@@ -136,6 +137,10 @@ export class HttpHandlerService {
         return this.http
             .patch<void>(`${this.baseUrl}/virtualPlayer/remove`, bot, { withCredentials: true })
             .pipe(catchError(this.handleError<void>('deleteBot')));
+    }
+
+    getAvailableRooms(): Observable<GameRoomClient[]> {
+        return this.http.get<GameRoomClient[]>(`${this.baseUrl}/game/rooms`).pipe(catchError(this.handleError<GameRoomClient[]>('get game rooms')));
     }
 
     signUp(newUser: IUser): Observable<{ imageKey: string }> {
