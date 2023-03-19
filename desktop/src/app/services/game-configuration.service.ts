@@ -185,6 +185,19 @@ export class GameConfigurationService {
         } as PlayerRoomInfo);
     }
 
+    exitRoom(exitByIsOwn?: boolean) {
+        if (this.roomInformation.isCreator) {
+            this.router.navigate([`${AppRoutes.MultiGameCreationPage}/${this.gameMode}`]).then();
+            this.removeRoom();
+            return;
+        }
+
+        this.router.navigate([`${AppRoutes.MultiJoinPage}/${this.gameMode}`]).then();
+
+        if (!exitByIsOwn) return;
+        this.exitWaitingRoom();
+    }
+
     private gameCreatedConfirmationEvent(roomId: string): void {
         this.roomInformation.roomId = roomId;
         // if (this.roomInformation.playerName[1]) this.clientSocket.send(SocketEvents.StartScrabbleGame, this.roomInformation.roomId);
@@ -252,18 +265,5 @@ export class GameConfigurationService {
         return (
             player1.username === player2.username && player1.email === player2.email && player1.profilePicture.name === player2.profilePicture.name
         );
-    }
-
-    private exitRoom(exitByIsOwn?: boolean) {
-        if (this.roomInformation.isCreator) {
-            this.router.navigate([`${AppRoutes.MultiGameCreationPage}/${this.gameMode}`]).then();
-            this.removeRoom();
-            return;
-        }
-
-        this.router.navigate([`${AppRoutes.MultiJoinPage}/${this.gameMode}`]).then();
-
-        if (!exitByIsOwn) return;
-        this.exitWaitingRoom();
     }
 }

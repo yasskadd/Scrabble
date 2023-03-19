@@ -1,4 +1,4 @@
-import { AfterContentChecked, Component, OnDestroy } from '@angular/core';
+import { AfterContentChecked, Component, HostListener, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
@@ -33,6 +33,11 @@ export class WaitingOpponentPageComponent implements OnDestroy, AfterContentChec
                 this.joinGamePage();
             }
         });
+    }
+
+    @HostListener('window:popstate', ['$event'])
+    onPopState() {
+        this.gameConfiguration.exitRoom(true);
     }
 
     joinSoloMode() {
