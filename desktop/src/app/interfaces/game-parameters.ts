@@ -1,9 +1,11 @@
+import { IUser } from '@common/interfaces/user';
+
 export interface GameParameters {
-    username: string;
+    user: IUser;
     dictionary: string;
     timer: number;
     mode: string;
     isMultiplayer: boolean;
-    opponent?: string;
+    opponents?: IUser[];
     botDifficulty?: string;
 }
