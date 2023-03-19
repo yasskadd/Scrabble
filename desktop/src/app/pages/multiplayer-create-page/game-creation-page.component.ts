@@ -14,6 +14,7 @@ import { DictionaryEvents } from '@common/models/dictionary-events';
 import { GameDifficulty } from '@common/models/game-difficulty';
 import { GameTimeOptions } from '@common/models/game-time-options';
 import { SnackBarService } from '@services/snack-bar.service';
+import { GameParameters } from '@app/interfaces/game-parameters';
 
 @Component({
     selector: 'app-multiplayer-create-page',
@@ -158,14 +159,15 @@ export class GameCreationPageComponent implements OnInit {
 
     private initGame(dictionaryTitle: string): void {
         this.gameConfiguration.gameInitialization({
-            username: this.userService.user.username,
+            user: this.userService.user,
             timer: (this.form.get('timer') as AbstractControl).value,
             dictionary: dictionaryTitle,
             mode: this.gameMode,
             isMultiplayer: !this.isSoloMode(),
             opponent: this.isSoloMode() ? this.botName : undefined,
             botDifficulty: this.isSoloMode() ? (this.form.get('difficultyBot') as AbstractControl).value : undefined,
-        });
+        } as GameParameters);
+
         this.playerName = '';
     }
 }
