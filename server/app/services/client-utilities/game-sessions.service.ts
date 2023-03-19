@@ -128,6 +128,8 @@ export class GameSessions {
     }
 
     private exitWaitingRoom(this: this, socket: Socket, playerRoomInfo: PlayerRoomInfo): void {
+        if (!playerRoomInfo.roomId) return;
+
         socket.broadcast.to(playerRoomInfo.roomId).emit(SocketEvents.OpponentLeave, this.stripUserPassword(playerRoomInfo.player));
         socket.leave(playerRoomInfo.roomId);
         socket.join(PLAYERS_JOINING_ROOM);
@@ -228,7 +230,9 @@ export class GameSessions {
     private removeUserFromRoom(socketID: string, playerRoomInfo: PlayerRoomInfo): void {
         const room = this.gameRooms.get(playerRoomInfo.roomId);
         if (room !== undefined) {
-            const index: number = room.users.indexOf(playerRoomInfo.player);
+            const index: number = room.users.findIndex((user: IUser) => {
+                return this.areUsersTheSame(user, playerRoomInfo.player);
+            });
 
             if (index > UNAVAILABLE_ELEMENT_INDEX) {
                 room.users.splice(index, 1);
