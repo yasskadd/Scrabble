@@ -192,8 +192,12 @@ export class GameConfigurationService {
     private rejectByOtherPlayerEvent(name: string): void {
         if (name !== this.roomInformation.playerName[0]) return;
 
-        this.clientSocket.send(SocketEvents.RejectByOtherPlayer, { id: this.roomInformation.roomId, name: this.roomInformation.playerName[0] });
+        this.clientSocket.send(SocketEvents.RejectByOtherPlayer, {
+            roomId: this.roomInformation.roomId,
+            player: this.roomInformation.players[0],
+        } as PlayerRoomInfo);
         this.resetRoomInformation();
+
         // TODO : Language
         this.setErrorSubject('Rejected by other player');
     }
