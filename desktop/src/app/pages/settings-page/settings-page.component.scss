@@ -1,0 +1,31 @@
+app-header {
+    padding-top: 5px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    background-color: #7fa99b;
+}
+
+.sticky {
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+
+body {
+    height: 100%;
+    display: flex;
+    background-color: #c2e5da;
+}
+
+.justified {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.settings-form {
+    align-items: normal;
+    margin-bottom: 16px;
+}

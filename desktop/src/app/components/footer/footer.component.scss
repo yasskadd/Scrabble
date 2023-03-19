@@ -13,11 +13,33 @@
 //     justify-content: flex-end;
 // }
 
+app-footer ::ng-deep mat-form-field .mat-mdc-form-field-bottom-align {
+    height: 0px !important;
+}
+
+.zones {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.language-selector {
+    position: absolute;
+    right: 16px;
+    transform: translate(0px, 10px);
+}
+
+.team-infos {
+    margin-top: 32px;
+    margin-bottom: 32px;
+}
+
 .team-name {
     font-family: system-ui;
     font-size: 20px;
     font-weight: 500;
-    margin-bottom: 10px;
+    margin: 0px 0px 16px 0px;
 }
 
 .team-members {

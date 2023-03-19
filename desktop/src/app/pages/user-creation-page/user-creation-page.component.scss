@@ -1,0 +1,53 @@
+app-header {
+    padding-top: 5px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    background-color: #7fa99b;
+}
+
+.avatar-selector {
+    margin-bottom: 20px;
+    align-self: center;
+}
+
+.selecter-avatar {
+    margin-bottom: 20px;
+    align-self: center;
+    height: 56px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.sticky {
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+
+body {
+    height: 100%;
+    display: flex;
+    background-color: #c2e5da;
+}
+
+.justified {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.connection-form {
+    align-items: normal;
+    margin-bottom: 16px;
+}
+
+::ng-deep mat-dialog-container div.mat-mdc-dialog-surface {
+    box-shadow: none !important;
+    border-radius: 6px !important;
+    border-style: ridge !important;
+    border-radius: 8px !important;
+    overflow-y: hidden;
+}
