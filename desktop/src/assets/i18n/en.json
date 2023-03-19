@@ -27,6 +27,7 @@
         "no_available_games": "No available games",
         "label": {
             "name": "Player name",
+            "names": "Player names",
             "difficulty": "Difficulty",
             "timer": "Timer",
             "dictionary": "Dictionary"
