@@ -14,6 +14,7 @@ import { DictionaryController } from './controllers/dictionary.controller';
 import { HistoryController } from './controllers/history.controller';
 import { ProfilePictureController } from './controllers/profile-picture.controller';
 import { VirtualPlayerController } from './controllers/virtual-players.controller';
+import { GameRoomController } from '@app/controllers/game-room.controller';
 
 @Service()
 export class Application {
@@ -28,6 +29,7 @@ export class Application {
         private readonly dictionaryController: DictionaryController,
         private readonly authentificationController: AuthentificationController,
         private readonly profilePictureController: ProfilePictureController,
+        private readonly gameRoomController: GameRoomController,
     ) {
         this.app = express();
 
@@ -54,6 +56,7 @@ export class Application {
         this.app.use('/dictionary', this.dictionaryController.router);
         this.app.use('/virtualPlayer', this.virtualPlayerController.router);
         this.app.use('/auth', this.authentificationController.router);
+        this.app.use('/game', this.gameRoomController.router);
         this.app.use('/image', this.profilePictureController.router);
         this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerJSDoc(this.swaggerOptions)));
         this.app.use('/', (req, res) => {
