@@ -109,7 +109,10 @@ export class GameConfigurationService {
     }
 
     rejectOpponent(player: IUser): void {
-        this.clientSocket.send(SocketEvents.RejectOpponent, { id: this.roomInformation.roomId, player });
+        this.clientSocket.send(SocketEvents.RejectOpponent, {
+            roomId: this.roomInformation.roomId,
+            player,
+        } as PlayerRoomInfo);
         this.roomInformation.players = this.roomInformation.players.filter((playerElement: IUser) => {
             return playerElement.username !== player.username && playerElement.profilePicture.name !== player.profilePicture.name;
         });
