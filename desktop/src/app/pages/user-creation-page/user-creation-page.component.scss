@@ -1,35 +1,16 @@
-app-header {
-    padding-top: 5px;
+.encapsulating-div {
     display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    background-color: #7fa99b;
-}
-
-.avatar-selector {
-    margin-bottom: 20px;
-    align-self: center;
-}
-
-.selecter-avatar {
-    margin-bottom: 20px;
-    align-self: center;
-    height: 56px;
-    aspect-ratio: 1;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.sticky {
-    position: fixed;
-    top: 0;
-    width: 100%;
+    flex-direction: column;
+    height: 100%;
 }
 
 body {
-    height: 100%;
+    height: inherit;
     display: flex;
-    background-color: #c2e5da;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
 }
 
 .justified {
@@ -42,6 +23,20 @@ body {
 .connection-form {
     align-items: normal;
     margin-bottom: 16px;
+}
+
+.avatar-selector {
+    margin-bottom: 20px;
+    align-self: center;
+}
+
+.selector-avatar {
+    margin-bottom: 20px;
+    align-self: center;
+    height: 56px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
 ::ng-deep mat-dialog-container div.mat-mdc-dialog-surface {
