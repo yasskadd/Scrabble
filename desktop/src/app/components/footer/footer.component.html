@@ -1,7 +1,15 @@
 <mat-toolbar>
     <mat-toolbar-row>
         <h4 class="team-name">{{ "footer.team" | translate }} 110</h4>
-        <div class="language">
+        <div class="language-dark-mode">
+            <!-- Language -->
+            <button *ngIf="themeService.isDarkTheme.value" mat-stroked-button color="accent" (click)="themeService.toggleDarkMode()">
+                <mat-icon>bedtime</mat-icon>
+            </button>
+            <!-- Language -->
+            <button *ngIf="!themeService.isDarkTheme.value" mat-stroked-button color="accent" (click)="themeService.toggleDarkMode()">
+                <mat-icon>wb_sunny</mat-icon>
+            </button>
             <mat-form-field appearance="outline" class="language-selector">
                 <mat-label>Language</mat-label>
                 <mat-select [formControl]="languageForm" required>
@@ -13,12 +21,24 @@
     </mat-toolbar-row>
     <mat-toolbar-row>
         <div class="team-members">
-            <a mat-button href="https://www.linkedin.com/in/michael-roussel-401b0a1b0" target="_blank">Michael Roussel</a>
-            <a mat-button href="https://www.linkedin.com/in/raphael-tremblay-242961205" target="_blank">Raphael Tremblay</a>
-            <a mat-button href="https://www.linkedin.com/in/christian-sassine-554801214" target="_blank">Christian Sassine</a>
-            <a mat-button href="https://www.linkedin.com/in/esmé-généreux-045270204" target="_blank">Esmé Généreux</a>
-            <a mat-button href="https://www.linkedin.com/in/yasser-kadimi-184a38231" target="_blank">Yasser Kadimi</a>
-            <a mat-button href="https://www.linkedin.com/in/laurent-nguyen-298b15254" target="_blank">Laurent Quoc Hoa Nguyen</a>
+            <button mat-button onclick="window.location.href='//www.linkedin.com/in/michael-roussel-401b0a1b0'" target="_blank">
+                Michael Roussel
+            </button>
+            <button mat-button onclick="window.location.href='https://www.linkedin.com/in/raphael-tremblay-242961205'" target="_blank">
+                Raphael Tremblay
+            </button>
+            <button mat-button onclick="window.location.href='https://www.linkedin.com/in/christian-sassine-554801214'" target="_blank">
+                Christian Sassine
+            </button>
+            <button mat-button onclick="window.location.href='https://www.linkedin.com/in/esmé-généreux-045270204'" target="_blank">
+                Esmé Généreux
+            </button>
+            <button mat-button onclick="window.location.href='https://www.linkedin.com/in/yasser-kadimi-184a38231'" target="_blank">
+                Yasser Kadimi
+            </button>
+            <button mat-button onclick="window.location.href='https://www.linkedin.com/in/laurent-nguyen-298b15254'" target="_blank">
+                Laurent Quoc Hoa Nguyen
+            </button>
         </div>
     </mat-toolbar-row>
 </mat-toolbar>
