@@ -3,11 +3,11 @@
         <h4 class="team-name">{{ "footer.team" | translate }} 110</h4>
         <div class="language-dark-mode">
             <!-- Language -->
-            <button *ngIf="themeService.isDarkTheme.value" mat-stroked-button color="accent" (click)="themeService.toggleDarkMode()">
+            <button *ngIf="themeService.isDarkTheme.value" mat-stroked-button (click)="themeService.toggleDarkMode()">
                 <mat-icon>bedtime</mat-icon>
             </button>
             <!-- Language -->
-            <button *ngIf="!themeService.isDarkTheme.value" mat-stroked-button color="accent" (click)="themeService.toggleDarkMode()">
+            <button *ngIf="!themeService.isDarkTheme.value" mat-stroked-button (click)="themeService.toggleDarkMode()">
                 <mat-icon>wb_sunny</mat-icon>
             </button>
             <mat-form-field appearance="outline" class="language-selector">
