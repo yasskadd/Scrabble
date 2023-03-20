@@ -56,8 +56,8 @@ export class GameCreationPageComponent implements OnInit {
         this.difficultyList = [];
         this.timerList = [];
 
-        this.passwordEnableForm = new FormControl(false, Validators.required);
-        this.passwordForm = new FormControl('', Validators.required);
+        this.passwordEnableForm = new FormControl(false);
+        this.passwordForm = new FormControl('');
         this.timerForm = new FormControl('', Validators.required);
         this.difficultyForm = new FormControl('', Validators.required);
         // TODO : Set default dictionary from server
@@ -84,6 +84,15 @@ export class GameCreationPageComponent implements OnInit {
             timer: this.timerForm,
             difficultyBot: this.difficultyForm,
             dictionary: this.dictionaryForm,
+        });
+
+        this.passwordEnableForm.valueChanges.subscribe(() => {
+            if (this.passwordEnableForm.value) {
+                this.passwordForm.addValidators(Validators.required);
+            } else {
+                this.passwordForm.removeValidators(Validators.required);
+            }
+            this.form.setControl('password', this.passwordForm);
         });
     }
 
