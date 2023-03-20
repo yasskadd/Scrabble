@@ -6,7 +6,7 @@ const WIN_SCORE = 10;
 export class PlayerScoreService {
     constructor() {}
 
-    calculateScore(currentPlayerScore: number): number {}
+    calculateScore(currentPlayerScore: number, playerGameResult: string): number {}
 
     lossScore(currentPlayerScore: number): number {
         return currentPlayerScore + LOSS_SCORE;
