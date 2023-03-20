@@ -92,6 +92,19 @@ body {
     font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
+.encapsulating-div {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.justified {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
 .abandonDialogComponent > mat-dialog-container {
     background: rgb(245, 132, 151);
     border-radius: 4px;
@@ -101,10 +114,6 @@ body {
 .soloDifficulty > mat-dialog-container {
     background: rgb(83, 224, 255);
     border-radius: 30px 30px 30px 30px;
-}
-
-.highScoreComponent > mat-dialog-container {
-    background-color: #7fa99b;
 }
 
 mat-step-header {

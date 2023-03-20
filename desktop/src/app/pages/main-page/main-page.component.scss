@@ -63,13 +63,6 @@ mat-drawer {
     width: 130px;
 }
 
-.justified {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
 .mat-raised-button:hover {
     transform: scale(1.01);
 }

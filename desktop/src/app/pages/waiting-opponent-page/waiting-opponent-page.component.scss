@@ -1,21 +1,11 @@
 body {
     margin: auto;
     height: 100%;
-    // background-color: #c2e5da;
-}
-
-.justified {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
 }
 
 .wrapper {
     width: 50%;
     min-width: 500px;
-    // background-color: #7fa99b;
-    // color: #23501f;
     padding: 30px;
 }
 
@@ -46,10 +36,6 @@ body {
 
 .textWaitingOpponent {
     font-size: 200%;
-}
-
-::ng-deep .mat-card {
-    // background-color: #c2e5da;
 }
 
 .container-buttons {
