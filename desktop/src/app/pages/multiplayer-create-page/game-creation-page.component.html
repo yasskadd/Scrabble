@@ -8,8 +8,24 @@
                 <mat-label> {{ "new_game_page.opponent_name" | translate }} : {{ botName }} </mat-label>
             </form>
             <br />
+            <form *ngIf="!isSoloMode()">
+                <mat-label>
+                    <!-- TODO : Lanaguge -->
+                    Sécuriser
+                </mat-label>
+                <mat-checkbox [formControl]="passwordEnableForm"></mat-checkbox>
+            </form>
+            <form *ngIf="passwordEnableForm.value" [formGroup]="form">
+                <mat-form-field appearance="outline" formControlName="password">
+                    <mat-label>
+                        <!-- TODO : Language -->
+                        Mot de passe
+                    </mat-label>
+                    <input type="text" matInput />
+                </mat-form-field>
+            </form>
             <form *ngIf="isSoloMode()" class="soloMode" [formGroup]="form">
-                <mat-form-field appearance="fill">
+                <mat-form-field appearance="outline">
                     <mat-label>
                         {{ "new_game_page.label.difficulty" | translate }}
                     </mat-label>
@@ -22,7 +38,7 @@
             </form>
 
             <form [formGroup]="form">
-                <mat-form-field appearance="fill">
+                <mat-form-field appearance="outline">
                     <mat-label> {{ "new_game_page.label.timer" | translate }} </mat-label>
                     <mat-select id="timer-select" formControlName="timer">
                         <mat-option id="timer-options" *ngFor="let time of timerList" [value]="time">
@@ -33,7 +49,7 @@
             </form>
 
             <form [formGroup]="form">
-                <mat-form-field appearance="fill">
+                <mat-form-field appearance="outline">
                     <mat-label> {{ "new_game_page.label.dictionary" | translate }} </mat-label>
                     <mat-select (click)="downloadDictionaries()" formControlName="dictionary">
                         <mat-option *ngFor="let dictionary of dictionaryList" [value]="dictionary.title">
