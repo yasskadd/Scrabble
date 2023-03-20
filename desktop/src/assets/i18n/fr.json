@@ -70,7 +70,8 @@
     },
     "difficulty": {
         "beginner": "Débutant",
-        "expert": "Expert"
+        "expert": "Expert",
+        "score-based": "Relative"
     },
     "virtual_player": {
         "name": "Nom",

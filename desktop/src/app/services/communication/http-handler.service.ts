@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
+import { GameRoomClient } from '@app/interfaces/game-room-client';
 import { HighScores } from '@app/interfaces/high-score-parameters';
 import { AvatarData } from '@common/interfaces/avatar-data';
 import { Bot } from '@common/interfaces/bot';
@@ -12,7 +13,6 @@ import { IUser } from '@common/interfaces/user';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { GameRoomClient } from '@app/interfaces/game-room-client';
 
 @Injectable({
     providedIn: 'root',
