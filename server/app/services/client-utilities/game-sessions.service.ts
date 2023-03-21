@@ -178,7 +178,7 @@ export class GameSessions {
     }
 
     private getNewId(): string {
-        return uuid.v4();
+        return uuid.v4().substring(0, 6);
     }
 
     private verifyRoomPassword(password: string | undefined, roomId: string): boolean {
