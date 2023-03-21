@@ -1,9 +1,17 @@
 @import url('https://fonts.googleapis.com/css?family=Proxima+Nova');
+// @import '../../../styles.scss';
 
-#panel-title {
-    text-align: center;
-    margin-bottom: 0px;
+// $primary: map-get($angular-default-theme, primary);
+
+mat-card {
+    height: 100%;
+    width: 100%;
 }
+
+// #panel-title {
+//     text-align: center;
+//     margin-bottom: 0px;
+// }
 
 .player {
     border-radius: 4px;
@@ -11,7 +19,6 @@
     margin-left: 5px;
     margin-right: 5px;
     margin-bottom: 20px;
-    // background-color: #aecec4;
     display: flex;
     flex-direction: row;
     justify-content: space-around;
@@ -27,7 +34,6 @@
     display: flex;
     align-items: center;
     padding-top: 10px;
-    // color: #23501f;
 }
 
 #player-2 {
@@ -80,9 +86,7 @@
 .active {
     margin-left: 10px;
     margin-right: 0;
-    // border: 2px solid #23501f;
-    // background-color: #c2e5da;
-    box-shadow: rgb(35, 80, 31, 0.4) -5px 5px, rgb(35, 80, 31, 0.3) -10px 10px, rgb(35, 80, 31, 0.2) -15px 15px;
+    // background-color: mat-color($primary, 200); // TODO
 }
 
 td {
