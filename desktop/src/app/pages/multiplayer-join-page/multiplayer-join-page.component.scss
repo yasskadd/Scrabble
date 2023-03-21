@@ -40,8 +40,8 @@ button .join-random-game {
     margin: 10px;
 }
 
-button .join-game {
-    margin: 0px 0px 0px 10px;
+button.join-game {
+    margin: 8px 8px 8px 24px;
 }
 
 .return-button {
@@ -50,6 +50,7 @@ button .join-game {
 
 .wrapper {
     text-align: center;
+    width: auto;
 }
 
 .max {
@@ -78,7 +79,7 @@ table {
 }
 
 th {
-    padding: 0px 20px 20px 20px;
+    padding: 16px 32px 16px 32px;
 }
 
 td {

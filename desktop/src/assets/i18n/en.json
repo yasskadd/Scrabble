@@ -27,6 +27,7 @@
         "no_available_games": "No available games",
         "label": {
             "name": "Player name",
+            "names": "Player names",
             "difficulty": "Difficulty",
             "timer": "Timer",
             "dictionary": "Dictionary"
@@ -69,7 +70,8 @@
     },
     "difficulty": {
         "beginner": "Beginner",
-        "expert": "Expert"
+        "expert": "Expert",
+        "score-based": "Relative"
     },
     "virtual_player": {
         "name": "Name",

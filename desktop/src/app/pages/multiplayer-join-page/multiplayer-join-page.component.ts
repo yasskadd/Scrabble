@@ -1,65 +1,45 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { AppRoutes } from '@app/models/app-routes';
+import { AfterViewInit, Component, OnDestroy } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
 import { UserService } from '@app/services/user.service';
-import { SnackBarService } from '@services/snack-bar.service';
 import { TimeService } from '@services/time.service';
+import { GameRoomClient } from '@app/interfaces/game-room-client';
 
 @Component({
     selector: 'app-multiplayer-join-page',
     templateUrl: './multiplayer-join-page.component.html',
     styleUrls: ['./multiplayer-join-page.component.scss'],
 })
-export class MultiplayerJoinPageComponent implements OnInit, OnDestroy {
+export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
     gameMode: string;
 
     constructor(
-        public timer: TimeService,
-        private gameConfiguration: GameConfigurationService,
+        protected timer: TimeService,
+        protected gameConfiguration: GameConfigurationService,
         private userService: UserService,
-        private router: Router,
-        private snackBarService: SnackBarService,
         private activatedRoute: ActivatedRoute,
     ) {
         this.gameMode = this.activatedRoute.snapshot.params.id;
     }
 
-    get availableRooms() {
+    get availableRooms(): GameRoomClient[] {
         return this.gameConfiguration.availableRooms;
     }
 
     ngOnDestroy() {
         this.gameConfiguration.isRoomJoinable.unsubscribe();
-        this.gameConfiguration.errorReason.unsubscribe();
     }
 
-    ngOnInit(): void {
-        this.listenToServerResponse();
+    ngAfterViewInit() {
         this.gameConfiguration.resetRoomInformation();
         this.gameConfiguration.joinPage(this.gameMode);
     }
 
-    joinRoom(roomId: string) {
-        this.gameConfiguration.joinGame(roomId, this.userService.user.username);
+    joinRoom(room: GameRoomClient) {
+        this.gameConfiguration.joinGame(room, this.userService.user);
     }
 
     joinRandomGame() {
-        this.gameConfiguration.joinRandomRoom(this.userService.user.username);
-    }
-
-    listenToServerResponse() {
-        this.gameConfiguration.isRoomJoinable.subscribe((value) => {
-            if (value) this.navigatePage();
-        });
-        this.gameConfiguration.errorReason.subscribe((error) => {
-            if (error) {
-                this.snackBarService.openError(error);
-            }
-        });
-    }
-
-    navigatePage() {
-        this.router.navigate([`${AppRoutes.MultiWaitingPage}/${this.gameMode}`]).then();
+        this.gameConfiguration.joinRandomRoom();
     }
 }

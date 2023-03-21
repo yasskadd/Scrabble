@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable max-lines */
 /* eslint-disable dot-notation*/
-import { GameParameters } from '@app/interfaces/game-parameters';
 import { GameRoom } from '@app/interfaces/game-room';
 import { GameSessions } from '@app/services/client-utilities/game-sessions.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
+import { GameParameters } from '@common/interfaces/game-parameters';
 import { assert, expect } from 'chai';
 import { createServer, Server } from 'http';
 import { AddressInfo } from 'net';

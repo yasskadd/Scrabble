@@ -26,7 +26,7 @@ export class HeaderComponent {
     }
 
     redirectHome() {
-        //this.isHomePage = true;
+        // this.isHomePage = true;
         this.router.navigate([AppRoutes.HomePage]).then();
     }
 

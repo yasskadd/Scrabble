@@ -1,5 +1,7 @@
+import { IUser } from './user';
+
 export interface GameScrabbleInformation {
-    playerName: string[];
+    players: IUser[];
     roomId: string;
     timer: number;
     socketId: string[];
