@@ -6,8 +6,8 @@ import * as jwt from 'jsonwebtoken';
 import { Service } from 'typedi';
 
 const SUCCESS = 200;
-const TEMP_REDIRECT = 307;
 const ERROR = 401;
+const TEMP_REDIRECT = 307;
 
 @Service()
 export class AuthentificationController {

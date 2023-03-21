@@ -1,10 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { GameConfigurationService } from '@app/services/game-configuration.service';
-import { TimeService } from '@services/time.service';
 import { AppRoutes } from '@app/models/app-routes';
-import { FormControl, Validators } from '@angular/forms';
+import { GameConfigurationService } from '@app/services/game-configuration.service';
+import { UserService } from '@app/services/user.service';
 import { SnackBarService } from '@services/snack-bar.service';
+import { TimeService } from '@services/time.service';
 
 @Component({
     selector: 'app-multiplayer-join-page',
@@ -12,18 +12,17 @@ import { SnackBarService } from '@services/snack-bar.service';
     styleUrls: ['./multiplayer-join-page.component.scss'],
 })
 export class MultiplayerJoinPageComponent implements OnInit, OnDestroy {
-    playerNameForm: FormControl;
     gameMode: string;
 
     constructor(
         public timer: TimeService,
         private gameConfiguration: GameConfigurationService,
+        private userService: UserService,
         private router: Router,
         private snackBarService: SnackBarService,
         private activatedRoute: ActivatedRoute,
     ) {
         this.gameMode = this.activatedRoute.snapshot.params.id;
-        this.playerNameForm = new FormControl('', Validators.required);
     }
 
     get availableRooms() {
@@ -42,13 +41,11 @@ export class MultiplayerJoinPageComponent implements OnInit, OnDestroy {
     }
 
     joinRoom(roomId: string) {
-        this.gameConfiguration.joinGame(roomId, this.playerNameForm.value);
-        this.playerNameForm.setValue('');
+        this.gameConfiguration.joinGame(roomId, this.userService.user.username);
     }
 
     joinRandomGame() {
-        this.gameConfiguration.joinRandomRoom(this.playerNameForm.value);
-        this.playerNameForm.setValue('');
+        this.gameConfiguration.joinRandomRoom(this.userService.user.username);
     }
 
     listenToServerResponse() {

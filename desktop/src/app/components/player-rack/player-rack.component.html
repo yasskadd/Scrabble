@@ -1,41 +1,50 @@
-<div class="rack-info justified" id="player-letters" #info>
-    <div
-        *ngFor="let letter of rack; index as i"
-        [ngClass]="[
-            lettersToExchange.includes(i) ? 'rack-letter-exchange-selected' : 'rack-letter',
-            !lettersToExchange.includes(i) && lettersToManipulate.includes(i) ? 'rack-letter-manipulate-selected' : 'rack-letter'
-        ]"
-        (click)="onLeftClick($event, i)"
-        (contextmenu)="onRightClick($event, i)"
-    >
-        <div class="letter-value" [style.font-size]="letterSize + 'px'" *ngIf="letter.value !== undefined">
-            {{ letter.value.toUpperCase() }}
-        </div>
-        <div class="letter-points" [style.font-size]="pointsSize + 'px'">{{ letter.points }}</div>
-    </div>
-</div>
-
-<div class="button-container justified">
-    <div class="left-side">
-        <button id="skip-turn" mat-raised-button [disabled]="!gameClient.playerOneTurn" (click)="skipTurn()">
+<div class='justified'>
+    <div class='left-side'>
+        <button id='skip-turn' mat-raised-button [disabled]='!gameClient.playerOneTurn' (click)='skipTurn()'>
             {{ "game_page.rack.skip_round" | translate }}
         </button>
         <button
-            *ngIf="lettersToExchange.length !== 0"
-            id="exchange"
+            *ngIf='lettersToExchange.length !== 0'
+            id='exchange'
             mat-raised-button
-            [disabled]="!gameClient.playerOneTurn || lettersToExchange.length === 0 || gameClient.letterReserveLength < 7"
-            (click)="exchange()"
+            [disabled]='!gameClient.playerOneTurn || lettersToExchange.length === 0 || gameClient.letterReserveLength < 7'
+            (click)='exchangeLetters()'
         >
             {{ "game_page.rack.switch_letters" | translate }}
         </button>
     </div>
 
-    <div class="right-side">
-        <button *ngIf="lettersToExchange.length !== 0" id="cancel" mat-raised-button [disabled]="lettersToExchange.length === 0" (click)="cancel()">
+    <div class='rack-info justified'
+         id='player-rack'
+         cdkDropList
+         [cdkDropListData]='gameClient.playerOne.rack'
+         (cdkDropListDropped)='drop($event)'
+         cdkDropListOrientation='horizontal'
+    >
+        <div
+            cdkDrag
+            [cdkDragData]='letter'
+            (cdkDragStarted)='letterPlacementService.currentSelection = letter'
+            *ngFor='let letter of gameClient.playerOne.rack; index as i'
+            (click)='onSelection($event, i)'
+            class='rack'
+        >
+            <div class='rack-letter letter-shadow' *cdkDragPlaceholder></div>
+            <div class='rack-letter'>
+                <div class='letter-value'>
+                    {{ letter.value.toUpperCase() }}
+                </div>
+                <div class='letter-points'>{{ letter.points }}</div>
+            </div>
+        </div>
+    </div>
+    <div class='right-side'>
+        <button *ngIf='lettersToExchange.length !== 0' id='cancel' mat-raised-button
+                [disabled]='lettersToExchange.length === 0' (click)='cancelSelection()'>
             {{ "action.cancel" | translate }}
         </button>
-        <button mat-raised-button (click)="playPlacedLetters()" [disabled]="letterPlacementService.noLettersPlaced()">
+        <button mat-raised-button (click)='letterPlacementService.submitPlacement()'
+                [disabled]='letterPlacementService.noLettersPlaced()'>
             {{ "action.play" | translate }}
         </button>
     </div>
