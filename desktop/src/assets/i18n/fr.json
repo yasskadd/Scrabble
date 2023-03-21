@@ -131,8 +131,9 @@
         }
     },
     "header": {
-        "home": "Acceuil",
-        "admin": "Admin"
+        "home": "ACCEUIL",
+        "admin": "ADMIN",
+        "welcome": "BIENVENUE"
     },
     "chat": {
         "message_box": "Entrez un message",
