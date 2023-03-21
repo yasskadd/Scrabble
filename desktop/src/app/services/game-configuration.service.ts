@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { GameParameters } from '@app/interfaces/game-parameters';
 import { GameRoomClient } from '@app/interfaces/game-room-client';
 import { RoomInformation } from '@app/interfaces/room-information';
 import { AppRoutes } from '@app/models/app-routes';
 import { GameStatus } from '@app/models/game-status';
 import { NUMBER_OF_PLAYERS } from '@common/constants/players';
 import { SocketEvents } from '@common/constants/socket-events';
+import { GameParameters } from '@common/interfaces/game-parameters';
 import { GameScrabbleInformation } from '@common/interfaces/game-scrabble-information';
 import { PlayerRoomInfo } from '@common/interfaces/player-room-info';
 import { IUser } from '@common/interfaces/user';

@@ -1,4 +1,5 @@
 import { IUser } from '@common/interfaces/user';
+import { GameVisibility } from '@common/models/game-visibility';
 
 export interface GameRoom {
     id: string;
@@ -8,6 +9,6 @@ export interface GameRoom {
     dictionary: string;
     timer: number;
     mode: string;
-    visibility: string;
+    visibility: GameVisibility;
     password: string;
 }

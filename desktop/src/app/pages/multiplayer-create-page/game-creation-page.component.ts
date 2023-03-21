@@ -3,7 +3,6 @@ import { AbstractControl, FormBuilder, FormControl, FormGroup, Validators } from
 import { ActivatedRoute, Router } from '@angular/router';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
-import { GameParameters } from '@app/interfaces/game-parameters';
 import { AppRoutes } from '@app/models/app-routes';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
@@ -11,9 +10,11 @@ import { LanguageService } from '@app/services/language.service';
 import { TimeService } from '@app/services/time.service';
 import { UserService } from '@app/services/user.service';
 import { VirtualPlayersService } from '@app/services/virtual-players.service';
+import { GameParameters } from '@common/interfaces/game-parameters';
 import { DictionaryEvents } from '@common/models/dictionary-events';
 import { GameDifficulty } from '@common/models/game-difficulty';
 import { GameTimeOptions } from '@common/models/game-time-options';
+import { GameVisibility } from '@common/models/game-visibility';
 import { SnackBarService } from '@services/snack-bar.service';
 
 @Component({
@@ -90,6 +91,7 @@ export class GameCreationPageComponent implements OnInit {
             if (this.passwordEnableForm.value) {
                 this.passwordForm.addValidators(Validators.required);
             } else {
+                this.passwordForm.removeValidators(Validators.required);
             }
             this.form.setControl('password', this.passwordForm);
         });
@@ -179,6 +181,8 @@ export class GameCreationPageComponent implements OnInit {
             isMultiplayer: !this.isSoloMode(),
             opponent: this.isSoloMode() ? this.botName : undefined,
             botDifficulty: this.isSoloMode() ? (this.form.get('difficultyBot') as AbstractControl).value : undefined,
+            visibility: GameVisibility.Public,
+            password: this.passwordForm.value,
         } as GameParameters);
 
         this.playerName = '';

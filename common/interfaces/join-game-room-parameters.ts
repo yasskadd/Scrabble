@@ -1,5 +1,7 @@
+import { IUser } from './user';
+
 export interface JoinGameRoomParameters {
     roomId: string;
-    username: string;
+    player: IUser;
     password?: string;
 }
