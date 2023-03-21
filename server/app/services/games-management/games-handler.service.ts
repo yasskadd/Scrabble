@@ -5,7 +5,7 @@ import { Player } from '@app/classes/player/player.class';
 import { WordSolver } from '@app/classes/word-solver.class';
 import { Behavior } from '@app/interfaces/behavior';
 import { Dictionary } from '@app/interfaces/dictionary';
-import { GameScrabbleInformation } from '@app/interfaces/game-scrabble-information';
+import { GameScrabbleInformation } from '@common/interfaces/game-scrabble-information';
 import { DictionaryStorageService } from '@app/services/database/dictionary-storage.service';
 import { RackService } from '@app/services/rack.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
@@ -23,7 +23,7 @@ export class GamesHandler {
         this.players = new Map();
         this.gamePlayers = new Map();
         this.dictionaries = new Map();
-        this.setDictionaries();
+        this.setDictionaries().then();
     }
 
     updatePlayerInfo(roomId: string, game: Game) {
@@ -108,7 +108,7 @@ export class GamesHandler {
 
     async getDictionary(title: string): Promise<Dictionary> {
         if (title === 'Mon dictionnaire') title = 'dictionary';
-        const dictionary = JSON.parse((await this.dictionaryStorage.getDictionary(title)).toString());
-        return dictionary;
+
+        return JSON.parse((await this.dictionaryStorage.getDictionary(title)).toString());
     }
 }

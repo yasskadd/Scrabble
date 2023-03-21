@@ -1,5 +1,7 @@
+import { IUser } from '@common/interfaces/user';
+
 export interface RoomInformation {
-    playerName: string[];
+    players: IUser[];
     roomId: string;
     isCreator: boolean;
     statusGame: string;

@@ -1,21 +1,21 @@
-.encapsulating-div {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-app-header {
-    display: flex;
-    background-color: #7fa99b;
-    height: 10%;
-}
-
 mat-drawer-container {
     height: inherit;
-    background-color: #c2e5da;
     display: flex;
-    justify-content: center; // for horizontal
+    justify-content: center;
     align-items: center;
+}
+
+mat-drawer {
+    left: 0;
+    height: 100%;
+    width: 20%;
+    padding: 10px;
+}
+
+.open-chat-button {
+    position: absolute;
+    left: 5px;
+    top: 5px;
 }
 
 .chat-sidenav {
@@ -49,51 +49,12 @@ mat-drawer-container {
     height: 100%;
 }
 
-.open-chat-button {
-    position: absolute;
-    left: 5px;
-    top: 5px;
-    background-color: #fff;
-}
-
 .language-selector {
     position: absolute;
     right: 5px;
     top: 5px;
     padding: 8px;
     width: 130px;
-}
-
-mat-drawer {
-    left: 0;
-    height: 100%;
-    width: 20%;
-    padding: 10px;
-}
-
-app-footer {
-    text-align: center;
-    color: #23501f;
-    background-color: #7fa99b;
-}
-
-.justified {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-::ng-deep .toolMainPage {
-    font-size: 14px;
-    background-color: #23501f;
-}
-
-.mat-card {
-    padding: 30px;
-    width: 40%;
-    box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
-    background-color: #7fa99b;
 }
 
 .mat-raised-button:hover {
@@ -104,14 +65,10 @@ app-footer {
     margin: 7px;
     width: 95%;
     padding: 5px;
-
     font-size: 23px;
     font-weight: 500;
     font-family: system-ui;
     text-align: center;
-
-    color: #cff3e8;
-    background-color: #23501f;
 }
 
 .buttons-columns {
@@ -137,35 +94,25 @@ app-footer {
     margin-bottom: 30px;
 }
 
-#scores:hover {
-    transform: scale(1.01);
-}
-
-#scores > * {
-    color: #23501f;
+#scores > .mdc-button {
     font-weight: 800;
+    font-family: system-ui;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #fbd7a3;
     border-radius: 3px;
     margin: 2px;
-    width: 35px;
-    height: 35px;
-    box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
-    text-align: center;
+    min-width: 40px;
+    min-height: 40px;
+    max-width: 40px;
+    max-height: 40px;
+    padding-inline: 0px;
 }
 
-.scores-icon {
-    margin-left: 15px;
-}
-
-.help-button {
-    position: absolute;
-    margin-right: -460px;
-    margin-bottom: -190px !important;
-    // background-color: #23501f;
-}
+// TODO
+// .help-button {
+//     position: absolute;
+//     margin-right: -460px;
+//     margin-bottom: -190px !important;
+// }
 
 ::ng-deep .mat-fab {
     height: 40px !important;
@@ -178,4 +125,8 @@ app-footer {
 
 ::ng-deep .mat-drawer-content {
     width: 100%;
+}
+
+::ng-deep .toolMainPage {
+    font-size: 14px;
 }
