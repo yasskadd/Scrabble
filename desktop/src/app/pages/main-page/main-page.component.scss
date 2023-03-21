@@ -94,27 +94,20 @@ mat-drawer {
     margin-bottom: 30px;
 }
 
-#scores:hover {
-    transform: scale(1.01);
+#scores > .mdc-button {
+    font-weight: 800;
+    font-family: system-ui;
+    display: flex;
+    border-radius: 3px;
+    margin: 2px;
+    min-width: 40px;
+    min-height: 40px;
+    max-width: 40px;
+    max-height: 40px;
+    padding-inline: 0px;
 }
 
 // TODO
-#scores > * {
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 3px;
-    margin: 2px;
-    width: 35px;
-    height: 35px;
-    text-align: center;
-}
-
-.scores-icon {
-    margin-left: 15px;
-}
-
 // .help-button {
 //     position: absolute;
 //     margin-right: -460px;
