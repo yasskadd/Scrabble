@@ -31,6 +31,11 @@ export class AccountStorageService {
         return (await this.database.users.collection.findOne({ username: name })) !== null;
     }
 
+    async getUserData(username: string): Promise<IUser> {
+        const userDocument = (await this.database.users.collection.findOne({ username })) as Document;
+        return userDocument as IUser;
+    }
+
     async getProfilePicInfo(username: string): Promise<ImageInfo> {
         const userDocument = (await this.database.users.collection.findOne({ username })) as Document;
         return userDocument.profilePicture as ImageInfo;
