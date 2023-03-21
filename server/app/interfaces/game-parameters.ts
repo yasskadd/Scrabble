@@ -4,4 +4,6 @@ export interface GameParameters {
     timer: number;
     mode: string;
     isMultiplayer: boolean;
+    visibility: string;
+    password?: string;
 }
