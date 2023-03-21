@@ -1,63 +1,69 @@
 <div class="encapsulating-div">
     <app-header></app-header>
-
     <body class="justified">
-        <mat-card class="wrapper">
-            <mat-card-title class="main-title">
-                {{ "new_game_page.game_settings" | translate }}
-            </mat-card-title>
+        <mat-card class="wrapper"
+            ><mat-card-title class="main-title"> {{ "new_game_page.game_settings" | translate }} </mat-card-title>
             <div>
                 <form *ngIf="isSoloMode()" class="soloMode">
                     <mat-label> {{ "new_game_page.opponent_name" | translate }} : {{ botName }} </mat-label>
                 </form>
                 <br />
-                <form *ngIf="isSoloMode()" class="soloMode" [formGroup]="form">
-                    <mat-form-field appearance="fill">
+                <form *ngIf="!isSoloMode()">
+                    <mat-label>
+                        <!-- TODO : Lanaguge -->
+                        Sécuriser
+                    </mat-label>
+                    <mat-checkbox [formControl]="passwordEnableForm"></mat-checkbox>
+                </form>
+                <form *ngIf="passwordEnableForm.value" [formGroup]="form">
+                    <mat-form-field appearance="outline">
                         <mat-label>
-                            {{ "new_game_page.label.difficulty" | translate }}
+                            <!-- TODO : Language -->
+                            Mot de passe
                         </mat-label>
-                        <mat-select id="difficulty-select" formControlName="difficultyBot">
-                            <mat-option id="difficulty-options" *ngFor="let difficulty of difficultyList" [value]="difficulty">
+                        <input type="text" matInput formControlName="password" />
+                    </mat-form-field>
+                </form>
+                <form *ngIf="isSoloMode()" class="soloMode" [formGroup]="form">
+                    <mat-form-field appearance="fill"
+                        ><mat-label> {{ "new_game_page.label.difficulty" | translate }} </mat-label
+                        ><mat-select id="difficulty-select" formControlName="difficultyBot"
+                            ><mat-option id="difficulty-options" *ngFor="let difficulty of difficultyList" [value]="difficulty">
                                 {{ difficulty }}
-                            </mat-option>
-                        </mat-select>
-                    </mat-form-field>
+                            </mat-option></mat-select
+                        ></mat-form-field
+                    >
                 </form>
-
                 <form [formGroup]="form">
-                    <mat-form-field appearance="fill">
-                        <mat-label> {{ "new_game_page.label.timer" | translate }} </mat-label>
-                        <mat-select id="timer-select" formControlName="timer">
-                            <mat-option id="timer-options" *ngFor="let time of timerList" [value]="time">
+                    <mat-form-field appearance="fill"
+                        ><mat-label> {{ "new_game_page.label.timer" | translate }} </mat-label
+                        ><mat-select id="timer-select" formControlName="timer"
+                            ><mat-option id="timer-options" *ngFor="let time of timerList" [value]="time">
                                 {{ timer.getTimeStamp(time) }}
-                            </mat-option>
-                        </mat-select>
-                    </mat-form-field>
+                            </mat-option></mat-select
+                        ></mat-form-field
+                    >
                 </form>
-
                 <form [formGroup]="form">
-                    <mat-form-field appearance="fill">
-                        <mat-label> {{ "new_game_page.label.dictionary" | translate }} </mat-label>
-                        <mat-select (click)="downloadDictionaries()" formControlName="dictionary">
-                            <mat-option *ngFor="let dictionary of dictionaryList" [value]="dictionary.title">
+                    <mat-form-field appearance="fill"
+                        ><mat-label> {{ "new_game_page.label.dictionary" | translate }} </mat-label
+                        ><mat-select (click)="downloadDictionaries()" formControlName="dictionary"
+                            ><mat-option *ngFor="let dictionary of dictionaryList" [value]="dictionary.title">
                                 {{ dictionary.title.charAt(0).toUpperCase() + dictionary.title.slice(1) }}
-                                <span matTooltip="{{ dictionary.description }}" id="dict-info">ⓘ</span>
-                            </mat-option>
-                        </mat-select>
-                    </mat-form-field>
+
+                                <span matTooltip="{{ dictionary.description }}" id="dict-info">ⓘ</span></mat-option
+                            ></mat-select
+                        ></mat-form-field
+                    >
                     <div #info id="info">
                         <p></p>
                         <p></p>
                     </div>
                 </form>
-
                 <app-import-dictionary></app-import-dictionary>
-
                 <div class="container-button">
-                    <button class="return-button" mat-icon-button routerLink="/home">
-                        <mat-icon>navigate_before</mat-icon>
-                    </button>
-                    <button class="start-button" (click)="createGame()" mat-raised-button [disabled]="form.invalid || !userService.user.username">
+                    <button class="return-button" mat-icon-button routerLink="/home"><mat-icon>navigate_before</mat-icon></button
+                    ><button class="start-button" (click)="createGame()" mat-raised-button [disabled]="form.invalid || !userService.user.username">
                         {{ "action.create" | translate }}
                     </button>
                 </div>
