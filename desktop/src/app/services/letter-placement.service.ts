@@ -93,6 +93,7 @@ export class LetterPlacementService {
         this.placeLetter(placedLetter, this.boardTiles[this.selectionPositions[0].coord]);
     }
 
+    // TODO
     submitPlacement() {
         if (this.noLettersPlaced()) return;
 
@@ -108,6 +109,8 @@ export class LetterPlacementService {
             isHorizontal: this.selectionPositions[0].direction === PlayDirection.Right,
             letters,
         } as CommandInfo);
+
+        console.log(this.selectionPositions[0].direction === PlayDirection.Right);
 
         // this.chatboxService.submitMessage(
         //     `!placer ${verticalPlacement}${this.selectionPositions[0].coord}${this.selectionPositions[0].direction} ${lettersToSubmit}`,
@@ -404,6 +407,7 @@ export class LetterPlacementService {
             y: Math.floor(this.origin / TOTAL_ROWS) + 1,
         };
 
+        console.log(coord);
         return coord;
     }
 }
