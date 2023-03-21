@@ -22,11 +22,27 @@ export class UserService {
     login(user: IUser): Subject<string> {
         const subject = new Subject<string>();
 
-        // TODO : Also get image data from server
         this.httpHandlerService.login(user).subscribe({
-            next: () => {
+            next: (loginRes: { userData: IUser }) => {
+                if (loginRes.userData.profilePicture.isDefaultPicture) {
+                    this.httpHandlerService.getDefaultImages().subscribe((map: Map<string, string[]>) => {
+                        // Set url in userData for local access to the default image
+                        // (yes we download all of the keys, but it's easier like that)
+                        Object.entries(map).forEach((entry: [string, string[]]) => {
+                            if (entry[0] === loginRes.userData.profilePicture.name) {
+                                loginRes.userData.profilePicture.key = entry[1][0];
+                            }
+                        });
+                    });
+                } else {
+                    this.httpHandlerService.getProfilePicture().subscribe((res: { url: string }) => {
+                        // Set url in userData for local access to the image
+                        loginRes.userData.profilePicture.key = res.url;
+                    });
+                }
+                this.user = loginRes.userData;
+
                 this.cookieService.updateUserSessionCookie();
-                this.user = user;
                 subject.next('');
             },
             error: (error: HttpErrorResponse) => {
