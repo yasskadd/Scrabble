@@ -1,18 +1,21 @@
+import { NUMBER_OF_PLAYERS } from '@app/constants/players';
 import { GameParameters } from '@app/interfaces/game-parameters';
 import { GameRoom } from '@app/interfaces/game-room';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
+import { JoinGameRoomParameters } from '@common/interfaces/join-game-room-parameters';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
+
+import * as uuid from 'uuid';
 
 const UNAVAILABLE_ELEMENT_INDEX = -1;
 const SECOND = 1000;
 const PLAYERS_JOINING_ROOM = 'joinGameRoom';
 const SAME_USER_IN_ROOM_ERROR = "L'adversaire a le même nom";
 const ROOM_NOT_AVAILABLE_ERROR = "La salle n'est plus disponible";
+const WRONG_ROOM_PASSWORD = 'Le mot de passe pour la salle est erronée';
 const PLAYERS_REJECT_FROM_ROOM_ERROR = "L'adversaire à rejeter votre demande";
-
-type Parameters = { id: string; name: string };
 
 @Service()
 export class GameSessions {
@@ -29,7 +32,7 @@ export class GameSessions {
             this.createGame(sio, socket, gameInfo);
         });
 
-        this.socketManager.io(SocketEvents.PlayerJoinGameAvailable, (sio, socket, parameters: Parameters) => {
+        this.socketManager.io(SocketEvents.PlayerJoinGameAvailable, (sio, socket, parameters: JoinGameRoomParameters) => {
             this.playerJoinGameAvailable(sio, socket, parameters);
         });
 
@@ -37,7 +40,7 @@ export class GameSessions {
             this.roomLobby(sio, socket);
         });
 
-        this.socketManager.on(SocketEvents.ExitWaitingRoom, (socket, parameters: Parameters) => {
+        this.socketManager.on(SocketEvents.ExitWaitingRoom, (socket, parameters: JoinGameRoomParameters) => {
             this.exitWaitingRoom(socket, parameters);
         });
 
@@ -52,8 +55,13 @@ export class GameSessions {
         this.socketManager.on(SocketEvents.JoinRoom, (socket, roomID: string) => {
             this.joinRoom(socket, roomID);
         });
-        this.socketManager.io(SocketEvents.RejectByOtherPlayer, (sio, socket, parameters: Parameters) => {
+
+        this.socketManager.io(SocketEvents.RejectByOtherPlayer, (sio, socket, parameters: JoinGameRoomParameters) => {
             this.rejectByOtherPlayer(sio, socket, parameters);
+        });
+
+        this.socketManager.on(SocketEvents.Invite, (socket, inviteeId: string, parameters: JoinGameRoomParameters) => {
+            this.invitePlayer(socket, inviteeId, parameters);
         });
 
         this.socketManager.io(SocketEvents.StartScrabbleGame, (sio, socket, roomId: string) => {
@@ -63,6 +71,10 @@ export class GameSessions {
         this.socketManager.io(SocketEvents.Disconnect, (sio, socket) => {
             this.disconnect(sio, socket);
         });
+    }
+
+    private invitePlayer(this: this, socket: Socket, inviteeId: string, parameters: JoinGameRoomParameters): void {
+        socket.broadcast.to(inviteeId).emit(SocketEvents.Invite, parameters);
     }
 
     private joinRoom(this: this, socket: Socket, roomID: string): void {
@@ -90,37 +102,40 @@ export class GameSessions {
             }
         }, SECOND);
     }
-    private playerJoinGameAvailable(this: this, sio: Server, socket: Socket, parameters: Parameters): void {
-        const roomId = parameters.id;
-        const username = parameters.name;
+    private playerJoinGameAvailable(this: this, sio: Server, socket: Socket, parameters: JoinGameRoomParameters): void {
+        const roomId = parameters.roomId;
+        const username = parameters.username;
+        const roomPassword = parameters.password?.length ? parameters.password : '';
 
         const roomIsAvailable = this.roomStatus(roomId);
         const userTheSame = this.sameUsernameExists(username, roomId);
+        const roomPasswordMatch = this.verifyRoomPassword(roomPassword, roomId);
 
-        if (roomIsAvailable && !userTheSame) {
+        if (roomIsAvailable && !userTheSame && roomPasswordMatch) {
             socket.leave(PLAYERS_JOINING_ROOM);
             socket.join(roomId);
             this.addUserToRoom(username, socket.id, roomId);
             socket.emit(SocketEvents.JoinValidGame, this.getOpponentName(username, roomId));
             socket.broadcast.to(roomId).emit(SocketEvents.FoundAnOpponent, username);
         } else if (userTheSame) socket.emit(SocketEvents.ErrorJoining, SAME_USER_IN_ROOM_ERROR);
+        else if (!roomPasswordMatch) socket.emit(SocketEvents.ErrorJoining, WRONG_ROOM_PASSWORD);
         else socket.emit(SocketEvents.ErrorJoining, ROOM_NOT_AVAILABLE_ERROR);
 
         sio.to(PLAYERS_JOINING_ROOM).emit(SocketEvents.UpdateRoomJoinable, this.getAvailableRooms());
     }
 
-    private exitWaitingRoom(this: this, socket: Socket, parameters: Parameters): void {
-        const roomId = parameters.id;
-        const playerName = parameters.name;
+    private exitWaitingRoom(this: this, socket: Socket, parameters: JoinGameRoomParameters): void {
+        const roomId = parameters.roomId;
+        const playerName = parameters.username;
         socket.broadcast.to(roomId).emit(SocketEvents.OpponentLeave);
         socket.leave(roomId);
         socket.join(PLAYERS_JOINING_ROOM);
         this.removeUserFromRoom(playerName, socket.id, roomId);
     }
 
-    private rejectByOtherPlayer(this: this, sio: Server, socket: Socket, parameters: Parameters): void {
-        const roomId = parameters.id;
-        const playerName = parameters.name;
+    private rejectByOtherPlayer(this: this, sio: Server, socket: Socket, parameters: JoinGameRoomParameters): void {
+        const roomId = parameters.roomId;
+        const playerName = parameters.username;
         socket.leave(roomId);
         socket.join(PLAYERS_JOINING_ROOM);
         this.removeUserFromRoom(playerName, socket.id, roomId);
@@ -140,14 +155,19 @@ export class GameSessions {
     }
 
     private getNewId(): string {
-        const id = this.idCounter++;
-        return id.toString();
+        return uuid.v4();
+    }
+
+    private verifyRoomPassword(password: string, roomId: string): boolean {
+        const room = this.gameRooms.get(roomId);
+        if (room === undefined) return false;
+        return room.password === password;
     }
 
     private getAvailableRooms(): GameRoom[] {
         const roomAvailableArray: GameRoom[] = [];
         this.gameRooms.forEach((gameRoom) => {
-            if (gameRoom.isAvailable === true) roomAvailableArray.push(gameRoom);
+            if (gameRoom.isAvailable === true && gameRoom.visibility === 'public') roomAvailableArray.push(gameRoom);
         });
         return roomAvailableArray;
     }
@@ -168,6 +188,8 @@ export class GameSessions {
             dictionary: parameters.dictionary,
             timer: parameters.timer,
             mode: parameters.mode,
+            visibility: parameters.visibility,
+            password: parameters.password?.length ? parameters.password : '',
         };
         this.gameRooms.set(roomID, newRoom);
         return roomID;
@@ -194,12 +216,12 @@ export class GameSessions {
 
     private makeRoomAvailable(roomID: string): void {
         const room = this.gameRooms.get(roomID);
-        if (room !== undefined) room.isAvailable = true;
+        if (room !== undefined && room.socketID.length !== NUMBER_OF_PLAYERS) room.isAvailable = true;
     }
 
     private makeRoomUnavailable(roomID: string): void {
         const room = this.gameRooms.get(roomID);
-        if (room !== undefined) room.isAvailable = false;
+        if (room !== undefined && room.socketID.length === NUMBER_OF_PLAYERS) room.isAvailable = false;
     }
 
     private addUserToRoom(user: string, socketID: string, roomID: string): void {
