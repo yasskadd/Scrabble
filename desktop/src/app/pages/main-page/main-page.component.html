@@ -21,8 +21,10 @@
                         matTooltipPosition="right"
                         matTooltipClass="toolMainPage"
                     >
-                        <div *ngFor="let letter of ['S', 'C', 'O', 'R', 'E', 'S']">{{ letter }}</div>
-                        <mat-icon class="scores-icon">emoji_events</mat-icon>
+                        <button mat-flat-button color="accent" *ngFor="let letter of ['S', 'C', 'O', 'R', 'E', 'S']">{{ letter }}</button>
+                        <button mat-flat-button color="accent">
+                            <mat-icon class="scores-icon">emoji_events</mat-icon>
+                        </button>
                     </div>
                     <button
                         id="classique"
