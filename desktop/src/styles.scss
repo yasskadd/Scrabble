@@ -7,7 +7,7 @@ $angular-warn: mat.define-palette(mat.$red-palette);
 $angular-default-theme: mat.define-light-theme(
     (
         color: (
-            primary: mat.define-palette(mat.$green-palette, 900),
+            primary: mat.define-palette(mat.$green-palette, 900, 200),
             accent: mat.define-palette(mat.$orange-palette, 200),
             warn: $angular-warn,
         ),
@@ -20,7 +20,7 @@ $angular-default-theme: mat.define-light-theme(
 $angular-dark-theme: mat.define-dark-theme(
     (
         color: (
-            primary: mat.define-palette(mat.$green-palette, 800),
+            primary: mat.define-palette(mat.$green-palette, 800, 900),
             accent: mat.define-palette(mat.$teal-palette, 600),
             warn: $angular-warn,
         ),
