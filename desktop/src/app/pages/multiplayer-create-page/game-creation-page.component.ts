@@ -90,7 +90,6 @@ export class GameCreationPageComponent implements OnInit {
             if (this.passwordEnableForm.value) {
                 this.passwordForm.addValidators(Validators.required);
             } else {
-                this.passwordForm.removeValidators(Validators.required);
             }
             this.form.setControl('password', this.passwordForm);
         });

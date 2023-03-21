@@ -2,7 +2,6 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
-import { GameRoomClient } from '@app/interfaces/game-room-client';
 import { HighScores } from '@app/interfaces/high-score-parameters';
 import { AvatarData } from '@common/interfaces/avatar-data';
 import { Bot } from '@common/interfaces/bot';
@@ -137,10 +136,6 @@ export class HttpHandlerService {
         return this.http
             .patch<void>(`${this.baseUrl}/virtualPlayer/remove`, bot, { withCredentials: true })
             .pipe(catchError(this.handleError<void>('deleteBot')));
-    }
-
-    getAvailableRooms(): Observable<GameRoomClient[]> {
-        return this.http.get<GameRoomClient[]>(`${this.baseUrl}/game/rooms`).pipe(catchError(this.handleError<GameRoomClient[]>('get game rooms')));
     }
 
     signUp(newUser: IUser): Observable<{ imageKey: string }> {

@@ -10,7 +10,6 @@ import { SocketEvents } from '@common/constants/socket-events';
 import { GameScrabbleInformation } from '@common/interfaces/game-scrabble-information';
 import { PlayerRoomInfo } from '@common/interfaces/player-room-info';
 import { IUser } from '@common/interfaces/user';
-import { HttpHandlerService } from '@services/communication/http-handler.service';
 import { SnackBarService } from '@services/snack-bar.service';
 import { UserService } from '@services/user.service';
 import { Subject } from 'rxjs';
@@ -31,7 +30,6 @@ export class GameConfigurationService {
         private snackBarService: SnackBarService,
         private userService: UserService,
         private clientSocket: ClientSocketService,
-        private httpHandlerService: HttpHandlerService,
         private router: Router,
     ) {
         this.availableRooms = [];
@@ -73,7 +71,8 @@ export class GameConfigurationService {
         });
 
         this.clientSocket.on(SocketEvents.UpdateRoomJoinable, (gamesToJoin: GameRoomClient[]) => {
-            this.availableRooms = this.filterGameMode(this.roomInformation.mode, gamesToJoin);
+            // this.availableRooms = this.filterGameMode(this.roomInformation.mode, gamesToJoin);
+            this.availableRooms = gamesToJoin;
         });
 
         this.clientSocket.on(SocketEvents.ErrorJoining, (reason: string) => {
@@ -168,14 +167,6 @@ export class GameConfigurationService {
         this.roomInformation.isCreator = false;
 
         this.availableRooms = [];
-        this.updateAvailableRooms();
-    }
-
-    updateAvailableRooms(): void {
-        this.httpHandlerService.getAvailableRooms().subscribe((rooms: GameRoomClient[]) => {
-            // this.availableRooms = this.filterGameMode(this.roomInformation.mode, rooms);
-            this.availableRooms = rooms;
-        });
     }
 
     joinRandomRoom(): void {
@@ -255,14 +246,6 @@ export class GameConfigurationService {
         this.roomInformation.players = [...allPlayers];
 
         this.router.navigate([`${AppRoutes.MultiWaitingPage}/${this.gameMode}`]).then();
-    }
-
-    private filterGameMode(gameMode: string, availableRooms: GameRoomClient[]): GameRoomClient[] {
-        if (!gameMode) return availableRooms;
-
-        return availableRooms.filter((element: GameRoomClient) => {
-            return !element.mode || element.mode === gameMode;
-        });
     }
 
     private arePlayersTheSame(player1: IUser, player2: IUser): boolean {
