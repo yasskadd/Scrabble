@@ -1,5 +1,5 @@
 #canvas {
-    background-color: #fff;
+    // background-color: #fff;
     border-radius: 4px;
     box-shadow: 1px 3px 2px -2px rgba(0, 0, 0, 0.2), 1px 2px 2px 1px rgba(0, 0, 0, 0.14), 1px 2px 4px 1px rgba(0, 0, 0, 0.12);
 }
@@ -15,7 +15,7 @@
     align-items: center;
     height: 20px;
     padding-bottom: 5px;
-    background-color: #7fa99b;
+    // background-color: #7fa99b;
     border-radius: 4px;
     margin: 5px 0;
     padding: 5px 10px;
@@ -24,7 +24,7 @@
 #font-size {
     font-size: 14px;
     font-weight: 500;
-    color: #23501f;
+    // color: #23501f;
     margin-bottom: 0px;
 }
 
@@ -35,8 +35,8 @@
 #winning-message {
     position: absolute;
     top: calc(50% - 2em);
-    background-color: #23501f;
-    color: #fff;
+    // background-color: #23501f;
+    // color: #fff;
     padding: 10px;
     font-family: system-ui;
     font-size: 20px;
@@ -49,7 +49,7 @@
 ::ng-deep .mat-accent .mat-slider-track-fill,
 ::ng-deep .mat-accent .mat-slider-thumb,
 ::ng-deep .mat-accent .mat-slider-thumb-label {
-    background-color: #23501f;
+    // background-color: #23501f;
 }
 
 app-game-board {

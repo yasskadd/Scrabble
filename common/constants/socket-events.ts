@@ -54,4 +54,5 @@ export enum SocketEvents {
     ClueCommand = 'clueCommand',
     ImportDictionary = 'ImportDictionary',
     SendMessageHome = 'sendMessageHome',
+    Invite = 'invite',
 }

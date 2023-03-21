@@ -8,4 +8,6 @@ export interface GameRoom {
     dictionary: string;
     timer: number;
     mode: string;
+    visibility: string;
+    password: string;
 }

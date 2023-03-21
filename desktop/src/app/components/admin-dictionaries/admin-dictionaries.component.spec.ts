@@ -38,7 +38,7 @@ describe('AdminDictionariesComponent', () => {
         dictionaryServiceSpy.deleteDictionary.and.resolveTo();
         dictionaryServiceSpy.resetDictionaries.and.resolveTo();
 
-        // Reason : FileSaver says it<s deprecated when it isn't (import works)
+        // Reason : FileSaver says it's deprecated when it isn't (import works)
         // eslint-disable-next-line deprecation/deprecation
         await TestBed.configureTestingModule({
             imports: [MatDialogModule],
