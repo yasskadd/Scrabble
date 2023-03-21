@@ -28,9 +28,10 @@
     border-collapse: collapse;
     // background-color: #fbd7a3;
     // box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
-    border-radius: 4px;
-    width: 40px;
-    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    max-width: 40px;
+    max-height: 40px;
     margin: 12px;
 }
 

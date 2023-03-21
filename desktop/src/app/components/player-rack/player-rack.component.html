@@ -15,7 +15,7 @@
     </div>
 
     <div
-        class="rack-info justified"
+        class="rack-info justified-rack"
         id="player-rack"
         cdkDropList
         [cdkDropListData]="gameClient.playerOne.rack"
@@ -30,13 +30,13 @@
             (click)="onSelection($event, i)"
             class="rack"
         >
-            <div class="rack-letter letter-shadow" *cdkDragPlaceholder></div>
-            <div class="rack-letter">
+            <button mat-flat-button color="accent" class="rack-letter letter-shadow" *cdkDragPlaceholder></button>
+            <button mat-raised-button color="accent" class="rack-letter">
                 <div class="letter-value">
                     {{ letter.value.toUpperCase() }}
                 </div>
                 <div class="letter-points">{{ letter.points }}</div>
-            </div>
+            </button>
         </div>
     </div>
     <div class="right-side">
