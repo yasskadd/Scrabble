@@ -8,7 +8,8 @@
                 <table class="roomAvailable" *ngIf="availableRooms.length > 0">
                     <thead class="tableContainer">
                         <tr>
-                            <th>{{ "new_game_page.label.names" | translate }}</th>
+                            <th>{{ "new_game_page.label.players" | translate }}</th>
+                            <th>{{ "new_game_page.label.host" | translate }}</th>
                             <th>{{ "new_game_page.label.difficulty" | translate }}</th>
                             <th>{{ "new_game_page.label.timer" | translate }}</th>
                             <th>{{ "new_game_page.label.dictionary" | translate }}</th>
@@ -16,10 +17,24 @@
                     </thead>
                     <tbody>
                         <tr *ngFor="let gameRoom of availableRooms">
-                            <td *ngFor="let user of gameRoom.users">
-                                <div>
-                                    {{ user.username }}
-                                </div>
+                            <td>
+                                <span class="players-row">
+                                    <mat-icon>people</mat-icon>
+                                    {{ gameRoom.users.length }} / 4
+                                </span>
+                                <!-- TODO : Show only if there are -->
+                                <span class="players-row">
+                                    <mat-icon>smart_toy</mat-icon>
+                                    {{ gameRoom.users.length }}
+                                </span>
+                                <!-- TODO : Show only if there are -->
+                                <span class="players-row">
+                                    <mat-icon>people_outline</mat-icon>
+                                    {{ gameRoom.users.length }}
+                                </span>
+                            </td>
+                            <td>
+                                {{ gameRoom.users[0].username }}
                             </td>
                             <td>{{ gameRoom.mode }}</td>
                             <td>{{ timer.getTimeStamp(gameRoom.timer) }}</td>

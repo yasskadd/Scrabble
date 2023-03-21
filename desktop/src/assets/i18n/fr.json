@@ -27,7 +27,8 @@
         "no_available_games": "Aucunes parties disponibles",
         "label": {
             "name": "Nom de joueur",
-            "names": "Nom de joueurs",
+            "players": "Joueurs",
+            "host": "Hôte",
             "difficulty": "Difficulté",
             "timer": "Minuterie",
             "dictionary": "Dictionnaire"
