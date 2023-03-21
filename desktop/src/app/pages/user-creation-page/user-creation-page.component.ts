@@ -9,7 +9,6 @@ import { MAX_EMAIL_LENGTH, MAX_TEXT_LENGTH } from '@app/constants/user';
 import { equalStringValidator } from '@app/directives/custom-validators';
 import { AppRoutes } from '@app/models/app-routes';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
-import { UserService } from '@app/services/user.service';
 import { AvatarData } from '@common/interfaces/avatar-data';
 import { ImageInfo } from '@common/interfaces/image-info';
 import { IUser } from '@common/interfaces/user';
@@ -35,13 +34,7 @@ export class UserCreationPageComponent {
 
     protected imageTypes: typeof ImageType = ImageType;
 
-    constructor(
-        private userService: UserService,
-        private httpHandlerService: HttpHandlerService,
-        private router: Router,
-        private formBuilder: FormBuilder,
-        private dialog: MatDialog,
-    ) {
+    constructor(private httpHandlerService: HttpHandlerService, private router: Router, private formBuilder: FormBuilder, private dialog: MatDialog) {
         this.profilePicForm = new FormControl(undefined, [Validators.required]);
         this.usernameForm = new FormControl('', [Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]);
         this.emailForm = new FormControl('', [Validators.required, Validators.email, Validators.maxLength(MAX_EMAIL_LENGTH)]);
@@ -55,7 +48,7 @@ export class UserCreationPageComponent {
             emailForm: this.emailForm,
             passwordForm: this.passwordForm,
             passwordCopyForm: this.passwordCopyForm,
-            recaptcha: ['', Validators.required],
+            // recaptcha: ['', Validators.required],
         });
 
         this.addPasswordValidator();
@@ -100,21 +93,12 @@ export class UserCreationPageComponent {
                 profilePicture,
             } as IUser)
             .subscribe({
-                next: () => {
+                next: (res: { imageKey: string }) => {
                     this.connectionError = '';
 
                     if (!isDefaultPicture) {
-                        // TODO : Upload new custom image
+                        this.httpHandlerService.sendProfilePicture(this.profilePicForm.value as AvatarData, res.imageKey).subscribe();
                     }
-
-                    // TODO : For testing only, user creating an account will
-                    // need to connect after creating it
-                    this.userService.user = {
-                        email: this.emailForm.value,
-                        username: this.usernameForm.value,
-                        password: this.passwordForm.value,
-                        profilePicture: this.profilePicForm.value,
-                    };
 
                     this.router.navigate([AppRoutes.HomePage]).then();
                 },

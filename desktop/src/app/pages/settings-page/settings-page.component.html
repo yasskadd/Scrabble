@@ -1,13 +1,25 @@
-<app-header style="width: 100%" class="sticky"></app-header>
+<div class="encapsulating-div">
+    <app-header></app-header>
 
-<body class="justified">
-    <form class="justified settings-form">
-        <mat-form-field appearance="outline">
-            <!-- TODO : Language -->
-            <mat-label>Nom d'utilisateur</mat-label>
-            <input matInput />
-        </mat-form-field>
-    </form>
-</body>
+    <body class="mat-app-background">
+        <form class="justified settings-form">
+            <mat-form-field appearance="outline">
+                <!-- TODO : Language AND display current username-->
+                <mat-label>Changer le nom d'utilisateur</mat-label>
+                <input matInput />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <!-- TODO : Language -->
+                <mat-label>Changer votre mot de passe</mat-label>
+                <input matInput />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <!-- TODO : Language -->
+                <mat-label>Confirmer le mot de passe</mat-label>
+                <input matInput />
+            </mat-form-field>
+        </form>
+    </body>
 
-<app-footer style="width: 100%"></app-footer>
+    <app-footer></app-footer>
+</div>

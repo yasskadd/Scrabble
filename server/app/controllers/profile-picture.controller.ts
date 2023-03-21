@@ -4,7 +4,7 @@ import { FileRequest } from '@app/interfaces/file-request';
 import { uploadImage } from '@app/middlewares/multer-middleware';
 import { verifyToken } from '@app/middlewares/token-verification-middleware';
 import { AccountStorageService } from '@app/services/database/account-storage.service';
-import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, PutObjectCommandInput, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { ImageInfo } from '@common/interfaces/image-info';
 import { Request, Response, Router } from 'express';
@@ -36,6 +36,15 @@ export class ProfilePictureController {
     private configureRouter(): void {
         this.router = Router();
 
+        /**
+         * HTTP GET request to get the default pictures informations
+         *
+         * @return { Map<string, string[] } send - The informations of all the images arranged in a key, value pair.
+         *                       key - The name of the default image
+         *                       value[0] - The url of the default image
+         *                       value[1] - The encrypted key of the default image
+         * @return { number } HTTP Status - The return status of the request
+         */
         this.router.get('/default-pictures', async (req: Request, res: Response) => {
             const imageUrlsMap: Map<string, string[]> = new Map();
             for (const image of this.defaultImagesMap.entries()) {
@@ -43,47 +52,54 @@ export class ProfilePictureController {
                 const signedUrl = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 3600 });
                 imageUrlsMap.set(image[0], [signedUrl, image[1]]);
             }
-            console.log(imageUrlsMap);
             res.status(StatusCodes.OK).send(Object.fromEntries(imageUrlsMap));
         });
 
-        this.router.post('/profile-picture', uploadImage.single('image'), async (req: FileRequest, res: Response) => {
-            if (req.fileValidationError || !req.file) {
+        /**
+         * HTTP POST request to send an image to the S3 bucket
+         *
+         * @param { FormatData } files - Container for the files necessary for the request
+         *             { image } files[0] - File of the image to post
+         *          { imageKey } files[1] - File containing the imageKey in the text/html data
+         * @return { number } HTTP Status - The return status of the request
+         */
+        this.router.post('/profile-picture', uploadImage.any(), async (req: FileRequest, res: Response) => {
+            if (!req.files || req.fileValidationError || req.files.length !== 2 || !req.files[0] || !req.files[1]) {
                 res.status(StatusCodes.BAD_REQUEST).send({
                     message: 'No file received or invalid file type',
                     success: false,
                 });
                 return;
             }
-            const imageKey = uuid.v4() + req.file?.originalname;
-            const s3UploadCommand = this.createPutCommand(req, imageKey as string);
+
+            const s3UploadCommand = this.createPutCommand(req.files[0], req.files[1].buffer.toString());
             await this.s3Client.send(s3UploadCommand);
-            // Get the signed_url
-            const getImageCommand = this.CreateGetCommand(imageKey as string);
-            const signedURL = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 3600 });
-            const imageInfo: ImageInfo = {
-                name: req.file?.originalname as string,
-                isDefaultPicture: false,
-                key: imageKey,
-            };
-            res.status(StatusCodes.CREATED).send({
-                imageInfo,
-                URL: signedURL,
-            });
+
+            res.sendStatus(StatusCodes.CREATED);
         });
 
+        /**
+         * HTTP GET request to request an image in the S3 bucket
+         *
+         * @param { string } session_token - String of the connected user token
+         * @return {{ url: string }} data - URL of the image usable as a simple source link
+         * @return { number } HTTP Status - The return status of the request
+         */
         this.router.get('/profile-picture', verifyToken, async (req: Request, res: Response) => {
             const username = res.locals.user.name;
             const profilePicInfo: ImageInfo = await this.accountStorage.getProfilePicInfo(username);
+
             // Create new signed_url
             const getImageCommand = this.CreateGetCommand(profilePicInfo.key as string);
             const signedURL = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 3600 });
             res.status(StatusCodes.OK).send({ url: signedURL });
         });
 
-        /*  PUT request to UPLOAD modify existing profile picture, we need to get imageKey in database and to PutCommand to override
-            the image in the bucket. Then create a new signed URL and send it to client */
-
+        /** PUT request to UPLOAD modify existing profile picture from an
+         * AvatarData object, we need to get imageKey in database and to PutCommand
+         * to override the image in the bucket. Then create a new signed URL and
+         * send it to client
+         */
         this.router.put('/profile-picture', verifyToken, uploadImage.single('image'), async (req: FileRequest, res: Response) => {
             if (req.fileValidationError || !req.file) {
                 res.status(StatusCodes.BAD_REQUEST).send({
@@ -92,10 +108,11 @@ export class ProfilePictureController {
                 });
                 return;
             }
+
             const username = res.locals.user.name;
             const oldProfilePicInfo = await this.accountStorage.getProfilePicInfo(username);
             const newImageKey = uuid.v4() + req.file?.originalname;
-            const putCommand = this.createPutCommand(req, newImageKey as string);
+            const putCommand = this.createPutCommand(req.file, newImageKey as string);
             this.s3Client
                 .send(putCommand)
                 .then(async () => {
@@ -119,7 +136,6 @@ export class ProfilePictureController {
         });
 
         /* PATCH route only do modify profile picture to a default one, delete image in bucket if it exists and return file name */
-
         this.router.patch('/profile-picture', verifyToken, async (req: Request, res: Response) => {
             // We just need to put hasDefaultImage to true and modify the image name, and delete the image in the bucket if it exists
             const username = res.locals.user.name;
@@ -159,13 +175,13 @@ export class ProfilePictureController {
         });
     }
 
-    private createPutCommand(req: Request, imageKey: string): PutObjectCommand {
+    private createPutCommand(req: Express.Multer.File, imageKey: string): PutObjectCommand {
         return new PutObjectCommand({
             Bucket: BUCKET_NAME,
             Key: imageKey,
-            Body: req.file?.buffer,
-            ContentType: req.file?.mimetype,
-        });
+            Body: req.buffer,
+            ContentType: req.mimetype,
+        } as PutObjectCommandInput);
     }
 
     private CreateGetCommand(key: string): GetObjectCommand {

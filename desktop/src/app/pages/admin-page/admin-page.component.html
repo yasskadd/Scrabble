@@ -1,29 +1,34 @@
-<body class="justified">
-    <app-header style="width: 100%"></app-header>
-    <mat-tab-group class="justified content-wrap" mat-align-tabs="center">
-        <mat-tab>
-            <ng-template mat-tab-label>
-                {{ "admin_page.tabs.dictionaries" | translate }}
-            </ng-template>
-            <app-admin-dictionaries id="dictionary"></app-admin-dictionaries>
-        </mat-tab>
-        <mat-tab>
-            <ng-template mat-tab-label>
-                {{ "admin_page.tabs.virtual_players" | translate }}
-            </ng-template>
-            <app-admin-virtual-players id="virtual-players"></app-admin-virtual-players>
-        </mat-tab>
-        <mat-tab>
-            <ng-template mat-tab-label>
-                {{ "admin_page.tabs.game_historic" | translate }}
-            </ng-template>
-            <app-admin-game-history id="game-history"></app-admin-game-history>
-        </mat-tab>
-        <mat-tab>
-            <ng-template mat-tab-label>
-                {{ "admin_page.tabs.highscores" | translate }}
-            </ng-template>
-            <app-admin-high-scores id="hi gh-scores"></app-admin-high-scores>
-        </mat-tab> </mat-tab-group
-    ><app-footer style="width: 100%"></app-footer>
-</body>
+<div class="encapsulating-div">
+    <app-header></app-header>
+
+    <body class="mat-app-background">
+        <mat-tab-group class="justified content-wrap" mat-align-tabs="center">
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    {{ "admin_page.tabs.dictionaries" | translate }}
+                </ng-template>
+                <app-admin-dictionaries id="dictionary"></app-admin-dictionaries>
+            </mat-tab>
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    {{ "admin_page.tabs.virtual_players" | translate }}
+                </ng-template>
+                <app-admin-virtual-players id="virtual-players"></app-admin-virtual-players>
+            </mat-tab>
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    {{ "admin_page.tabs.game_historic" | translate }}
+                </ng-template>
+                <app-admin-game-history id="game-history"></app-admin-game-history>
+            </mat-tab>
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    {{ "admin_page.tabs.highscores" | translate }}
+                </ng-template>
+                <app-admin-high-scores id="hi gh-scores"></app-admin-high-scores>
+            </mat-tab>
+        </mat-tab-group>
+    </body>
+
+    <app-footer style="width: 100%"></app-footer>
+</div>
