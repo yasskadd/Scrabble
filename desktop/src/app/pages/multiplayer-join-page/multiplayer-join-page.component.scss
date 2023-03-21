@@ -1,21 +1,11 @@
 body {
     margin: auto;
     height: 100%;
-    background-color: #c2e5da;
-}
-
-.justified {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
 }
 
 .wrapper {
     width: 50%;
     min-width: 500px;
-    background-color: #7fa99b;
-    color: #23501f;
     padding: 30px;
 }
 
@@ -48,13 +38,10 @@ button .join-random-game {
     font-size: 25px;
     padding: 2px;
     margin: 10px;
-    color: honeydew;
-    background-color: green;
 }
 
-button .join-game {
-    margin: 0px 0px 0px 10px;
-    background-color: greenyellow;
+button.join-game {
+    margin: 8px 8px 8px 24px;
 }
 
 .return-button {
@@ -63,10 +50,11 @@ button .join-game {
 
 .wrapper {
     text-align: center;
+    width: auto;
 }
 
 .max {
-    color: red;
+    // color: red;
 }
 
 .list-container {
@@ -91,7 +79,7 @@ table {
 }
 
 th {
-    padding: 0px 20px 20px 20px;
+    padding: 16px 32px 16px 32px;
 }
 
 td {

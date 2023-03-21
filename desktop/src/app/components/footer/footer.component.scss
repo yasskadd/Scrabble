@@ -1,45 +1,29 @@
-// .sticky {
-//     position: absolute;
-//     bottom: 0;
-//     width: 100%;
-// }
-
-// footer {
-//     height: 85px;
-//     width: 100%;
-//     text-align: center;
-//     color: #23501f;
-//     background-color: #7fa99b;
-//     justify-content: flex-end;
-// }
-
-app-footer ::ng-deep mat-form-field .mat-mdc-form-field-bottom-align {
-    height: 0px !important;
-}
-
-.zones {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.language-selector {
-    position: absolute;
-    right: 16px;
-    transform: translate(0px, 10px);
-}
-
-.team-infos {
-    margin-top: 32px;
-    margin-bottom: 32px;
-}
-
 .team-name {
     font-family: system-ui;
     font-size: 20px;
     font-weight: 500;
-    margin: 0px 0px 16px 0px;
+    margin-left: 7px;
+}
+
+.language-dark-mode {
+    display: flex;
+    position: absolute;
+    bottom: 11px;
+    right: 20px;
+}
+
+.language-dark-mode > .mdc-button {
+    display: flex;
+    border-radius: 3px;
+    margin-right: 8px;
+    min-width: 55px;
+    min-height: 55px;
+    max-width: 55px;
+    max-height: 55px;
+}
+
+mat-icon {
+    margin: 0px !important;
 }
 
 .team-members {
@@ -49,7 +33,6 @@ app-footer ::ng-deep mat-form-field .mat-mdc-form-field-bottom-align {
 
 .team-members > * {
     text-decoration: none !important;
-    color: #23501f;
     margin-left: 5px;
     margin-right: 5px;
     padding: 3px;
@@ -57,6 +40,5 @@ app-footer ::ng-deep mat-form-field .mat-mdc-form-field-bottom-align {
 }
 
 .team-members > *:hover {
-    background-color: #9dcfbe;
     cursor: pointer;
 }
