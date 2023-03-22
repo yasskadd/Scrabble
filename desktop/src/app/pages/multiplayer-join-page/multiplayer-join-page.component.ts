@@ -37,19 +37,19 @@ export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
     }
 
     protected botPresent(room: GameRoomClient): boolean {
-        let present: boolean = false;
+        const present = !!room;
 
         // TODO : Add verification with right interface
-        room.users.forEach(() => {});
+        // room.users.forEach(() => {});
 
         return present;
     }
 
     protected observerPresent(room: GameRoomClient): boolean {
-        let present: boolean = false;
+        const present = !!room;
 
         // TODO : Add verification with right interface
-        room.users.forEach(() => {});
+        // room.users.forEach(() => {});
 
         return present;
     }
