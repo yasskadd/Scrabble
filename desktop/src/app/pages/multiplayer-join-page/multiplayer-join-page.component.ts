@@ -1,9 +1,9 @@
 import { AfterViewInit, Component, OnDestroy } from '@angular/core';
+import { FormControl } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { GameConfigurationService } from '@app/services/game-configuration.service';
-import { UserService } from '@app/services/user.service';
-import { TimeService } from '@services/time.service';
 import { GameRoomClient } from '@app/interfaces/game-room-client';
+import { GameConfigurationService } from '@app/services/game-configuration.service';
+import { TimeService } from '@services/time.service';
 
 @Component({
     selector: 'app-multiplayer-join-page',
@@ -12,14 +12,11 @@ import { GameRoomClient } from '@app/interfaces/game-room-client';
 })
 export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
     gameMode: string;
+    protected roomIdForm: FormControl;
 
-    constructor(
-        protected timer: TimeService,
-        protected gameConfiguration: GameConfigurationService,
-        private userService: UserService,
-        private activatedRoute: ActivatedRoute,
-    ) {
+    constructor(protected timer: TimeService, protected gameConfiguration: GameConfigurationService, private activatedRoute: ActivatedRoute) {
         this.gameMode = this.activatedRoute.snapshot.params.id;
+        this.roomIdForm = new FormControl('');
     }
 
     get availableRooms(): GameRoomClient[] {
@@ -35,11 +32,25 @@ export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
         this.gameConfiguration.joinPage(this.gameMode);
     }
 
-    joinRoom(room: GameRoomClient) {
-        this.gameConfiguration.joinGame(room, this.userService.user);
+    joinSecretRoom(): void {
+        this.gameConfiguration.joinSecretRoom(this.roomIdForm.value);
     }
 
-    joinRandomGame() {
-        this.gameConfiguration.joinRandomRoom();
+    protected botPresent(room: GameRoomClient): boolean {
+        let present: boolean = false;
+
+        // TODO : Add verification with right interface
+        room.users.forEach(() => {});
+
+        return present;
+    }
+
+    protected observerPresent(room: GameRoomClient): boolean {
+        let present: boolean = false;
+
+        // TODO : Add verification with right interface
+        room.users.forEach(() => {});
+
+        return present;
     }
 }

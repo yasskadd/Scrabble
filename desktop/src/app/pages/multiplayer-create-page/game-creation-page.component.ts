@@ -177,6 +177,15 @@ export class GameCreationPageComponent implements OnInit {
         this.isGamePublic = !this.isGamePublic;
     }
 
+    protected getError(): string {
+        if (this.passwordForm.hasError('minlength')) {
+            // TODO : Language
+            return '8 caractères minimum';
+        }
+
+        return '';
+    }
+
     private getDictionary(title: string): DictionaryInfo {
         if (this.selectedFile !== null) return this.selectedFile;
         return this.dictionaryList.find((dictionary) => dictionary.title === title);
