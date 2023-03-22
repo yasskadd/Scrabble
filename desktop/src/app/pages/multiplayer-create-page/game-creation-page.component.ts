@@ -10,9 +10,11 @@ import { LanguageService } from '@app/services/language.service';
 import { TimeService } from '@app/services/time.service';
 import { UserService } from '@app/services/user.service';
 import { VirtualPlayersService } from '@app/services/virtual-players.service';
+import { GameParameters } from '@common/interfaces/game-parameters';
 import { DictionaryEvents } from '@common/models/dictionary-events';
 import { GameDifficulty } from '@common/models/game-difficulty';
 import { GameTimeOptions } from '@common/models/game-time-options';
+import { GameVisibility } from '@common/models/game-visibility';
 import { SnackBarService } from '@services/snack-bar.service';
 
 @Component({
@@ -29,6 +31,8 @@ export class GameCreationPageComponent implements OnInit {
     selectedFile: Dictionary | null;
 
     form: FormGroup;
+    passwordEnableForm: FormControl;
+    passwordForm: FormControl;
     playerForm: FormControl;
     timerForm: FormControl;
     difficultyForm: FormControl;
@@ -53,6 +57,8 @@ export class GameCreationPageComponent implements OnInit {
         this.difficultyList = [];
         this.timerList = [];
 
+        this.passwordEnableForm = new FormControl(false);
+        this.passwordForm = new FormControl('');
         this.timerForm = new FormControl('', Validators.required);
         this.difficultyForm = new FormControl('', Validators.required);
         // TODO : Set default dictionary from server
@@ -75,9 +81,19 @@ export class GameCreationPageComponent implements OnInit {
         });
 
         this.form = this.formBuilder.group({
+            password: this.passwordForm,
             timer: this.timerForm,
             difficultyBot: this.difficultyForm,
             dictionary: this.dictionaryForm,
+        });
+
+        this.passwordEnableForm.valueChanges.subscribe(() => {
+            if (this.passwordEnableForm.value) {
+                this.passwordForm.addValidators(Validators.required);
+            } else {
+                this.passwordForm.removeValidators(Validators.required);
+            }
+            this.form.setControl('password', this.passwordForm);
         });
     }
 
@@ -158,14 +174,17 @@ export class GameCreationPageComponent implements OnInit {
 
     private initGame(dictionaryTitle: string): void {
         this.gameConfiguration.gameInitialization({
-            username: this.userService.user.username,
+            user: this.userService.user,
             timer: (this.form.get('timer') as AbstractControl).value,
             dictionary: dictionaryTitle,
             mode: this.gameMode,
             isMultiplayer: !this.isSoloMode(),
             opponent: this.isSoloMode() ? this.botName : undefined,
             botDifficulty: this.isSoloMode() ? (this.form.get('difficultyBot') as AbstractControl).value : undefined,
-        });
+            visibility: GameVisibility.Public,
+            password: this.passwordForm.value,
+        } as GameParameters);
+
         this.playerName = '';
     }
 }
