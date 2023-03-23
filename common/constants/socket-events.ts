@@ -31,7 +31,6 @@ export enum SocketEvents {
     RemoveRoom = 'removeRoom',
     RejectOpponent = 'rejectOpponent',
     RejectByOtherPlayer = 'rejectByOtherPlayer',
-    JoinRoom = 'joinRoom',
     StartScrabbleGame = 'startScrabbleGame',
     GameAboutToStart = 'gameAboutToStart',
     ExitWaitingRoom = 'exitWaitingRoom',

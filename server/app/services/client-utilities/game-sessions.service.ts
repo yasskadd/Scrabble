@@ -53,10 +53,6 @@ export class GameSessions {
             this.rejectOpponent(socket, roomParameters);
         });
 
-        this.socketManager.on(SocketEvents.JoinRoom, (socket, roomID: string) => {
-            this.joinRoom(socket, roomID);
-        });
-
         this.socketManager.io(SocketEvents.RejectByOtherPlayer, (sio, socket, roomParameters: JoinGameRoomParameters) => {
             this.rejectByOtherPlayer(sio, socket, roomParameters);
         });
@@ -76,7 +72,8 @@ export class GameSessions {
 
     /**
      * Method to get a copy of all available rooms. The users have their passwords striped
-     * @return {GameRoom[]} The array of all available rooms
+     *
+     * @return The array of all available rooms
      */
     getAvailableRooms(): GameRoom[] {
         const roomAvailableArray: GameRoom[] = [];
@@ -98,10 +95,6 @@ export class GameSessions {
 
     private invitePlayer(socket: Socket, inviteeId: string, parameters: JoinGameRoomParameters): void {
         socket.broadcast.to(inviteeId).emit(SocketEvents.Invite, parameters);
-    }
-
-    private joinRoom(socket: Socket, roomID: string): void {
-        socket.join(roomID);
     }
 
     private rejectOpponent(socket: Socket, roomParameters: JoinGameRoomParameters): void {
