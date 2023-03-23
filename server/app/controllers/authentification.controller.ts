@@ -90,6 +90,7 @@ export class AuthentificationController {
          */
         this.router.get('/captcha', async (req: Request, res: Response) => {
             const captcha = await fs.promises.readFile('./assets/webpages/captcha.html');
+            res.setHeader('content-type', 'text/html');
             res.status(SUCCESS).send(captcha.toString());
             return;
         });
