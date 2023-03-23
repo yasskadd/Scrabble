@@ -6,6 +6,7 @@ import { DialogBoxPasswordComponent } from '@app/components/dialog-box-password/
 import { GameConfigurationService } from '@app/services/game-configuration.service';
 import { GameRoom } from '@common/interfaces/game-room';
 import { TimeService } from '@services/time.service';
+import { RoomPlayer } from '@common/interfaces/room-player';
 
 @Component({
     selector: 'app-multiplayer-join-page',
@@ -81,5 +82,9 @@ export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
     protected isGameRoomLocked(gameRoom: GameRoom) {
         return !gameRoom;
         // return gameRoom.visibility ? gameRoom.visibility === GameVisibility.Locked : true;
+    }
+
+    protected getGameCreator(gameRoom: GameRoom): RoomPlayer {
+        return gameRoom.players.find((player: RoomPlayer) => player.isCreator);
     }
 }

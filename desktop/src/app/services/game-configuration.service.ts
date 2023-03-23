@@ -72,7 +72,6 @@ export class GameConfigurationService {
         });
 
         this.clientSocket.on(SocketEvents.UpdateRoomJoinable, (gamesToJoin: GameRoom[]) => {
-            // this.availableRooms = this.filterGameMode(this.roomInformation.mode, gamesToJoin);
             this.availableRooms = gamesToJoin;
         });
 
@@ -118,21 +117,21 @@ export class GameConfigurationService {
         }
     }
 
-    gameInitialization(parameters: GameCreationQuery): void {
+    gameInitialization(gameQuery: GameCreationQuery): void {
         this.roomInformation.statusGame = GameStatus.SearchingOpponent;
         this.roomInformation.players.push({
-            user: parameters.user,
+            user: gameQuery.user,
             roomId: '',
             type: PlayerType.User,
             isCreator: true,
         });
-        this.roomInformation.botDifficulty = parameters.botDifficulty;
-        this.roomInformation.timer = parameters.timer;
-        this.roomInformation.dictionary = parameters.dictionary;
+        this.roomInformation.botDifficulty = gameQuery.botDifficulty;
+        this.roomInformation.timer = gameQuery.timer;
+        this.roomInformation.dictionary = gameQuery.dictionary;
         this.roomInformation.isCreator = true;
-        this.roomInformation.mode = parameters.mode;
+        this.roomInformation.mode = gameQuery.mode;
 
-        this.clientSocket.send(SocketEvents.CreateGame, parameters);
+        this.clientSocket.send(SocketEvents.CreateGame, gameQuery);
     }
 
     joinRoom(room: GameRoom): void {
@@ -210,7 +209,6 @@ export class GameConfigurationService {
 
     private gameCreatedConfirmationEvent(roomId: string): void {
         this.roomInformation.roomId = roomId;
-        // if (this.roomInformation.playerName[1]) this.clientSocket.send(SocketEvents.StartScrabbleGame, this.roomInformation.roomId);
     }
 
     private opponentLeaveEvent(player: IUser): void {

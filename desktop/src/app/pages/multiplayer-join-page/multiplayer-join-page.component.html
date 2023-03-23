@@ -37,7 +37,7 @@
                                 </span>
                             </td>
                             <td>
-                                {{ gameRoom.players[0].username }}
+                                {{ getGameCreator(gameRoom).user.username }}
                             </td>
                             <td>{{ gameRoom.state }}</td>
                             <td>{{ timer.getTimeStamp(gameRoom.timer) }}</td>

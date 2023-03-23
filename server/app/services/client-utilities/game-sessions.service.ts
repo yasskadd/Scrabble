@@ -83,8 +83,6 @@ export class GameSessions {
 
         this.gameRooms.forEach((gameRoom) => {
             roomAvailableArray.push(this.stripPlayersPassword(gameRoom));
-
-            roomAvailableArray.push(gameRoom);
         });
 
         return roomAvailableArray;
@@ -180,8 +178,8 @@ export class GameSessions {
         }
     }
 
-    private createGame(server: Server, socket: Socket, gameInfo: GameCreationQuery): void {
-        const roomId = this.setupNewGameRoom(gameInfo, socket.id);
+    private createGame(server: Server, socket: Socket, gameQuery: GameCreationQuery): void {
+        const roomId = this.setupNewGameRoom(gameQuery, socket.id);
 
         socket.join(roomId);
         socket.emit(SocketEvents.GameCreatedConfirmation, roomId);
