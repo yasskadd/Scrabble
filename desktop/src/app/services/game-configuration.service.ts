@@ -14,6 +14,7 @@ import { SnackBarService } from '@services/snack-bar.service';
 import { UserService } from '@services/user.service';
 import { Subject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
+import { GameRoom } from '@common/interfaces/game-room';
 
 @Injectable({
     providedIn: 'root',
@@ -136,7 +137,7 @@ export class GameConfigurationService {
         this.roomInformation.mode = parameters.mode;
     }
 
-    joinRoom(room: GameRoomClient): void {
+    joinRoom(room: GameRoom): void {
         this.clientSocket.send(SocketEvents.PlayerJoinGameAvailable, {
             roomId: room.id,
             player: this.userService.user,
