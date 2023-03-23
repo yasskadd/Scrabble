@@ -37,8 +37,8 @@ export class GameSessions {
             this.createGame(server, socket, gameInfo);
         });
 
-        this.socketManager.io(SocketEvents.PlayerJoinGameAvailable, (server: Server, socket: SocketType, roomParameters: JoinGameQuery) => {
-            this.joinGameRoom(server, socket, roomParameters);
+        this.socketManager.io(SocketEvents.JoinGameRoom, (server: Server, socket: SocketType, joinGameQuery: JoinGameQuery) => {
+            this.joinGameRoom(server, socket, joinGameQuery);
         });
 
         this.socketManager.io(SocketEvents.RoomLobby, (server: Server, socket: SocketType) => {

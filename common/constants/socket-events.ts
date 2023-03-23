@@ -23,7 +23,7 @@ export enum SocketEvents {
     CreateGame = 'createGame',
     GameCreatedConfirmation = 'gameCreatedConfirmation',
     UpdateRoomJoinable = 'updateListOfRooms',
-    PlayerJoinGameAvailable = 'roomJoin',
+    JoinGameRoom = 'roomJoin',
     JoinValidGame = 'joinValid',
     FoundAnOpponent = 'foundOpponent',
     ErrorJoining = 'joiningError',

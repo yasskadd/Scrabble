@@ -89,7 +89,7 @@ describe('GameConfigurationService', () => {
         const usernamePlayer = 'Maurice';
         const spyOnSocket = spyOn(service['clientSocket'], 'send');
         service.joinGame(roomID, usernamePlayer);
-        expect(spyOnSocket).toHaveBeenCalledWith(SocketEvents.PlayerJoinGameAvailable, { id: roomID, name: usernamePlayer });
+        expect(spyOnSocket).toHaveBeenCalledWith(SocketEvents.JoinGameRoom, { id: roomID, name: usernamePlayer });
         expect(service.roomInformation.playerName[0]).toEqual(usernamePlayer);
         expect(service.roomInformation.roomId).toEqual(roomID);
     });
@@ -402,6 +402,6 @@ describe('GameConfigurationService', () => {
         service.availableRooms = testRoom;
         service.joinRandomRoom(playerName);
         const information = { id: service.roomInformation.roomId, name: playerName };
-        expect(spy).toHaveBeenCalledWith(SocketEvents.PlayerJoinGameAvailable, information);
+        expect(spy).toHaveBeenCalledWith(SocketEvents.JoinGameRoom, information);
     });
 });

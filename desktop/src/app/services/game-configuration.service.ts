@@ -135,9 +135,10 @@ export class GameConfigurationService {
     }
 
     joinRoom(room: GameRoom): void {
-        this.clientSocket.send(SocketEvents.PlayerJoinGameAvailable, {
+        this.clientSocket.send(SocketEvents.JoinGameRoom, {
             roomId: room.id,
             user: this.userService.user,
+            password: room.password,
         } as RoomPlayer);
 
         this.roomInformation.roomId = room.id;
@@ -148,7 +149,7 @@ export class GameConfigurationService {
     }
 
     joinSecretRoom(roomId: string): void {
-        this.clientSocket.send(SocketEvents.PlayerJoinGameAvailable, {
+        this.clientSocket.send(SocketEvents.JoinGameRoom, {
             roomId,
             user: this.userService.user,
         } as RoomPlayer);
