@@ -39,7 +39,7 @@
                             <td>
                                 {{ gameRoom.users[0].username }}
                             </td>
-                            <td>{{ gameRoom.mode }}</td>
+                            <td>{{ gameRoom.state }}</td>
                             <td>{{ timer.getTimeStamp(gameRoom.timer) }}</td>
                             <td>{{ gameRoom.dictionary }}</td>
                             <button class="join-game" (click)="joinRoom(gameRoom)" mat-raised-button>

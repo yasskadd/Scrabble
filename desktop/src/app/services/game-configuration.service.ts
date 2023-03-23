@@ -147,7 +147,7 @@ export class GameConfigurationService {
         this.roomInformation.players = [...room.users];
         this.roomInformation.dictionary = room.dictionary;
         this.roomInformation.timer = room.timer;
-        this.roomInformation.mode = room.mode;
+        this.roomInformation.mode = room.state;
     }
 
     joinSecretRoom(roomId: string): void {

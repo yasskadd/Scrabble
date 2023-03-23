@@ -28,7 +28,7 @@ const GAME_ROOM: GameRoom = {
     users: ['Maurice'],
     dictionary: 'Francais',
     timer: 1,
-    mode: 'classique',
+    state: 'classique',
 };
 const GAME_ROOM_2_PLAYER: GameRoom = {
     socketId: [SOCKET_ID, 'sfdg78fdsg'],
@@ -37,7 +37,7 @@ const GAME_ROOM_2_PLAYER: GameRoom = {
     users: ['Vincent', 'Maurice'],
     dictionary: 'Francais',
     timer: 1,
-    mode: 'classique',
+    state: 'classique',
 };
 const GAME_PARAMETERS: GameParameters = {
     username: 'Vincent',
@@ -121,7 +121,7 @@ describe('GameSession Service', () => {
             users: ['Vincent', 'Maurice'],
             dictionary: 'Francais',
             timer: 1,
-            mode: 'classique',
+            state: 'classique',
         };
 
         gameSessions['gameRooms'].set(ROOM_ID, gameRoomTest);
@@ -159,7 +159,7 @@ describe('GameSession Service', () => {
             users: ['Maurice'],
             dictionary: 'Francais',
             timer: 1,
-            mode: 'classique',
+            state: 'classique',
         };
 
         gameSessions['gameRooms'].set(ROOM_ID, gameRoomAvailable);
@@ -178,7 +178,7 @@ describe('GameSession Service', () => {
             users: ['Maurice'],
             dictionary: 'Francais',
             timer: 1,
-            mode: 'classique',
+            state: 'classique',
         };
 
         gameSessions['gameRooms'].set(ROOM_ID, gameRoomNotAvailable);
@@ -211,7 +211,7 @@ describe('GameSession Service', () => {
             users: [OPPONENT_NAME, PLAYER_NAME],
             dictionary: 'Francais',
             timer: 1,
-            mode: 'classique',
+            state: 'classique',
         };
         gameSessions['gameRooms'].set(ROOM_ID, gameRoom2);
 
@@ -234,7 +234,7 @@ describe('GameSession Service', () => {
             users: [OPPONENT_NAME, PLAYER_NAME],
             dictionary: 'Francais',
             timer: 1,
-            mode: 'classique',
+            state: 'classique',
         };
         const undefinedRoomID = '2';
         gameSessions['gameRooms'].set(ROOM_ID, GAME_ROOM_2);
@@ -292,7 +292,7 @@ describe('GameSession Service', () => {
             users: ['Maurice'],
             dictionary: 'Francais',
             timer: 1,
-            mode: 'classique',
+            state: 'classique',
         };
         const roomIDInvalid = '2';
         gameSessions['gameRooms'].set(ROOM_ID, gameRoomTest);
@@ -310,7 +310,7 @@ describe('GameSession Service', () => {
             users: ['Maurice'],
             dictionary: 'Francais',
             timer: 1,
-            mode: 'classique',
+            state: 'classique',
         };
         const gameRoomTest2: GameRoom = {
             socketId: [SOCKET_ID],
@@ -319,18 +319,18 @@ describe('GameSession Service', () => {
             users: ['Vincent'],
             dictionary: 'Francais',
             timer: 1,
-            mode: 'classique',
+            state: 'classique',
         };
         const roomID2 = '2';
 
-        let GAME_ROOM_AVAILABLE = gameSessions['getAvailableRooms']();
+        let GAME_ROOM_AVAILABLE = gameSessions['getClientSafeAvailableRooms']();
         expect(GAME_ROOM_AVAILABLE.length).equal(0);
 
         gameSessions['gameRooms'].set(ROOM_ID, gameRoomTest);
 
         gameSessions['gameRooms'].set(roomID2, gameRoomTest2);
 
-        GAME_ROOM_AVAILABLE = gameSessions['getAvailableRooms']();
+        GAME_ROOM_AVAILABLE = gameSessions['getClientSafeAvailableRooms']();
         expect(GAME_ROOM_AVAILABLE.length).equal(2);
         done();
     });
@@ -423,7 +423,7 @@ describe('GameSession Service', () => {
             users: ['Vincent'],
             dictionary: 'Francais',
             timer: 1,
-            mode: 'classique',
+            state: 'classique',
         };
         const spy = sinon.spy(gameSessions, 'removeRoom' as never);
 
@@ -446,7 +446,7 @@ describe('GameSession Service', () => {
             users: ['Vincent'],
             dictionary: 'Francais',
             timer: 1,
-            mode: 'classique',
+            state: 'classique',
         };
 
         gameSessions['gameRooms'].set(ROOM_ID, gameRoomAvailable);
@@ -468,7 +468,7 @@ describe('GameSession Service', () => {
             users: ['Maurice'],
             dictionary: 'Francais',
             timer: 1,
-            mode: 'classique',
+            state: 'classique',
         };
         const parametersTest: Parameters = { id: '1', name: 'Chris' };
         const spy = sinon.spy(gameSessions, 'addUserToRoom' as never);
@@ -490,7 +490,7 @@ describe('GameSession Service', () => {
             users: ['Vincent', 'Maurice'],
             dictionary: 'Francais',
             timer: 1,
-            mode: 'classique',
+            state: 'classique',
         };
 
         gameSessions['gameRooms'].set(ROOM_ID, gameRoomFull);
@@ -567,7 +567,7 @@ describe('GameSession Service', () => {
             users: ['Vincent'],
             dictionary: 'Francais',
             timer: 1,
-            mode: 'classique',
+            state: 'classique',
         };
 
         gameSessions['gameRooms'].set(ROOM_ID, gameRoomTest2);
@@ -586,7 +586,7 @@ describe('GameSession Service', () => {
             users: ['Vincent'],
             dictionary: 'Francais',
             timer: 1,
-            mode: 'classique',
+            state: 'classique',
         };
 
         gameSessions['gameRooms'].set(ROOM_ID, gameRoomTest2);
