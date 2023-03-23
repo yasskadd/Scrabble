@@ -1,8 +1,8 @@
-import { GameRoom } from '@common/interfaces/game-room';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { NUMBER_OF_PLAYERS } from '@common/constants/players';
 import { SocketEvents } from '@common/constants/socket-events';
 import { GameParameters } from '@common/interfaces/game-parameters';
+import { GameRoom } from '@common/interfaces/game-room';
 import { JoinGameRoomParameters } from '@common/interfaces/join-game-room-parameters';
 import { IUser } from '@common/interfaces/user';
 import { Server, Socket } from 'socket.io';
@@ -74,8 +74,13 @@ export class GameSessions {
         });
     }
 
+    /**
+     * Method to get a copy of all available rooms. The users have their passwords striped
+     * @return {GameRoom[]} The array of all available rooms
+     */
     getAvailableRooms(): GameRoom[] {
         const roomAvailableArray: GameRoom[] = [];
+
         this.gameRooms.forEach((gameRoom) => {
             if (gameRoom.isAvailable) {
                 const usersWithoutPasswords: IUser[] = [];
@@ -91,25 +96,25 @@ export class GameSessions {
         return roomAvailableArray;
     }
 
-    private invitePlayer(this: this, socket: Socket, inviteeId: string, parameters: JoinGameRoomParameters): void {
+    private invitePlayer(socket: Socket, inviteeId: string, parameters: JoinGameRoomParameters): void {
         socket.broadcast.to(inviteeId).emit(SocketEvents.Invite, parameters);
     }
 
-    private joinRoom(this: this, socket: Socket, roomID: string): void {
+    private joinRoom(socket: Socket, roomID: string): void {
         socket.join(roomID);
     }
 
-    private rejectOpponent(this: this, socket: Socket, roomParameters: JoinGameRoomParameters): void {
+    private rejectOpponent(socket: Socket, roomParameters: JoinGameRoomParameters): void {
         // Check that the player is removed from the game room player list
         socket.broadcast.to(roomParameters.roomId).emit(SocketEvents.RejectByOtherPlayer, this.stripUserPassword(roomParameters.player));
     }
 
-    private roomLobby(this: this, sio: Server, socket: Socket): void {
+    private roomLobby(sio: Server, socket: Socket): void {
         socket.join(PLAYERS_JOINING_ROOM);
         sio.to(PLAYERS_JOINING_ROOM).emit(SocketEvents.UpdateRoomJoinable, this.getAvailableRooms());
     }
 
-    private disconnect(this: this, sio: Server, socket: Socket): void {
+    private disconnect(sio: Server, socket: Socket): void {
         let tempTime = 5;
         setInterval(() => {
             tempTime = tempTime - 1;
@@ -122,7 +127,7 @@ export class GameSessions {
         }, SECOND);
     }
 
-    private playerJoinGameAvailable(this: this, sio: Server, socket: Socket, roomParameters: JoinGameRoomParameters): void {
+    private playerJoinGameAvailable(sio: Server, socket: Socket, roomParameters: JoinGameRoomParameters): void {
         const userAlreadyConnected: boolean = this.sameUserConnected(roomParameters.player, roomParameters.roomId);
 
         if (
@@ -147,7 +152,7 @@ export class GameSessions {
         sio.to(PLAYERS_JOINING_ROOM).emit(SocketEvents.UpdateRoomJoinable, this.getAvailableRooms());
     }
 
-    private exitWaitingRoom(this: this, socket: Socket, roomParameters: JoinGameRoomParameters): void {
+    private exitWaitingRoom(socket: Socket, roomParameters: JoinGameRoomParameters): void {
         if (!roomParameters.roomId) return;
 
         socket.broadcast.to(roomParameters.roomId).emit(SocketEvents.OpponentLeave, this.stripUserPassword(roomParameters.player));
@@ -156,7 +161,7 @@ export class GameSessions {
         this.removeUserFromRoom(socket.id, roomParameters);
     }
 
-    private rejectByOtherPlayer(this: this, sio: Server, socket: Socket, roomParameters: JoinGameRoomParameters): void {
+    private rejectByOtherPlayer(sio: Server, socket: Socket, roomParameters: JoinGameRoomParameters): void {
         socket.leave(roomParameters.roomId);
         socket.join(PLAYERS_JOINING_ROOM);
 
@@ -164,14 +169,14 @@ export class GameSessions {
         sio.to(PLAYERS_JOINING_ROOM).emit(SocketEvents.UpdateRoomJoinable, this.getAvailableRooms());
     }
 
-    private startScrabbleGame(this: this, sio: Server, roomId: string): void {
+    private startScrabbleGame(sio: Server, roomId: string): void {
         const room = this.gameRooms.get(roomId);
         if (room) {
             sio.to(roomId).emit(SocketEvents.GameAboutToStart, room.socketID);
         }
     }
 
-    private createGame(this: this, sio: Server, socket: Socket, gameInfo: GameParameters): void {
+    private createGame(sio: Server, socket: Socket, gameInfo: GameParameters): void {
         const roomId = this.setupNewRoom(gameInfo, socket.id);
         socket.join(roomId);
         socket.emit(SocketEvents.GameCreatedConfirmation, roomId);
@@ -273,7 +278,7 @@ export class GameSessions {
         this.makeRoomAvailable(roomParameters.roomId);
     }
 
-    private removeRoom(this: this, sio: Server, roomID: string): void {
+    private removeRoom(sio: Server, roomID: string): void {
         this.gameRooms.delete(roomID);
         sio.to(PLAYERS_JOINING_ROOM).emit(SocketEvents.UpdateRoomJoinable, this.getAvailableRooms());
     }
