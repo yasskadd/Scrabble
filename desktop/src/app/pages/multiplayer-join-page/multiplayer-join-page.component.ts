@@ -79,7 +79,7 @@ export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
     }
 
     protected isGameRoomLocked(gameRoom: GameRoom) {
-        return !!gameRoom;
+        return !gameRoom;
         // return gameRoom.visibility ? gameRoom.visibility === GameVisibility.Locked : true;
     }
 }

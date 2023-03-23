@@ -3,12 +3,8 @@ import * as cookie from 'cookie';
 import * as http from 'http';
 import * as jwt from 'jsonwebtoken';
 import * as io from 'socket.io';
-import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import { Service } from 'typedi';
-
-type SocketType = io.Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, unknown>;
-type CallbackSignature = (socket: SocketType, ...args: unknown[]) => void;
-type OnSioCallbackSignature = (sio: io.Server, socket: SocketType, ...args: unknown[]) => void;
+import { CallbackSignature, OnSioCallbackSignature } from '@app/types/sockets';
 
 @Service()
 export class SocketManager {
