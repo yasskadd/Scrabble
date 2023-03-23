@@ -296,9 +296,6 @@ export class GameSessions {
                 return room.id;
             }
         }
-        // for (const [key, value] of this.gameRooms.entries()) {
-        //     if (value.socketID.includes(socketID)) return key;
-        // }
 
         return '';
     }
