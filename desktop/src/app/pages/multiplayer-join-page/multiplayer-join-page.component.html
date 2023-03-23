@@ -25,19 +25,19 @@
                             <td>
                                 <span class="players-row">
                                     <mat-icon>people</mat-icon>
-                                    {{ gameRoom.users.length }} / 4
+                                    {{ gameRoom.players.length }} / 4
                                 </span>
                                 <span *ngIf="botPresent(gameRoom)" class="players-row">
                                     <mat-icon>smart_toy</mat-icon>
-                                    {{ gameRoom.users.length }}
+                                    {{ gameRoom.players.length }}
                                 </span>
                                 <span *ngIf="observerPresent(gameRoom)" class="players-row">
                                     <mat-icon>people_outline</mat-icon>
-                                    {{ gameRoom.users.length }}
+                                    {{ gameRoom.players.length }}
                                 </span>
                             </td>
                             <td>
-                                {{ gameRoom.users[0].username }}
+                                {{ gameRoom.players[0].username }}
                             </td>
                             <td>{{ gameRoom.state }}</td>
                             <td>{{ timer.getTimeStamp(gameRoom.timer) }}</td>

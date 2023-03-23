@@ -1,7 +1,7 @@
-import { IUser } from '@common/interfaces/user';
+import { RoomPlayer } from '@common/interfaces/room-player';
 
 export interface RoomInformation {
-    players: IUser[];
+    players: RoomPlayer[];
     roomId: string;
     isCreator: boolean;
     statusGame: string;

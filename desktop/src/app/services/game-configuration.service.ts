@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { GameRoomClient } from '@app/interfaces/game-room-client';
 import { RoomInformation } from '@app/interfaces/room-information';
 import { AppRoutes } from '@app/models/app-routes';
 import { GameStatus } from '@app/models/game-status';
 import { NUMBER_OF_PLAYERS } from '@common/constants/players';
 import { SocketEvents } from '@common/constants/socket-events';
-import { GameParameters } from '@common/interfaces/game-parameters';
+import { GameCreationQuery } from '@common/interfaces/game-creation-query';
 import { GameScrabbleInformation } from '@common/interfaces/game-scrabble-information';
 import { RoomPlayer } from '@common/interfaces/room-player';
 import { IUser } from '@common/interfaces/user';
@@ -15,6 +14,7 @@ import { UserService } from '@services/user.service';
 import { Subject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
 import { GameRoom } from '@common/interfaces/game-room';
+import { PlayerType } from '@common/models/player-type';
 
 @Injectable({
     providedIn: 'root',
@@ -24,7 +24,7 @@ export class GameConfigurationService {
     isGameStarted: Subject<boolean>;
     isRoomJoinable: Subject<boolean>;
     errorReason: string;
-    availableRooms: GameRoomClient[];
+    availableRooms: GameRoom[];
     gameMode: string;
 
     constructor(
@@ -51,7 +51,7 @@ export class GameConfigurationService {
     }
 
     configureBaseSocketFeatures() {
-        this.clientSocket.on(SocketEvents.JoinValidGame, (allPlayers: IUser[]) => {
+        this.clientSocket.on(SocketEvents.JoinValidGame, (allPlayers: RoomPlayer[]) => {
             this.joinValidGameEvent(allPlayers);
         });
 
@@ -63,7 +63,7 @@ export class GameConfigurationService {
             this.gameAboutToStartEvent(socketIDUserRoom);
         });
 
-        this.clientSocket.on(SocketEvents.FoundAnOpponent, (opponent: IUser) => {
+        this.clientSocket.on(SocketEvents.FoundAnOpponent, (opponent: RoomPlayer) => {
             this.foundAnOpponentEvent(opponent);
         });
 
@@ -71,7 +71,7 @@ export class GameConfigurationService {
             this.gameCreatedConfirmationEvent(roomId);
         });
 
-        this.clientSocket.on(SocketEvents.UpdateRoomJoinable, (gamesToJoin: GameRoomClient[]) => {
+        this.clientSocket.on(SocketEvents.UpdateRoomJoinable, (gamesToJoin: GameRoom[]) => {
             // this.availableRooms = this.filterGameMode(this.roomInformation.mode, gamesToJoin);
             this.availableRooms = gamesToJoin;
         });
@@ -92,7 +92,7 @@ export class GameConfigurationService {
     removeRoom(): void {
         if (this.roomInformation.players.length > 1) {
             for (let i = 1; i < this.roomInformation.players.length; i++) {
-                this.rejectOpponent(this.roomInformation.players[i]);
+                this.rejectOpponent(this.roomInformation.players[i].user);
             }
         }
         this.clientSocket.send(SocketEvents.RemoveRoom, this.roomInformation.roomId);
@@ -103,7 +103,7 @@ export class GameConfigurationService {
     exitWaitingRoom(): void {
         this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
             roomId: this.roomInformation.roomId,
-            player: this.userService.user,
+            user: this.userService.user,
         } as RoomPlayer);
         this.resetRoomInformation();
     }
@@ -111,40 +111,41 @@ export class GameConfigurationService {
     rejectOpponent(player: IUser): void {
         this.clientSocket.send(SocketEvents.RejectOpponent, {
             roomId: this.roomInformation.roomId,
-            player,
+            user: player,
         } as RoomPlayer);
-        this.roomInformation.players = this.roomInformation.players.filter((playerElement: IUser) => {
-            return playerElement.username !== player.username && playerElement.profilePicture.name !== player.profilePicture.name;
+        this.roomInformation.players = this.roomInformation.players.filter((playerElement: RoomPlayer) => {
+            return playerElement.user.username !== player.username && playerElement.user.profilePicture.name !== player.profilePicture.name;
         });
         if (this.roomInformation.players.length > 1) {
             this.roomInformation.statusGame = GameStatus.SearchingOpponent;
         }
     }
 
-    gameInitialization(parameters: GameParameters): void {
+    gameInitialization(parameters: GameCreationQuery): void {
         this.roomInformation.statusGame = GameStatus.SearchingOpponent;
-        if (parameters.opponents && parameters.opponents.length !== 0) {
-            parameters.opponents.forEach((opponent: IUser) => {
-                this.roomInformation.players.push(opponent);
-            });
-            this.roomInformation.botDifficulty = parameters.botDifficulty;
-        }
-        this.clientSocket.send(SocketEvents.CreateGame, parameters);
+        this.roomInformation.players.push({
+            user: parameters.user,
+            roomId: '',
+            type: PlayerType.User,
+            isCreator: true,
+        });
+        this.roomInformation.botDifficulty = parameters.botDifficulty;
         this.roomInformation.timer = parameters.timer;
         this.roomInformation.dictionary = parameters.dictionary;
-        this.roomInformation.players.push(parameters.user);
         this.roomInformation.isCreator = true;
         this.roomInformation.mode = parameters.mode;
+
+        this.clientSocket.send(SocketEvents.CreateGame, parameters);
     }
 
     joinRoom(room: GameRoom): void {
         this.clientSocket.send(SocketEvents.PlayerJoinGameAvailable, {
             roomId: room.id,
-            player: this.userService.user,
+            user: this.userService.user,
         } as RoomPlayer);
 
         this.roomInformation.roomId = room.id;
-        this.roomInformation.players = [...room.users];
+        this.roomInformation.players = [...room.players];
         this.roomInformation.dictionary = room.dictionary;
         this.roomInformation.timer = room.timer;
         this.roomInformation.mode = room.state;
@@ -153,7 +154,7 @@ export class GameConfigurationService {
     joinSecretRoom(roomId: string): void {
         this.clientSocket.send(SocketEvents.PlayerJoinGameAvailable, {
             roomId,
-            player: this.userService.user,
+            user: this.userService.user,
         } as RoomPlayer);
 
         // TODO : Make this work
@@ -182,11 +183,18 @@ export class GameConfigurationService {
     joinRandomRoom(): void {
         const random = Math.floor(Math.random() * this.availableRooms.length);
         const roomToJoinId = this.availableRooms[random].id;
-        this.roomInformation.players = [this.userService.user];
+        this.roomInformation.players = [
+            {
+                user: this.userService.user,
+                roomId: '',
+                type: PlayerType.User,
+            },
+        ];
         this.roomInformation.roomId = roomToJoinId;
         this.clientSocket.send(SocketEvents.PlayerJoinGameAvailable, {
+            user: this.roomInformation.players[0].user,
             roomId: roomToJoinId,
-            player: this.roomInformation.players[0],
+            type: PlayerType.User,
         } as RoomPlayer);
     }
 
@@ -210,22 +218,29 @@ export class GameConfigurationService {
 
     private opponentLeaveEvent(player: IUser): void {
         this.roomInformation.statusGame = GameStatus.SearchingOpponent;
-        this.roomInformation.players = this.roomInformation.players.filter((playerElement: IUser) => {
-            return !this.arePlayersTheSame(player, playerElement);
+        this.roomInformation.players = this.roomInformation.players.filter((playerElement: RoomPlayer) => {
+            return !this.arePlayersTheSame(player, playerElement.user);
         });
     }
 
-    private foundAnOpponentEvent(opponent: IUser): void {
+    private foundAnOpponentEvent(opponent: RoomPlayer): void {
         if (this.roomInformation.players.length < NUMBER_OF_PLAYERS) {
             this.roomInformation.players.push(opponent);
         }
+
         this.roomInformation.statusGame = GameStatus.FoundOpponent;
     }
 
     private gameAboutToStartEvent(socketIDUserRoom: string[]): void {
         if (this.roomInformation.isCreator) {
+            // TODO : Change that
+            const users: IUser[] = [];
+            this.roomInformation.players.forEach((player: RoomPlayer) => {
+                users.push(player.user);
+            });
+
             this.clientSocket.send(SocketEvents.CreateScrabbleGame, {
-                players: this.roomInformation.players,
+                players: users,
                 roomId: this.roomInformation.roomId,
                 timer: this.roomInformation.timer,
                 dictionary: this.roomInformation.dictionary,
@@ -241,7 +256,7 @@ export class GameConfigurationService {
     private rejectByOtherPlayerEvent(user: IUser): void {
         this.clientSocket.send(SocketEvents.RejectByOtherPlayer, {
             roomId: this.roomInformation.roomId,
-            player: user,
+            user,
         } as RoomPlayer);
         this.resetRoomInformation();
 
@@ -250,7 +265,7 @@ export class GameConfigurationService {
         this.exitRoom(false);
     }
 
-    private joinValidGameEvent(allPlayers: IUser[]): void {
+    private joinValidGameEvent(allPlayers: RoomPlayer[]): void {
         this.roomInformation.isCreator = false;
         this.roomInformation.statusGame = GameStatus.WaitingOpponentConfirmation;
         this.roomInformation.players = [...allPlayers];

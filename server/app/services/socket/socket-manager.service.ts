@@ -43,10 +43,6 @@ export class SocketManager {
         this.sio.to(room).emit(event, ...args);
     }
 
-    getUsername(socket: io.Socket): string | undefined {
-        return this.socketUsernameMap.get(socket);
-    }
-
     handleSockets(): void {
         this.sio.on('connection', (socket) => {
             if (socket.handshake.headers.cookie) {

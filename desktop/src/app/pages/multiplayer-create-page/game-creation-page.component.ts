@@ -11,7 +11,7 @@ import { LanguageService } from '@app/services/language.service';
 import { TimeService } from '@app/services/time.service';
 import { UserService } from '@app/services/user.service';
 import { VirtualPlayersService } from '@app/services/virtual-players.service';
-import { GameParameters } from '@common/interfaces/game-parameters';
+import { GameCreationQuery } from '@common/interfaces/game-creation-query';
 import { DictionaryEvents } from '@common/models/dictionary-events';
 import { GameDifficulty } from '@common/models/game-difficulty';
 import { GameTimeOptions } from '@common/models/game-time-options';
@@ -206,7 +206,7 @@ export class GameCreationPageComponent implements OnInit {
             botDifficulty: this.isSoloMode() ? (this.form.get('difficultyBot') as AbstractControl).value : undefined,
             visibility: this.isGamePublic ? GameVisibility.Public : GameVisibility.Private,
             password: this.passwordForm.value,
-        } as GameParameters);
+        } as GameCreationQuery);
 
         this.playerName = '';
     }
