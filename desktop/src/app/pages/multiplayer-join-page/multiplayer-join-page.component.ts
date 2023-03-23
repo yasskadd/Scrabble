@@ -63,6 +63,10 @@ export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
         this.gameConfiguration.joinSecretRoom(this.roomIdForm.value);
     }
 
+    joinRandomRoom(): void {
+        this.joinRoom(this.availableRooms[Math.floor(Math.random() * this.availableRooms.length)]);
+    }
+
     protected getBots(room: GameRoom): RoomPlayer[] | undefined {
         return room.players.filter((player: RoomPlayer) => player.type === PlayerType.Bot);
     }

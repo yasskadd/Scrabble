@@ -177,24 +177,6 @@ export class GameConfigurationService {
         this.availableRooms = [];
     }
 
-    joinRandomRoom(): void {
-        const random = Math.floor(Math.random() * this.availableRooms.length);
-        const roomToJoinId = this.availableRooms[random].id;
-        this.roomInformation.players = [
-            {
-                user: this.userService.user,
-                roomId: '',
-                type: PlayerType.User,
-            },
-        ];
-        this.roomInformation.roomId = roomToJoinId;
-        this.clientSocket.send(SocketEvents.PlayerJoinGameAvailable, {
-            user: this.roomInformation.players[0].user,
-            roomId: roomToJoinId,
-            type: PlayerType.User,
-        } as RoomPlayer);
-    }
-
     exitRoom(exitByIsOwn?: boolean) {
         if (this.roomInformation.isCreator) {
             this.router.navigate([`${AppRoutes.MultiGameCreationPage}/${this.gameMode}`]).then();
