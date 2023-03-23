@@ -20,6 +20,7 @@ import {
 import { GameRoomState } from '@common/models/game-room-state';
 import { RoomPlayer } from '@common/interfaces/room-player';
 import { PlayerType } from '@common/models/player-type';
+import { GameVisibility } from '@common/models/game-visibility';
 
 // const PLAYERS_REJECT_FROM_ROOM_ERROR = "L'adversaire à rejeter votre demande";
 
@@ -82,7 +83,9 @@ export class GameSessions {
         const roomAvailableArray: GameRoom[] = [];
 
         this.gameRooms.forEach((gameRoom) => {
-            roomAvailableArray.push(this.stripPlayersPassword(gameRoom));
+            if (gameRoom.visibility !== GameVisibility.Private) {
+                roomAvailableArray.push(this.stripPlayersPassword(gameRoom));
+            }
         });
 
         return roomAvailableArray;
@@ -98,9 +101,9 @@ export class GameSessions {
         socket.broadcast.to(roomParameters.roomId).emit(SocketEvents.RejectByOtherPlayer, this.stripUserPassword(roomParameters.user));
     }
 
-    private roomLobby(sio: Server, socket: Socket): void {
+    private roomLobby(server: Server, socket: Socket): void {
         socket.join(JOINING_ROOM_ID);
-        sio.to(JOINING_ROOM_ID).emit(SocketEvents.UpdateRoomJoinable, this.getClientSafeAvailableRooms());
+        server.to(JOINING_ROOM_ID).emit(SocketEvents.UpdateRoomJoinable, this.getClientSafeAvailableRooms());
     }
 
     private disconnect(server: Server, socket: Socket): void {
