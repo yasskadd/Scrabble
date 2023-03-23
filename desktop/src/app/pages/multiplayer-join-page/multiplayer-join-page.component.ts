@@ -7,6 +7,8 @@ import { GameConfigurationService } from '@app/services/game-configuration.servi
 import { GameRoom } from '@common/interfaces/game-room';
 import { TimeService } from '@services/time.service';
 import { RoomPlayer } from '@common/interfaces/room-player';
+import { PlayerType } from '@common/models/player-type';
+import { GameVisibility } from '@common/models/game-visibility';
 
 @Component({
     selector: 'app-multiplayer-join-page',
@@ -61,27 +63,16 @@ export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
         this.gameConfiguration.joinSecretRoom(this.roomIdForm.value);
     }
 
-    protected botPresent(room: GameRoom): boolean {
-        const present = !!room;
-
-        // TODO : Add verification with right interface
-        // room.users.forEach(() => {});
-
-        return present;
+    protected getBots(room: GameRoom): RoomPlayer[] | undefined {
+        return room.players.filter((player: RoomPlayer) => player.type === PlayerType.Bot);
     }
 
-    protected observerPresent(room: GameRoom): boolean {
-        const present = !!room;
-
-        // TODO : Add verification with right interface
-        // room.users.forEach(() => {});
-
-        return present;
+    protected getObservers(room: GameRoom): RoomPlayer[] {
+        return room.players.filter((player: RoomPlayer) => player.type === PlayerType.Observer);
     }
 
     protected isGameRoomLocked(gameRoom: GameRoom) {
-        return !gameRoom;
-        // return gameRoom.visibility ? gameRoom.visibility === GameVisibility.Locked : true;
+        return gameRoom.visibility === GameVisibility.Locked;
     }
 
     protected getGameCreator(gameRoom: GameRoom): RoomPlayer {

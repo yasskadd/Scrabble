@@ -27,13 +27,13 @@
                                     <mat-icon>people</mat-icon>
                                     {{ gameRoom.players.length }} / 4
                                 </span>
-                                <span *ngIf="botPresent(gameRoom)" class="players-row">
+                                <span *ngIf="getBots(gameRoom)" class="players-row">
                                     <mat-icon>smart_toy</mat-icon>
-                                    {{ gameRoom.players.length }}
+                                    {{ getBots(gameRoom).length }}
                                 </span>
-                                <span *ngIf="observerPresent(gameRoom)" class="players-row">
+                                <span *ngIf="getObservers(gameRoom)" class="players-row">
                                     <mat-icon>people_outline</mat-icon>
-                                    {{ gameRoom.players.length }}
+                                    {{ getObservers(gameRoom).length }}
                                 </span>
                             </td>
                             <td>
