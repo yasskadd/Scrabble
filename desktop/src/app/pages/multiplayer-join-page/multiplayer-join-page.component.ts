@@ -1,12 +1,11 @@
 import { AfterViewInit, Component, OnDestroy } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { GameConfigurationService } from '@app/services/game-configuration.service';
-import { TimeService } from '@services/time.service';
-import { GameRoom } from '@common/interfaces/game-room';
 import { MatDialog } from '@angular/material/dialog';
+import { ActivatedRoute } from '@angular/router';
 import { DialogBoxPasswordComponent } from '@app/components/dialog-box-password/dialog-box-password.component';
-import { GameVisibility } from '@common/models/game-visibility';
+import { GameConfigurationService } from '@app/services/game-configuration.service';
+import { GameRoom } from '@common/interfaces/game-room';
+import { TimeService } from '@services/time.service';
 
 @Component({
     selector: 'app-multiplayer-join-page',
@@ -81,6 +80,6 @@ export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
 
     protected isGameRoomLocked(gameRoom: GameRoom) {
         return true;
-        return gameRoom.visibility ? gameRoom.visibility === GameVisibility.Locked : true;
+        // return gameRoom.visibility ? gameRoom.visibility === GameVisibility.Locked : true;
     }
 }
