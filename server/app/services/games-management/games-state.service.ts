@@ -306,20 +306,39 @@ export class GamesStateService {
     private async userConnected(socketId: string[], roomId: string) {
         const player1Room = this.gamesHandler.players.get(socketId[0])?.room;
         const player2Room = this.gamesHandler.players.get(socketId[1])?.room;
+        // If both players are still in the game
         if (player1Room === roomId && player2Room === roomId) {
             this.endGame(socketId[0]);
             await this.sendHighScore(socketId[0]);
             await this.sendHighScore(socketId[1]);
             return;
         }
+        // If player 1 is still in the game
         if (player1Room === roomId) {
             this.endGame(socketId[0]);
             await this.sendHighScore(socketId[0]);
             return;
         }
+        // If player 2 is still in the game
         if (player2Room === roomId) {
             this.endGame(socketId[1]);
             await this.sendHighScore(socketId[1]);
         }
     }
+
+    // private async userConnected(socketIds: string[], roomId: string) {
+    //     const players = socketIds.map(id => this.gamesHandler.players.get(id));
+    //     const playersInRoom = players.filter(player => player?.room === roomId);
+    //     this.endGame(player.id);
+    //     if (playersInRoom.length === socketIds.length) {
+    //         playersInRoom.forEach(player => {
+    //             await this.sendHighScore(player.id);
+    //         });
+    //     } else {
+    //         playersInRoom.forEach(player => {
+    //             this.endGame(player.id);
+    //             await this.sendHighScore(player.id);
+    //         });
+    //     }
+    // }
 }

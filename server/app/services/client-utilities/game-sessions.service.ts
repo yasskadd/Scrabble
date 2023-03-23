@@ -20,12 +20,10 @@ const WRONG_ROOM_PASSWORD = 'Le mot de passe pour la salle est erronée';
 
 @Service()
 export class GameSessions {
-    idCounter: number;
     private gameRooms: Map<string, GameRoom>;
 
     constructor(private socketManager: SocketManager) {
         this.gameRooms = new Map<string, GameRoom>();
-        this.idCounter = 0;
     }
 
     initSocketEvents() {
