@@ -92,7 +92,7 @@ export class GameConfigurationService {
     removeRoom(): void {
         if (this.roomInformation.players.length > 1) {
             for (let i = 1; i < this.roomInformation.players.length; i++) {
-                this.rejectOpponent(this.roomInformation.players[i].user);
+                this.rejectOpponent(this.roomInformation.players[i]);
             }
         }
         this.clientSocket.send(SocketEvents.RemoveRoom, this.roomInformation.roomId);
@@ -108,13 +108,10 @@ export class GameConfigurationService {
         this.resetRoomInformation();
     }
 
-    rejectOpponent(player: IUser): void {
-        this.clientSocket.send(SocketEvents.RejectOpponent, {
-            roomId: this.roomInformation.roomId,
-            user: player,
-        } as RoomPlayer);
+    rejectOpponent(player: RoomPlayer): void {
+        this.clientSocket.send(SocketEvents.RejectOpponent, player);
         this.roomInformation.players = this.roomInformation.players.filter((playerElement: RoomPlayer) => {
-            return playerElement.user.username !== player.username && playerElement.user.profilePicture.name !== player.profilePicture.name;
+            return playerElement.user.username !== player.user.username && playerElement.user.profilePicture.name !== player.user.profilePicture.name;
         });
         if (this.roomInformation.players.length > 1) {
             this.roomInformation.statusGame = GameStatus.SearchingOpponent;
