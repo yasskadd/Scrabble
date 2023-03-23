@@ -18,9 +18,11 @@ import { VirtualPlayersStorageService } from '@app/services/database/virtual-pla
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
 import { Subject } from 'rxjs';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import { GamesHandler } from './games-handler.service';
+import { SocketType } from '@app/types/sockets';
+import { PublicViewUpdate } from '@common/interfaces/public-view-update';
 
 const MAX_SKIP = 6;
 const SECOND = 1000;
@@ -39,7 +41,9 @@ export class GamesStateService {
     }
 
     initSocketsEvents(): void {
-        this.socketManager.on(SocketEvents.CreateScrabbleGame, async (socket, gameInfo: GameScrabbleInformation) => await this.createGame(gameInfo));
+        this.socketManager.io(SocketEvents.CreateScrabbleGame, async (server: Server, socket: SocketType, gameInfo: GameScrabbleInformation) => {
+            await this.createGame(server, socket, gameInfo);
+        });
 
         this.socketManager.on(SocketEvents.Disconnect, (socket) => {
             this.disconnect(socket);
@@ -54,7 +58,7 @@ export class GamesStateService {
         });
     }
 
-    async createGame(this: this, gameInfo: GameScrabbleInformation) {
+    async createGame(server: Server, socket: Socket, gameInfo: GameScrabbleInformation) {
         const players = this.initPlayers(gameInfo);
         const game = this.createNewGame(gameInfo);
         const gameCreator = players[0];
@@ -63,11 +67,8 @@ export class GamesStateService {
         this.gamesHandler.updatePlayerInfo(gameCreator.room, game);
         await this.gameSubscriptions(gameInfo, game);
 
-        this.socketManager.emitRoom(gameInfo.roomId, SocketEvents.ViewUpdate, {
-            gameboard: game.gameboard.gameboardTiles,
-            activePlayer: game.turn.activePlayer,
-        });
-        this.socketManager.emitRoom(gameInfo.roomId, SocketEvents.LetterReserveUpdated, game.letterReserve.lettersReserve);
+        this.sendPublicViewUpdate(server, game);
+        server.to(gameInfo.roomId).emit(SocketEvents.LetterReserveUpdated, game.letterReserve.lettersReserve);
     }
 
     private initializePlayers(players: Player[], game: Game, socketId: string[]) {
@@ -161,13 +162,13 @@ export class GamesStateService {
     }
 
     private createNewGame(gameInfo: GameScrabbleInformation): Game {
-        const players = this.gamesHandler.gamePlayers.get(gameInfo.roomId)?.players as Player[];
         const gameBehavior = this.gamesHandler.dictionaries.get(gameInfo.dictionary);
+
         return new Game(
-            players,
             new Turn(gameInfo.timer),
             new LetterReserve(),
-            !(gameInfo.mode === 'classique'),
+            gameInfo.roomId,
+            this.gamesHandler.gamePlayers.get(gameInfo.roomId)?.players as Player[],
             (gameBehavior as Behavior).dictionaryValidation as DictionaryValidation,
             (gameBehavior as Behavior).letterPlacement as LetterPlacement,
             (gameBehavior as Behavior).wordSolver as WordSolver,
@@ -310,5 +311,12 @@ export class GamesStateService {
             this.endGame(socketId[1]);
             await this.sendHighScore(socketId[1]);
         }
+    }
+
+    private sendPublicViewUpdate(server: Server, game: Game) {
+        server.to(game.roomId).emit(SocketEvents.PublicViewUpdate, {
+            gameboard: game.gameboard.gameboardTiles,
+            activePlayer: game.turn.activePlayer,
+        } as PublicViewUpdate);
     }
 }

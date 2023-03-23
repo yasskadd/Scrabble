@@ -16,7 +16,7 @@ export enum SocketEvents {
     GameMessage = 'gameMessage',
     GameCommand = 'command',
     OpponentDisconnect = 'user disconnect',
-    ViewUpdate = 'updateClientView',
+    PublicViewUpdate = 'updateClientView',
     UpdateGameBoard = 'updateGameBoard',
     Play = 'playGame',
     Exchange = 'ExchangeLetters',

@@ -69,7 +69,7 @@ export class GameClientService {
             this.opponentLeaveGameEvent();
         });
 
-        this.clientSocketService.on(SocketEvents.ViewUpdate, (info: PlayInfo) => {
+        this.clientSocketService.on(SocketEvents.PublicViewUpdate, (info: PlayInfo) => {
             this.viewUpdateEvent(info);
         });
 
