@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { RoomInformation } from '@app/interfaces/room-information';
 import { AppRoutes } from '@app/models/app-routes';
-import { GameStatus } from '@app/models/game-status';
 import { NUMBER_OF_PLAYERS } from '@common/constants/players';
 import { SocketEvents } from '@common/constants/socket-events';
 import { GameCreationQuery } from '@common/interfaces/game-creation-query';
@@ -15,6 +14,7 @@ import { Subject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
 import { GameRoom } from '@common/interfaces/game-room';
 import { PlayerType } from '@common/models/player-type';
+import { GameRoomState } from '@common/models/game-room-state';
 
 @Injectable({
     providedIn: 'root',
@@ -39,7 +39,7 @@ export class GameConfigurationService {
             roomId: '',
             timer: 0,
             isCreator: false,
-            statusGame: '',
+            statusGame: GameRoomState.Waiting,
             mode: '',
             botDifficulty: undefined,
             dictionary: '',
@@ -52,7 +52,7 @@ export class GameConfigurationService {
 
     configureBaseSocketFeatures() {
         this.clientSocket.on(SocketEvents.JoinValidGame, (allPlayers: RoomPlayer[]) => {
-            this.joinValidGameEvent(allPlayers);
+            this.joinValidGame(allPlayers);
         });
 
         this.clientSocket.on(SocketEvents.RejectByOtherPlayer, (user: IUser) => {
@@ -112,13 +112,9 @@ export class GameConfigurationService {
         this.roomInformation.players = this.roomInformation.players.filter((playerElement: RoomPlayer) => {
             return playerElement.user.username !== player.user.username && playerElement.user.profilePicture.name !== player.user.profilePicture.name;
         });
-        if (this.roomInformation.players.length > 1) {
-            this.roomInformation.statusGame = GameStatus.SearchingOpponent;
-        }
     }
 
     gameInitialization(gameQuery: GameCreationQuery): void {
-        this.roomInformation.statusGame = GameStatus.SearchingOpponent;
         this.roomInformation.players.push({
             user: gameQuery.user,
             roomId: '',
@@ -171,7 +167,7 @@ export class GameConfigurationService {
         this.roomInformation.botDifficulty = undefined;
         this.roomInformation.mode = '';
         this.roomInformation.players = [];
-        this.roomInformation.statusGame = '';
+        this.roomInformation.statusGame = GameRoomState.Waiting;
         this.roomInformation.isCreator = false;
 
         this.availableRooms = [];
@@ -195,7 +191,6 @@ export class GameConfigurationService {
     }
 
     private opponentLeaveEvent(player: IUser): void {
-        this.roomInformation.statusGame = GameStatus.SearchingOpponent;
         this.roomInformation.players = this.roomInformation.players.filter((playerElement: RoomPlayer) => {
             return !this.arePlayersTheSame(player, playerElement.user);
         });
@@ -205,8 +200,6 @@ export class GameConfigurationService {
         if (this.roomInformation.players.length < NUMBER_OF_PLAYERS) {
             this.roomInformation.players.push(opponent);
         }
-
-        this.roomInformation.statusGame = GameStatus.FoundOpponent;
     }
 
     private gameAboutToStartEvent(socketIDUserRoom: string[]): void {
@@ -243,9 +236,8 @@ export class GameConfigurationService {
         this.exitRoom(false);
     }
 
-    private joinValidGameEvent(allPlayers: RoomPlayer[]): void {
+    private joinValidGame(allPlayers: RoomPlayer[]): void {
         this.roomInformation.isCreator = false;
-        this.roomInformation.statusGame = GameStatus.WaitingOpponentConfirmation;
         this.roomInformation.players = [...allPlayers];
 
         this.router.navigate([`${AppRoutes.MultiWaitingPage}/${this.gameMode}`]).then();
