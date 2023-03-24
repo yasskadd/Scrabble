@@ -19,9 +19,10 @@ export class WaitingOpponentPageComponent implements OnDestroy, AfterContentChec
         this.gameConfiguration.gameMode = this.activatedRoute.snapshot.params.id;
     }
 
+    // TODO : Check for page refresh also
     @HostListener('window:popstate', ['$event'])
     onPopState() {
-        this.gameConfiguration.exitRoom(true);
+        this.gameConfiguration.exitRoom();
     }
 
     ngAfterContentChecked(): void {
@@ -41,7 +42,7 @@ export class WaitingOpponentPageComponent implements OnDestroy, AfterContentChec
     }
 
     joinSoloMode() {
-        this.gameConfiguration.removeRoom();
+        this.gameConfiguration.exitRoom();
         this.router.navigate([`${AppRoutes.SoloGameCreationPage}/${this.gameConfiguration.gameMode}`]).then();
     }
 

@@ -88,25 +88,6 @@ export class GameConfigurationService {
         });
     }
 
-    removeRoom(): void {
-        if (this.roomInformation.players.length > 1) {
-            for (let i = 1; i < this.roomInformation.players.length; i++) {
-                this.rejectOpponent(this.roomInformation.players[i]);
-            }
-        }
-        this.clientSocket.send(SocketEvents.RemoveRoom, this.roomInformation.roomId);
-        this.roomInformation.roomId = '';
-        this.roomInformation.players = [this.roomInformation.players[0]];
-    }
-
-    exitWaitingRoom(): void {
-        this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
-            roomId: this.roomInformation.roomId,
-            user: this.userService.user,
-        } as RoomPlayer);
-        this.resetRoomInformation();
-    }
-
     rejectOpponent(player: RoomPlayer): void {
         this.clientSocket.send(SocketEvents.RejectOpponent, player);
         this.roomInformation.players = this.roomInformation.players.filter((playerElement: RoomPlayer) => {
@@ -173,17 +154,23 @@ export class GameConfigurationService {
         this.availableRooms = [];
     }
 
-    exitRoom(exitByIsOwn?: boolean) {
-        if (this.roomInformation.isCreator) {
+    exitRoom() {
+        this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
+            roomId: this.localGameRoom.id,
+            user: this.userService.user,
+        } as RoomPlayer);
+
+        if (this.isGameCreator()) {
             this.router.navigate([`${AppRoutes.MultiGameCreationPage}/${this.gameMode}`]).then();
-            this.removeRoom();
-            return;
+        } else {
+            this.router.navigate([`${AppRoutes.MultiJoinPage}/${this.gameMode}`]).then();
         }
 
-        this.router.navigate([`${AppRoutes.MultiJoinPage}/${this.gameMode}`]).then();
+        this.resetRoomInformations();
+    }
 
-        if (!exitByIsOwn) return;
-        this.exitWaitingRoom();
+    isGameCreator(): boolean {
+        return !!this.localGameRoom.players.find((player: RoomPlayer) => player.isCreator && player.user.username === this.userService.user.username);
     }
 
     private gameCreatedConfirmationEvent(roomId: string): void {
