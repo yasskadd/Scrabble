@@ -17,8 +17,6 @@ import { Subject } from 'rxjs';
     styleUrls: ['./main-page.component.scss'],
 })
 export class MainPageComponent implements OnDestroy {
-    readonly title: string = "Bienvenue au Scrabble de l'équipe 107!";
-
     protected userNameForm: FormControl;
     protected homeConnectionResponse: SocketResponse;
     protected connectionSubject: Subject<SocketResponse>;
@@ -70,10 +68,12 @@ export class MainPageComponent implements OnDestroy {
         this.dialog.open(DialogGameHelpComponent, { width: '50%' });
     }
 
+    // TODO : should be in chat-component
     sendMessage(): void {
         this.chatBoxHandlerService.submitMessage('test');
     }
 
+    // TODO : should be in a log-in component
     logIn(): void {
         if (this.chatBoxHandlerService.loggedIn) return;
         this.userNameForm.markAsTouched();
@@ -82,10 +82,12 @@ export class MainPageComponent implements OnDestroy {
         this.chatBoxHandlerService.joinHomeRoom(this.userService.user.username);
     }
 
+    // TODO : should be in a log-in component
     logOut(): void {
         this.chatBoxHandlerService.leaveHomeRoom(this.userService.user.username);
     }
 
+    // TODO : should be in a log-in component
     getErrorMessage(): string {
         let message = '';
         switch (this.homeConnectionResponse.socketMessage) {

@@ -2,10 +2,13 @@
     <h1>{{ "game.state.loading" | translate }}</h1>
     <mat-spinner diameter="200"></mat-spinner>
 </div>
-<body *ngIf="!isLoading">
-    <app-information-panel class="information-panel justified"></app-information-panel>
+<div *ngIf="!isLoading" class="encapsulating-div mat-app-background">
+    <app-header></app-header>
+    <body>
+        <app-information-panel class="information-panel justified mat-app-background"></app-information-panel>
 
-    <app-play-area class="play-area justified" tabindex="0"></app-play-area>
+        <app-play-area class="play-area justified mat-app-background" tabindex="0"></app-play-area>
 
-    <app-chatbox class="chatbox"></app-chatbox>
-</body>
+        <app-chatbox class="chatbox mat-app-background"></app-chatbox>
+    </body>
+</div>

@@ -1,14 +1,15 @@
-import { HttpClient, HttpErrorResponse, HttpEvent, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
 import { HighScores } from '@app/interfaces/high-score-parameters';
+import { AvatarData } from '@common/interfaces/avatar-data';
 import { Bot } from '@common/interfaces/bot';
 import { BotNameSwitcher } from '@common/interfaces/bot-name-switcher';
 import { GameHistoryInfo } from '@common/interfaces/game-history-info';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
 import { IUser } from '@common/interfaces/user';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
@@ -137,23 +138,20 @@ export class HttpHandlerService {
             .pipe(catchError(this.handleError<void>('deleteBot')));
     }
 
-    signUp(newUser: IUser): Observable<string | HttpEvent<string>> {
+    signUp(newUser: IUser): Observable<{ imageKey: string }> {
         return this.http
-            .post<string>(`${this.baseUrl}/auth/signUp`, newUser, { withCredentials: true, observe: 'events' })
-            .pipe(catchError(this.throwError<string>));
+            .post<{ imageKey: string }>(`${this.baseUrl}/auth/signUp`, newUser)
+            .pipe(catchError(this.handleError<{ imageKey: string }>('sign-up')));
     }
 
-    login(user: IUser): Observable<any> {
-        const header = new HttpHeaders();
-        header.append('Content-Type', 'application/json');
-
+    login(user: IUser): Observable<{ userData: IUser }> {
         const httpOptions = {
-            headers: this.header,
             withCredentials: true,
-            observe: 'response' as 'response',
         };
 
-        return this.http.post(`${this.baseUrl}/auth/login`, user, httpOptions);
+        return this.http
+            .post<{ userData: IUser }>(`${this.baseUrl}/auth/login`, user, httpOptions)
+            .pipe(catchError(this.handleError<{ userData: IUser }>('login')));
     }
 
     logout(): Observable<any> {
@@ -179,11 +177,66 @@ export class HttpHandlerService {
             .pipe(catchError(this.handleError<Map<string, string[]>>('get-default-images')));
     }
 
+    sendProfilePicture(avatarData: AvatarData, imageKey: string): Observable<void> {
+        const header = new HttpHeaders();
+        header.append('Content-Type', 'multipart/form-data');
+
+        const httpOptions = {
+            headers: this.header,
+            withCredentials: true,
+        };
+
+        // Creation of 2 files because the request only accepts files
+        const imageKeyFile = new File([imageKey], 'imageKey', { type: 'text/html' });
+        const data = new FormData();
+        data.append('data', avatarData.file);
+        data.append('imageKey', imageKeyFile);
+
+        return this.http
+            .post<void>(`${this.baseUrl}/image/profile-picture`, data, httpOptions)
+            .pipe(catchError(this.handleError<void>('send-profile-picture')));
+    }
+
+    getProfilePicture(): Observable<{ url: string }> {
+        const httpOptions = {
+            withCredentials: true,
+        };
+
+        return this.http
+            .get<{ url: string }>(`${this.baseUrl}/image/profile-picture`, httpOptions)
+            .pipe(catchError(this.handleError<{ url: string }>('get-profile-picture')));
+    }
+
+    modifyProfilePicture(image: AvatarData, isDefault: boolean): Observable<{ userData: IUser }> {
+        if (isDefault) {
+            return this.http
+                .patch<{ userData: IUser }>(
+                    `${this.baseUrl}/image/profile-picture`,
+                    { fileName: image.name },
+                    {
+                        withCredentials: true,
+                    },
+                )
+                .pipe(catchError(this.handleError<{ userData: IUser }>('modify-image-to-default')));
+        }
+
+        const header = new HttpHeaders();
+        header.append('Content-Type', 'multipart/form-data');
+
+        const data = new FormData();
+        data.append('image', image.file);
+
+        return this.http.put<{ userData: IUser }>(`${this.baseUrl}/image/profile-picture`, data, {
+            headers: this.header,
+            withCredentials: true,
+        });
+    }
+
     private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
         return () => of(result as T);
     }
 
-    private throwError<T>(error: HttpErrorResponse): Observable<T> {
-        return throwError(() => new HttpErrorResponse(error));
-    }
+    // private throwError<T>(error: HttpErrorResponse): Observable<T> {
+    //     return throwError(() => new HttpErrorResponse(error));
+    // }
 }

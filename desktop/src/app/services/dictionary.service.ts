@@ -25,7 +25,7 @@ export class DictionaryService {
 
     addDictionary(dictionary: Dictionary): Subject<string> {
         const subject: Subject<string> = new Subject<string>();
-        const subscription = this.dictionaryVerificationService.verificationStatus.subscribe((error: string) => {
+        this.dictionaryVerificationService.verificationStatus.subscribe((error: string) => {
             if (error) {
                 subject.next(error);
             } else {
@@ -37,8 +37,6 @@ export class DictionaryService {
                 });
                 this.updateDictionariesInfos();
             }
-
-            subscription.unsubscribe();
         });
 
         this.dictionaryVerificationService.globalVerification(dictionary);
@@ -59,9 +57,8 @@ export class DictionaryService {
 
     updateDictionariesInfos(): Subject<void> {
         const subject: Subject<void> = new Subject<void>();
-        const subscription = this.httpHandler.getDictionaries().subscribe((dictionaryInfos: DictionaryInfo[]) => {
+        this.httpHandler.getDictionaries().subscribe((dictionaryInfos: DictionaryInfo[]) => {
             this.dictionariesInfos = dictionaryInfos;
-            subscription.unsubscribe();
         });
 
         return subject;
@@ -69,10 +66,9 @@ export class DictionaryService {
 
     getDictionary(title: string): Observable<Dictionary> {
         const subject: Subject<Dictionary> = new Subject<Dictionary>();
-        const subscription = this.httpHandler.getDictionary(title).subscribe((dictionary: Dictionary) => {
+        this.httpHandler.getDictionary(title).subscribe((dictionary: Dictionary) => {
             this.dictionary = dictionary;
             subject.next(this.dictionary);
-            subscription.unsubscribe();
         });
 
         return subject;

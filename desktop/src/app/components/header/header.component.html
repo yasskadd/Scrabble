@@ -1,33 +1,51 @@
-<div *ngIf="!isHomePage" id="home" (click)="redirectHome()">
-    <div *ngFor="let letter of getLetters('header.home')">{{ letter }}</div>
-</div>
+<mat-toolbar>
+    <div *ngIf="!isHomePage" id="home" (click)="redirectHome()">
+        <button [hidden]="true" mat-flat-button color="accent" *ngFor="let letter of getLetters('header.home')">{{ letter }}</button>
+    </div>
 
-<div *ngIf="isHomePage" id="admin" (click)="redirectAdmin()">
-    <div *ngFor="let letter of getLetters('header.admin')">{{ letter }}</div>
-</div>
+    <div *ngIf="isHomePage" id="admin" (click)="redirectAdmin()">
+        <button [hidden]="true" mat-flat-button color="accent" *ngFor="let letter of getLetters('header.admin')">{{ letter }}</button>
+    </div>
 
-<div id="image">
-    <img src="https://bit.ly/3m206ss" width="300" height="60" alt="Logo Scrabble" (click)="redirectHome()" />
-</div>
+    <div id="image">
+        <img src="https://bit.ly/3m206ss" width="250" height="50" alt="Logo Scrabble" (click)="redirectHome()" />
+    </div>
 
-<button mat-fab color="primary" *ngIf="!userService.isConnected() || !userService.user.profilePicture" [matMenuTriggerFor]="accountMenu">
-    <mat-icon>person</mat-icon>
-</button>
-<img
-    mat-fab-button
-    *ngIf="userService.isConnected() && userService.user.profilePicture"
-    [src]="userService.user.profilePicture"
-    [matMenuTriggerFor]="accountMenu"
-    class="selecter-avatar mat-elevation-z5"
-/>
+    <button
+        id="user-icon"
+        mat-fab
+        color="primary"
+        *ngIf="!userService.isConnected() || !userService.user.profilePicture"
+        [matMenuTriggerFor]="accountMenu"
+    >
+        <mat-icon>person</mat-icon>
+    </button>
 
-<mat-menu #accountMenu="matMenu">
-    <!-- Language -->
-    <button mat-menu-item (click)="redirectSettingsPage()" *ngIf="userService.isConnected()">Settings</button>
-    <!-- Language -->
-    <button mat-menu-item (click)="redirectUserPage()">Sign Up</button>
-    <!-- Language -->
-    <button mat-menu-item (click)="redirectLoginPage()" *ngIf="!userService.isConnected()">Sign In</button>
-    <!-- Language -->
-    <button mat-menu-item (click)="userService.logout()" *ngIf="userService.isConnected()">Sign Out</button>
-</mat-menu>
+    <img
+        mat-fab-button
+        *ngIf="userService.isConnected() && userService.user.profilePicture"
+        [src]="userService.user.profilePicture.key"
+        [matMenuTriggerFor]="accountMenu"
+        class="selector-avatar mat-elevation-z5"
+    />
+
+    <mat-menu #accountMenu="matMenu">
+        <!-- Language -->
+        <button *ngIf="themeService.isDarkTheme.value" mat-menu-item color="accent" (click)="themeService.toggleDarkMode()">
+            <mat-icon>bedtime</mat-icon> Dark Mode
+        </button>
+        <!-- Language -->
+        <button *ngIf="!themeService.isDarkTheme.value" mat-menu-item color="accent" (click)="themeService.toggleDarkMode()">
+            <mat-icon>wb_sunny</mat-icon> Light Mode
+        </button>
+
+        <!-- Language -->
+        <button mat-menu-item (click)="redirectSettingsPage()" *ngIf="userService.isConnected()">Settings</button>
+        <!-- Language -->
+        <button mat-menu-item (click)="redirectUserPage()">Sign Up</button>
+        <!-- Language -->
+        <button mat-menu-item (click)="redirectLoginPage()" *ngIf="!userService.isConnected()">Sign In</button>
+        <!-- Language -->
+        <button mat-menu-item (click)="userService.logout()" *ngIf="userService.isConnected()">Sign Out</button>
+    </mat-menu>
+</mat-toolbar>
