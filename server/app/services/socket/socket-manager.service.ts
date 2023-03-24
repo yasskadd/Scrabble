@@ -75,7 +75,6 @@ export class SocketManager {
 
                 // eslint-disable-next-line no-console
                 console.log('Connection of authenticated client with id = ' + socket.id + ' from : ' + socket.handshake.headers.host);
-                console.log(this.socketUsernameMap.values());
             } else {
                 socket.disconnect();
                 // eslint-disable-next-line no-console
@@ -100,13 +99,7 @@ export class SocketManager {
 
                 // eslint-disable-next-line no-console
                 console.log('Disconnection of client with id = ' + socket.id + ' from : ' + socket.handshake.headers.origin);
-                console.log(this.socketUsernameMap.values());
             });
-        });
-
-        this.sio.on('disconnect', (socket: io.Socket) => {
-            console.log('test');
-            console.log(socket.id);
         });
     }
 }
