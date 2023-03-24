@@ -1,6 +1,6 @@
 import { IUser } from './user';
 
-export interface JoinGameQuery {
+export interface UserRoomQuery {
     roomId: string;
     user: IUser;
     password?: string;
