@@ -17,6 +17,8 @@ import { GameDifficulty } from '@common/models/game-difficulty';
 import { GameTimeOptions } from '@common/models/game-time-options';
 import { GameVisibility } from '@common/models/game-visibility';
 import { SnackBarService } from '@services/snack-bar.service';
+import { SocketEvents } from '@common/constants/socket-events';
+import { ClientSocketService } from '@services/communication/client-socket.service';
 
 @Component({
     selector: 'app-multiplayer-create-page',
@@ -49,6 +51,7 @@ export class GameCreationPageComponent implements OnInit {
         protected gameConfiguration: GameConfigurationService,
         protected timer: TimeService,
         protected userService: UserService,
+        private clientSocketService: ClientSocketService,
         private languageService: LanguageService,
         private activatedRoute: ActivatedRoute,
         private formBuilder: FormBuilder,
@@ -97,7 +100,7 @@ export class GameCreationPageComponent implements OnInit {
 
     ngOnInit(): void {
         this.virtualPlayers.updateBotNames();
-        this.gameConfiguration.resetRoomInformation();
+        this.gameConfiguration.resetRoomInformations();
 
         this.difficultyForm.valueChanges.subscribe(() => {
             this.updateBotList();
@@ -196,7 +199,7 @@ export class GameCreationPageComponent implements OnInit {
     }
 
     private initGame(dictionaryTitle: string): void {
-        this.gameConfiguration.gameInitialization({
+        this.clientSocketService.send(SocketEvents.CreateGame, {
             user: this.userService.user,
             timer: (this.form.get('timer') as AbstractControl).value,
             dictionary: dictionaryTitle,

@@ -9,6 +9,7 @@ import { TimeService } from '@services/time.service';
 import { RoomPlayer } from '@common/interfaces/room-player';
 import { PlayerType } from '@common/models/player-type';
 import { GameVisibility } from '@common/models/game-visibility';
+import { GameMode } from '@common/models/game-mode';
 
 @Component({
     selector: 'app-multiplayer-join-page',
@@ -38,8 +39,10 @@ export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
     }
 
     ngAfterViewInit() {
-        this.gameConfiguration.resetRoomInformation();
-        this.gameConfiguration.joinPage(this.gameMode);
+        this.gameConfiguration.resetRoomInformations();
+        this.gameConfiguration.navigateJoinPage(
+            this.gameMode === 'solo' ? GameMode.Solo : this.gameMode === 'multi' ? GameMode.Multi : GameMode.Null,
+        );
     }
 
     joinRoom(gameRoom: GameRoom): void {
