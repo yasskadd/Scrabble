@@ -50,7 +50,6 @@ export class ClientSocketService implements OnDestroy {
         if (this.socket) {
             this.disconnect();
         }
-        console.log('connection');
         if (this.useTauriSocket) {
             if (cookie) {
                 tauri.tauri

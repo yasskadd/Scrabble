@@ -39,6 +39,13 @@ export class SocketManager {
         onElement.push(callback);
     }
 
+    getSocketId() {
+        for (const [socket, username] of this.socketUsernameMap) {
+            console.log(username);
+            console.log(socket.id);
+        }
+    }
+
     emitRoom(room: string, event: string, ...args: unknown[]) {
         this.sio.to(room).emit(event, ...args);
     }
@@ -68,6 +75,7 @@ export class SocketManager {
 
                 // eslint-disable-next-line no-console
                 console.log('Connection of authenticated client with id = ' + socket.id + ' from : ' + socket.handshake.headers.host);
+                console.log(this.socketUsernameMap.values());
             } else {
                 socket.disconnect();
                 // eslint-disable-next-line no-console
@@ -89,9 +97,16 @@ export class SocketManager {
                 if (this.socketUsernameMap.has(socket)) {
                     this.socketUsernameMap.delete(socket);
                 }
+
                 // eslint-disable-next-line no-console
                 console.log('Disconnection of client with id = ' + socket.id + ' from : ' + socket.handshake.headers.origin);
+                console.log(this.socketUsernameMap.values());
             });
+        });
+
+        this.sio.on('disconnect', (socket: io.Socket) => {
+            console.log('test');
+            console.log(socket.id);
         });
     }
 }
