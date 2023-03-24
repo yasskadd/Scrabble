@@ -2,6 +2,7 @@ import { SECRET_KEY } from '@app/../very-secret-file';
 import { AccountStorageService } from '@app/services/database/account-storage.service';
 import { IUser } from '@common/interfaces/user';
 import { Request, Response, Router } from 'express';
+import * as fs from 'fs';
 import * as jwt from 'jsonwebtoken';
 import { Service } from 'typedi';
 import * as uuid from 'uuid';
@@ -80,6 +81,18 @@ export class AuthentificationController {
                 path: '/',
             });
             res.redirect(TEMP_REDIRECT, '/auth/login');
+        });
+
+        /**
+         * HTTP GET request to pull the captcha
+         *
+         * @return text/html
+         */
+        this.router.get('/captcha', async (req: Request, res: Response) => {
+            const captcha = await fs.promises.readFile('./assets/webpages/captcha.html');
+            res.setHeader('content-type', 'text/html');
+            res.status(SUCCESS).send(captcha.toString());
+            return;
         });
     }
 
