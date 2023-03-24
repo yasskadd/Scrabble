@@ -4,7 +4,6 @@ import { GameRoomState } from '@common/models/game-room-state';
 export interface RoomInformation {
     players: RoomPlayer[];
     roomId: string;
-    isCreator: boolean;
     statusGame: GameRoomState;
     mode: string;
     timer: number;
