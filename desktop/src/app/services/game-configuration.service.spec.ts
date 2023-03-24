@@ -266,7 +266,7 @@ describe('GameConfigurationService', () => {
     it('should handle rejectByOtherPlayer event with a reason why he was rejected from the other player ', () => {
         const playerRejectFromRoomError = "L'adversaire à rejeter votre demande";
         const spyOnRejectByOtherPlayerEvent = spyOn(service, 'rejectByOtherPlayerEvent' as never);
-        socketEmulator.peerSideEmit(SocketEvents.RejectByOtherPlayer, playerRejectFromRoomError);
+        socketEmulator.peerSideEmit(SocketEvents.KickedFromGameRoom, playerRejectFromRoomError);
         expect(spyOnRejectByOtherPlayerEvent).toHaveBeenCalled();
     });
 

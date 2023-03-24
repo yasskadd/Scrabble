@@ -48,12 +48,12 @@ export class GameSessions {
             this.exitWaitingRoom(server, socket, userQuery);
         });
 
-        this.socketManager.on(SocketEvents.RejectOpponent, (socket: SocketType, userRoomQuery: UserRoomQuery) => {
-            this.rejectOpponent(socket, userRoomQuery);
+        this.socketManager.on(SocketEvents.RejectOpponent, (socket: SocketType, player: RoomPlayer) => {
+            this.rejectOpponent(socket, player);
         });
 
-        this.socketManager.on(SocketEvents.RejectByOtherPlayer, (socket: SocketType, userRoomQuery: UserRoomQuery) => {
-            this.rejectByOtherPlayer(socket, userRoomQuery);
+        this.socketManager.on(SocketEvents.ExitGameRoom, (socket: SocketType, userRoomQuery: UserRoomQuery) => {
+            this.exitGameRoom(socket, userRoomQuery);
         });
 
         this.socketManager.on(SocketEvents.Invite, (socket: Socket, inviteeId: string, userRoomQuery: UserRoomQuery) => {
@@ -87,8 +87,9 @@ export class GameSessions {
         socket.broadcast.to(inviteeId).emit(SocketEvents.Invite, parameters);
     }
 
-    private rejectOpponent(socket: Socket, roomParameters: UserRoomQuery): void {
+    private rejectOpponent(socket: Socket, player: RoomPlayer): void {
         // Check that the player is removed from the game room player list
+        socket.broadcast.to(player.roomId).emit(SocketEvents.KickedFromGameRoom, this.stripPlayerPassword(player));
     }
 
     private enterRoomLobby(server: Server, socket: Socket): void {
@@ -136,36 +137,25 @@ export class GameSessions {
     }
 
     private exitWaitingRoom(server: Server, socket: Socket, userQuery: UserRoomQuery): void {
-        // TODO : Send some logic in submethods
         if (!userQuery.roomId) return;
 
+        this.exitGameRoom(socket, userQuery);
         socket.broadcast.to(userQuery.roomId).emit(SocketEvents.OpponentLeave, this.stripUserPassword(userQuery.user));
-        socket.leave(userQuery.roomId);
 
-        socket.join(JOINING_ROOM_ID);
-
-        const player: RoomPlayer | undefined = this.getPlayerFromQuery(userQuery);
-        if (!player) return;
-
-        this.removePlayerFromRoom(player);
-
-        if (player.isCreator) {
+        if (this.getPlayerFromQuery(userQuery)?.isCreator) {
             this.getRoom(userQuery.roomId)?.players.forEach((opponent: RoomPlayer) => {
-                this.removePlayerFromRoom(opponent);
-                // TODO : Faire leave les joueurs de la room et joindre la room d'attente
-                socket.broadcast.to(userQuery.roomId).emit(SocketEvents.RejectByOtherPlayer, this.stripPlayerPassword(opponent));
+                socket.broadcast.to(userQuery.roomId).emit(SocketEvents.KickedFromGameRoom, this.stripPlayerPassword(opponent));
             });
 
-            this.gameRooms = this.gameRooms.filter((room: GameRoom) => room.id !== userQuery.roomId);
-            server.to(JOINING_ROOM_ID).emit(SocketEvents.UpdateRoomJoinable, this.getClientSafeAvailableRooms());
+            this.removeRoom(server, userQuery.roomId);
         }
     }
 
-    private rejectByOtherPlayer(socket: Socket, userQuery: UserRoomQuery): void {
+    private exitGameRoom(socket: Socket, userQuery: UserRoomQuery): void {
         const player: RoomPlayer | undefined = this.getPlayerFromQuery(userQuery);
         if (!player) return;
 
-        this.removePlayerFromRoom(player);
+        this.removePlayerFromGameRoom(player);
         socket.leave(userQuery.roomId);
         socket.join(JOINING_ROOM_ID);
 
@@ -242,7 +232,7 @@ export class GameSessions {
     }
 
     // TODO : Remove player from ITS room
-    private removePlayerFromRoom(player: RoomPlayer): void {
+    private removePlayerFromGameRoom(player: RoomPlayer): void {
         const room: GameRoom | undefined = this.getRoom(player.roomId);
         if (!room) return;
 
@@ -279,6 +269,11 @@ export class GameSessions {
 
     private getRoom(roomId: string): GameRoom | undefined {
         return this.gameRooms.find((room: GameRoom) => room.id === roomId);
+    }
+
+    private removeRoom(server: Server, roomId: string): void {
+        this.gameRooms = this.gameRooms.filter((room: GameRoom) => room.id !== roomId);
+        server.to(JOINING_ROOM_ID).emit(SocketEvents.UpdateRoomJoinable, this.getClientSafeAvailableRooms());
     }
 
     private stripUserPassword(user: IUser): IUser {

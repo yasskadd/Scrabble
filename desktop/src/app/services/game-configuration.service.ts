@@ -14,6 +14,7 @@ import { GameRoom } from '@common/interfaces/game-room';
 import { GameRoomState } from '@common/models/game-room-state';
 import { GameMode } from '@common/models/game-mode';
 import { GameVisibility } from '@common/models/game-visibility';
+import { UserRoomQuery } from '@common/interfaces/user-room-query';
 
 @Injectable({
     providedIn: 'root',
@@ -45,9 +46,8 @@ export class GameConfigurationService {
             this.joinedValidGame(gameRoom);
         });
 
-        this.clientSocket.on(SocketEvents.RejectByOtherPlayer, (user: IUser) => {
-            // TODO : This is broken
-            this.rejectByOtherPlayerEvent(user);
+        this.clientSocket.on(SocketEvents.KickedFromGameRoom, (user: IUser) => {
+            this.kickedFromGameRoom(user);
         });
 
         this.clientSocket.on(SocketEvents.GameAboutToStart, (players: RoomPlayer[]) => {
@@ -79,7 +79,10 @@ export class GameConfigurationService {
     }
 
     rejectOpponent(player: RoomPlayer): void {
-        this.clientSocket.send(SocketEvents.RejectOpponent, player);
+        this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
+            user: player.user,
+            roomId: player.roomId,
+        } as UserRoomQuery);
         this.localGameRoom.players = this.localGameRoom.players.filter((playerElement: RoomPlayer) => {
             return playerElement.user.username !== player.user.username && playerElement.user.profilePicture.name !== player.user.profilePicture.name;
         });
@@ -115,7 +118,6 @@ export class GameConfigurationService {
     }
 
     resetRoomInformations(): void {
-        // TODO : Create an empty room
         this.localGameRoom = {
             id: '',
             players: [],
@@ -186,9 +188,8 @@ export class GameConfigurationService {
         this.isGameStarted.next(true);
     }
 
-    private rejectByOtherPlayerEvent(user: IUser): void {
-        // TODO : Clean that
-        this.clientSocket.send(SocketEvents.RejectByOtherPlayer, {
+    private kickedFromGameRoom(user: IUser): void {
+        this.clientSocket.send(SocketEvents.ExitGameRoom, {
             roomId: this.localGameRoom.id,
             user,
         } as RoomPlayer);
@@ -196,7 +197,6 @@ export class GameConfigurationService {
 
         // TODO : Language
         this.snackBarService.openError('Rejected by other player');
-        this.exitRoom();
     }
 
     private joinedValidGame(gameRoom: GameRoom): void {

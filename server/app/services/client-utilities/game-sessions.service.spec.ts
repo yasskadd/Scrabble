@@ -613,7 +613,7 @@ describe('GameSession Service', () => {
         it('rejectOpponent should emit a message to the other player in the room when he reject him', (done) => {
             const rejectMessage = "L'adversaire à rejeter votre demande";
 
-            clientSocket.on(SocketEvents.RejectByOtherPlayer, (information) => {
+            clientSocket.on(SocketEvents.KickedFromGameRoom, (information) => {
                 expect(information).to.be.eql(rejectMessage);
                 done();
             });
