@@ -6,7 +6,6 @@ import { RoomPlayer } from './room-player';
 export interface GameRoom {
     id: string;
     players: RoomPlayer[];
-    socketIds: string[];
     dictionary: string;
     timer: number;
     mode: GameMode;
