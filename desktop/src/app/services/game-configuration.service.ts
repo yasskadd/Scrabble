@@ -41,6 +41,7 @@ export class GameConfigurationService implements OnDestroy {
         this.isGameStarted = new Subject<boolean>();
         this.configureBaseSocketFeatures();
 
+        // TODO : Move this somewhere more logic
         // eslint-disable-next-line no-underscore-dangle
         if (window.__TAURI_IPC__) {
             tauriWindow
