@@ -1,6 +1,5 @@
 <div class="encapsulating-div">
     <app-header></app-header>
-
     <body class="justified mat-app-background">
         <h1>{{ "new_game_page.game_settings" | translate }}</h1>
         <div class="justified">
@@ -8,21 +7,25 @@
                 <h4>{{ "new_game_page.opponent_name" | translate }} : {{ botName }}</h4>
             </form>
 
-            <form *ngIf="!isSoloMode()">
-                <mat-label>
-                    <!-- TODO : Lanaguge -->
-                    Sécuriser
-                </mat-label>
-                <mat-checkbox [formControl]="passwordEnableForm"></mat-checkbox>
-            </form>
+            <div>
+                <button mat-icon-button *ngIf="!isSoloMode()" [disabled]="!isGamePublic" (click)="clickPasswordToggle()" class="setting-button">
+                    <mat-icon *ngIf="isGameLocked">lock_outline</mat-icon>
+                    <mat-icon *ngIf="!isGameLocked">lock_open</mat-icon>
+                </button>
+                <button mat-icon-button *ngIf="!isSoloMode()" [disabled]="isGameLocked" (click)="clickVisibilityToggle()" class="setting-button">
+                    <mat-icon *ngIf="isGamePublic">visibility_outline</mat-icon>
+                    <mat-icon *ngIf="!isGamePublic">visibility_off_outline</mat-icon>
+                </button>
+            </div>
 
-            <form *ngIf="passwordEnableForm.value" [formGroup]="form">
+            <form *ngIf="isGameLocked" [formGroup]="form">
                 <mat-form-field appearance="outline">
                     <mat-label>
                         <!-- TODO : Language -->
                         Mot de passe
                     </mat-label>
                     <input type="text" matInput formControlName="password" />
+                    <mat-error> {{ getError() }}</mat-error>
                 </mat-form-field>
             </form>
 

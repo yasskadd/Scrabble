@@ -8,12 +8,13 @@ import { NUMBER_OF_PLAYERS } from '@common/constants/players';
 import { SocketEvents } from '@common/constants/socket-events';
 import { GameParameters } from '@common/interfaces/game-parameters';
 import { GameScrabbleInformation } from '@common/interfaces/game-scrabble-information';
-import { PlayerRoomInfo } from '@common/interfaces/player-room-info';
+import { RoomPlayer } from '@common/interfaces/room-player';
 import { IUser } from '@common/interfaces/user';
 import { SnackBarService } from '@services/snack-bar.service';
 import { UserService } from '@services/user.service';
 import { Subject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
+import { GameRoom } from '@common/interfaces/game-room';
 
 @Injectable({
     providedIn: 'root',
@@ -103,7 +104,7 @@ export class GameConfigurationService {
         this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
             roomId: this.roomInformation.roomId,
             player: this.userService.user,
-        } as PlayerRoomInfo);
+        } as RoomPlayer);
         this.resetRoomInformation();
     }
 
@@ -111,7 +112,7 @@ export class GameConfigurationService {
         this.clientSocket.send(SocketEvents.RejectOpponent, {
             roomId: this.roomInformation.roomId,
             player,
-        } as PlayerRoomInfo);
+        } as RoomPlayer);
         this.roomInformation.players = this.roomInformation.players.filter((playerElement: IUser) => {
             return playerElement.username !== player.username && playerElement.profilePicture.name !== player.profilePicture.name;
         });
@@ -136,17 +137,26 @@ export class GameConfigurationService {
         this.roomInformation.mode = parameters.mode;
     }
 
-    joinGame(room: GameRoomClient, player: IUser): void {
+    joinRoom(room: GameRoom): void {
         this.clientSocket.send(SocketEvents.PlayerJoinGameAvailable, {
             roomId: room.id,
-            player,
-        } as PlayerRoomInfo);
+            player: this.userService.user,
+        } as RoomPlayer);
 
         this.roomInformation.roomId = room.id;
         this.roomInformation.players = [...room.users];
         this.roomInformation.dictionary = room.dictionary;
         this.roomInformation.timer = room.timer;
         this.roomInformation.mode = room.mode;
+    }
+
+    joinSecretRoom(roomId: string): void {
+        this.clientSocket.send(SocketEvents.PlayerJoinGameAvailable, {
+            roomId,
+            player: this.userService.user,
+        } as RoomPlayer);
+
+        // TODO : Make this work
     }
 
     joinPage(gameMode: string): void {
@@ -177,7 +187,7 @@ export class GameConfigurationService {
         this.clientSocket.send(SocketEvents.PlayerJoinGameAvailable, {
             roomId: roomToJoinId,
             player: this.roomInformation.players[0],
-        } as PlayerRoomInfo);
+        } as RoomPlayer);
     }
 
     exitRoom(exitByIsOwn?: boolean) {
@@ -232,7 +242,7 @@ export class GameConfigurationService {
         this.clientSocket.send(SocketEvents.RejectByOtherPlayer, {
             roomId: this.roomInformation.roomId,
             player: user,
-        } as PlayerRoomInfo);
+        } as RoomPlayer);
         this.resetRoomInformation();
 
         // TODO : Language

@@ -1,4 +1,4 @@
-import { GameRoom } from '@app/interfaces/game-room';
+import { GameRoom } from '@common/interfaces/game-room';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { NUMBER_OF_PLAYERS } from '@common/constants/players';
 import { SocketEvents } from '@common/constants/socket-events';
@@ -10,6 +10,7 @@ import { Service } from 'typedi';
 import * as uuid from 'uuid';
 
 const UNAVAILABLE_ELEMENT_INDEX = -1;
+const ROOMID_LENGTH = 6;
 const SECOND = 1000;
 const PLAYERS_JOINING_ROOM = 'joinGameRoom';
 const SAME_USER_IN_ROOM_ERROR = "L'adversaire a le même nom";
@@ -178,7 +179,7 @@ export class GameSessions {
     }
 
     private getNewId(): string {
-        return uuid.v4();
+        return uuid.v4().substring(0, ROOMID_LENGTH);
     }
 
     private verifyRoomPassword(password: string | undefined, roomId: string): boolean {
