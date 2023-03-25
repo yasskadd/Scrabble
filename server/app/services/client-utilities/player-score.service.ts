@@ -1,7 +1,5 @@
+import { LOSS_SCORE, MAX_SCORE, MIN_SCORE, WIN_SCORE } from '@app/constants/score';
 import { Service } from 'typedi';
-const LOSS_SCORE = -5;
-const WIN_SCORE = 10;
-
 @Service()
 export class PlayerScoreService {
     constructor() {}
@@ -12,10 +10,12 @@ export class PlayerScoreService {
     }
 
     lossScore(currentPlayerScore: number): number {
-        return currentPlayerScore + LOSS_SCORE;
+        const newScore = currentPlayerScore + LOSS_SCORE;
+        return newScore < MIN_SCORE ? MIN_SCORE : newScore;
     }
 
     winScore(currentPlayerScore: number): number {
-        return currentPlayerScore + WIN_SCORE;
+        const newScore = currentPlayerScore + WIN_SCORE;
+        return newScore > MAX_SCORE ? MAX_SCORE : newScore;
     }
 }
