@@ -13,3 +13,11 @@ export const SECOND_3 = 3000;
 export const SECOND_1 = 1000;
 export const letterReserveMinQuantity = 7;
 export const BOT_BEGINNER_DIFFICULTY = 'Débutant';
+export const BOT_EXPERT_DIFFICULTY = 'Expert';
+export const BOT_SCORE_RELATED_DIFFICULTY = 'ScoreRelated';
+
+export enum PlayMoves {
+    Place = 'place',
+    Exchange = 'exchange',
+    Skip = 'skip',
+}
