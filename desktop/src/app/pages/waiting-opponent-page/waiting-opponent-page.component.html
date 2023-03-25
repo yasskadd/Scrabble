@@ -40,9 +40,12 @@
         ></mat-progress-bar>
     </mat-card>
     <div class='container-buttons'>
-        <button class='returnButton' mat-icon-button (click)='gameConfiguration.exitRoom()'>
+        <button class='returnButton' mat-icon-button (click)='exitWaitingRoom()'>
             <mat-icon>navigate_before</mat-icon>
         </button>
+        <div *ngIf='gameConfiguration.localGameRoom.visibility === gameVisibility.Private'>
+            Code : {{gameConfiguration.localGameRoom.id}}
+        </div>
         <div id='player-decision'>
             <button
                 *ngIf='gameConfiguration.isGameCreator()'

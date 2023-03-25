@@ -16,7 +16,7 @@ export class DialogBoxAbandonGameComponent {
 
     abandonGame() {
         this.gameclient.abandonGame();
-        this.router.navigate([AppRoutes.HomePage]).then();
+        this.router.navigate([`${AppRoutes.HomePage}`]).then();
         this.openSnackBar();
     }
 

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { NUMBER_OF_PLAYERS } from '@common/constants/players';
@@ -15,17 +15,18 @@ import { GameRoomState } from '@common/models/game-room-state';
 import { GameMode } from '@common/models/game-mode';
 import { GameVisibility } from '@common/models/game-visibility';
 import { UserRoomQuery } from '@common/interfaces/user-room-query';
+import { window as tauriWindow } from '@tauri-apps/api';
+import { TauriEvent } from '@tauri-apps/api/event';
 
 @Injectable({
     providedIn: 'root',
 })
-export class GameConfigurationService {
+export class GameConfigurationService implements OnDestroy {
     localGameRoom: GameRoom;
     isGameStarted: Subject<boolean>;
     isRoomJoinable: Subject<boolean>;
     errorReason: string;
     availableRooms: GameRoom[];
-    gameMode: string;
 
     constructor(
         private snackBarService: SnackBarService,
@@ -34,11 +35,30 @@ export class GameConfigurationService {
         private router: Router,
     ) {
         this.resetRoomInformations();
+        this.availableRooms = [];
 
-        this.clientSocket.establishConnection();
         this.isRoomJoinable = new Subject<boolean>();
         this.isGameStarted = new Subject<boolean>();
         this.configureBaseSocketFeatures();
+
+        // TODO : Move this somewhere more logic
+        // eslint-disable-next-line no-underscore-dangle
+        if (window.__TAURI_IPC__) {
+            tauriWindow
+                .getCurrent()
+                .listen(TauriEvent.WINDOW_CLOSE_REQUESTED, () => {
+                    if (this.localGameRoom) {
+                        alert('disconnecting from socket!');
+                        this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
+                            roomId: this.localGameRoom.id,
+                            user: this.userService.user,
+                        } as UserRoomQuery);
+                    }
+                    alert('test');
+                    tauriWindow.getCurrent().close().then();
+                })
+                .then();
+        }
     }
 
     configureBaseSocketFeatures() {
@@ -46,8 +66,8 @@ export class GameConfigurationService {
             this.joinedValidGame(gameRoom);
         });
 
-        this.clientSocket.on(SocketEvents.KickedFromGameRoom, (user: IUser) => {
-            this.kickedFromGameRoom(user);
+        this.clientSocket.on(SocketEvents.KickedFromGameRoom, () => {
+            this.kickedFromGameRoom();
         });
 
         this.clientSocket.on(SocketEvents.GameAboutToStart, (players: RoomPlayer[]) => {
@@ -58,11 +78,11 @@ export class GameConfigurationService {
             this.foundAnOpponentEvent(opponent);
         });
 
-        this.clientSocket.on(SocketEvents.GameCreatedConfirmation, (room: GameRoom) => {
-            this.gameCreatedConfirmationEvent(room);
+        this.clientSocket.on(SocketEvents.CurrentGameRoomUpdate, (room: GameRoom) => {
+            this.localGameRoom = room;
         });
 
-        this.clientSocket.on(SocketEvents.UpdateRoomJoinable, (gamesToJoin: GameRoom[]) => {
+        this.clientSocket.on(SocketEvents.UpdateGameRooms, (gamesToJoin: GameRoom[]) => {
             this.availableRooms = gamesToJoin;
         });
 
@@ -70,7 +90,7 @@ export class GameConfigurationService {
             if (reason) {
                 this.snackBarService.openError(reason);
             }
-            this.exitRoom();
+            this.exitWaitingRoom();
         });
 
         this.clientSocket.on(SocketEvents.OpponentLeave, (player: IUser) => {
@@ -78,14 +98,20 @@ export class GameConfigurationService {
         });
     }
 
+    ngOnDestroy() {
+        if (this.localGameRoom) {
+            this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
+                roomId: this.localGameRoom.id,
+                user: this.userService.user,
+            } as UserRoomQuery);
+        }
+    }
+
     rejectOpponent(player: RoomPlayer): void {
         this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
             user: player.user,
             roomId: player.roomId,
         } as UserRoomQuery);
-        this.localGameRoom.players = this.localGameRoom.players.filter((playerElement: RoomPlayer) => {
-            return playerElement.user.username !== player.user.username && playerElement.user.profilePicture.name !== player.user.profilePicture.name;
-        });
     }
 
     joinRoom(room: GameRoom): void {
@@ -102,6 +128,7 @@ export class GameConfigurationService {
     joinSecretRoom(roomId: string): void {
         this.clientSocket.send(SocketEvents.JoinGameRoom, {
             roomId,
+            socketId: '',
             user: this.userService.user,
         } as RoomPlayer);
 
@@ -128,31 +155,19 @@ export class GameConfigurationService {
             visibility: GameVisibility.Public,
             password: '',
         };
-
-        this.availableRooms = [];
     }
 
-    exitRoom() {
+    exitWaitingRoom() {
         this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
             roomId: this.localGameRoom.id,
             user: this.userService.user,
         } as RoomPlayer);
-
-        if (this.isGameCreator()) {
-            this.router.navigate([`${AppRoutes.MultiGameCreationPage}/${this.gameMode}`]).then();
-        } else {
-            this.router.navigate([`${AppRoutes.MultiJoinPage}/${this.gameMode}`]).then();
-        }
 
         this.resetRoomInformations();
     }
 
     isGameCreator(): boolean {
         return !!this.localGameRoom.players.find((player: RoomPlayer) => player.isCreator && player.user.username === this.userService.user.username);
-    }
-
-    private gameCreatedConfirmationEvent(room: GameRoom): void {
-        this.localGameRoom = room;
     }
 
     private opponentLeaveEvent(player: IUser): void {
@@ -188,21 +203,18 @@ export class GameConfigurationService {
         this.isGameStarted.next(true);
     }
 
-    private kickedFromGameRoom(user: IUser): void {
-        this.clientSocket.send(SocketEvents.ExitGameRoom, {
-            roomId: this.localGameRoom.id,
-            user,
-        } as RoomPlayer);
+    private kickedFromGameRoom(): void {
         this.resetRoomInformations();
 
+        this.router.navigate([`${AppRoutes.MultiJoinPage}/multi`]).then();
         // TODO : Language
         this.snackBarService.openError('Rejected by other player');
     }
 
     private joinedValidGame(gameRoom: GameRoom): void {
-        this.localGameRoom.players = [...gameRoom.players];
+        this.localGameRoom = gameRoom;
 
-        this.router.navigate([`${AppRoutes.MultiWaitingPage}/${this.gameMode}`]).then();
+        this.router.navigate([`${AppRoutes.MultiWaitingPage}/${gameRoom.mode}`]).then();
     }
 
     private arePlayersTheSame(player1: IUser, player2: IUser): boolean {

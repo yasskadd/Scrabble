@@ -39,11 +39,14 @@ export class SocketManager {
         onElement.push(callback);
     }
 
-    getSocketId() {
-        for (const [socket, username] of this.socketUsernameMap) {
-            console.log(username);
-            console.log(socket.id);
+    getSocketFromId(socketId: string): io.Socket | undefined {
+        for (const [socket] of this.socketUsernameMap) {
+            if (socket.id === socketId) {
+                return socket;
+            }
         }
+
+        return undefined;
     }
 
     emitRoom(room: string, event: string, ...args: unknown[]) {
@@ -93,6 +96,7 @@ export class SocketManager {
                 }
             }
             socket.on('disconnect', () => {
+                console.log('Detected a disconnection');
                 if (this.socketUsernameMap.has(socket)) {
                     this.socketUsernameMap.delete(socket);
                 }

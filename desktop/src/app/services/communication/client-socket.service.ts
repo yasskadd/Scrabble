@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { RustCommand, RustEvent } from '@app/models/rust-command';
 import { LanguageService } from '@services/language.service';
 import { SnackBarService } from '@services/snack-bar.service';
@@ -11,22 +11,18 @@ import { environment } from 'src/environments/environment';
 @Injectable({
     providedIn: 'root',
 })
-export class ClientSocketService implements OnDestroy {
+export class ClientSocketService {
     updateSubject: Subject<void>;
     private socket: Socket;
+    private connected: boolean;
 
     private readonly useTauriSocket: boolean;
 
     constructor(private snackBarService: SnackBarService, private languageService: LanguageService) {
         this.updateSubject = new Subject<void>();
+
         // eslint-disable-next-line no-underscore-dangle
         this.useTauriSocket = !!window.__TAURI_IPC__;
-
-        this.establishConnection();
-    }
-
-    ngOnDestroy(): void {
-        this.disconnect();
     }
 
     isSocketAlive() {
@@ -44,10 +40,12 @@ export class ClientSocketService implements OnDestroy {
         } else {
             this.socket = io(environment.serverUrl, { transports: ['websocket'], upgrade: false });
         }
+
+        this.connected = true;
     }
 
     establishConnection(cookie?: string) {
-        if (this.socket) {
+        if (this.connected) {
             this.disconnect();
         }
         if (this.useTauriSocket) {
@@ -95,6 +93,8 @@ export class ClientSocketService implements OnDestroy {
         } else {
             this.socket.disconnect();
         }
+
+        this.connected = false;
     }
 
     on<T>(eventName: string, action: (data: T) => void): void {

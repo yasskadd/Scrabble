@@ -207,7 +207,7 @@ export class GameCreationPageComponent implements OnInit {
             isMultiplayer: !this.isSoloMode(),
             opponent: this.isSoloMode() ? this.botName : undefined,
             botDifficulty: this.isSoloMode() ? (this.form.get('difficultyBot') as AbstractControl).value : undefined,
-            visibility: this.isGamePublic ? GameVisibility.Public : GameVisibility.Private,
+            visibility: this.isGameLocked ? GameVisibility.Locked : this.isGamePublic ? GameVisibility.Public : GameVisibility.Private,
             password: this.passwordForm.value,
         } as GameCreationQuery);
 

@@ -225,13 +225,13 @@ describe('GameConfigurationService', () => {
             { id: '2', users: ['Poulin', 'George'], dictionary: 'francais', timer: 1, mode: 'classique' },
         ];
 
-        socketEmulator.peerSideEmit(SocketEvents.UpdateRoomJoinable, testRoom);
+        socketEmulator.peerSideEmit(SocketEvents.UpdateGameRooms, testRoom);
         expect(spy).toHaveBeenCalledWith(testRoom as never);
     });
 
     it('should handle gameCreatedConfirmation event with the ID of the game he just created', () => {
         const roomId = '3';
-        socketEmulator.peerSideEmit(SocketEvents.GameCreatedConfirmation, roomId);
+        socketEmulator.peerSideEmit(SocketEvents.CurrentGameRoomUpdate, roomId);
         expect(service.roomInformation.roomId).toEqual(roomId);
     });
 
