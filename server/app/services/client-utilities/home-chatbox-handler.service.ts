@@ -1,4 +1,4 @@
-import { GameRoom } from '@app/interfaces/game-room';
+import { GameRoom } from '@common/interfaces/game-room';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
 import { ChatboxMessage } from '@common/interfaces/chatbox-message';

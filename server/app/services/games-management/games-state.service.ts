@@ -7,9 +7,10 @@ import { Bot } from '@app/classes/player/bot.class';
 import { ExpertBot } from '@app/classes/player/expert-bot.class';
 import { Player } from '@app/classes/player/player.class';
 import { RealPlayer } from '@app/classes/player/real-player.class';
+import { ScoreRelatedBot } from '@app/classes/player/score-related-bot.class';
 import { Turn } from '@app/classes/turn.class';
 import { WordSolver } from '@app/classes/word-solver.class';
-import { BOT_BEGINNER_DIFFICULTY } from '@app/constants/bot';
+import { BOT_BEGINNER_DIFFICULTY, BOT_EXPERT_DIFFICULTY } from '@app/constants/bot';
 import { Behavior } from '@app/interfaces/behavior';
 import { ScoreStorageService } from '@app/services/database/score-storage.service';
 import { VirtualPlayersStorageService } from '@app/services/database/virtual-players-storage.service';
@@ -155,13 +156,19 @@ export class GamesStateService {
                         dictionaryValidation: dictionaryValidation as DictionaryValidation,
                     });
                     players.push(newPlayer);
-                } else {
+                } else if (gameInfo.botDifficulty === BOT_EXPERT_DIFFICULTY) {
                     newPlayer = new ExpertBot(false, gameInfo.players[players.length].username, {
                         timer: gameInfo.timer,
                         roomId: gameInfo.roomId,
                         dictionaryValidation: dictionaryValidation as DictionaryValidation,
                     });
                     players.push(newPlayer);
+                } else {
+                    newPlayer = new ScoreRelatedBot(false, gameInfo.players[players.length].username, {
+                        timer: gameInfo.timer,
+                        roomId: gameInfo.roomId,
+                        dictionaryValidation: dictionaryValidation as DictionaryValidation,
+                    });
                 }
                 if (this.gamesHandler.gamePlayers.get(newPlayer.room) === undefined)
                     this.gamesHandler.gamePlayers.set(newPlayer.room, { gameInfo, players: [] as Player[] });

@@ -1,4 +1,5 @@
 export enum GameVisibility {
-	Public = 'public',
-	Private = 'private',
+    Public = 'public',
+    Locked = 'locked',
+    Private = 'private',
 }
