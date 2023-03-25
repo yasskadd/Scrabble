@@ -7,16 +7,17 @@ import { Bot } from '@app/classes/player/bot.class';
 import { ExpertBot } from '@app/classes/player/expert-bot.class';
 import { Player } from '@app/classes/player/player.class';
 import { RealPlayer } from '@app/classes/player/real-player.class';
+import { ScoreRelatedBot } from '@app/classes/player/score-related-bot.class';
 import { Turn } from '@app/classes/turn.class';
 import { WordSolver } from '@app/classes/word-solver.class';
-import { BOT_BEGINNER_DIFFICULTY } from '@app/constants/bot';
-import { NUMBER_OF_PLAYERS } from '@common/constants/players';
+import { BOT_BEGINNER_DIFFICULTY, BOT_EXPERT_DIFFICULTY } from '@app/constants/bot';
 import { Behavior } from '@app/interfaces/behavior';
-import { GameScrabbleInformation } from '@common/interfaces/game-scrabble-information';
 import { ScoreStorageService } from '@app/services/database/score-storage.service';
 import { VirtualPlayersStorageService } from '@app/services/database/virtual-players-storage.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
+import { NUMBER_OF_PLAYERS } from '@common/constants/players';
 import { SocketEvents } from '@common/constants/socket-events';
+import { GameScrabbleInformation } from '@common/interfaces/game-scrabble-information';
 import { Subject } from 'rxjs';
 import { Socket } from 'socket.io';
 import { Service } from 'typedi';
@@ -155,13 +156,19 @@ export class GamesStateService {
                         dictionaryValidation: dictionaryValidation as DictionaryValidation,
                     });
                     players.push(newPlayer);
-                } else {
+                } else if (gameInfo.botDifficulty === BOT_EXPERT_DIFFICULTY) {
                     newPlayer = new ExpertBot(false, gameInfo.players[players.length].username, {
                         timer: gameInfo.timer,
                         roomId: gameInfo.roomId,
                         dictionaryValidation: dictionaryValidation as DictionaryValidation,
                     });
                     players.push(newPlayer);
+                } else {
+                    newPlayer = new ScoreRelatedBot(false, gameInfo.players[players.length].username, {
+                        timer: gameInfo.timer,
+                        roomId: gameInfo.roomId,
+                        dictionaryValidation: dictionaryValidation as DictionaryValidation,
+                    });
                 }
                 if (this.gamesHandler.gamePlayers.get(newPlayer.room) === undefined)
                     this.gamesHandler.gamePlayers.set(newPlayer.room, { gameInfo, players: [] as Player[] });
