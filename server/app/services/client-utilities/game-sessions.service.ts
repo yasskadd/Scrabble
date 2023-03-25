@@ -20,6 +20,8 @@ import { RoomPlayer } from '@common/interfaces/room-player';
 import { PlayerType } from '@common/models/player-type';
 import { GameVisibility } from '@common/models/game-visibility';
 import { GAME_LOBBY_ROOM_ID } from '@common/constants/room';
+import { GamesStateService } from '@app/services/games-management/games-state.service';
+import { GameScrabbleInformation } from '@common/interfaces/game-scrabble-information';
 
 // const PLAYERS_REJECT_FROM_ROOM_ERROR = "L'adversaire à rejeter votre demande";
 
@@ -27,16 +29,16 @@ import { GAME_LOBBY_ROOM_ID } from '@common/constants/room';
 export class GameSessions {
     private gameRooms: GameRoom[];
 
-    constructor(private socketManager: SocketManager) {
+    constructor(private gameStateService: GamesStateService, private socketManager: SocketManager) {
         this.gameRooms = [];
     }
 
     initSocketEvents() {
-        this.socketManager.io(SocketEvents.CreateGame, (server: Server, socket: SocketType, gameQuery: GameCreationQuery) => {
+        this.socketManager.io(SocketEvents.CreateWaitingRoom, (server: Server, socket: SocketType, gameQuery: GameCreationQuery) => {
             this.createGame(server, socket, gameQuery);
         });
 
-        this.socketManager.io(SocketEvents.JoinGameRoom, (server: Server, socket: SocketType, userRoomQuery: UserRoomQuery) => {
+        this.socketManager.io(SocketEvents.JoinWaitingRoom, (server: Server, socket: SocketType, userRoomQuery: UserRoomQuery) => {
             this.joinGameRoom(server, socket, userRoomQuery);
         });
 
@@ -48,43 +50,9 @@ export class GameSessions {
             this.exitWaitingRoom(server, socket, userQuery);
         });
 
-        this.socketManager.io(SocketEvents.RejectOpponent, (server: Server, socket: SocketType, player: RoomPlayer) => {
-            this.rejectOpponent(server, socket, player);
-        });
-
-        this.socketManager.io(SocketEvents.ExitGameRoom, (server: Server, socket: SocketType, userRoomQuery: UserRoomQuery) => {
-            this.exitGameRoom(server, socket, userRoomQuery);
-        });
-
-        this.socketManager.on(SocketEvents.Invite, (socket: Socket, inviteeId: string, userRoomQuery: UserRoomQuery) => {
-            this.invitePlayer(socket, inviteeId, userRoomQuery);
-        });
-
         this.socketManager.io(SocketEvents.StartScrabbleGame, (server: Server, socket: SocketType, roomId: string) => {
             this.startScrabbleGame(server, roomId);
         });
-    }
-
-    // TODO : Check if we still need that
-    private invitePlayer(socket: Socket, inviteeId: string, parameters: UserRoomQuery): void {
-        socket.broadcast.to(inviteeId).emit(SocketEvents.Invite, parameters);
-    }
-
-    private rejectOpponent(server: Server, socket: Socket, player: RoomPlayer): void {
-        // Check that the player is removed from the game room player list
-        const playerSocket: Socket | undefined = this.socketManager.getSocketFromId(player.socketId);
-        if (!playerSocket) return;
-
-        this.exitGameRoom(server, playerSocket, {
-            user: player.user,
-            roomId: player.roomId,
-        });
-
-        if (!player.isCreator && player.socketId !== socket.id) {
-            playerSocket.emit(SocketEvents.KickedFromGameRoom, this.stripPlayerPassword(player));
-        }
-
-        server.to(player.roomId).emit(SocketEvents.CurrentGameRoomUpdate, this.getRoom(player.roomId));
     }
 
     private enterRoomLobby(server: Server, socket: Socket): void {
@@ -128,8 +96,8 @@ export class GameSessions {
         };
         room.players.push(newPlayer);
 
-        socket.broadcast.to(joinGameQuery.roomId).emit(SocketEvents.FoundAnOpponent, this.stripPlayerPassword(newPlayer));
-        socket.emit(SocketEvents.JoinedValidGame, this.stripPlayersPassword(room));
+        socket.broadcast.to(joinGameQuery.roomId).emit(SocketEvents.PlayerJoinedWaitingRoom, this.stripPlayerPassword(newPlayer));
+        socket.emit(SocketEvents.JoinedValidWaitingRoom, this.stripPlayersPassword(room));
 
         server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
@@ -155,6 +123,22 @@ export class GameSessions {
         this.removeRoom(server, userQuery.roomId);
     }
 
+    private rejectOpponent(server: Server, socket: Socket, player: RoomPlayer): void {
+        const playerSocket: Socket | undefined = this.socketManager.getSocketFromId(player.socketId);
+        if (!playerSocket) return;
+
+        this.exitGameRoom(server, playerSocket, {
+            user: player.user,
+            roomId: player.roomId,
+        });
+
+        if (!player.isCreator && player.socketId !== socket.id) {
+            playerSocket.emit(SocketEvents.KickedFromGameRoom, this.stripPlayerPassword(player));
+        }
+
+        server.to(player.roomId).emit(SocketEvents.UpdateWaitingRoom, this.getRoom(player.roomId));
+    }
+
     private exitGameRoom(server: Server, socket: SocketType, userQuery: UserRoomQuery): void {
         const player: RoomPlayer | undefined = this.getPlayerFromQuery(userQuery);
         if (!player) return;
@@ -165,8 +149,30 @@ export class GameSessions {
     }
 
     private startScrabbleGame(server: Server, roomId: string): void {
-        if (this.getRoom(roomId)) {
-            server.to(roomId).emit(SocketEvents.GameAboutToStart, this.getRoom(roomId)?.players);
+        const room = this.getRoom(roomId);
+
+        if (room) {
+            // TODO : Changed GameScrabbleInformation to simply using GameRoom
+            const users: IUser[] = [];
+            const socketIds: string[] = [];
+            room.players.forEach((player: RoomPlayer) => {
+                users.push(player.user);
+                socketIds.push(player.socketId);
+            });
+
+            this.gameStateService
+                .createGame(server, {
+                    players: users,
+                    roomId,
+                    timer: room.timer,
+                    socketId: socketIds,
+                    mode: room.mode,
+                    botDifficulty: 'easy',
+                    dictionary: room.dictionary,
+                } as GameScrabbleInformation)
+                .then(() => {
+                    server.to(roomId).emit(SocketEvents.GameAboutToStart);
+                });
         }
     }
 
@@ -178,7 +184,7 @@ export class GameSessions {
         socket.leave(GAME_LOBBY_ROOM_ID);
 
         socket.join(room.id);
-        socket.emit(SocketEvents.CurrentGameRoomUpdate, room);
+        socket.emit(SocketEvents.UpdateWaitingRoom, room);
     }
 
     private passwordValid(query: UserRoomQuery): boolean {
@@ -240,21 +246,6 @@ export class GameSessions {
     private generateRoomId(): string {
         return uuid.v4().substring(0, ROOMID_LENGTH);
     }
-
-    // !!! Saving that - could be useful
-    // private getRoomId(socketId: string): string {
-    //     let roomId = '';
-    //
-    //     this.gameRooms.forEach((room: GameRoom) => {
-    //         room.players.forEach((player: RoomPlayer) => {
-    //             if (player.socketId === socketId) {
-    //                 roomId = player.roomId;
-    //             }
-    //         });
-    //     });
-    //
-    //     return roomId;
-    // }
 
     private getRoom(roomId: string): GameRoom | undefined {
         return this.gameRooms.find((room: GameRoom) => room.id === roomId);

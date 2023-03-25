@@ -450,10 +450,10 @@ describe('GameSession Service', () => {
         };
 
         gameSessions['gameRooms'].set(ROOM_ID, gameRoomAvailable);
-        serverSocket.on(SocketEvents.JoinGameRoom, (parameters) => {
+        serverSocket.on(SocketEvents.JoinWaitingRoom, (parameters) => {
             gameSessions['playerJoinGameAvailable'](sio, serverSocket, parameters);
         });
-        clientSocket.emit(SocketEvents.JoinGameRoom, parameters2);
+        clientSocket.emit(SocketEvents.JoinWaitingRoom, parameters2);
         clientSocket.on(SocketEvents.ErrorJoining, (reason: string) => {
             expect(reason).to.equal(sameUserError);
             done();
@@ -494,10 +494,10 @@ describe('GameSession Service', () => {
         };
 
         gameSessions['gameRooms'].set(ROOM_ID, gameRoomFull);
-        serverSocket.on(SocketEvents.JoinGameRoom, (parameters) => {
+        serverSocket.on(SocketEvents.JoinWaitingRoom, (parameters) => {
             gameSessions['playerJoinGameAvailable'](sio, serverSocket, parameters);
         });
-        clientSocket.emit(SocketEvents.JoinGameRoom, parametersTest);
+        clientSocket.emit(SocketEvents.JoinWaitingRoom, parametersTest);
         clientSocket.on(SocketEvents.ErrorJoining, (reason: string) => {
             expect(reason).to.equal(roomNotAvailableError);
             done();

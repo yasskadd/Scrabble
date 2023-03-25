@@ -1,4 +1,5 @@
 export enum SocketEvents {
+    // Methods used for the prototype
     SendMessage = 'sendMessage',
     ReceiveHomeMessage = 'broadcastMessageHome',
     JoinHomeRoom = 'joinHomeRoom',
@@ -13,6 +14,22 @@ export enum SocketEvents {
     SignIn = 'signIn',
     SignOut = 'signOut',
 
+    // GameRoom commands
+    CreateWaitingRoom = 'createGame',
+    JoinWaitingRoom = 'roomJoin',
+    UpdateWaitingRoom = 'gameCreatedConfirmation',
+    ExitWaitingRoom = 'exitWaitingRoom', // Used to tell a user is leaving the room
+    JoinedValidWaitingRoom = 'joinValid',
+    UpdateGameRooms = 'updateListOfRooms',
+    PlayerJoinedWaitingRoom = 'foundOpponent',
+    ErrorJoining = 'joiningError',
+    EnterRoomLobby = 'roomLobby',
+    KickedFromGameRoom = 'kickedFromGameRoom',
+    GameAboutToStart = 'gameAboutToStart',
+    OpponentLeave = 'opponentLeave',
+    StartScrabbleGame = 'startScrabbleGame',
+
+    Invite = 'invite',
     GameMessage = 'gameMessage',
     GameCommand = 'command',
     OpponentDisconnect = 'user disconnect',
@@ -20,22 +37,6 @@ export enum SocketEvents {
     UpdateGameBoard = 'updateGameBoard',
     Play = 'playGame',
     Exchange = 'ExchangeLetters',
-    CreateGame = 'createGame',
-    CurrentGameRoomUpdate = 'gameCreatedConfirmation',
-    UpdateGameRooms = 'updateListOfRooms',
-    JoinGameRoom = 'roomJoin',
-    JoinedValidGame = 'joinValid',
-    FoundAnOpponent = 'foundOpponent',
-    ErrorJoining = 'joiningError',
-    EnterRoomLobby = 'roomLobby',
-    RemoveRoom = 'removeRoom',
-    RejectOpponent = 'rejectOpponent',
-    KickedFromGameRoom = 'kickedFromGameRoom',
-    ExitGameRoom = 'exitGameRoom',
-    StartScrabbleGame = 'startScrabbleGame',
-    GameAboutToStart = 'gameAboutToStart',
-    ExitWaitingRoom = 'exitWaitingRoom',
-    OpponentLeave = 'opponentLeave',
     RackViewUpdate = 'updateRackClient',
     Skip = 'skip',
     UpdatePlayerInformation = 'UpdateMyPlayerInformation',
@@ -54,5 +55,4 @@ export enum SocketEvents {
     ClueCommand = 'clueCommand',
     ImportDictionary = 'ImportDictionary',
     SendMessageHome = 'sendMessageHome',
-    Invite = 'invite',
 }

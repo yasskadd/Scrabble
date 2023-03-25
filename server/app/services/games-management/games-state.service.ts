@@ -42,7 +42,7 @@ export class GamesStateService {
 
     initSocketsEvents(): void {
         this.socketManager.io(SocketEvents.CreateScrabbleGame, async (server: Server, socket: SocketType, gameInfo: GameScrabbleInformation) => {
-            await this.createGame(server, socket, gameInfo);
+            await this.createGame(server, gameInfo);
         });
 
         this.socketManager.on(SocketEvents.Disconnect, (socket) => {
@@ -58,7 +58,7 @@ export class GamesStateService {
         });
     }
 
-    async createGame(server: Server, socket: Socket, gameInfo: GameScrabbleInformation) {
+    async createGame(server: Server, gameInfo: GameScrabbleInformation) {
         const players = this.initPlayers(gameInfo);
         const game = this.createNewGame(gameInfo);
         const gameCreator = players[0];

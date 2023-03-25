@@ -199,7 +199,7 @@ export class GameCreationPageComponent implements OnInit {
     }
 
     private initGame(dictionaryTitle: string): void {
-        this.clientSocketService.send(SocketEvents.CreateGame, {
+        this.clientSocketService.send(SocketEvents.CreateWaitingRoom, {
             user: this.userService.user,
             timer: (this.form.get('timer') as AbstractControl).value,
             dictionary: dictionaryTitle,
