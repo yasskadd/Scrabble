@@ -1,7 +1,7 @@
 <body class='justified'>
 <mat-card class='wrapper'>
     <div id='title-and-solo-button'>
-        <mat-card-title>{{ gameConfiguration.localGameRoom.statusGame | translate }}</mat-card-title>
+        <mat-card-title>{{ gameConfiguration.localGameRoom.state | translate }}</mat-card-title>
         <button
             *ngIf='gameConfiguration.isGameCreator()'
             (click)='joinSoloMode()'
