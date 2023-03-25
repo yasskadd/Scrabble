@@ -96,7 +96,6 @@ export class SocketManager {
                 }
             }
             socket.on('disconnect', () => {
-                console.log('Detected a disconnection');
                 if (this.socketUsernameMap.has(socket)) {
                     this.socketUsernameMap.delete(socket);
                 }

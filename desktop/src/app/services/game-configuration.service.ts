@@ -45,13 +45,12 @@ export class GameConfigurationService implements OnDestroy {
                 .getCurrent()
                 .listen(TauriEvent.WINDOW_CLOSE_REQUESTED, () => {
                     if (this.localGameRoom) {
-                        alert('disconnecting from socket!');
+                        alert('Disconnecting from socket!');
                         this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
                             roomId: this.localGameRoom.id,
                             user: this.userService.user,
                         } as UserRoomQuery);
                     }
-                    alert('test');
                     tauriWindow.getCurrent().close().then();
                 })
                 .then();
