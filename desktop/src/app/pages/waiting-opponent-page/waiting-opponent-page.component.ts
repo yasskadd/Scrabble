@@ -4,6 +4,8 @@ import { AppRoutes } from '@app/models/app-routes';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
 import { UserService } from '@app/services/user.service';
 import { GameVisibility } from '@common/models/game-visibility';
+import { RoomPlayer } from '@common/interfaces/room-player';
+import { PlayerType } from '@common/models/player-type';
 
 @Component({
     selector: 'app-waiting-opponent-page',
@@ -29,15 +31,19 @@ export class WaitingOpponentPageComponent implements OnDestroy {
         this.gameConfiguration.isRoomJoinable.unsubscribe();
     }
 
-    joinSoloMode() {
+    protected joinSoloMode(): void {
         this.router.navigate([`${AppRoutes.SoloGameCreationPage}/${this.gameMode}`]).then();
     }
 
-    exitWaitingRoom(): void {
+    protected exitWaitingRoom(): void {
         if (this.gameConfiguration.isGameCreator()) {
             this.router.navigate([`${AppRoutes.MultiGameCreationPage}/${this.gameMode}`]).then();
         } else {
             this.router.navigate([`${AppRoutes.MultiJoinPage}/${this.gameMode}`]).then();
         }
+    }
+
+    protected isValidGame(): boolean {
+        return this.gameConfiguration.localGameRoom.players.filter((player: RoomPlayer) => player.type === PlayerType.User).length > 1;
     }
 }
