@@ -42,8 +42,8 @@ export class WaitingOpponentPageComponent implements OnDestroy, AfterContentChec
     }
 
     joinSoloMode() {
-        this.gameConfiguration.exitRoom();
-        this.router.navigate([`${AppRoutes.SoloGameCreationPage}/${this.gameConfiguration.gameMode}`]).then();
+        // this.gameConfiguration.exitWaitingRoom();
+        this.router.navigate([`${AppRoutes.SoloGameCreationPage}/${this.gameMode}`]).then();
     }
 
     joinGamePage() {

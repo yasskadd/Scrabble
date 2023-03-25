@@ -202,7 +202,7 @@ export class GameConfigurationService {
     private joinedValidGame(gameRoom: GameRoom): void {
         this.localGameRoom.players = [...gameRoom.players];
 
-        this.router.navigate([`${AppRoutes.MultiWaitingPage}/${this.gameMode}`]).then();
+        this.router.navigate([`${AppRoutes.MultiWaitingPage}/${gameRoom.mode}`]).then();
     }
 
     private arePlayersTheSame(player1: IUser, player2: IUser): boolean {
