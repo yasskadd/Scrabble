@@ -1,9 +1,15 @@
-app-header {
-    padding-top: 5px;
+body {
+    height: inherit;
     display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    background-color: #7fa99b;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.connection-form {
+    align-items: normal;
+    margin-bottom: 16px;
 }
 
 .avatar-selector {
@@ -11,37 +17,13 @@ app-header {
     align-self: center;
 }
 
-.selecter-avatar {
+.selector-avatar {
     margin-bottom: 20px;
     align-self: center;
     height: 56px;
     aspect-ratio: 1;
     border-radius: 50%;
     object-fit: cover;
-}
-
-.sticky {
-    position: fixed;
-    top: 0;
-    width: 100%;
-}
-
-body {
-    height: 100%;
-    display: flex;
-    background-color: #c2e5da;
-}
-
-.justified {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.connection-form {
-    align-items: normal;
-    margin-bottom: 16px;
 }
 
 ::ng-deep mat-dialog-container div.mat-mdc-dialog-surface {

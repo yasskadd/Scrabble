@@ -78,13 +78,13 @@ describe('Expert Bot Tests', () => {
             stubReserveQuantity = Sinon.stub(expertBot.game.letterReserve, 'totalQuantity');
             stubGetRandom = Sinon.stub(expertBot, 'getRandomNumber' as keyof ExpertBot);
             rackStub = [
-                { value: 'a' } as Letter,
-                { value: 'b' } as Letter,
-                { value: 'c' } as Letter,
-                { value: 'd' } as Letter,
-                { value: 'e' } as Letter,
-                { value: 'f' } as Letter,
-                { value: 'g' } as Letter,
+                { value: 'a' } as unknown as Letter,
+                { value: 'b' } as unknown as Letter,
+                { value: 'c' } as unknown as Letter,
+                { value: 'd' } as unknown as Letter,
+                { value: 'e' } as unknown as Letter,
+                { value: 'f' } as unknown as Letter,
+                { value: 'g' } as unknown as Letter,
             ];
             expertBot.rack = rackStub;
         });

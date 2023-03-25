@@ -1,4 +1,7 @@
+import { SECRET_KEY } from '@app/../very-secret-file';
+import * as cookie from 'cookie';
 import * as http from 'http';
+import * as jwt from 'jsonwebtoken';
 import * as io from 'socket.io';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import { Service } from 'typedi';
@@ -9,6 +12,7 @@ type OnSioCallbackSignature = (sio: io.Server, socket: SocketType, ...args: unkn
 
 @Service()
 export class SocketManager {
+    private socketUsernameMap: Map<io.Socket, string>;
     private onEvents: Map<string, CallbackSignature[]>;
     private onAndSioEvents: Map<string, OnSioCallbackSignature[]>;
     private sio: io.Server;
@@ -16,6 +20,7 @@ export class SocketManager {
     constructor() {
         this.onEvents = new Map<string, CallbackSignature[]>();
         this.onAndSioEvents = new Map<string, OnSioCallbackSignature[]>();
+        this.socketUsernameMap = new Map<io.Socket, string>();
     }
 
     init(server: http.Server) {
@@ -42,14 +47,49 @@ export class SocketManager {
         this.sio.to(room).emit(event, ...args);
     }
 
+    getUsername(socket: io.Socket): string | undefined {
+        return this.socketUsernameMap.get(socket);
+    }
+
+    modifyUsername(oldUsername: string, newUsername: string): void {
+        this.socketUsernameMap.forEach((value: string, key: io.Socket) => {
+            if (value === oldUsername) {
+                this.socketUsernameMap.set(key, newUsername);
+                return;
+            }
+        });
+    }
+
     handleSockets(): void {
         this.sio.on('connection', (socket) => {
             if (socket.handshake.headers.cookie) {
+                const cookies = socket.handshake.headers.cookie;
+                // Verify jwt token
+                const token = cookie.parse(cookies).session_token;
+                let isTokenValid = false;
+                let username = '';
+                jwt.verify(token, SECRET_KEY, (err: jwt.VerifyErrors, decoded: any) => {
+                    if (err) isTokenValid = false;
+                    else {
+                        isTokenValid = true;
+                        username = decoded.name;
+                    }
+                });
+
+                if (!isTokenValid || this.socketUsernameMap.has(socket)) {
+                    socket.disconnect();
+                    return;
+                }
+
+                this.socketUsernameMap.set(socket, username);
+
                 // eslint-disable-next-line no-console
                 console.log('Connection of authenticated client with id = ' + socket.id + ' from : ' + socket.handshake.headers.host);
             } else {
+                socket.disconnect();
                 // eslint-disable-next-line no-console
-                console.log('Connection of client with id = ' + socket.id + ' from : ' + socket.handshake.headers.host);
+                console.log('Connection failed of client with id = ' + socket.id + ' from : ' + socket.handshake.headers.host);
+                return;
             }
             for (const [event, callbacks] of this.onEvents.entries()) {
                 for (const callback of callbacks) {
@@ -63,6 +103,9 @@ export class SocketManager {
                 }
             }
             socket.on('disconnect', () => {
+                if (this.socketUsernameMap.has(socket)) {
+                    this.socketUsernameMap.delete(socket);
+                }
                 // eslint-disable-next-line no-console
                 console.log('Disconnection of client with id = ' + socket.id + ' from : ' + socket.handshake.headers.origin);
             });

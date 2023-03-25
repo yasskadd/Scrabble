@@ -1,9 +1,10 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { AppRoutes } from '@app/models/app-routes';
+import { AfterViewInit, Component, OnDestroy } from '@angular/core';
+import { FormControl } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+import { ActivatedRoute } from '@angular/router';
+import { DialogBoxPasswordComponent } from '@app/components/dialog-box-password/dialog-box-password.component';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
-import { UserService } from '@app/services/user.service';
-import { SnackBarService } from '@services/snack-bar.service';
+import { GameRoom } from '@common/interfaces/game-room';
 import { TimeService } from '@services/time.service';
 
 @Component({
@@ -11,55 +12,74 @@ import { TimeService } from '@services/time.service';
     templateUrl: './multiplayer-join-page.component.html',
     styleUrls: ['./multiplayer-join-page.component.scss'],
 })
-export class MultiplayerJoinPageComponent implements OnInit, OnDestroy {
+export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
     gameMode: string;
+    protected roomIdForm: FormControl;
 
     constructor(
-        public timer: TimeService,
-        private gameConfiguration: GameConfigurationService,
-        private userService: UserService,
-        private router: Router,
-        private snackBarService: SnackBarService,
+        protected timer: TimeService,
+        protected gameConfiguration: GameConfigurationService,
         private activatedRoute: ActivatedRoute,
+        private dialog: MatDialog,
     ) {
         this.gameMode = this.activatedRoute.snapshot.params.id;
+        this.roomIdForm = new FormControl('');
     }
 
-    get availableRooms() {
-        return this.gameConfiguration.availableRooms;
+    get availableRooms(): GameRoom[] {
+        return this.gameConfiguration.availableRooms as GameRoom[];
     }
 
     ngOnDestroy() {
         this.gameConfiguration.isRoomJoinable.unsubscribe();
-        this.gameConfiguration.errorReason.unsubscribe();
     }
 
-    ngOnInit(): void {
-        this.listenToServerResponse();
+    ngAfterViewInit() {
         this.gameConfiguration.resetRoomInformation();
         this.gameConfiguration.joinPage(this.gameMode);
     }
 
-    joinRoom(roomId: string) {
-        this.gameConfiguration.joinGame(roomId, this.userService.user.username);
+    joinRoom(gameRoom: GameRoom): void {
+        if (this.isGameRoomLocked(gameRoom)) {
+            this.dialog
+                .open(DialogBoxPasswordComponent)
+                .afterClosed()
+                .subscribe((data: string) => {
+                    if (data) {
+                        gameRoom.password = data;
+                        this.gameConfiguration.joinRoom(gameRoom);
+                    }
+                });
+            return;
+        }
+
+        this.gameConfiguration.joinRoom(gameRoom);
     }
 
-    joinRandomGame() {
-        this.gameConfiguration.joinRandomRoom(this.userService.user.username);
+    joinSecretRoom(): void {
+        this.gameConfiguration.joinSecretRoom(this.roomIdForm.value);
     }
 
-    listenToServerResponse() {
-        this.gameConfiguration.isRoomJoinable.subscribe((value) => {
-            if (value) this.navigatePage();
-        });
-        this.gameConfiguration.errorReason.subscribe((error) => {
-            if (error) {
-                this.snackBarService.openError(error);
-            }
-        });
+    protected botPresent(room: GameRoom): boolean {
+        const present = !!room;
+
+        // TODO : Add verification with right interface
+        // room.users.forEach(() => {});
+
+        return present;
     }
 
-    navigatePage() {
-        this.router.navigate([`${AppRoutes.MultiWaitingPage}/${this.gameMode}`]).then();
+    protected observerPresent(room: GameRoom): boolean {
+        const present = !!room;
+
+        // TODO : Add verification with right interface
+        // room.users.forEach(() => {});
+
+        return present;
+    }
+
+    protected isGameRoomLocked(gameRoom: GameRoom) {
+        return !!gameRoom;
+        // return gameRoom.visibility ? gameRoom.visibility === GameVisibility.Locked : true;
     }
 }

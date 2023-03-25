@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MIN_PASSWORD_LENGTH } from '@app/constants/user';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
 import { AppRoutes } from '@app/models/app-routes';
@@ -10,9 +11,11 @@ import { LanguageService } from '@app/services/language.service';
 import { TimeService } from '@app/services/time.service';
 import { UserService } from '@app/services/user.service';
 import { VirtualPlayersService } from '@app/services/virtual-players.service';
+import { GameParameters } from '@common/interfaces/game-parameters';
 import { DictionaryEvents } from '@common/models/dictionary-events';
 import { GameDifficulty } from '@common/models/game-difficulty';
 import { GameTimeOptions } from '@common/models/game-time-options';
+import { GameVisibility } from '@common/models/game-visibility';
 import { SnackBarService } from '@services/snack-bar.service';
 
 @Component({
@@ -29,10 +32,15 @@ export class GameCreationPageComponent implements OnInit {
     selectedFile: Dictionary | null;
 
     form: FormGroup;
+    passwordEnableForm: FormControl;
+    passwordForm: FormControl;
     playerForm: FormControl;
     timerForm: FormControl;
     difficultyForm: FormControl;
     dictionaryForm: FormControl;
+
+    protected isGameLocked: boolean;
+    protected isGamePublic: boolean;
 
     private readonly gameMode: string;
 
@@ -53,10 +61,15 @@ export class GameCreationPageComponent implements OnInit {
         this.difficultyList = [];
         this.timerList = [];
 
+        this.passwordEnableForm = new FormControl(false);
+        this.passwordForm = new FormControl('');
         this.timerForm = new FormControl('', Validators.required);
         this.difficultyForm = new FormControl('', Validators.required);
         // TODO : Set default dictionary from server
         this.dictionaryForm = new FormControl('Mon dictionnaire', Validators.required);
+
+        this.isGameLocked = false;
+        this.isGamePublic = true;
 
         // Fill arrays of values from enum constants
         Object.values(GameDifficulty).forEach((value: GameDifficulty) => {
@@ -75,6 +88,7 @@ export class GameCreationPageComponent implements OnInit {
         });
 
         this.form = this.formBuilder.group({
+            password: this.passwordForm,
             timer: this.timerForm,
             difficultyBot: this.difficultyForm,
             dictionary: this.dictionaryForm,
@@ -147,6 +161,31 @@ export class GameCreationPageComponent implements OnInit {
         return this.dictionaryList.some((dictionaryList) => dictionaryList.title === dictionaryTitle);
     }
 
+    protected clickPasswordToggle(): void {
+        this.isGameLocked = !this.isGameLocked;
+
+        if (this.isGameLocked) {
+            this.passwordForm.addValidators([Validators.required, Validators.minLength(MIN_PASSWORD_LENGTH)]);
+        } else {
+            this.passwordForm.removeValidators([Validators.required, Validators.minLength(MIN_PASSWORD_LENGTH)]);
+        }
+
+        this.form.setControl('password', this.passwordForm);
+    }
+
+    protected clickVisibilityToggle(): void {
+        this.isGamePublic = !this.isGamePublic;
+    }
+
+    protected getError(): string {
+        if (this.passwordForm.hasError('minlength')) {
+            // TODO : Language
+            return '8 caractères minimum';
+        }
+
+        return '';
+    }
+
     private getDictionary(title: string): DictionaryInfo {
         if (this.selectedFile !== null) return this.selectedFile;
         return this.dictionaryList.find((dictionary) => dictionary.title === title);
@@ -158,14 +197,17 @@ export class GameCreationPageComponent implements OnInit {
 
     private initGame(dictionaryTitle: string): void {
         this.gameConfiguration.gameInitialization({
-            username: this.userService.user.username,
+            user: this.userService.user,
             timer: (this.form.get('timer') as AbstractControl).value,
             dictionary: dictionaryTitle,
             mode: this.gameMode,
             isMultiplayer: !this.isSoloMode(),
             opponent: this.isSoloMode() ? this.botName : undefined,
             botDifficulty: this.isSoloMode() ? (this.form.get('difficultyBot') as AbstractControl).value : undefined,
-        });
+            visibility: this.isGamePublic ? GameVisibility.Public : GameVisibility.Private,
+            password: this.passwordForm.value,
+        } as GameParameters);
+
         this.playerName = '';
     }
 }
