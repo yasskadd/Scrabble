@@ -58,11 +58,11 @@ export class GameConfigurationService {
             this.foundAnOpponentEvent(opponent);
         });
 
-        this.clientSocket.on(SocketEvents.GameCreatedConfirmation, (room: GameRoom) => {
-            this.gameCreatedConfirmationEvent(room);
+        this.clientSocket.on(SocketEvents.CurrentGameRoomUpdate, (room: GameRoom) => {
+            this.localGameRoom = room;
         });
 
-        this.clientSocket.on(SocketEvents.UpdateRoomJoinable, (gamesToJoin: GameRoom[]) => {
+        this.clientSocket.on(SocketEvents.UpdateGameRooms, (gamesToJoin: GameRoom[]) => {
             this.availableRooms = gamesToJoin;
         });
 

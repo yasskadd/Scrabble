@@ -9,7 +9,6 @@ import { Service } from 'typedi';
 import * as uuid from 'uuid';
 import { SocketType } from '@app/types/sockets';
 import {
-    JOINING_ROOM_ID,
     ROOM_NOT_AVAILABLE_ERROR,
     ROOMID_LENGTH,
     SAME_USER_IN_ROOM_ERROR,
@@ -20,6 +19,7 @@ import { GameRoomState } from '@common/models/game-room-state';
 import { RoomPlayer } from '@common/interfaces/room-player';
 import { PlayerType } from '@common/models/player-type';
 import { GameVisibility } from '@common/models/game-visibility';
+import { GAME_LOBBY_ROOM_ID } from '@common/constants/room';
 
 // const PLAYERS_REJECT_FROM_ROOM_ERROR = "L'adversaire à rejeter votre demande";
 
@@ -48,12 +48,12 @@ export class GameSessions {
             this.exitWaitingRoom(server, socket, userQuery);
         });
 
-        this.socketManager.on(SocketEvents.RejectOpponent, (socket: SocketType, player: RoomPlayer) => {
-            this.rejectOpponent(socket, player);
+        this.socketManager.io(SocketEvents.RejectOpponent, (server: Server, socket: SocketType, player: RoomPlayer) => {
+            this.rejectOpponent(server, socket, player);
         });
 
-        this.socketManager.on(SocketEvents.ExitGameRoom, (socket: SocketType, userRoomQuery: UserRoomQuery) => {
-            this.exitGameRoom(socket, userRoomQuery);
+        this.socketManager.io(SocketEvents.ExitGameRoom, (server: Server, socket: SocketType, userRoomQuery: UserRoomQuery) => {
+            this.exitGameRoom(server, socket, userRoomQuery);
         });
 
         this.socketManager.on(SocketEvents.Invite, (socket: Socket, inviteeId: string, userRoomQuery: UserRoomQuery) => {
