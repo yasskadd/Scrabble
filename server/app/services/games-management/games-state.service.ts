@@ -297,23 +297,15 @@ export class GamesStateService {
     }
 
     private async userConnected(socketId: string[], roomId: string) {
-        const player1Room = this.gamesHandler.players.get(socketId[0])?.room;
-        const player2Room = this.gamesHandler.players.get(socketId[1])?.room;
-        if (player1Room === roomId && player2Room === roomId) {
-            this.endGame(socketId[0]);
-            await this.sendHighScore(socketId[0]);
-            await this.sendHighScore(socketId[1]);
+        const playersInRoom = socketId.filter((socket) => {
+            const playerRoom = this.gamesHandler.players.get(socket)?.room;
+            if (playerRoom === roomId) return socket;
             return;
-        }
-        if (player1Room === roomId) {
-            this.endGame(socketId[0]);
-            await this.sendHighScore(socketId[0]);
-            return;
-        }
-        if (player2Room === roomId) {
-            this.endGame(socketId[1]);
-            await this.sendHighScore(socketId[1]);
-        }
+        });
+        if (playersInRoom.length !== 0) this.endGame(playersInRoom[0]);
+        playersInRoom.forEach(async (player) => {
+            await this.sendHighScore(player);
+        });
     }
 
     private sendPublicViewUpdate(server: Server, game: Game) {
