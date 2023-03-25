@@ -51,6 +51,15 @@ export class SocketManager {
         return this.socketUsernameMap.get(socket);
     }
 
+    modifyUsername(oldUsername: string, newUsername: string): void {
+        this.socketUsernameMap.forEach((value: string, key: io.Socket) => {
+            if (value === oldUsername) {
+                this.socketUsernameMap.set(key, newUsername);
+                return;
+            }
+        });
+    }
+
     handleSockets(): void {
         this.sio.on('connection', (socket) => {
             if (socket.handshake.headers.cookie) {
