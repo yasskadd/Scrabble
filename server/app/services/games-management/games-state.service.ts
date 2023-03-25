@@ -10,19 +10,19 @@ import { RealPlayer } from '@app/classes/player/real-player.class';
 import { Turn } from '@app/classes/turn.class';
 import { WordSolver } from '@app/classes/word-solver.class';
 import { BOT_BEGINNER_DIFFICULTY } from '@app/constants/bot';
-import { NUMBER_OF_PLAYERS } from '@common/constants/players';
 import { Behavior } from '@app/interfaces/behavior';
-import { GameScrabbleInformation } from '@common/interfaces/game-scrabble-information';
 import { ScoreStorageService } from '@app/services/database/score-storage.service';
 import { VirtualPlayersStorageService } from '@app/services/database/virtual-players-storage.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
+import { SocketType } from '@app/types/sockets';
+import { NUMBER_OF_PLAYERS } from '@common/constants/players';
 import { SocketEvents } from '@common/constants/socket-events';
+import { GameScrabbleInformation } from '@common/interfaces/game-scrabble-information';
+import { PublicViewUpdate } from '@common/interfaces/public-view-update';
 import { Subject } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import { GamesHandler } from './games-handler.service';
-import { SocketType } from '@app/types/sockets';
-import { PublicViewUpdate } from '@common/interfaces/public-view-update';
 
 const MAX_SKIP = 6;
 const SECOND = 1000;
@@ -221,7 +221,10 @@ export class GamesStateService {
         botPlayer.rack = info.rack;
 
         if (playerToReplace.game.turn.activePlayer === playerToReplace.name) playerToReplace.game.turn.activePlayer = botPlayer.name;
-        else playerToReplace.game.turn.inactivePlayers?.push(botPlayer.name);
+        else {
+            this.findAndDeleteElementFromArray(playerToReplace.game.turn.inactivePlayers as string[], playerToReplace.name);
+            playerToReplace.game.turn.inactivePlayers?.push(botPlayer.name);
+        }
         if (playerInRoom[1] === playerToReplace)
             this.gamesHandler.gamePlayers.set(playerToReplace.room, {
                 gameInfo: this.gamesHandler.gamePlayers.get(playerToReplace.room)?.gameInfo as GameScrabbleInformation,
@@ -318,5 +321,13 @@ export class GamesStateService {
             gameboard: game.gameboard.gameboardTiles,
             activePlayer: game.turn.activePlayer,
         } as PublicViewUpdate);
+    }
+
+    private findAndDeleteElementFromArray(array: any[], element: any) {
+        const NOT_FOUND = -1;
+        const index = array?.indexOf(element);
+        if (index !== NOT_FOUND) {
+            array.splice(index as number, 1);
+        }
     }
 }
