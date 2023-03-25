@@ -21,7 +21,7 @@ export class AccountStorageService {
         await this.database.users.addDocument(newUser);
     }
 
-    async loginValidator(user: Document): Promise<boolean> {
+    async loginValidator(user: IUser): Promise<boolean> {
         const userDocument = (await this.database.users.collection?.findOne({ username: user.username })) as Document;
         if (!userDocument) return false;
         const hashedPassword = userDocument.password;
@@ -29,7 +29,7 @@ export class AccountStorageService {
         return await this.compareHash(user.password, hashedPassword);
     }
 
-    async isUserRegistered(name: string): Promise<boolean> {
+    async isUsernameRegistered(name: string): Promise<boolean> {
         return (await this.database.users.collection?.findOne({ username: name })) !== null;
     }
 
@@ -65,6 +65,25 @@ export class AccountStorageService {
                     'profilePicture.key': imageKey,
                     'profilePicture.name': fileName,
                 },
+            },
+        );
+    }
+
+    async updateUsername(oldUsername: string, newUsername: string): Promise<void> {
+        await this.database.users.collection.updateOne({ username: oldUsername }, { $set: { username: newUsername } });
+    }
+
+    async isSamePassword(username: string, newPassword: string): Promise<boolean> {
+        const userDocument = (await this.database.users.collection?.findOne({ username })) as IUser | null;
+        return await this.compareHash(newPassword, userDocument?.password as string);
+    }
+
+    async updatePassword(username: string, newPassword: string): Promise<void> {
+        const newHashedPassword = await this.generateHash(newPassword);
+        await this.database.users.collection.updateOne(
+            { username },
+            {
+                $set: { password: newHashedPassword },
             },
         );
     }
