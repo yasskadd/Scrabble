@@ -197,13 +197,13 @@ describe('GameClientService', () => {
 
     it('the playerOneTurn should be false when ViewUpdate is called and it is not their turn to play', () => {
         service.playerOne = PLAYER_ONE;
-        socketEmulator.peerSideEmit(SocketEvents.ViewUpdate, PLAYER_INFO);
+        socketEmulator.peerSideEmit(SocketEvents.PublicViewUpdate, PLAYER_INFO);
         expect(service.playerOneTurn).not.toBeTruthy();
     });
 
     it('playerOneTurn should be true when ViewUpdate is called and it is their turn to play', () => {
         service.playerOne = PLAYER_TWO;
-        socketEmulator.peerSideEmit(SocketEvents.ViewUpdate, PLAYER_INFO);
+        socketEmulator.peerSideEmit(SocketEvents.PublicViewUpdate, PLAYER_INFO);
         expect(service.playerOneTurn).toBeTruthy();
     });
 

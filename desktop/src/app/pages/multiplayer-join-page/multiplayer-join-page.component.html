@@ -25,21 +25,21 @@
                             <td>
                                 <span class="players-row">
                                     <mat-icon>people</mat-icon>
-                                    {{ gameRoom.users.length }} / 4
+                                    {{ getPlayers(gameRoom).length }} / 4
                                 </span>
-                                <span *ngIf="botPresent(gameRoom)" class="players-row">
+                                <span *ngIf="getBots(gameRoom)" class="players-row">
                                     <mat-icon>smart_toy</mat-icon>
-                                    {{ gameRoom.users.length }}
+                                    {{ getBots(gameRoom).length }}
                                 </span>
-                                <span *ngIf="observerPresent(gameRoom)" class="players-row">
+                                <span *ngIf="getObservers(gameRoom)" class="players-row">
                                     <mat-icon>people_outline</mat-icon>
-                                    {{ gameRoom.users.length }}
+                                    {{ getObservers(gameRoom).length }}
                                 </span>
                             </td>
                             <td>
-                                {{ gameRoom.users[0].username }}
+                                {{ getGameCreator(gameRoom).user.username }}
                             </td>
-                            <td>{{ gameRoom.mode }}</td>
+                            <td>{{ gameRoom.state }}</td>
                             <td>{{ timer.getTimeStamp(gameRoom.timer) }}</td>
                             <td>{{ gameRoom.dictionary }}</td>
                             <button class="join-game" (click)="joinRoom(gameRoom)" mat-raised-button>
@@ -55,7 +55,7 @@
                 <button class="return-button" mat-icon-button routerLink="/home">
                     <mat-icon>navigate_before</mat-icon>
                 </button>
-                <mat-form-field (keydown.enter)='gameConfiguration.joinRandomRoom()' appearance="outline">
+                <mat-form-field (keydown.enter)='joinSecretRoom()' appearance="outline">
                     <mat-label>
                         <!-- TODO : Language -->
                         Code de connexion
@@ -66,7 +66,7 @@
                     </button>
                 </mat-form-field>
                 <button
-                    (click)="gameConfiguration.joinRandomRoom()"
+                    (click)="joinRandomRoom()"
                     class="join-random-game-button"
                     mat-icon-button
                     [matTooltip]="'new_game_page.random' | translate"

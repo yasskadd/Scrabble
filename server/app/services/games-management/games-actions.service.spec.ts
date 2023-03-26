@@ -319,7 +319,7 @@ describe('GamesActions Service', () => {
         gamesHandlerStub['gamePlayers'].set(player1.room, [player1]);
 
         gamesActionsService['playGame'](serverSocket, commandInfo);
-        expect(socketManagerStub.emitRoom.calledOnceWithExactly(ROOM, SocketEvents.ViewUpdate, EXPECTED_INFORMATION)).to.be.equal(true);
+        expect(socketManagerStub.emitRoom.calledOnceWithExactly(ROOM, SocketEvents.PublicViewUpdate, EXPECTED_INFORMATION)).to.be.equal(true);
     });
 
     it('playGame() should call updatePlayerInfo', () => {

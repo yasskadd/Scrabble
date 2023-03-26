@@ -6,6 +6,10 @@ import { DialogBoxPasswordComponent } from '@app/components/dialog-box-password/
 import { GameConfigurationService } from '@app/services/game-configuration.service';
 import { GameRoom } from '@common/interfaces/game-room';
 import { TimeService } from '@services/time.service';
+import { RoomPlayer } from '@common/interfaces/room-player';
+import { PlayerType } from '@common/models/player-type';
+import { GameVisibility } from '@common/models/game-visibility';
+import { GameMode } from '@common/models/game-mode';
 
 @Component({
     selector: 'app-multiplayer-join-page',
@@ -27,7 +31,7 @@ export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
     }
 
     get availableRooms(): GameRoom[] {
-        return this.gameConfiguration.availableRooms as GameRoom[];
+        return this.gameConfiguration.availableRooms;
     }
 
     ngOnDestroy() {
@@ -35,8 +39,10 @@ export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
     }
 
     ngAfterViewInit() {
-        this.gameConfiguration.resetRoomInformation();
-        this.gameConfiguration.joinPage(this.gameMode);
+        this.gameConfiguration.resetRoomInformations();
+        this.gameConfiguration.navigateJoinPage(
+            this.gameMode === 'solo' ? GameMode.Solo : this.gameMode === 'multi' ? GameMode.Multi : GameMode.Null,
+        );
     }
 
     joinRoom(gameRoom: GameRoom): void {
@@ -60,26 +66,27 @@ export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
         this.gameConfiguration.joinSecretRoom(this.roomIdForm.value);
     }
 
-    protected botPresent(room: GameRoom): boolean {
-        const present = !!room;
-
-        // TODO : Add verification with right interface
-        // room.users.forEach(() => {});
-
-        return present;
+    joinRandomRoom(): void {
+        this.joinRoom(this.availableRooms[Math.floor(Math.random() * this.availableRooms.length)]);
     }
 
-    protected observerPresent(room: GameRoom): boolean {
-        const present = !!room;
+    protected getPlayers(room: GameRoom) {
+        return room.players.filter((player: RoomPlayer) => player.type === PlayerType.User);
+    }
 
-        // TODO : Add verification with right interface
-        // room.users.forEach(() => {});
+    protected getBots(room: GameRoom): RoomPlayer[] | undefined {
+        return room.players.filter((player: RoomPlayer) => player.type === PlayerType.Bot);
+    }
 
-        return present;
+    protected getObservers(room: GameRoom): RoomPlayer[] {
+        return room.players.filter((player: RoomPlayer) => player.type === PlayerType.Observer);
     }
 
     protected isGameRoomLocked(gameRoom: GameRoom) {
-        return !!gameRoom;
-        // return gameRoom.visibility ? gameRoom.visibility === GameVisibility.Locked : true;
+        return gameRoom.visibility === GameVisibility.Locked;
+    }
+
+    protected getGameCreator(gameRoom: GameRoom): RoomPlayer {
+        return gameRoom.players.find((player: RoomPlayer) => player.isCreator);
     }
 }

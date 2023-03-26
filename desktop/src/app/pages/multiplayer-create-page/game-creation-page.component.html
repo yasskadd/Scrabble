@@ -29,7 +29,7 @@
                 </mat-form-field>
             </form>
 
-            <form *ngIf="isSoloMode()" class="soloMode" [formGroup]="form">
+            <form [formGroup]="form">
                 <mat-form-field appearance="outline">
                     <mat-label> {{ "new_game_page.label.difficulty" | translate }} </mat-label>
                     <mat-select id="difficulty-select" formControlName="difficultyBot">

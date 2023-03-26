@@ -104,7 +104,7 @@ export class GamesActionsService {
             socket.emit(SocketEvents.ImpossibleCommandError, play);
             return;
         }
-        this.socketManager.emitRoom(player.room, SocketEvents.ViewUpdate, {
+        this.socketManager.emitRoom(player.room, SocketEvents.PublicViewUpdate, {
             gameboard: play.gameboard.gameboardTiles,
             activePlayer: player.game.turn.activePlayer,
         });

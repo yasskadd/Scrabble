@@ -15,11 +15,13 @@ import { Behavior } from '@app/interfaces/behavior';
 import { ScoreStorageService } from '@app/services/database/score-storage.service';
 import { VirtualPlayersStorageService } from '@app/services/database/virtual-players-storage.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
+import { SocketType } from '@app/types/sockets';
 import { NUMBER_OF_PLAYERS } from '@common/constants/players';
 import { SocketEvents } from '@common/constants/socket-events';
 import { GameScrabbleInformation } from '@common/interfaces/game-scrabble-information';
+import { PublicViewUpdate } from '@common/interfaces/public-view-update';
 import { Subject } from 'rxjs';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import { GamesHandler } from './games-handler.service';
 
@@ -40,7 +42,9 @@ export class GamesStateService {
     }
 
     initSocketsEvents(): void {
-        this.socketManager.on(SocketEvents.CreateScrabbleGame, async (socket, gameInfo: GameScrabbleInformation) => await this.createGame(gameInfo));
+        this.socketManager.io(SocketEvents.CreateScrabbleGame, async (server: Server, socket: SocketType, gameInfo: GameScrabbleInformation) => {
+            await this.createGame(server, gameInfo);
+        });
 
         this.socketManager.on(SocketEvents.Disconnect, (socket) => {
             this.disconnect(socket);
@@ -55,7 +59,7 @@ export class GamesStateService {
         });
     }
 
-    async createGame(this: this, gameInfo: GameScrabbleInformation) {
+    async createGame(server: Server, gameInfo: GameScrabbleInformation) {
         const players = this.initPlayers(gameInfo);
         const game = this.createNewGame(gameInfo);
         const gameCreator = players[0];
@@ -64,22 +68,8 @@ export class GamesStateService {
         this.gamesHandler.updatePlayerInfo(gameCreator.room, game);
         await this.gameSubscriptions(gameInfo, game);
 
-        this.socketManager.emitRoom(gameInfo.roomId, SocketEvents.ViewUpdate, {
-            gameboard: game.gameboard.gameboardTiles,
-            activePlayer: game.turn.activePlayer,
-        });
-        this.socketManager.emitRoom(gameInfo.roomId, SocketEvents.LetterReserveUpdated, game.letterReserve.lettersReserve);
-        this.sendObjectivesToClient(players[0], players[1]);
-    }
-
-    private sendObjectivesToClient(playerOne: Player, playerTwo: Player) {
-        if (!playerOne.game.isMode2990) return;
-
-        this.socketManager.emitRoom(playerOne.room, 'InitObjective', {
-            objectives1: playerOne.objectives,
-            objectives2: playerTwo.objectives,
-            playerName: playerOne.name,
-        });
+        this.sendPublicViewUpdate(server, game);
+        server.to(gameInfo.roomId).emit(SocketEvents.LetterReserveUpdated, game.letterReserve.lettersReserve);
     }
 
     private initializePlayers(players: Player[], game: Game, socketId: string[]) {
@@ -179,13 +169,13 @@ export class GamesStateService {
     }
 
     private createNewGame(gameInfo: GameScrabbleInformation): Game {
-        const players = this.gamesHandler.gamePlayers.get(gameInfo.roomId)?.players as Player[];
         const gameBehavior = this.gamesHandler.dictionaries.get(gameInfo.dictionary);
+
         return new Game(
-            players,
             new Turn(gameInfo.timer),
             new LetterReserve(),
-            !(gameInfo.mode === 'classique'),
+            gameInfo.roomId,
+            this.gamesHandler.gamePlayers.get(gameInfo.roomId)?.players as Player[],
             (gameBehavior as Behavior).dictionaryValidation as DictionaryValidation,
             (gameBehavior as Behavior).letterPlacement as LetterPlacement,
             (gameBehavior as Behavior).wordSolver as WordSolver,
@@ -238,7 +228,10 @@ export class GamesStateService {
         botPlayer.rack = info.rack;
 
         if (playerToReplace.game.turn.activePlayer === playerToReplace.name) playerToReplace.game.turn.activePlayer = botPlayer.name;
-        else playerToReplace.game.turn.inactivePlayers?.push(botPlayer.name);
+        else {
+            this.findAndDeleteElementFromArray(playerToReplace.game.turn.inactivePlayers as string[], playerToReplace.name);
+            playerToReplace.game.turn.inactivePlayers?.push(botPlayer.name);
+        }
         if (playerInRoom[1] === playerToReplace)
             this.gamesHandler.gamePlayers.set(playerToReplace.room, {
                 gameInfo: this.gamesHandler.gamePlayers.get(playerToReplace.room)?.gameInfo as GameScrabbleInformation,
@@ -311,41 +304,29 @@ export class GamesStateService {
     }
 
     private async userConnected(socketId: string[], roomId: string) {
-        const player1Room = this.gamesHandler.players.get(socketId[0])?.room;
-        const player2Room = this.gamesHandler.players.get(socketId[1])?.room;
-        // If both players are still in the game
-        if (player1Room === roomId && player2Room === roomId) {
-            this.endGame(socketId[0]);
-            await this.sendHighScore(socketId[0]);
-            await this.sendHighScore(socketId[1]);
+        const playersInRoom = socketId.filter((socket) => {
+            const playerRoom = this.gamesHandler.players.get(socket)?.room;
+            if (playerRoom === roomId) return socket;
             return;
-        }
-        // If player 1 is still in the game
-        if (player1Room === roomId) {
-            this.endGame(socketId[0]);
-            await this.sendHighScore(socketId[0]);
-            return;
-        }
-        // If player 2 is still in the game
-        if (player2Room === roomId) {
-            this.endGame(socketId[1]);
-            await this.sendHighScore(socketId[1]);
-        }
+        });
+        if (playersInRoom.length !== 0) this.endGame(playersInRoom[0]);
+        playersInRoom.forEach(async (player) => {
+            await this.sendHighScore(player);
+        });
     }
 
-    // private async userConnected(socketIds: string[], roomId: string) {
-    //     const players = socketIds.map(id => this.gamesHandler.players.get(id));
-    //     const playersInRoom = players.filter(player => player?.room === roomId);
-    //     this.endGame(player.id);
-    //     if (playersInRoom.length === socketIds.length) {
-    //         playersInRoom.forEach(player => {
-    //             await this.sendHighScore(player.id);
-    //         });
-    //     } else {
-    //         playersInRoom.forEach(player => {
-    //             this.endGame(player.id);
-    //             await this.sendHighScore(player.id);
-    //         });
-    //     }
-    // }
+    private sendPublicViewUpdate(server: Server, game: Game) {
+        server.to(game.roomId).emit(SocketEvents.PublicViewUpdate, {
+            gameboard: game.gameboard.gameboardTiles,
+            activePlayer: game.turn.activePlayer,
+        } as PublicViewUpdate);
+    }
+
+    private findAndDeleteElementFromArray(array: any[], element: any) {
+        const NOT_FOUND = -1;
+        const index = array?.indexOf(element);
+        if (index !== NOT_FOUND) {
+            array.splice(index as number, 1);
+        }
+    }
 }
