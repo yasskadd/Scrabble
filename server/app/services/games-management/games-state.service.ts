@@ -37,9 +37,9 @@ export class GamesStateService {
     gameEnded: Subject<string>;
 
     constructor(
-        private socketManager: SocketManager,
         private gamesHandler: GamesHandler,
-        private readonly scoreStorage: ScoreStorageService,
+        private socketManager: SocketManager,
+        private scoreStorage: ScoreStorageService,
         private historyStorageService: HistoryStorageService,
         private virtualPlayerStorage: VirtualPlayersStorageService,
     ) {

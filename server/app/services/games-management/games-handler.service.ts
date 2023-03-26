@@ -38,6 +38,7 @@ export class GamesHandler {
 
             socket.emit(SocketEvents.UpdatePlayerInformation, gamePlayer.getInformation());
 
+            // TODO : Update that
             const opponentPlayersInfos: (PlayerInformation | undefined)[] = this.players.map((player: GamePlayer) => {
                 if (player.player.user.username !== gamePlayer.player.user.username) {
                     return player.getInformation();
