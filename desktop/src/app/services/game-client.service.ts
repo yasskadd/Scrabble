@@ -14,7 +14,7 @@ type InitObjective = { objectives1: Objective[]; objectives2: Objective[]; playe
 type PlayInfo = { gameboard: string[]; activePlayer: string };
 type PlayerInformation = { name: string; score: number; rack: Letter[]; room: string; gameboard: string[] };
 type Player = { name: string; score: number; rack: Letter[]; objective?: Objective[] };
-type GameInfo = { gameboard: LetterTileInterface[]; players: Player[]; activePlayer: string };
+type GameInfo = { gameboard: string[]; players: Player[]; activePlayer: string };
 const TIMEOUT_PASS = 30;
 const TIMEOUT = 3000;
 

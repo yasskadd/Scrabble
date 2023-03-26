@@ -1,6 +1,6 @@
 import { Game } from '@app/classes/game.class';
 import { PlaceLettersReturn } from '@app/interfaces/place-letters-return';
-import { PlayCommandInfo } from '@common/interfaces/game-actions';
+import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { Player } from './player.class';
 
 export class RealPlayer extends Player {
@@ -12,7 +12,7 @@ export class RealPlayer extends Player {
         this.isPlayerOne = isPlayerOne;
     }
 
-    placeLetter(commandInfo: PlayCommandInfo): PlaceLettersReturn | string {
+    placeLetter(commandInfo: PlaceWordCommandInfo): PlaceLettersReturn | string {
         if (this.game === undefined) return 'error';
         return this.game.play(this, commandInfo);
     }

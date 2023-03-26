@@ -4,7 +4,7 @@ import * as Constant from '@app/constants/bot';
 import { BotInformation } from '@app/interfaces/bot-information';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
-import { PlayCommandInfo } from '@common/interfaces/game-actions';
+import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { Container } from 'typedi';
 import { Player } from './player.class';
 
@@ -56,7 +56,7 @@ export class Bot extends Player {
         this.isNotTurn = true;
     }
 
-    protected play(commandInfo: PlayCommandInfo): void {
+    protected play(commandInfo: PlaceWordCommandInfo): void {
         if (commandInfo === undefined || this.isNotTurn) {
             this.skipTurn();
             return;
@@ -65,12 +65,12 @@ export class Bot extends Player {
         this.isNotTurn = true;
     }
 
-    protected processWordSolver(): Map<PlayCommandInfo, number> {
+    protected processWordSolver(): Map<PlaceWordCommandInfo, number> {
         this.wordSolver.setGameboard(this.game.gameboard);
         return this.wordSolver.commandInfoScore(this.wordSolver.findAllOptions(this.rackToString()));
     }
 
-    protected emitPlaceCommand(randomCommandInfo: PlayCommandInfo): void {
+    protected emitPlaceCommand(randomCommandInfo: PlaceWordCommandInfo): void {
         const coordString = `${String.fromCharCode(Constant.CHAR_ASCII + randomCommandInfo.firstCoordinate.y)}${randomCommandInfo.firstCoordinate.x}`;
         const placeCommand = `!placer ${coordString}${randomCommandInfo.isHorizontal ? 'h' : 'v'} ${randomCommandInfo.letters.join('')}`;
         this.socketManager.emitRoom(this.botInfo.roomId, SocketEvents.GameMessage, placeCommand);

@@ -8,7 +8,7 @@ import { ObjectivesHandler } from '@app/classes/objectives-handler.class';
 import { Player } from '@app/classes/player/player.class';
 import { Word } from '@app/classes/word.class';
 import { RackService } from '@app/services/rack.service';
-import { PlayCommandInfo } from '@common/interfaces/game-actions';
+import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { expect } from 'chai';
 import * as Sinon from 'sinon';
 import { Container } from 'typedi';
@@ -17,7 +17,7 @@ import { LetterPlacement } from './letter-placement.class';
 
 describe('Letter Placement', () => {
     let player: Player;
-    let commandInfo: PlayCommandInfo;
+    let commandInfo: PlaceWordCommandInfo;
     let gameboard: Gameboard;
     let rackService: RackService;
     let dictionaryValidation: Sinon.SinonStubbedInstance<DictionaryValidation> & DictionaryValidation;

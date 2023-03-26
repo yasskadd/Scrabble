@@ -1,11 +1,11 @@
 import * as Constant from '@app/constants/bot';
 import { SocketEvents } from '@common/constants/socket-events';
-import { PlayCommandInfo } from '@common/interfaces/game-actions';
+import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { Bot } from './bot.class';
 
 export class ExpertBot extends Bot {
     playTurn(): void {
-        const bestCommandInfo: PlayCommandInfo = [...this.processWordSolver().entries()].reduce(
+        const bestCommandInfo: PlaceWordCommandInfo = [...this.processWordSolver().entries()].reduce(
             (highestScore, currentScore) => {
                 return currentScore[1] > highestScore[1] ? currentScore : highestScore;
             },
@@ -18,7 +18,7 @@ export class ExpertBot extends Bot {
         }
     }
 
-    play(commandInfo: PlayCommandInfo): void {
+    play(commandInfo: PlaceWordCommandInfo): void {
         if (commandInfo === undefined) {
             this.exchangeLetters();
             return;

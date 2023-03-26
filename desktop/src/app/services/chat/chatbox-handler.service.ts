@@ -115,6 +115,8 @@ export class ChatboxHandlerService implements OnDestroy {
             this.messages.push(this.createDisconnectedUserMessage(userName));
         });
 
+        // TODO: Implement listeners for new socket events (PlacementSuccess/Failure, ExchangeSuccess/Failure, nextTurn...)
+
         // this.clientSocket.on(SocketEvents.ImpossibleCommandError, (error: string) => {
         //     this.messages.push(this.createImpossibleCommandMessage(error));
         // });

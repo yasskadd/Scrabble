@@ -7,7 +7,7 @@ import { Turn } from '@app/classes/turn.class';
 import { WordSolver } from '@app/classes/word-solver.class';
 import { BotInformation } from '@app/interfaces/bot-information';
 import { Coordinate } from '@common/interfaces/coordinate';
-import { PlayCommandInfo } from '@common/interfaces/game-actions';
+import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { Letter } from '@common/interfaces/letter';
 import { expect } from 'chai';
 import { ReplaySubject } from 'rxjs';
@@ -186,35 +186,35 @@ describe('BotBeginner', () => {
     });
 
     context('addCommandInfoToList() tests', () => {
-        let commandInfoMapStub: Map<PlayCommandInfo, number>;
+        let commandInfoMapStub: Map<PlaceWordCommandInfo, number>;
         beforeEach(() => {
             commandInfoMapStub = new Map();
         });
 
         it('should add commandInfo to list with random number being 3 and commandInfo score in range from 1 to 6', () => {
             const RANDOM_NUMBER = 3;
-            commandInfoMapStub.set({} as PlayCommandInfo, 1);
-            commandInfoMapStub.set({} as PlayCommandInfo, 3);
-            commandInfoMapStub.set({} as PlayCommandInfo, 6);
-            commandInfoMapStub.set({} as PlayCommandInfo, 8);
+            commandInfoMapStub.set({} as PlaceWordCommandInfo, 1);
+            commandInfoMapStub.set({} as PlaceWordCommandInfo, 3);
+            commandInfoMapStub.set({} as PlaceWordCommandInfo, 6);
+            commandInfoMapStub.set({} as PlaceWordCommandInfo, 8);
             expect(botBeginner['addCommandInfoToList'](commandInfoMapStub, RANDOM_NUMBER).length).to.equal(3);
         });
 
         it('should add commandInfo to list with random number being 6 and commandInfo score in range from 7 to 12', () => {
             const RANDOM_NUMBER = 6;
-            commandInfoMapStub.set({} as PlayCommandInfo, 1);
-            commandInfoMapStub.set({} as PlayCommandInfo, 3);
-            commandInfoMapStub.set({} as PlayCommandInfo, 7);
-            commandInfoMapStub.set({} as PlayCommandInfo, 12);
+            commandInfoMapStub.set({} as PlaceWordCommandInfo, 1);
+            commandInfoMapStub.set({} as PlaceWordCommandInfo, 3);
+            commandInfoMapStub.set({} as PlaceWordCommandInfo, 7);
+            commandInfoMapStub.set({} as PlaceWordCommandInfo, 12);
             expect(botBeginner['addCommandInfoToList'](commandInfoMapStub, RANDOM_NUMBER).length).to.equal(2);
         });
 
         it('should add commandInfo to list with random number being 8 and commandInfo score in range from 13 to 18', () => {
             const RANDOM_NUMBER = 8;
-            commandInfoMapStub.set({} as PlayCommandInfo, 1);
-            commandInfoMapStub.set({} as PlayCommandInfo, 3);
-            commandInfoMapStub.set({} as PlayCommandInfo, 7);
-            commandInfoMapStub.set({} as PlayCommandInfo, 15);
+            commandInfoMapStub.set({} as PlaceWordCommandInfo, 1);
+            commandInfoMapStub.set({} as PlaceWordCommandInfo, 3);
+            commandInfoMapStub.set({} as PlaceWordCommandInfo, 7);
+            commandInfoMapStub.set({} as PlaceWordCommandInfo, 15);
             expect(botBeginner['addCommandInfoToList'](commandInfoMapStub, RANDOM_NUMBER).length).to.equal(1);
         });
     });
@@ -224,7 +224,7 @@ describe('BotBeginner', () => {
         let mockWordSolver: Sinon.SinonMock;
         let mockBot: Sinon.SinonMock;
         let clock: Sinon.SinonFakeTimers;
-        let commandInfoStub: PlayCommandInfo;
+        let commandInfoStub: PlaceWordCommandInfo;
         before(() => {
             commandInfoStub = {
                 firstCoordinate: { x: 1, y: 1 } as Coordinate,
