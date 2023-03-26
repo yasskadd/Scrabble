@@ -58,8 +58,8 @@ export class GameSessions {
             this.exitWaitingRoom(server, socket, userQuery);
         });
 
-        this.socketManager.io(SocketEvents.StartScrabbleGame, (server: Server, socket: SocketType, roomId: string) => {
-            this.startScrabbleGame(server, roomId);
+        this.socketManager.io(SocketEvents.StartScrabbleGame, async (server: Server, socket: SocketType, roomId: string) => {
+            await this.startScrabbleGame(server, roomId);
         });
     }
 
@@ -166,11 +166,11 @@ export class GameSessions {
         server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
 
-    private startScrabbleGame(server: Server, roomId: string): void {
+    private async startScrabbleGame(server: Server, roomId: string): void {
         const room = this.getRoom(roomId);
 
         if (room) {
-            this.gameStateService.createGame(server, room);
+            await this.gameStateService.createGame(server, room);
             // // TODO : Changed GameScrabbleInformation to simply using GameRoom
             // const users: IUser[] = [];
             // const socketIds: string[] = [];
