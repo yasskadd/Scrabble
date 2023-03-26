@@ -54,6 +54,7 @@ import { MultiplayerJoinPageComponent } from './pages/multiplayer-join-page/mult
 import { SettingsPageComponent } from './pages/settings-page/settings-page.component';
 import { UserCreationPageComponent } from './pages/user-creation-page/user-creation-page.component';
 import { WaitingOpponentPageComponent } from './pages/waiting-opponent-page/waiting-opponent-page.component';
+import { DialogBoxPasswordComponent } from './components/dialog-box-password/dialog-box-password.component';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(http, '../assets/i18n/', '.json');
@@ -99,6 +100,7 @@ export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(h
         ConnectionPageComponent,
         SettingsPageComponent,
         GameBoardComponent,
+        DialogBoxPasswordComponent,
     ],
     imports: [
         CommonModule,

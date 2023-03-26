@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MIN_PASSWORD_LENGTH } from '@app/constants/user';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
 import { AppRoutes } from '@app/models/app-routes';
@@ -38,6 +39,9 @@ export class GameCreationPageComponent implements OnInit {
     difficultyForm: FormControl;
     dictionaryForm: FormControl;
 
+    protected isGameLocked: boolean;
+    protected isGamePublic: boolean;
+
     private readonly gameMode: string;
 
     constructor(
@@ -64,6 +68,9 @@ export class GameCreationPageComponent implements OnInit {
         // TODO : Set default dictionary from server
         this.dictionaryForm = new FormControl('Mon dictionnaire', Validators.required);
 
+        this.isGameLocked = false;
+        this.isGamePublic = true;
+
         // Fill arrays of values from enum constants
         Object.values(GameDifficulty).forEach((value: GameDifficulty) => {
             this.languageService.getWord(value as string).subscribe((word: string) => {
@@ -85,15 +92,6 @@ export class GameCreationPageComponent implements OnInit {
             timer: this.timerForm,
             difficultyBot: this.difficultyForm,
             dictionary: this.dictionaryForm,
-        });
-
-        this.passwordEnableForm.valueChanges.subscribe(() => {
-            if (this.passwordEnableForm.value) {
-                this.passwordForm.addValidators(Validators.required);
-            } else {
-                this.passwordForm.removeValidators(Validators.required);
-            }
-            this.form.setControl('password', this.passwordForm);
         });
     }
 
@@ -163,6 +161,31 @@ export class GameCreationPageComponent implements OnInit {
         return this.dictionaryList.some((dictionaryList) => dictionaryList.title === dictionaryTitle);
     }
 
+    protected clickPasswordToggle(): void {
+        this.isGameLocked = !this.isGameLocked;
+
+        if (this.isGameLocked) {
+            this.passwordForm.addValidators([Validators.required, Validators.minLength(MIN_PASSWORD_LENGTH)]);
+        } else {
+            this.passwordForm.removeValidators([Validators.required, Validators.minLength(MIN_PASSWORD_LENGTH)]);
+        }
+
+        this.form.setControl('password', this.passwordForm);
+    }
+
+    protected clickVisibilityToggle(): void {
+        this.isGamePublic = !this.isGamePublic;
+    }
+
+    protected getError(): string {
+        if (this.passwordForm.hasError('minlength')) {
+            // TODO : Language
+            return '8 caractères minimum';
+        }
+
+        return '';
+    }
+
     private getDictionary(title: string): DictionaryInfo {
         if (this.selectedFile !== null) return this.selectedFile;
         return this.dictionaryList.find((dictionary) => dictionary.title === title);
@@ -181,7 +204,7 @@ export class GameCreationPageComponent implements OnInit {
             isMultiplayer: !this.isSoloMode(),
             opponent: this.isSoloMode() ? this.botName : undefined,
             botDifficulty: this.isSoloMode() ? (this.form.get('difficultyBot') as AbstractControl).value : undefined,
-            visibility: GameVisibility.Public,
+            visibility: this.isGamePublic ? GameVisibility.Public : GameVisibility.Private,
             password: this.passwordForm.value,
         } as GameParameters);
 

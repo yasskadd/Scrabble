@@ -17,7 +17,7 @@ export class BeginnerBot extends Bot {
     }
 
     exchangeLetters(): void {
-        if (this.game === undefined || this.playedTurned || this.game.letterReserve.totalQuantity() < Constant.letterReserveMinQuantity) return;
+        if (this.game === undefined || this.isNotTurn || this.game.letterReserve.totalQuantity() < Constant.letterReserveMinQuantity) return;
         const rack: string[] = [...this.rackToString()];
         let numberOfLetters = this.getRandomNumber(rack.length);
         const lettersToExchange: string[] = new Array();
@@ -27,7 +27,7 @@ export class BeginnerBot extends Bot {
         }
         this.socketManager.emitRoom(this.botInfo.roomId, SocketEvents.GameMessage, `!echanger ${lettersToExchange.length} lettres`);
         this.rack = this.game.exchange(lettersToExchange, this);
-        this.playedTurned = true;
+        this.isNotTurn = true;
     }
 
     placeLetters() {
@@ -41,7 +41,7 @@ export class BeginnerBot extends Bot {
         else if (this.countUp < 3) setTimeout(() => this.play(randomCommandInfo), Constant.SECOND_3 - this.countUp * Constant.SECOND_1);
     }
 
-    private addCommandInfoToList(commandInfoMap: Map<CommandInfo, number>, randomNumber: number): CommandInfo[] {
+    protected addCommandInfoToList(commandInfoMap: Map<CommandInfo, number>, randomNumber: number): CommandInfo[] {
         const commandInfoList = new Array();
         if (this.inRange(randomNumber, 1, Constant.PROB_4)) {
             commandInfoMap.forEach((value, key) => {

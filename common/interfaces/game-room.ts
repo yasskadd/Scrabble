@@ -1,5 +1,5 @@
-import { IUser } from '@common/interfaces/user';
-import { GameVisibility } from '@common/models/game-visibility';
+import { IUser } from './user';
+import { GameVisibility } from '../models/game-visibility';
 
 export interface GameRoom {
     id: string;

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable max-lines */
 /* eslint-disable dot-notation*/
-import { GameRoom } from '@app/interfaces/game-room';
+import { GameRoom } from '@common/interfaces/game-room';
 import { GameSessions } from '@app/services/client-utilities/game-sessions.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
