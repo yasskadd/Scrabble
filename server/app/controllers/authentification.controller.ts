@@ -30,6 +30,7 @@ export class AuthentificationController {
          */
         this.router.post('/signUp', async (req: Request, res: Response) => {
             const user: IUser = req.body;
+
             if (!(await this.accountStorage.isUserRegistered(user.username))) {
                 // Generating an image key if the profile pic is not a default one
                 let imageKey = '';
