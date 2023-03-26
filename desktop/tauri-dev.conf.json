@@ -16,6 +16,9 @@
             "window": {
                 "all": true
             },
+            "dialog": {
+                "all": true
+            },
             "http": {
                 "scope": ["http://**", "https://**", "ws://**"],
                 "all": true,
@@ -64,7 +67,8 @@
                 "width": 1000,
                 "focus": false,
                 "minWidth": 1000,
-                "minHeight": 800
+                "minHeight": 800,
+                "label": "main"
             }
         ]
     }

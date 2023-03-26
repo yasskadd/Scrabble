@@ -14,6 +14,7 @@ import { WordSolver } from './word-solver.class';
 const MAX_QUANTITY = 7;
 
 export class Game {
+    roomId: string;
     gameboard: Gameboard;
     gameMode: string;
     beginningTime: Date;
@@ -25,15 +26,21 @@ export class Game {
     wordSolver: WordSolver;
     letterPlacement: LetterPlacement;
 
+    isMode2990: boolean;
+
     constructor(
-        players: Player[],
         public turn: Turn,
         public letterReserve: LetterReserve,
-        public isMode2990: boolean,
+        roomId: string,
+        players: Player[],
         dictionaryValidation: DictionaryValidation,
         letterPlacement: LetterPlacement,
         wordSolver: WordSolver,
     ) {
+        // TODO : Remove this
+        this.isMode2990 = false;
+
+        this.roomId = roomId;
         this.start(players);
         this.beginningTime = new Date();
         this.gameboard = new Gameboard();

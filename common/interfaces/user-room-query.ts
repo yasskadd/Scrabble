@@ -1,7 +1,7 @@
 import { IUser } from './user';
 
-export interface JoinGameRoomParameters {
+export interface UserRoomQuery {
     roomId: string;
-    player: IUser;
+    user: IUser;
     password?: string;
 }

@@ -9,13 +9,11 @@ import { Container } from 'typedi';
 import { Player } from './player.class';
 
 export class Bot extends Player {
-    isPlayerOne: boolean;
     roomId: string;
-    game: Game;
     protected countUp: number = 0;
     protected socketManager: SocketManager = Container.get(SocketManager);
     protected wordSolver: WordSolver;
-    protected playedTurned: boolean = false;
+    protected isNotTurn: boolean = false;
     private timer: number;
 
     constructor(isPlayerOne: boolean, name: string, protected botInfo: BotInformation) {
@@ -43,7 +41,7 @@ export class Bot extends Player {
             if (this.countUp === Constant.TIME_SKIP && this.name === this.game.turn.activePlayer) this.skipTurn();
         });
         this.game.turn.endTurn.subscribe((activePlayer) => {
-            this.playedTurned = false;
+            this.isNotTurn = false;
             if (activePlayer === this.name) {
                 this.countUp = 0;
                 this.playTurn();
@@ -52,19 +50,19 @@ export class Bot extends Player {
     }
 
     skipTurn(): void {
-        if (this.game === undefined || this.playedTurned) return;
+        if (this.game === undefined || this.isNotTurn) return;
         this.socketManager.emitRoom(this.botInfo.roomId, SocketEvents.GameMessage, '!passer');
         this.game.skip(this.name);
-        this.playedTurned = true;
+        this.isNotTurn = true;
     }
 
     protected play(commandInfo: CommandInfo): void {
-        if (commandInfo === undefined || this.playedTurned) {
+        if (commandInfo === undefined || this.isNotTurn) {
             this.skipTurn();
             return;
         }
         this.emitPlaceCommand(commandInfo);
-        this.playedTurned = true;
+        this.isNotTurn = true;
     }
 
     protected processWordSolver(): Map<CommandInfo, number> {
