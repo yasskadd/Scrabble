@@ -2,8 +2,6 @@ import { LOSS_SCORE, MAX_SCORE, MIN_SCORE, WIN_SCORE } from '@app/constants/scor
 import { Service } from 'typedi';
 @Service()
 export class PlayerScoreService {
-    constructor() {}
-
     calculateScore(currentPlayerScore: number, playerWonGame: boolean): number {
         if (playerWonGame) return this.winScore(currentPlayerScore);
         return this.lossScore(currentPlayerScore);
