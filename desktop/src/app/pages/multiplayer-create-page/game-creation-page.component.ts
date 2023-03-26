@@ -11,12 +11,14 @@ import { LanguageService } from '@app/services/language.service';
 import { TimeService } from '@app/services/time.service';
 import { UserService } from '@app/services/user.service';
 import { VirtualPlayersService } from '@app/services/virtual-players.service';
-import { GameParameters } from '@common/interfaces/game-parameters';
+import { GameCreationQuery } from '@common/interfaces/game-creation-query';
 import { DictionaryEvents } from '@common/models/dictionary-events';
 import { GameDifficulty } from '@common/models/game-difficulty';
 import { GameTimeOptions } from '@common/models/game-time-options';
 import { GameVisibility } from '@common/models/game-visibility';
 import { SnackBarService } from '@services/snack-bar.service';
+import { SocketEvents } from '@common/constants/socket-events';
+import { ClientSocketService } from '@services/communication/client-socket.service';
 
 @Component({
     selector: 'app-multiplayer-create-page',
@@ -34,7 +36,6 @@ export class GameCreationPageComponent implements OnInit {
     form: FormGroup;
     passwordEnableForm: FormControl;
     passwordForm: FormControl;
-    playerForm: FormControl;
     timerForm: FormControl;
     difficultyForm: FormControl;
     dictionaryForm: FormControl;
@@ -49,6 +50,7 @@ export class GameCreationPageComponent implements OnInit {
         protected gameConfiguration: GameConfigurationService,
         protected timer: TimeService,
         protected userService: UserService,
+        private clientSocketService: ClientSocketService,
         private languageService: LanguageService,
         private activatedRoute: ActivatedRoute,
         private formBuilder: FormBuilder,
@@ -97,7 +99,7 @@ export class GameCreationPageComponent implements OnInit {
 
     ngOnInit(): void {
         this.virtualPlayers.updateBotNames();
-        this.gameConfiguration.resetRoomInformation();
+        this.gameConfiguration.resetRoomInformations();
 
         this.difficultyForm.valueChanges.subscribe(() => {
             this.updateBotList();
@@ -196,17 +198,16 @@ export class GameCreationPageComponent implements OnInit {
     }
 
     private initGame(dictionaryTitle: string): void {
-        this.gameConfiguration.gameInitialization({
+        this.clientSocketService.send(SocketEvents.CreateWaitingRoom, {
             user: this.userService.user,
             timer: (this.form.get('timer') as AbstractControl).value,
             dictionary: dictionaryTitle,
             mode: this.gameMode,
-            isMultiplayer: !this.isSoloMode(),
-            opponent: this.isSoloMode() ? this.botName : undefined,
-            botDifficulty: this.isSoloMode() ? (this.form.get('difficultyBot') as AbstractControl).value : undefined,
-            visibility: this.isGamePublic ? GameVisibility.Public : GameVisibility.Private,
+            botDifficulty:
+                Object.values(GameDifficulty)[this.difficultyList.findIndex((difficulty: string) => this.difficultyForm.value === difficulty)],
+            visibility: this.isGameLocked ? GameVisibility.Locked : this.isGamePublic ? GameVisibility.Public : GameVisibility.Private,
             password: this.passwordForm.value,
-        } as GameParameters);
+        } as GameCreationQuery);
 
         this.playerName = '';
     }

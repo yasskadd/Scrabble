@@ -7,6 +7,9 @@ import { HttpHandlerService } from './communication/http-handler.service';
 import { AvatarData } from '@common/interfaces/avatar-data';
 import { ImageInfo } from '@common/interfaces/image-info';
 import { ImageType } from '@common/models/image-type';
+import { AppRoutes } from '@app/models/app-routes';
+import { Router } from '@angular/router';
+import { ClientSocketService } from '@services/communication/client-socket.service';
 
 @Injectable({
     providedIn: 'root',
@@ -14,7 +17,12 @@ import { ImageType } from '@common/models/image-type';
 export class UserService {
     user: IUser;
 
-    constructor(private httpHandlerService: HttpHandlerService, private cookieService: AppCookieService) {
+    constructor(
+        private httpHandlerService: HttpHandlerService,
+        private clientSocketService: ClientSocketService,
+        private cookieService: AppCookieService,
+        private router: Router,
+    ) {
         this.initUser();
     }
 
@@ -43,6 +51,9 @@ export class UserService {
     logout(): void {
         this.httpHandlerService.logout().subscribe(() => {
             this.initUser();
+            this.cookieService.removeSessionCookie();
+            this.clientSocketService.disconnect();
+            this.router.navigate([AppRoutes.ConnectionPage]).then();
         });
     }
 
