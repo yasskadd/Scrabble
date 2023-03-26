@@ -23,7 +23,6 @@ export class DatabaseCollection {
 
     async fetchDocuments(query: Filter<Document>, projection?: FindOptions<Document> | undefined): Promise<Document[]> {
         await this.connect();
-
         return await this.collection.find(query, projection).toArray();
     }
 
