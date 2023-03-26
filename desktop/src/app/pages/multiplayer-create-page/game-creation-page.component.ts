@@ -36,7 +36,6 @@ export class GameCreationPageComponent implements OnInit {
     form: FormGroup;
     passwordEnableForm: FormControl;
     passwordForm: FormControl;
-    playerForm: FormControl;
     timerForm: FormControl;
     difficultyForm: FormControl;
     dictionaryForm: FormControl;
@@ -204,9 +203,8 @@ export class GameCreationPageComponent implements OnInit {
             timer: (this.form.get('timer') as AbstractControl).value,
             dictionary: dictionaryTitle,
             mode: this.gameMode,
-            isMultiplayer: !this.isSoloMode(),
-            opponent: this.isSoloMode() ? this.botName : undefined,
-            botDifficulty: this.isSoloMode() ? (this.form.get('difficultyBot') as AbstractControl).value : undefined,
+            botDifficulty:
+                Object.values(GameDifficulty)[this.difficultyList.findIndex((difficulty: string) => this.difficultyForm.value === difficulty)],
             visibility: this.isGameLocked ? GameVisibility.Locked : this.isGamePublic ? GameVisibility.Public : GameVisibility.Private,
             password: this.passwordForm.value,
         } as GameCreationQuery);

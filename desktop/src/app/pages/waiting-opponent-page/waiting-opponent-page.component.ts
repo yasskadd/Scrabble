@@ -14,6 +14,7 @@ import { PlayerType } from '@common/models/player-type';
 })
 export class WaitingOpponentPageComponent implements OnDestroy {
     protected gameVisibility: typeof GameVisibility = GameVisibility;
+    protected playerType: typeof PlayerType = PlayerType;
 
     private gameMode: string;
 

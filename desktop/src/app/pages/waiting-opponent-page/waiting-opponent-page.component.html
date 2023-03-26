@@ -23,7 +23,7 @@
                     </span>
                 <button
                     *ngIf='gameConfiguration.isGameCreator() && player.user.username !== userService.user.username && player.user
-.profilePicture.name !== userService.user.profilePicture.name'
+.profilePicture.name !== userService.user.profilePicture.name && player.type === playerType.User'
                     class='rejectButton'
                     (click)='gameConfiguration.rejectOpponent(player)'
                     mat-raised-button

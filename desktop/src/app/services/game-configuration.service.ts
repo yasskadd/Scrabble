@@ -113,8 +113,6 @@ export class GameConfigurationService implements OnDestroy {
             user: this.userService.user,
             password: room.password,
         } as RoomPlayer);
-
-        this.localGameRoom = room;
     }
 
     joinSecretRoom(roomId: string): void {
