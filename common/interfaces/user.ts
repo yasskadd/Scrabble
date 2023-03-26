@@ -5,4 +5,5 @@ export interface IUser {
     username: string;
     password: string;
     profilePicture?: ImageInfo;
+    score: number;
 }

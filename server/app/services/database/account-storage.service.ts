@@ -6,6 +6,7 @@ import { Document } from 'mongodb';
 import { Service } from 'typedi';
 import { DatabaseService } from './database.service';
 
+const DEFAULT_PLAYER_SCORE = 1000;
 @Service()
 export class AccountStorageService {
     constructor(private database: DatabaseService) {}
@@ -17,6 +18,7 @@ export class AccountStorageService {
             username: user.username,
             password: hashedPassword,
             profilePicture: user.profilePicture as ImageInfo,
+            score: DEFAULT_PLAYER_SCORE,
         };
         await this.database.users.addDocument(newUser);
     }

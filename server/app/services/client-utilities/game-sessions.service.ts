@@ -303,6 +303,7 @@ export class GameSessions {
             username: user.username,
             password: 'null',
             profilePicture: user.profilePicture,
+            score: user.score,
         } as IUser;
     }
 
@@ -348,6 +349,7 @@ export class GameSessions {
                         name: 'bot-image',
                         isDefaultPicture: true,
                     },
+                    score: 0,
                 },
                 socketId: '',
                 roomId: '',
