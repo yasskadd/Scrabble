@@ -1,8 +1,8 @@
 /* eslint-disable dot-notation */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { Gameboard } from '@app/classes/gameboard.class';
 import { LetterTree } from '@app/classes/trie/letter-tree.class';
 import { Word } from '@app/classes/word.class';
+import { Gameboard } from '@common/classes/gameboard.class';
 import { expect } from 'chai';
 import * as Sinon from 'sinon';
 import { DictionaryValidation } from './dictionary-validation.class';

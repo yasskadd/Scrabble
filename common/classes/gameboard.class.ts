@@ -1,4 +1,5 @@
 import { LetterTile } from '@common/classes/letter-tile.class';
+import { TOTAL_TILES_IN_ROW } from '@common/constants/board-info';
 import * as multipliers from '@common/constants/board-multiplier-coords';
 import { Coordinate } from '@common/interfaces/coordinate';
 
@@ -82,5 +83,19 @@ export class Gameboard {
             if (this.isAnchor(tile)) anchors.push(tile.coordinate);
         }
         return anchors;
+    }
+
+    toStringArray(): string[] {
+        const gameboard = Array(TOTAL_TILES_IN_ROW ** 2).fill('', 0, TOTAL_TILES_IN_ROW ** 2);
+
+        this.gameboardTiles.forEach((tile) => {
+            gameboard[tile.coordinate.x + tile.coordinate.y * TOTAL_TILES_IN_ROW] = tile.letter;
+        });
+
+        return gameboard;
+    }
+
+    updateFromStringArray(gameboard: string[]) {
+        this.gameboardTiles.forEach((tile) => (tile.letter = gameboard[tile.coordinate.x + tile.coordinate.y * TOTAL_TILES_IN_ROW]));
     }
 }

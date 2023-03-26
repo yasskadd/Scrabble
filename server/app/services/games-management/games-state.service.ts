@@ -19,6 +19,7 @@ import { SocketType } from '@app/types/sockets';
 import { NUMBER_OF_PLAYERS } from '@common/constants/players';
 import { SocketEvents } from '@common/constants/socket-events';
 import { GameScrabbleInformation } from '@common/interfaces/game-scrabble-information';
+import { GameInfo } from '@common/interfaces/game-state';
 import { PublicViewUpdate } from '@common/interfaces/public-view-update';
 import { Subject } from 'rxjs';
 import { Server, Socket } from 'socket.io';
@@ -46,17 +47,9 @@ export class GamesStateService {
             await this.createGame(server, gameInfo);
         });
 
-        this.socketManager.on(SocketEvents.Disconnect, (socket) => {
-            this.disconnect(socket);
-        });
-
-        this.socketManager.on(SocketEvents.AbandonGame, (socket) => {
-            this.abandonGame(socket);
-        });
-
-        this.socketManager.on(SocketEvents.QuitGame, (socket) => {
-            this.disconnect(socket);
-        });
+        this.socketManager.on(SocketEvents.Disconnect, this.disconnect);
+        this.socketManager.on(SocketEvents.AbandonGame, this.abandonGame);
+        this.socketManager.on(SocketEvents.QuitGame, this.disconnect);
     }
 
     async createGame(server: Server, gameInfo: GameScrabbleInformation) {
@@ -184,12 +177,13 @@ export class GamesStateService {
 
     private changeTurn(roomId: string) {
         const players = this.gamesHandler.gamePlayers.get(roomId)?.players as Player[];
-        const gameInfo = {
-            gameboard: players[0].game.gameboard.gameboardTiles,
+
+        const gameInfo: GameInfo = {
+            gameboard: players[0].game.gameboard.toStringArray(),
             players: players.map((x) => x.getInformation()),
             activePlayer: players[0].game.turn.activePlayer,
         };
-        this.socketManager.emitRoom(roomId, SocketEvents.Skip, gameInfo);
+        this.socketManager.emitRoom(roomId, SocketEvents.NextTurn, gameInfo);
     }
 
     private sendTimer(roomId: string, timer: number) {

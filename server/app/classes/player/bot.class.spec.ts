@@ -7,8 +7,8 @@ import { Turn } from '@app/classes/turn.class';
 import { WordSolver } from '@app/classes/word-solver.class';
 import { BotInformation } from '@app/interfaces/bot-information';
 import { SocketEvents } from '@common/constants/socket-events';
-import { CommandInfo } from '@common/interfaces/command-info';
 import { Coordinate } from '@common/interfaces/coordinate';
+import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { expect } from 'chai';
 import { ReplaySubject } from 'rxjs';
 import * as Sinon from 'sinon';
@@ -170,7 +170,7 @@ describe('Bot Tests', () => {
         });
 
         it('should call emitPlaceCommand() if commandInfo is not undefined and playedTurn is set to false', () => {
-            const commandInfoStub: CommandInfo = {
+            const commandInfoStub: PlaceWordCommandInfo = {
                 firstCoordinate: { x: 1, y: 1 } as Coordinate,
                 isHorizontal: true,
                 letters: ['t', 'e', 's', 't'],
@@ -189,7 +189,7 @@ describe('Bot Tests', () => {
     context('emitPlacementCommand() tests and placement is horizontal', () => {
         it('should emitRoom() with correct arguments', () => {
             bot.game.letterReserve = new LetterReserve();
-            const commandInfoStub: CommandInfo = {
+            const commandInfoStub: PlaceWordCommandInfo = {
                 firstCoordinate: { x: 1, y: 1 } as Coordinate,
                 isHorizontal: true,
                 letters: ['t', 'e', 's', 't'],
@@ -211,7 +211,7 @@ describe('Bot Tests', () => {
 
         it('should emitRoom() with correct arguments and placement is vertical', () => {
             bot.game.letterReserve = new LetterReserve();
-            const commandInfoStub: CommandInfo = {
+            const commandInfoStub: PlaceWordCommandInfo = {
                 firstCoordinate: { x: 1, y: 1 } as Coordinate,
                 isHorizontal: false,
                 letters: ['t', 'e', 's', 't'],
