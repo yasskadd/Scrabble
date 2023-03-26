@@ -1,8 +1,8 @@
 import { Game } from '@app/classes/game.class';
 import { Letter } from '@common/interfaces/letter';
 import { Objective } from '@common/interfaces/objective';
-import { RoomPlayer } from '@common/interfaces/room-player';
 import { PlayerInformation } from '@common/interfaces/player-information';
+import { RoomPlayer } from '@common/interfaces/room-player';
 
 export class GamePlayer {
     rack: Letter[];
@@ -29,7 +29,7 @@ export class GamePlayer {
             player: this.player,
             score: this.score,
             rack: this.rack,
-            gameboard: this.game.gameboard.gameboardTiles,
+            gameboard: this.game.gameboard.toStringArray(),
         };
     }
 

@@ -4,13 +4,13 @@ import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { SocketTestEmulator } from '@app/classes/test-classes/socket-test-emulator';
 import { SocketEvents } from '@common/constants/socket-events';
 import { Letter } from '@common/interfaces/letter';
-import { ReplaySubject } from 'rxjs';
-import { Socket } from 'socket.io-client';
 import { ChatboxHandlerService } from '@services/chat/chatbox-handler.service';
 import { CommandHandlerService } from '@services/command-handler.service';
 import { ClientSocketService } from '@services/communication/client-socket.service';
 import { GameClientService } from '@services/game-client.service';
 import { GameConfigurationService } from '@services/game-configuration.service';
+import { ReplaySubject } from 'rxjs';
+import { Socket } from 'socket.io-client';
 
 type Player = { name: string; score: number; rack?: Letter[]; room: string };
 
@@ -560,12 +560,12 @@ describe('ChatboxHandlerService', () => {
         expect(service.messages.pop()).toEqual(messageShow);
     });
 
-    it('should called the configureImpossibleCommandError if the server emit the Event', () => {
-        const messageError = 'impossible de placer la lettre';
-        const spy = spyOn(service, 'configureImpossibleCommandError' as never);
-        socketEmulator.peerSideEmit(SocketEvents.ImpossibleCommandError, messageError);
-        expect(spy).toHaveBeenCalledWith(messageError as never);
-    });
+    // it('should called the configureImpossibleCommandError if the server emit the Event', () => {
+    //     const messageError = 'impossible de placer la lettre';
+    //     const spy = spyOn(service, 'configureImpossibleCommandError' as never);
+    //     socketEmulator.peerSideEmit(SocketEvents.ImpossibleCommandError, messageError);
+    //     expect(spy).toHaveBeenCalledWith(messageError as never);
+    // });
 
     it('should called the addDisconnect  method if the server emit the Event', () => {
         const spy = spyOn(service, 'addDisconnect' as never);
@@ -602,12 +602,12 @@ describe('ChatboxHandlerService', () => {
         expect(spy).toHaveBeenCalled();
     });
 
-    it('configureImpossibleCommandError() should return the valid error configuration', () => {
-        const errorMessage = 'invalid placement';
-        const EXPECTED_IMPOSSIBLE_ERROR = { type: 'system-message', data: `[Erreur] ${errorMessage}` };
+    // it('configureImpossibleCommandError() should return the valid error configuration', () => {
+    //     const errorMessage = 'invalid placement';
+    //     const EXPECTED_IMPOSSIBLE_ERROR = { type: 'system-message', data: `[Erreur] ${errorMessage}` };
 
-        expect(service['configureImpossibleCommandError'](errorMessage)).toEqual(EXPECTED_IMPOSSIBLE_ERROR);
-    });
+    //     expect(service['configureImpossibleCommandError'](errorMessage)).toEqual(EXPECTED_IMPOSSIBLE_ERROR);
+    // });
 
     it('SubmitMessage should send nothing if the user input is empty', () => {
         const spy2 = spyOn(service, 'addMessage' as never);

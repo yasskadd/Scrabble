@@ -3,7 +3,6 @@
 /* eslint-disable dot-notation*/
 import { DictionaryValidation } from '@app/classes/dictionary-validation.class';
 import { Game } from '@app/classes/game.class';
-import { Gameboard } from '@app/classes/gameboard.class';
 import { LetterPlacement } from '@app/classes/letter-placement.class';
 import { LetterReserve } from '@app/classes/letter-reserve.class';
 import { ObjectivesHandler } from '@app/classes/objectives-handler.class';
@@ -17,6 +16,7 @@ import { VirtualPlayersStorageService } from '@app/services/database/virtual-pla
 import { GamesHandler } from '@app/services/games-management/games-handler.service';
 import { RackService } from '@app/services/rack.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
+import { Gameboard } from '@common/classes/gameboard.class';
 import { SocketEvents } from '@common/constants/socket-events';
 import { expect } from 'chai';
 import { createServer, Server } from 'http';

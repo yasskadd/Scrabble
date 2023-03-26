@@ -9,22 +9,25 @@ import { GamePlayer } from '@app/classes/player/player.class';
 import { RealPlayer } from '@app/classes/player/real-player.class';
 import { ScoreRelatedBot } from '@app/classes/player/score-related-bot.class';
 import { Turn } from '@app/classes/turn.class';
+import { MAX_QUANTITY } from '@app/constants/letter-reserve';
 import { DictionaryContainer } from '@app/interfaces/dictionaryContainer';
 import { ScoreStorageService } from '@app/services/database/score-storage.service';
 import { VirtualPlayersStorageService } from '@app/services/database/virtual-players-storage.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
+import { GameRoom } from '@common/interfaces/game-room';
+import { GameInfo } from '@common/interfaces/game-state';
+import { PlayerInformation } from '@common/interfaces/player-information';
 import { PublicViewUpdate } from '@common/interfaces/public-view-update';
+import { RoomPlayer } from '@common/interfaces/room-player';
+import { GameDifficulty } from '@common/models/game-difficulty';
+import { GameMode } from '@common/models/game-mode';
+import { PlayerType } from '@common/models/player-type';
 import { Subject } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import { GamesHandler } from './games-handler.service';
-import { GameRoom } from '@common/interfaces/game-room';
-import { RoomPlayer } from '@common/interfaces/room-player';
-import { GameDifficulty } from '@common/models/game-difficulty';
-import { PlayerType } from '@common/models/player-type';
-import { GameMode } from '@common/models/game-mode';
-import { MAX_QUANTITY } from '@app/constants/letter-reserve';
+import { HistoryStorageService } from '@app/services/database/history-storage.service';
 
 const MAX_SKIP = 6;
 const SECOND = 1000;
@@ -37,23 +40,23 @@ export class GamesStateService {
         private socketManager: SocketManager,
         private gamesHandler: GamesHandler,
         private readonly scoreStorage: ScoreStorageService,
+        private historyStorageService: HistoryStorageService,
         private virtualPlayerStorage: VirtualPlayersStorageService,
     ) {
         this.gameEnded = new Subject();
+
+        this.gameEnded.subscribe((room) => {
+            const gameInfo = this.historyStorageService.formatGameInfo(room);
+            if (!gameInfo) return;
+
+            this.historyStorageService.addToHistory(gameInfo).then();
+        });
     }
 
     initSocketsEvents(): void {
-        this.socketManager.on(SocketEvents.Disconnect, (socket) => {
-            this.disconnect(socket);
-        });
-
-        this.socketManager.on(SocketEvents.AbandonGame, (socket) => {
-            this.abandonGame(socket);
-        });
-
-        this.socketManager.on(SocketEvents.QuitGame, (socket) => {
-            this.disconnect(socket);
-        });
+        this.socketManager.on(SocketEvents.Disconnect, this.disconnect);
+        this.socketManager.on(SocketEvents.AbandonGame, this.abandonGame);
+        this.socketManager.on(SocketEvents.QuitGame, this.disconnect);
     }
 
     async createGame(server: Server, room: GameRoom) {
@@ -200,12 +203,23 @@ export class GamesStateService {
 
     private changeTurn(roomId: string) {
         const players = this.gamesHandler.getPlayersFromRoomId(roomId);
+        const informations: PlayerInformation[] = [];
 
-        this.socketManager.emitRoom(roomId, SocketEvents.Skip, {
-            gameboard: players[0].game.gameboard.gameboardTiles,
-            players: players.map((x) => x.getInformation()),
-            activePlayer: players[0].game.turn.activePlayer,
+        players.forEach((player: GamePlayer) => {
+            const information = player.getInformation();
+            if (information) {
+                informations.push(information);
+            }
         });
+        if (informations.length === 0) return;
+
+        const gameInfo: GameInfo = {
+            gameboard: players[0].game.gameboard.toStringArray(),
+            players: informations,
+            activePlayer: players[0].game.turn.activePlayer,
+        };
+
+        this.socketManager.emitRoom(roomId, SocketEvents.NextTurn, gameInfo);
     }
 
     private sendTimer(roomId: string, timer: number) {

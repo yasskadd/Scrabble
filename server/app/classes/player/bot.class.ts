@@ -4,7 +4,7 @@ import * as Constant from '@app/constants/bot';
 import { BotInformation } from '@app/interfaces/bot-information';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
-import { CommandInfo } from '@common/interfaces/command-info';
+import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { Container } from 'typedi';
 import { GamePlayer } from './player.class';
 import { RoomPlayer } from '@common/interfaces/room-player';
@@ -54,7 +54,7 @@ export class Bot extends GamePlayer {
         this.isNotTurn = true;
     }
 
-    protected play(commandInfo: CommandInfo): void {
+    protected play(commandInfo: PlaceWordCommandInfo): void {
         if (commandInfo === undefined || this.isNotTurn) {
             this.skipTurn();
             return;
@@ -63,12 +63,12 @@ export class Bot extends GamePlayer {
         this.isNotTurn = true;
     }
 
-    protected processWordSolver(): Map<CommandInfo, number> {
+    protected processWordSolver(): Map<PlaceWordCommandInfo, number> {
         this.wordSolver.setGameboard(this.game.gameboard);
         return this.wordSolver.commandInfoScore(this.wordSolver.findAllOptions(this.rackToString()));
     }
 
-    protected emitPlaceCommand(randomCommandInfo: CommandInfo): void {
+    protected emitPlaceCommand(randomCommandInfo: PlaceWordCommandInfo): void {
         const coordString = `${String.fromCharCode(Constant.CHAR_ASCII + randomCommandInfo.firstCoordinate.y)}${randomCommandInfo.firstCoordinate.x}`;
         const placeCommand = `!placer ${coordString}${randomCommandInfo.isHorizontal ? 'h' : 'v'} ${randomCommandInfo.letters.join('')}`;
         this.socketManager.emitRoom(this.botInfo.roomId, SocketEvents.GameMessage, placeCommand);

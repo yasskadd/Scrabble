@@ -1,31 +1,26 @@
 import { Injectable } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import * as constants from '@common/constants/board-info';
+import { Gameboard } from '@common/classes/gameboard.class';
 import { SocketEvents } from '@common/constants/socket-events';
+import { GameInfo } from '@common/interfaces/game-state';
 import { Letter } from '@common/interfaces/letter';
-import { LetterTileInterface } from '@common/interfaces/letter-tile-interface';
-import { Objective } from '@common/interfaces/objective';
 import { AlphabetLetter } from '@common/models/alphabet-letter';
 import { ReplaySubject, Subject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
+import { PlayerInformation } from '@common/interfaces/player-information';
 
-type CompletedObjective = { objective: Objective; name: string };
-type InitObjective = { objectives1: Objective[]; objectives2: Objective[]; playerName: string };
-type PlayInfo = { gameboard: LetterTileInterface[]; activePlayer: string };
-type PlayerInformation = { name: string; score: number; rack: Letter[]; room: string; gameboard: LetterTileInterface[] };
-type Player = { name: string; score: number; rack: Letter[]; objective?: Objective[] };
-type GameInfo = { gameboard: LetterTileInterface[]; players: Player[]; activePlayer: string };
+// type CompletedObjective = { objective: Objective; name: string };
+// type InitObjective = { objectives1: Objective[]; objectives2: Objective[]; playerName: string };
+type PlayInfo = { gameboard: string[]; activePlayer: string };
 const TIMEOUT_PASS = 30;
-const TIMEOUT = 3000;
 
 @Injectable({
     providedIn: 'root',
 })
 export class GameClientService {
     timer: number;
-    gameboard: LetterTileInterface[];
-    playerOne: Player;
-    secondPlayer: Player;
+    gameboard: Gameboard;
+    playerOne: PlayerInformation;
+    secondPlayer: PlayerInformation;
     playerOneTurn: boolean;
     letterReserveLength: number;
     isGameFinish: boolean;
@@ -34,17 +29,17 @@ export class GameClientService {
     gameboardUpdated: Subject<boolean>;
     turnFinish: ReplaySubject<boolean>;
 
-    constructor(private clientSocketService: ClientSocketService, private snackBar: MatSnackBar) {
+    constructor(private clientSocketService: ClientSocketService) {
         this.timer = 0;
         this.letterReserveLength = 0;
-        this.playerOne = {} as Player;
+        this.playerOne = {} as PlayerInformation;
         this.secondPlayer = undefined;
         this.winningMessage = '';
         this.playerOneTurn = false;
         this.isGameFinish = false;
         this.gameboardUpdated = new Subject();
         this.turnFinish = new ReplaySubject<boolean>(1);
-        this.gameboard = [];
+        this.gameboard = new Gameboard();
 
         this.clientSocketService.connected.subscribe((connected: boolean) => {
             if (connected) {
@@ -58,7 +53,7 @@ export class GameClientService {
             this.updatePlayerInformationEvent(player);
         });
 
-        this.clientSocketService.on(SocketEvents.UpdateOpponentInformation, (player: Player) => {
+        this.clientSocketService.on(SocketEvents.UpdateOpponentInformation, (player: PlayerInformation[]) => {
             this.updateOpponentInformationEvent(player);
         });
 
@@ -78,13 +73,13 @@ export class GameClientService {
             this.viewUpdateEvent(info);
         });
 
-        this.clientSocketService.on('CompletedObjective', (completedObjective: CompletedObjective) => {
-            this.completeObjective(completedObjective);
-        });
+        // this.clientSocketService.on('CompletedObjective', (completedObjective: CompletedObjective) => {
+        // this.completeObjective(completedObjective);
+        // });
 
-        this.clientSocketService.on('InitObjective', (objective: InitObjective) => {
-            this.setObjectives(objective);
-        });
+        // this.clientSocketService.on('InitObjective', (objective: InitObjective) => {
+        // this.setObjectives(objective);
+        // });
 
         this.clientSocketService.on(SocketEvents.Skip, (gameInfo: GameInfo) => {
             setTimeout(() => {
@@ -111,10 +106,11 @@ export class GameClientService {
     }
 
     resetGameInformation() {
+        // TODO : Update that
         this.timer = 0;
-        this.gameboard = [];
+        this.gameboard = new Gameboard();
         this.playerOne = {
-            name: '',
+            player: undefined,
             score: 0,
             rack: [
                 {
@@ -143,9 +139,9 @@ export class GameClientService {
                     points: 3,
                 },
             ],
-            objective: undefined,
+            gameboard: [],
         };
-        this.secondPlayer = { name: '', score: 0, rack: [], objective: undefined };
+        this.secondPlayer = { player: undefined, score: 0, rack: [], gameboard: [] };
 
         // TODO : change that back
         this.playerOneTurn = true;
@@ -158,40 +154,34 @@ export class GameClientService {
         this.winner = '';
     }
 
-    private completeObjective(completedObjective: CompletedObjective) {
-        if (this.playerOne.objective === undefined || this.secondPlayer.objective === undefined) return;
-        const indexPlayerOne = this.playerOne.objective.findIndex((element) => element.name === completedObjective.objective.name);
-        const indexSecondPlayer = this.secondPlayer.objective.findIndex((element) => element.name === completedObjective.objective.name);
-        if (indexPlayerOne !== constants.INVALID_INDEX && !this.playerOne.objective[indexPlayerOne].complete) {
-            this.playerOne.objective[indexPlayerOne].complete = true;
-            this.playerOne.objective[indexPlayerOne].user = completedObjective.name;
-            this.openSnackBar(`L'objectif ${this.playerOne.objective[indexPlayerOne].name} a été complété`);
-        }
-        if (indexSecondPlayer !== constants.INVALID_INDEX && !this.secondPlayer.objective[indexSecondPlayer].complete) {
-            this.secondPlayer.objective[indexSecondPlayer].complete = true;
-            this.secondPlayer.objective[indexSecondPlayer].user = completedObjective.name;
-        }
-    }
+    // private completeObjective(completedObjective: CompletedObjective) {
+    //     if (this.playerOne.objective === undefined || this.secondPlayer.objective === undefined) return;
+    //     const indexPlayerOne = this.playerOne.objective.findIndex((element) => element.user.username === completedObjective.objective.name);
+    //     const indexSecondPlayer = this.secondPlayer.objective.findIndex((element) => element.name === completedObjective.objective.name);
+    //     if (indexPlayerOne !== constants.INVALID_INDEX && !this.playerOne.objective[indexPlayerOne].complete) {
+    //         this.playerOne.objective[indexPlayerOne].complete = true;
+    //         this.playerOne.objective[indexPlayerOne].user = completedObjective.name;
+    //         this.openSnackBar(`L'objectif ${this.playerOne.objective[indexPlayerOne].name} a été complété`);
+    //     }
+    //     if (indexSecondPlayer !== constants.INVALID_INDEX && !this.secondPlayer.objective[indexSecondPlayer].complete) {
+    //         this.secondPlayer.objective[indexSecondPlayer].complete = true;
+    //         this.secondPlayer.objective[indexSecondPlayer].user = completedObjective.name;
+    //     }
+    // }
 
-    private openSnackBar(reason: string): void {
-        this.snackBar.open(reason, 'fermer', {
-            duration: TIMEOUT,
-            horizontalPosition: 'center',
-        });
-    }
+    // private setObjectives(objective: InitObjective) {
+    //     if (objective.playerName === this.playerOne.name) {
+    //         this.playerOne.objective = objective.objectives1;
+    //         this.secondPlayer.objective = objective.objectives2;
+    //         return;
+    //     }
+    //     this.secondPlayer.objective = objective.objectives1;
+    //     this.playerOne.objective = objective.objectives2;
+    // }
 
-    private setObjectives(objective: InitObjective) {
-        if (objective.playerName === this.playerOne.name) {
-            this.playerOne.objective = objective.objectives1;
-            this.secondPlayer.objective = objective.objectives2;
-            return;
-        }
-        this.secondPlayer.objective = objective.objectives1;
-        this.playerOne.objective = objective.objectives2;
-    }
-
-    private updateOpponentInformationEvent(player: Player) {
-        this.secondPlayer = { ...player, objective: this.secondPlayer.objective };
+    private updateOpponentInformationEvent(player: PlayerInformation[]) {
+        // TODO : Update that
+        this.secondPlayer = player[1];
     }
 
     private timerClientUpdateEvent(newTimer: number) {
@@ -207,13 +197,13 @@ export class GameClientService {
     }
 
     private viewUpdateEvent(info: PlayInfo) {
-        this.playerOneTurn = info.activePlayer === this.playerOne.name;
+        this.playerOneTurn = info.activePlayer === this.playerOne.player.user.username;
         this.updateNewGameboard(info.gameboard);
     }
 
     private updatePlayerInformationEvent(player: PlayerInformation) {
         const updatedRack = this.updateRack(player.rack);
-        this.playerOne = { ...player, objective: this.playerOne.objective };
+        this.playerOne = { ...player };
         this.playerOne.rack = updatedRack;
         this.updateNewGameboard(player.gameboard);
     }
@@ -242,8 +232,8 @@ export class GameClientService {
         return resultingRack;
     }
 
-    private updateNewGameboard(newGameboard: LetterTileInterface[]) {
-        this.gameboard = newGameboard;
+    private updateNewGameboard(newGameboard: string[]) {
+        this.gameboard.updateFromStringArray(newGameboard);
         this.updateGameboard();
     }
 
@@ -261,15 +251,15 @@ export class GameClientService {
     }
 
     private skipEvent(gameInfo: GameInfo) {
-        this.gameboard = gameInfo.gameboard;
-        const playerOneIndex = this.playerOne.name === gameInfo.players[0].name ? 0 : 1;
+        this.gameboard.updateFromStringArray(gameInfo.gameboard);
+        const playerOneIndex = this.playerOne.player.user.username === gameInfo.players[0].player.user.username ? 0 : 1;
         const secondPlayerIndex = Math.abs(playerOneIndex - 1);
         const updatedRack = this.updateRack(gameInfo.players[playerOneIndex].rack);
-        this.playerOne = { ...gameInfo.players[playerOneIndex], objective: this.playerOne.objective };
+        this.playerOne = { ...gameInfo.players[playerOneIndex] };
         this.playerOne.rack = updatedRack;
 
-        this.secondPlayer = { ...gameInfo.players[secondPlayerIndex], objective: this.secondPlayer.objective };
-        this.playerOneTurn = gameInfo.activePlayer === this.playerOne.name;
+        this.secondPlayer = { ...gameInfo.players[secondPlayerIndex] };
+        this.playerOneTurn = gameInfo.activePlayer === this.playerOne.player.user.username;
         this.updateGameboard();
     }
 
@@ -279,7 +269,7 @@ export class GameClientService {
             return;
         }
         this.winningMessage = 'game.state.winned';
-        this.winner = this.playerOne.score > this.secondPlayer.score ? this.playerOne.name : this.secondPlayer.name;
+        this.winner = this.playerOne.score > this.secondPlayer.score ? this.playerOne.player.user.username : this.secondPlayer.player.user.username;
     }
 
     private getAllLetterReserve(lettersReserveUpdated: Letter[]): void {
