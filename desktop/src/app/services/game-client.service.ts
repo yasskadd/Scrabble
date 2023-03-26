@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Gameboard } from '@common/classes/gameboard.class';
 import * as constants from '@common/constants/board-info';
 import { SocketEvents } from '@common/constants/socket-events';
+import { GameInfo, Player } from '@common/interfaces/game-state';
 import { Letter } from '@common/interfaces/letter';
-import { LetterTileInterface } from '@common/interfaces/letter-tile-interface';
 import { Objective } from '@common/interfaces/objective';
 import { AlphabetLetter } from '@common/models/alphabet-letter';
 import { ReplaySubject, Subject } from 'rxjs';
@@ -21,7 +22,7 @@ const TIMEOUT = 3000;
 })
 export class GameClientService {
     timer: number;
-    gameboard: LetterTileInterface[];
+    gameboard: Gameboard;
     playerOne: Player;
     secondPlayer: Player;
     playerOneTurn: boolean;
@@ -43,7 +44,7 @@ export class GameClientService {
         this.gameboardUpdated = new Subject();
         this.turnFinish = new ReplaySubject<boolean>(1);
         this.configureBaseSocketFeatures();
-        this.gameboard = [];
+        this.gameboard = new Gameboard();
     }
 
     configureBaseSocketFeatures() {
@@ -105,7 +106,7 @@ export class GameClientService {
 
     resetGameInformation() {
         this.timer = 0;
-        this.gameboard = [];
+        this.gameboard = new Gameboard();
         this.playerOne = {
             name: '',
             score: 0,
@@ -236,7 +237,7 @@ export class GameClientService {
     }
 
     private updateNewGameboard(newGameboard: string[]) {
-        this.gameboard.forEach((tile) => (tile._letter = newGameboard[tile.coordinate.x + tile.coordinate.y * constants.TOTAL_TILES_IN_COLUMN]));
+        this.gameboard.updateFromStringArray(newGameboard);
         this.updateGameboard();
     }
 
@@ -254,7 +255,7 @@ export class GameClientService {
     }
 
     private skipEvent(gameInfo: GameInfo) {
-        this.gameboard = gameInfo.gameboard;
+        this.gameboard.updateFromStringArray(gameInfo.gameboard);
         const playerOneIndex = this.playerOne.name === gameInfo.players[0].name ? 0 : 1;
         const secondPlayerIndex = Math.abs(playerOneIndex - 1);
         const updatedRack = this.updateRack(gameInfo.players[playerOneIndex].rack);
