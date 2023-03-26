@@ -41,7 +41,6 @@ export enum SocketEvents {
     Skip = 'skip',
     UpdatePlayerInformation = 'UpdateMyPlayerInformation',
     UpdateOpponentInformation = 'UpdateOpponentInformation',
-    CreateScrabbleGame = 'createScrabbleGame',
     TimerClientUpdate = 'timerUpdate',
     OpponentGameLeave = 'OpponentLeftTheGame',
     GameEnd = 'endGame',

@@ -5,7 +5,7 @@ import { Game } from '@app/classes/game.class';
 import { Gameboard } from '@app/classes/gameboard.class';
 import { LetterPlacement } from '@app/classes/letter-placement.class';
 import { LetterReserve } from '@app/classes/letter-reserve.class';
-import { Player } from '@app/classes/player/player.class';
+import { GamePlayer } from '@app/classes/player/player.class';
 import { RealPlayer } from '@app/classes/player/real-player.class';
 import { Turn } from '@app/classes/turn.class';
 import { WordSolver } from '@app/classes/word-solver.class';
@@ -168,7 +168,7 @@ describe('GamesHandler Service', () => {
         it("updatePlayerInfo() shouldn't do anything if the players are undefined", () => {
             gamesHandler['players'].set(serverSocket.id, playerOne);
 
-            gamesHandler['gamePlayers'].set(playerOne.room, undefined as unknown as Player[]);
+            gamesHandler['gamePlayers'].set(playerOne.room, undefined as unknown as GamePlayer[]);
 
             gamesHandler['updatePlayerInfo'](serverSocket, playerOne.room, playerOne.game);
             expect(socketManagerStub.emitRoom.called).to.not.be.equal(true);
@@ -177,7 +177,7 @@ describe('GamesHandler Service', () => {
         it("updatePlayerInfo() shouldn't do anything if the players are undefined", () => {
             gamesHandler['players'].set(serverSocket.id, playerOne);
 
-            gamesHandler['gamePlayers'].set(playerOne.room, undefined as unknown as Player[]);
+            gamesHandler['gamePlayers'].set(playerOne.room, undefined as unknown as GamePlayer[]);
 
             gamesHandler['updatePlayerInfo'](serverSocket, playerOne.room, playerOne.game);
             expect(socketManagerStub.emitRoom.called).to.not.be.equal(true);

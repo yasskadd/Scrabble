@@ -22,7 +22,6 @@ import { PlayerType } from '@common/models/player-type';
 import { GameVisibility } from '@common/models/game-visibility';
 import { GAME_LOBBY_ROOM_ID } from '@common/constants/room';
 import { GamesStateService } from '@app/services/games-management/games-state.service';
-import { GameScrabbleInformation } from '@common/interfaces/game-scrabble-information';
 import { GameDifficulty } from '@common/models/game-difficulty';
 import { VirtualPlayersStorageService } from '@app/services/database/virtual-players-storage.service';
 import { INVALID_INDEX } from '@common/constants/board-info';
@@ -171,27 +170,28 @@ export class GameSessions {
         const room = this.getRoom(roomId);
 
         if (room) {
-            // TODO : Changed GameScrabbleInformation to simply using GameRoom
-            const users: IUser[] = [];
-            const socketIds: string[] = [];
-            room.players.forEach((player: RoomPlayer) => {
-                users.push(player.user);
-                socketIds.push(player.socketId);
-            });
-
-            this.gameStateService
-                .createGame(server, {
-                    players: users,
-                    roomId,
-                    timer: room.timer,
-                    socketId: socketIds,
-                    mode: room.mode,
-                    botDifficulty: 'easy',
-                    dictionary: room.dictionary,
-                } as GameScrabbleInformation)
-                .then(() => {
-                    server.to(roomId).emit(SocketEvents.GameAboutToStart);
-                });
+            this.gameStateService.createGame(server, room);
+            // // TODO : Changed GameScrabbleInformation to simply using GameRoom
+            // const users: IUser[] = [];
+            // const socketIds: string[] = [];
+            // room.players.forEach((player: RoomPlayer) => {
+            //     users.push(player.user);
+            //     socketIds.push(player.socketId);
+            // });
+            //
+            // this.gameStateService
+            //     .createGame(server, {
+            //         players: users,
+            //         roomId,
+            //         timer: room.timer,
+            //         socketId: socketIds,
+            //         mode: room.mode,
+            //         botDifficulty: 'easy',
+            //         dictionary: room.dictionary,
+            //     } as GameScrabbleInformation)
+            //     .then(() => {
+            //         server.to(roomId).emit(SocketEvents.GameAboutToStart);
+            //     });
         }
     }
 

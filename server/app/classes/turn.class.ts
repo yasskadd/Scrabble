@@ -1,5 +1,5 @@
 import { ReplaySubject } from 'rxjs';
-import { Player } from './player/player.class';
+import { GamePlayer } from './player/player.class';
 
 const SECOND = 1000;
 
@@ -31,7 +31,7 @@ export class Turn {
         }, SECOND);
     }
 
-    determineStartingPlayer(players: Player[]): void {
+    determineStartingPlayer(players: GamePlayer[]): void {
         const randomNumber: number = Math.floor(Math.random() * players.length);
         this.activePlayer = players[randomNumber].name;
         const inactivePlayers = players.filter((player) => {

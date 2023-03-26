@@ -3,7 +3,7 @@
 /* eslint-disable dot-notation*/
 import { Game } from '@app/classes/game.class';
 import { LetterReserve } from '@app/classes/letter-reserve.class';
-import { Player } from '@app/classes/player/player.class';
+import { GamePlayer } from '@app/classes/player/player.class';
 import { Turn } from '@app/classes/turn.class';
 import { Word } from '@app/classes/word.class';
 import { CommandInfo } from '@common/interfaces/command-info';
@@ -16,8 +16,8 @@ import { ErrorType, LetterPlacement } from './letter-placement.class';
 import { WordSolver } from './word-solver.class';
 
 describe('Game tests', () => {
-    let player1: Player;
-    let player2: Player;
+    let player1: GamePlayer;
+    let player2: GamePlayer;
     let turn: SinonStubbedInstance<Turn> & Turn;
     let letterReserve: SinonStubbedInstance<LetterReserve> & LetterReserve;
     let letterPlacement: SinonStubbedInstance<LetterPlacement> & LetterPlacement;
@@ -26,9 +26,9 @@ describe('Game tests', () => {
     let game: Game;
 
     beforeEach(() => {
-        player1 = new Player('player1');
+        player1 = new GamePlayer('player1');
         player1.name = 'OriginalName1';
-        player2 = new Player('player2');
+        player2 = new GamePlayer('player2');
         player2.name = 'OriginalName2';
         turn = createStubInstance(Turn) as SinonStubbedInstance<Turn> & Turn;
         letterReserve = createStubInstance(LetterReserve) as SinonStubbedInstance<LetterReserve> & LetterReserve;

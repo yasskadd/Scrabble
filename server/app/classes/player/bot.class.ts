@@ -6,9 +6,9 @@ import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
 import { CommandInfo } from '@common/interfaces/command-info';
 import { Container } from 'typedi';
-import { Player } from './player.class';
+import { GamePlayer } from './player.class';
 
-export class Bot extends Player {
+export class Bot extends GamePlayer {
     roomId: string;
     protected countUp: number = 0;
     protected socketManager: SocketManager = Container.get(SocketManager);

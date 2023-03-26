@@ -1,5 +1,5 @@
 import { Gameboard } from '@app/classes/gameboard.class';
-import { Player } from '@app/classes/player/player.class';
+import { GamePlayer } from '@app/classes/player/player.class';
 import { Word } from '@app/classes/word.class';
 import { PlaceLettersReturn } from '@app/interfaces/place-letters-return';
 import { RackService } from '@app/services/rack.service';
@@ -22,7 +22,7 @@ export class LetterPlacement {
         this.dictionaryValidation = dictionaryValidation;
     }
 
-    globalCommandVerification(commandInfo: CommandInfo, gameboard: Gameboard, player: Player): [Word, ErrorType | null] {
+    globalCommandVerification(commandInfo: CommandInfo, gameboard: Gameboard, player: GamePlayer): [Word, ErrorType | null] {
         if (!this.validateCommandCoordinate(commandInfo.firstCoordinate, gameboard)) return [{} as Word, ErrorType.CommandCoordinateOutOfBounds];
         if (!this.rackService.areLettersInRack(commandInfo.letters, player)) return [{} as Word, ErrorType.LettersNotInRack];
 
@@ -32,7 +32,7 @@ export class LetterPlacement {
         return [commandWord, null];
     }
 
-    placeLetters(commandWord: Word, commandInfo: CommandInfo, player: Player, currentGameboard: Gameboard): PlaceLettersReturn {
+    placeLetters(commandWord: Word, commandInfo: CommandInfo, player: GamePlayer, currentGameboard: Gameboard): PlaceLettersReturn {
         this.placeNewLettersOnBoard(commandInfo, commandWord, currentGameboard);
 
         const validateWordReturn = this.dictionaryValidation.validateWord(commandWord, currentGameboard);
@@ -108,7 +108,7 @@ export class LetterPlacement {
         commandWord.newLetterCoords.forEach((coord) => gameboard.removeLetter(coord));
     }
 
-    private updatePlayerScore(wordScore: number, commandWord: Word, player: Player) {
+    private updatePlayerScore(wordScore: number, commandWord: Word, player: GamePlayer) {
         player.score += wordScore;
     }
 }

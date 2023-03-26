@@ -1,10 +1,10 @@
-import { Player } from '@app/classes/player/player.class';
+import { GamePlayer } from '@app/classes/player/player.class';
 import { Letter } from '@common/interfaces/letter';
 import { Service } from 'typedi';
 
 @Service()
 export class RackService {
-    areLettersInRack(commandLetters: string[], player: Player): boolean {
+    areLettersInRack(commandLetters: string[], player: GamePlayer): boolean {
         const tempRack: Letter[] = this.createTempRack(player);
         const lettersPresentInRack = this.findLettersPresentInRack(commandLetters, tempRack);
         return lettersPresentInRack.length === commandLetters.length;
@@ -20,7 +20,7 @@ export class RackService {
         });
     }
 
-    createTempRack(player: Player): Letter[] {
+    createTempRack(player: GamePlayer): Letter[] {
         const tempPlayerRack: Letter[] = [];
         for (const letter of player.rack) {
             tempPlayerRack.push(letter);

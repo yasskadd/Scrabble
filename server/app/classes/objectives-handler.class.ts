@@ -1,4 +1,4 @@
-import { Player } from '@app/classes/player/player.class';
+import { GamePlayer } from '@app/classes/player/player.class';
 import { Word } from '@app/classes/word.class';
 import * as ObjectivesInfo from '@app/constants/objectives-description';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
@@ -10,34 +10,34 @@ const MINIMUM_LETTERS_10 = 10;
 const MINIMUM_LETTERS_4 = 4;
 
 export class ObjectivesHandler {
-    players: [Player, Player];
+    players: [GamePlayer, GamePlayer];
     protected socketManager: SocketManager = Container.get(SocketManager);
     private objectivesMap: Map<Objective, CallableFunction> = new Map();
 
-    constructor(player1: Player, player2: Player) {
+    constructor(player1: GamePlayer, player2: GamePlayer) {
         this.players = [player1, player2];
         this.setMapObjectives();
         this.attributeObjectives(player1, player2);
     }
 
-    verifyObjectives(player: Player, allWordsFormed: Word[], numberOfLettersPlaced: number) {
+    verifyObjectives(player: GamePlayer, allWordsFormed: Word[], numberOfLettersPlaced: number) {
         player.objectives.forEach((objective) => {
             if (objective.type === 'Word') this.verifyWordObjectives(objective, allWordsFormed, player);
             else if (objective.type === 'Turn') this.verifyTurnObjectives(objective, numberOfLettersPlaced, player);
         });
     }
 
-    verifyWordObjectives(objective: Objective, allWordsFormed: Word[], player: Player): void {
+    verifyWordObjectives(objective: Objective, allWordsFormed: Word[], player: GamePlayer): void {
         const objectiveVerificationFunction = this.objectivesMap.get(objective) as CallableFunction;
         if (objectiveVerificationFunction(allWordsFormed)) this.completeObjective(player, objective);
     }
 
-    verifyTurnObjectives(objective: Objective, numberOfLettersPlaced: number, player: Player): void {
+    verifyTurnObjectives(objective: Objective, numberOfLettersPlaced: number, player: GamePlayer): void {
         const objectiveVerificationFunction = this.objectivesMap.get(objective) as CallableFunction;
         if (objectiveVerificationFunction(numberOfLettersPlaced, player)) this.completeObjective(player, objective);
     }
 
-    attributeObjectives(player1: Player, player2: Player): void {
+    attributeObjectives(player1: GamePlayer, player2: GamePlayer): void {
         const objectivesListCopy: Objective[] = [...ObjectivesInfo.objectivesList];
         const publicObjective1 = objectivesListCopy.splice(Math.floor(Math.random() * objectivesListCopy.length), 1)[0];
         publicObjective1.isPublic = true;
@@ -51,7 +51,7 @@ export class ObjectivesHandler {
         player2.objectives.push(publicObjective1, publicObjective2, privateObjective2);
     }
 
-    verifyClueCommandEndGame(players: Player[]) {
+    verifyClueCommandEndGame(players: GamePlayer[]) {
         if (!this.players[0].game.isMode2990) return;
         players.forEach((player) => {
             if (player.clueCommandUseCount === 0 && player.objectives.includes(ObjectivesInfo.clueCommandNeverUsed)) {
@@ -61,7 +61,7 @@ export class ObjectivesHandler {
         });
     }
 
-    private are5LettersPlacedTwice(numberOfLettersPlaced: number, player: Player) {
+    private are5LettersPlacedTwice(numberOfLettersPlaced: number, player: GamePlayer) {
         if (player.fiveLettersPlacedCount === 1 && numberOfLettersPlaced > MINIMUM_LETTERS_4) {
             player.fiveLettersPlacedCount = 0;
             return true;
@@ -140,11 +140,11 @@ export class ObjectivesHandler {
         this.objectivesMap.set(ObjectivesInfo.fiveLettersPlacedTwice, this.are5LettersPlacedTwice);
     }
 
-    private addObjectivePoints(player: Player, objective: Objective): void {
+    private addObjectivePoints(player: GamePlayer, objective: Objective): void {
         player.score += objective.points;
     }
 
-    private completeObjective(player: Player, objective: Objective): void {
+    private completeObjective(player: GamePlayer, objective: Objective): void {
         if (objective.isPublic) {
             const firstPlayerObjectives: Objective[] = this.players[0].objectives;
             const secondPlayerObjectives: Objective[] = this.players[1].objectives;

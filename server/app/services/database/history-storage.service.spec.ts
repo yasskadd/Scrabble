@@ -1,7 +1,7 @@
 /* eslint-disable dot-notation */
 import { DatabaseCollection } from '@app/classes/database-collection.class';
 import { Game } from '@app/classes/game.class';
-import { Player } from '@app/classes/player/player.class';
+import { GamePlayer } from '@app/classes/player/player.class';
 import { GamesHandler } from '@app/services/games-management/games-handler.service';
 import { GamesStateService } from '@app/services/games-management/games-state.service';
 import { expect } from 'chai';
@@ -102,8 +102,8 @@ describe('historyStorage Service', () => {
         game.isGameAbandoned = false;
         game.beginningTime = DATE1;
         game.gameMode = 'SNK';
-        const firstPlayer = Sinon.createStubInstance(Player);
-        const secondPlayer = Sinon.createStubInstance(Player);
+        const firstPlayer = Sinon.createStubInstance(GamePlayer);
+        const secondPlayer = Sinon.createStubInstance(GamePlayer);
 
         firstPlayer.name = 'Eren';
         firstPlayer.score = 1000;
@@ -113,7 +113,7 @@ describe('historyStorage Service', () => {
         secondPlayer.score = 100;
         secondPlayer.game = game as never;
 
-        const players = [firstPlayer, secondPlayer] as Player[];
+        const players = [firstPlayer, secondPlayer] as GamePlayer[];
 
         const EXPECTED_VALUE = {
             firstPlayerName: 'Eren',

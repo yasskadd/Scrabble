@@ -1,5 +1,5 @@
 import { Gameboard } from '@app/classes/gameboard.class';
-import { Player } from '@app/classes/player/player.class';
+import { GamePlayer } from '@app/classes/player/player.class';
 import { RealPlayer } from '@app/classes/player/real-player.class';
 import { Word } from '@app/classes/word.class';
 import { PlaceLettersReturn } from '@app/interfaces/place-letters-return';
@@ -39,7 +39,7 @@ export class GamesActionsService {
 
     private clueCommand(this: this, socket: Socket) {
         const letterString: string[] = [];
-        const player = this.gamesHandler.players.get(socket.id) as Player;
+        const player = this.gamesHandler.players.get(socket.id) as GamePlayer;
         player.clueCommandUseCount++;
         player.game.wordSolver.setGameboard(player.game.gameboard as Gameboard);
         player.rack.forEach((letter) => {
@@ -62,7 +62,7 @@ export class GamesActionsService {
 
     private reserveCommand(this: this, socket: Socket) {
         if (!this.gamesHandler.players.has(socket.id)) return;
-        const player = this.gamesHandler.players.get(socket.id) as Player;
+        const player = this.gamesHandler.players.get(socket.id) as GamePlayer;
         socket.emit(SocketEvents.AllReserveLetters, player.game.letterReserve.lettersReserve);
     }
 

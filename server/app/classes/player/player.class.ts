@@ -5,13 +5,13 @@ import { Objective } from '@common/interfaces/objective';
 
 type PlayerInformation = { name: string; score: number; rack: Letter[]; room: string; gameboard: LetterTile[] };
 
-export class Player {
+export class GamePlayer {
     rack: Letter[];
     score: number;
     name: string;
     room: string;
-    game: Game;
     isPlayerOne: boolean;
+    game: Game;
     objectives: Objective[];
     fiveLettersPlacedCount: number;
     clueCommandUseCount: number;
