@@ -166,7 +166,7 @@ export class GameSessions {
         server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
 
-    private async startScrabbleGame(server: Server, roomId: string): void {
+    private async startScrabbleGame(server: Server, roomId: string): Promise<void> {
         const room = this.getRoom(roomId);
 
         if (room) {
