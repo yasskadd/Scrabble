@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
 import { GameCreationQuery } from '@common/interfaces/game-creation-query';
@@ -25,6 +26,7 @@ import { GameScrabbleInformation } from '@common/interfaces/game-scrabble-inform
 import { GameDifficulty } from '@common/models/game-difficulty';
 import { VirtualPlayersStorageService } from '@app/services/database/virtual-players-storage.service';
 import { INVALID_INDEX } from '@common/constants/board-info';
+import { NUMBER_OF_PLAYERS } from '@common/constants/players';
 
 // const PLAYERS_REJECT_FROM_ROOM_ERROR = "L'adversaire à rejeter votre demande";
 
@@ -101,7 +103,7 @@ export class GameSessions {
             type: PlayerType.User,
             isCreator: false,
         };
-        if (room.players.filter((player: RoomPlayer) => player.type === PlayerType.User).length === 4) {
+        if (room.players.filter((player: RoomPlayer) => player.type === PlayerType.User).length === NUMBER_OF_PLAYERS) {
             newPlayer.type = PlayerType.Observer;
         }
         const botIndex = room.players.findIndex((player: RoomPlayer) => player.type === PlayerType.Bot);
