@@ -13,7 +13,6 @@ import { DictionaryContainer } from '@app/interfaces/dictionaryContainer';
 import { ScoreStorageService } from '@app/services/database/score-storage.service';
 import { VirtualPlayersStorageService } from '@app/services/database/virtual-players-storage.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
-import { NUMBER_OF_PLAYERS } from '@common/constants/players';
 import { SocketEvents } from '@common/constants/socket-events';
 import { PublicViewUpdate } from '@common/interfaces/public-view-update';
 import { Subject } from 'rxjs';
@@ -25,6 +24,7 @@ import { RoomPlayer } from '@common/interfaces/room-player';
 import { GameDifficulty } from '@common/models/game-difficulty';
 import { PlayerType } from '@common/models/player-type';
 import { GameMode } from '@common/models/game-mode';
+import { MAX_QUANTITY } from '@app/constants/letter-reserve';
 
 const MAX_SKIP = 6;
 const SECOND = 1000;
@@ -67,70 +67,83 @@ export class GamesStateService {
 
         this.sendPublicViewUpdate(server, game, room.id);
         server.to(room.id).emit(SocketEvents.LetterReserveUpdated, game.letterReserve.lettersReserve);
+
+        // start() that was in Game
+        this.gamesHandler.getPlayersFromRoomId(room.id).forEach((player: GamePlayer) => {
+            game.letterReserve.generateLetters(MAX_QUANTITY, player.rack);
+        });
+
+        game.turn.determineStartingPlayer(this.gamesHandler.getPlayersFromRoomId(room.id));
+        game.turn.start();
     }
 
     private initPlayers(game: Game, room: GameRoom): void {
         const players: GamePlayer[] = [];
 
-        room.players.forEach((player: RoomPlayer) => {
-            const newPlayer: GamePlayer = new RealPlayer(player);
+        room.players.forEach((roomPlayer: RoomPlayer) => {
+            switch (roomPlayer.type) {
+                case PlayerType.User: {
+                    const newPlayer: RealPlayer = new RealPlayer(roomPlayer);
 
-            this.gamesHandler.players.push(newPlayer);
-            players.push(newPlayer);
+                    this.gamesHandler.players.push(newPlayer);
+                    players.push(newPlayer);
 
-            // TODO : Is this usefull?
-            // if (this.gamesHandler.gamePlayers.get(player.roomId) === undefined) {
-            //     this.gamesHandler.gamePlayers.set(newPlayer.room, { room, players: [] as GamePlayer[] });
-            //     (this.gamesHandler.gamePlayers.get(newPlayer.room)?.players as GamePlayer[]).push(newPlayer);
-            // }
-        });
+                    newPlayer.setGame(game, roomPlayer.isCreator);
 
-        while (players.length !== NUMBER_OF_PLAYERS) {
-            const dictionaryValidation = (this.gamesHandler.dictionaries.get(room.dictionary) as DictionaryContainer).dictionaryValidation;
+                    // TODO : Is this usefull?
+                    // if (this.gamesHandler.gamePlayers.get(roomPlayer.roomId) === undefined) {
+                    //     this.gamesHandler.gamePlayers.set(newPlayer.room, { room, players: [] as GamePlayer[] });
+                    //     (this.gamesHandler.gamePlayers.get(newPlayer.room)?.players as GamePlayer[]).push(newPlayer);
+                    // }
 
-            let newPlayer: GamePlayer;
-            if (room.difficulty === GameDifficulty.Easy) {
-                newPlayer = new BeginnerBot(false, room.players[players.length], {
-                    timer: room.timer,
-                    roomId: room.id,
-                    dictionaryValidation: dictionaryValidation as DictionaryValidation,
-                });
-                players.push(newPlayer);
-            } else if (room.difficulty === GameDifficulty.Hard) {
-                newPlayer = new ExpertBot(false, room.players[players.length], {
-                    timer: room.timer,
-                    roomId: room.id,
-                    dictionaryValidation: dictionaryValidation as DictionaryValidation,
-                });
-                players.push(newPlayer);
-            } else {
-                newPlayer = new ScoreRelatedBot(false, room.players[players.length], {
-                    timer: room.timer,
-                    roomId: room.id,
-                    dictionaryValidation: dictionaryValidation as DictionaryValidation,
-                });
+                    break;
+                }
+                case PlayerType.Bot: {
+                    if (roomPlayer.type !== PlayerType.Bot) return;
+
+                    const dictionaryValidation = (this.gamesHandler.dictionaries.get(room.dictionary) as DictionaryContainer).dictionaryValidation;
+
+                    let newBot: Bot;
+                    if (room.difficulty === GameDifficulty.Easy) {
+                        newBot = new BeginnerBot(false, room.players[players.length], {
+                            timer: room.timer,
+                            roomId: room.id,
+                            dictionaryValidation: dictionaryValidation as DictionaryValidation,
+                        });
+                        players.push(newBot);
+                    } else if (room.difficulty === GameDifficulty.Hard) {
+                        newBot = new ExpertBot(false, room.players[players.length], {
+                            timer: room.timer,
+                            roomId: room.id,
+                            dictionaryValidation: dictionaryValidation as DictionaryValidation,
+                        });
+                        players.push(newBot);
+                    } else {
+                        newBot = new ScoreRelatedBot(false, room.players[players.length], {
+                            timer: room.timer,
+                            roomId: room.id,
+                            dictionaryValidation: dictionaryValidation as DictionaryValidation,
+                        });
+                    }
+
+                    newBot.setGame(game);
+                    newBot.start();
+
+                    break;
+                }
+                case PlayerType.Observer: {
+                    //     TODO : Implement that
+                    break;
+                }
+                default: {
+                    break;
+                }
             }
 
             // TODO : Is this still usefull ?
             //     if (this.gamesHandler.gamePlayers.get(newPlayer.room) === undefined)
             //         this.gamesHandler.gamePlayers.set(newPlayer.room, { room, players: [] as GamePlayer[] });
             //     (this.gamesHandler.gamePlayers.get(newPlayer.room)?.players as GamePlayer[]).push(newPlayer);
-        }
-
-        game.gameMode = 'classique';
-        game.isModeSolo = room.mode === GameMode.Solo;
-
-        room.players.forEach((player: RoomPlayer, i) => {
-            if (player.isCreator) {
-                (players[i] as RealPlayer).setGame(game, true);
-            } else (players[i] as RealPlayer).setGame(game, false);
-        });
-
-        room.players.forEach((player: RoomPlayer, i) => {
-            if (player.type === PlayerType.Bot) {
-                (players[i] as Bot).setGame(game);
-                (players[i] as Bot).start();
-            }
         });
     }
 
@@ -176,6 +189,8 @@ export class GamesStateService {
         return new Game(
             new Turn(room.timer),
             new LetterReserve(),
+            'classique',
+            room.mode === GameMode.Solo,
             this.gamesHandler.getPlayersFromRoomId(room.id),
             dictionaryContainer.dictionaryValidation,
             dictionaryContainer.letterPlacement,

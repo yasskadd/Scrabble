@@ -44,8 +44,13 @@ export class GameClientService {
         this.isGameFinish = false;
         this.gameboardUpdated = new Subject();
         this.turnFinish = new ReplaySubject<boolean>(1);
-        this.configureBaseSocketFeatures();
         this.gameboard = [];
+
+        this.clientSocketService.connected.subscribe((connected: boolean) => {
+            if (connected) {
+                this.configureBaseSocketFeatures();
+            }
+        });
     }
 
     configureBaseSocketFeatures() {

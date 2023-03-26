@@ -11,8 +11,6 @@ import { DictionaryValidation } from './dictionary-validation.class';
 import { LetterPlacement } from './letter-placement.class';
 import { WordSolver } from './word-solver.class';
 
-const MAX_QUANTITY = 7;
-
 export class Game {
     gameboard: Gameboard;
     gameMode: string;
@@ -30,6 +28,8 @@ export class Game {
     constructor(
         public turn: Turn,
         public letterReserve: LetterReserve,
+        gameMode: string,
+        isSoloMode: boolean,
         players: GamePlayer[],
         dictionaryValidation: DictionaryValidation,
         letterPlacement: LetterPlacement,
@@ -38,7 +38,9 @@ export class Game {
         // TODO : Remove this
         this.isMode2990 = false;
 
-        this.start(players);
+        // this.start(players);
+        this.gameMode = gameMode;
+        this.isModeSolo = isSoloMode;
         this.beginningTime = new Date();
         this.gameboard = new Gameboard();
         this.isGameFinish = false;
@@ -51,14 +53,14 @@ export class Game {
         this.wordSolver = wordSolver;
     }
 
-    start(players: GamePlayer[]): void {
-        players.forEach((player) => {
-            this.letterReserve.generateLetters(MAX_QUANTITY, player.rack);
-        });
-
-        this.turn.determineStartingPlayer(players);
-        this.turn.start();
-    }
+    // start(players: GamePlayer[]): void {
+    //     players.forEach((player) => {
+    //         this.letterReserve.generateLetters(MAX_QUANTITY, player.rack);
+    //     });
+    //
+    //     this.turn.determineStartingPlayer(players);
+    //     this.turn.start();
+    // }
 
     end(): void {
         this.turn.end(true);

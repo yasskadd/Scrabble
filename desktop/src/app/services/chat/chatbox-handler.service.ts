@@ -32,7 +32,11 @@ export class ChatboxHandlerService implements OnDestroy {
         this.messages = [];
         this.loggedIn = false;
 
-        this.configureBaseSocketFeatures();
+        this.clientSocket.connected.subscribe((connected: boolean) => {
+            if (connected) {
+                this.configureBaseSocketFeatures();
+            }
+        });
     }
 
     ngOnDestroy() {
