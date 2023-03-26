@@ -284,11 +284,12 @@ export class GamesStateService {
         }, SECOND);
     }
 
-    private endGame(socketId: string) {
-        const player = this.gamesHandler.players.get(socketId) as Player;
+    private endGame(socketIds: string[]) {
+        const player = this.gamesHandler.players.get(socketIds[0]) as Player;
         if (this.gamesHandler.gamePlayers.get(player.room)?.players !== undefined && !player.game.isGameFinish) {
             this.gameEnded.next(player.room);
             player.game.isGameFinish = true;
+            this.savePlayersScore(socketIds, player.room);
             this.socketManager.emitRoom(player.room, SocketEvents.GameEnd);
             this.gamesHandler.gamePlayers.delete(player.room);
         }
@@ -303,15 +304,30 @@ export class GamesStateService {
         });
     }
 
-    private async userConnected(socketId: string[], roomId: string) {
-        const playersInRoom = socketId.filter((socket) => {
+    private async userConnected(socketIds: string[], roomId: string) {
+        const playersInRoom = socketIds.filter((socket) => {
             const playerRoom = this.gamesHandler.players.get(socket)?.room;
             if (playerRoom === roomId) return socket;
             return;
         });
-        if (playersInRoom.length !== 0) this.endGame(playersInRoom[0]);
+        if (playersInRoom.length !== 0) this.endGame(playersInRoom);
         playersInRoom.forEach(async (player) => {
             await this.sendHighScore(player);
+        });
+    }
+
+    private savePlayersScore(socketId: string[], roomId: string): void {
+        const players = socketId.map((socket) => {
+            const player = this.gamesHandler.players.get(socket);
+            if (player?.room === roomId) return player;
+            return;
+        }) as Player[];
+        const winnerPlayer = players.reduce((acc, cur) => {
+            return cur.score > acc.score ? cur : acc;
+        });
+        players.forEach((player) => {
+            if (player === winnerPlayer) console.log(`The winner is ${player.name} with ${player.score} points`);
+            else console.log(`${player.name} has ${player.score} points`);
         });
     }
 
