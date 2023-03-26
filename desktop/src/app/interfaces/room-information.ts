@@ -1,10 +1,10 @@
-import { IUser } from '@common/interfaces/user';
+import { RoomPlayer } from '@common/interfaces/room-player';
+import { GameRoomState } from '@common/models/game-room-state';
 
 export interface RoomInformation {
-    players: IUser[];
+    players: RoomPlayer[];
     roomId: string;
-    isCreator: boolean;
-    statusGame: string;
+    statusGame: GameRoomState;
     mode: string;
     timer: number;
     botDifficulty?: string;

@@ -1,4 +1,3 @@
-import { GameRoom } from '@common/interfaces/game-room';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
 import { ChatboxMessage } from '@common/interfaces/chatbox-message';
@@ -6,7 +5,14 @@ import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import * as uuid from 'uuid';
 
-type HomeRoom = Pick<GameRoom, 'id' | 'isAvailable'> & { userMap: Map<string, string>; usernameSet: Set<string> };
+// type HomeRoom = Pick<GameRoom, 'id' | 'isAvailable'> & { userMap: Map<string, string>; usernameSet: Set<string> };
+
+interface HomeRoom {
+    id: string;
+    userMap: Map<string, string>;
+    usernameSet: Set<string>;
+    isAvailable: boolean;
+}
 
 const ROOM_LIMIT = 1000;
 

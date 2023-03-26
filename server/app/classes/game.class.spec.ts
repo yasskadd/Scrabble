@@ -6,7 +6,7 @@ import { LetterReserve } from '@app/classes/letter-reserve.class';
 import { Player } from '@app/classes/player/player.class';
 import { Turn } from '@app/classes/turn.class';
 import { Word } from '@app/classes/word.class';
-import { CommandInfo } from '@common/interfaces/command-info';
+import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { Letter } from '@common/interfaces/letter';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
@@ -86,7 +86,7 @@ describe('Game tests', () => {
 
     context('play test', () => {
         let letterA: Letter;
-        let commandInfo: CommandInfo;
+        let commandInfo: PlaceWordCommandInfo;
 
         beforeEach(() => {
             letterA = { value: 'a', quantity: 8, points: 1 };

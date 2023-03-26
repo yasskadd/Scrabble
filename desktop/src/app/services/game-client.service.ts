@@ -11,10 +11,8 @@ import { ClientSocketService } from './communication/client-socket.service';
 
 type CompletedObjective = { objective: Objective; name: string };
 type InitObjective = { objectives1: Objective[]; objectives2: Objective[]; playerName: string };
-type PlayInfo = { gameboard: LetterTileInterface[]; activePlayer: string };
-type PlayerInformation = { name: string; score: number; rack: Letter[]; room: string; gameboard: LetterTileInterface[] };
-type Player = { name: string; score: number; rack: Letter[]; objective?: Objective[] };
-type GameInfo = { gameboard: LetterTileInterface[]; players: Player[]; activePlayer: string };
+type PlayInfo = { gameboard: string[]; activePlayer: string };
+type PlayerInformation = { name: string; score: number; rack: Letter[]; room: string; gameboard: string[] };
 const TIMEOUT_PASS = 30;
 const TIMEOUT = 3000;
 
@@ -69,7 +67,7 @@ export class GameClientService {
             this.opponentLeaveGameEvent();
         });
 
-        this.clientSocketService.on(SocketEvents.ViewUpdate, (info: PlayInfo) => {
+        this.clientSocketService.on(SocketEvents.PublicViewUpdate, (info: PlayInfo) => {
             this.viewUpdateEvent(info);
         });
 
@@ -237,8 +235,8 @@ export class GameClientService {
         return resultingRack;
     }
 
-    private updateNewGameboard(newGameboard: LetterTileInterface[]) {
-        this.gameboard = newGameboard;
+    private updateNewGameboard(newGameboard: string[]) {
+        this.gameboard.forEach((tile) => (tile._letter = newGameboard[tile.coordinate.x + tile.coordinate.y * constants.TOTAL_TILES_IN_COLUMN]));
         this.updateGameboard();
     }
 

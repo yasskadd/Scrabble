@@ -4,8 +4,8 @@ import { LetterTree } from '@app/classes/trie/letter-tree.class';
 import { Word } from '@app/classes/word.class';
 import { ValidateWordReturn } from '@app/interfaces/validate-word-return';
 import * as constants from '@common/constants/board-info';
-import { CommandInfo } from '@common/interfaces/command-info';
 import { Coordinate } from '@common/interfaces/coordinate';
+import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { DictionaryValidation } from './dictionary-validation.class';
 const ALPHABET_LETTERS = 'abcdefghijklmnopqrstuvwxyz';
 const MAX_LETTERS_LIMIT = 7;
@@ -15,7 +15,7 @@ export class WordSolver {
     private gameboard: Gameboard;
     private legalLetterForBoardTiles: Map<Coordinate, string[]> = new Map();
     private isHorizontal: boolean;
-    private commandInfoList: CommandInfo[] = new Array();
+    private commandInfoList: PlaceWordCommandInfo[] = new Array();
     private rack: string[];
     private anchors: Coordinate[];
     private dictionaryValidation: DictionaryValidation;
@@ -29,7 +29,7 @@ export class WordSolver {
         this.gameboard = gameboard;
     }
 
-    findAllOptions(rack: string[]): CommandInfo[] {
+    findAllOptions(rack: string[]): PlaceWordCommandInfo[] {
         this.rack = rack;
         this.commandInfoList.length = 0;
 
@@ -43,8 +43,8 @@ export class WordSolver {
         return this.commandInfoList;
     }
 
-    commandInfoScore(commandInfoList: CommandInfo[]): Map<CommandInfo, number> {
-        const commandInfoMap: Map<CommandInfo, number> = new Map();
+    commandInfoScore(commandInfoList: PlaceWordCommandInfo[]): Map<PlaceWordCommandInfo, number> {
+        const commandInfoMap: Map<PlaceWordCommandInfo, number> = new Map();
         commandInfoList.forEach((commandInfo) => {
             const word = new Word(commandInfo, this.gameboard);
             this.placeLettersOnBoard(word, commandInfo);
@@ -73,7 +73,7 @@ export class WordSolver {
         if (partialWordNode !== null) this.extendWordAfterAnchor(partialWord, partialWordNode, currentAnchor, false);
     }
 
-    private placeLettersOnBoard(word: Word, commandInfo: CommandInfo) {
+    private placeLettersOnBoard(word: Word, commandInfo: PlaceWordCommandInfo) {
         const commandLettersCopy = commandInfo.letters.slice();
         word.newLetterCoords.forEach((coord) => {
             this.gameboard.placeLetter(coord, commandLettersCopy[0]);
@@ -106,7 +106,7 @@ export class WordSolver {
             firstCoordinate,
             isHorizontal: this.isHorizontal,
             letters: placedLetters,
-        } as CommandInfo);
+        } as PlaceWordCommandInfo);
     }
 
     private firstTurnOrEmpty() {
