@@ -13,8 +13,6 @@ type CompletedObjective = { objective: Objective; name: string };
 type InitObjective = { objectives1: Objective[]; objectives2: Objective[]; playerName: string };
 type PlayInfo = { gameboard: string[]; activePlayer: string };
 type PlayerInformation = { name: string; score: number; rack: Letter[]; room: string; gameboard: string[] };
-type Player = { name: string; score: number; rack: Letter[]; objective?: Objective[] };
-type GameInfo = { gameboard: string[]; players: Player[]; activePlayer: string };
 const TIMEOUT_PASS = 30;
 const TIMEOUT = 3000;
 
