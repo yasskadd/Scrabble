@@ -75,6 +75,10 @@ export class AccountStorageService {
         await this.database.users.collection.updateOne({ username: oldUsername }, { $set: { username: newUsername } });
     }
 
+    async updateScore(username: string, newScore: number): Promise<void> {
+        await this.database.users.collection.updateOne({ username }, { $set: { score: newScore } });
+    }
+
     async isSamePassword(username: string, newPassword: string): Promise<boolean> {
         const userDocument = (await this.database.users.collection?.findOne({ username })) as IUser | null;
         return await this.compareHash(newPassword, userDocument?.password as string);

@@ -9,12 +9,12 @@ export class PlayerScoreService {
         return this.lossScore(currentPlayerScore);
     }
 
-    lossScore(currentPlayerScore: number): number {
+    private lossScore(currentPlayerScore: number): number {
         const newScore = currentPlayerScore + LOSS_SCORE;
         return newScore < MIN_SCORE ? MIN_SCORE : newScore;
     }
 
-    winScore(currentPlayerScore: number): number {
+    private winScore(currentPlayerScore: number): number {
         const newScore = currentPlayerScore + WIN_SCORE;
         return newScore > MAX_SCORE ? MAX_SCORE : newScore;
     }

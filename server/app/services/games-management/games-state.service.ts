@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { DictionaryValidation } from '@app/classes/dictionary-validation.class';
 import { Game } from '@app/classes/game.class';
 import { LetterPlacement } from '@app/classes/letter-placement.class';
@@ -12,6 +13,8 @@ import { Turn } from '@app/classes/turn.class';
 import { WordSolver } from '@app/classes/word-solver.class';
 import { BOT_BEGINNER_DIFFICULTY, BOT_EXPERT_DIFFICULTY } from '@app/constants/bot';
 import { Behavior } from '@app/interfaces/behavior';
+import { PlayerScoreService } from '@app/services/client-utilities/player-score.service';
+import { AccountStorageService } from '@app/services/database/account-storage.service';
 import { ScoreStorageService } from '@app/services/database/score-storage.service';
 import { VirtualPlayersStorageService } from '@app/services/database/virtual-players-storage.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
@@ -36,6 +39,8 @@ export class GamesStateService {
         private socketManager: SocketManager,
         private gamesHandler: GamesHandler,
         private readonly scoreStorage: ScoreStorageService,
+        private readonly playerScore: PlayerScoreService,
+        private readonly accountStorage: AccountStorageService,
         private virtualPlayerStorage: VirtualPlayersStorageService,
     ) {
         this.gameEnded = new Subject();
@@ -284,12 +289,12 @@ export class GamesStateService {
         }, SECOND);
     }
 
-    private endGame(socketIds: string[]) {
+    private async endGame(socketIds: string[]) {
         const player = this.gamesHandler.players.get(socketIds[0]) as Player;
         if (this.gamesHandler.gamePlayers.get(player.room)?.players !== undefined && !player.game.isGameFinish) {
             this.gameEnded.next(player.room);
             player.game.isGameFinish = true;
-            this.savePlayersScore(socketIds, player.room);
+            await this.savePlayersScore(socketIds, player.room);
             this.socketManager.emitRoom(player.room, SocketEvents.GameEnd);
             this.gamesHandler.gamePlayers.delete(player.room);
         }
@@ -310,13 +315,13 @@ export class GamesStateService {
             if (playerRoom === roomId) return socket;
             return;
         });
-        if (playersInRoom.length !== 0) this.endGame(playersInRoom);
+        if (playersInRoom.length !== 0) await this.endGame(playersInRoom);
         playersInRoom.forEach(async (player) => {
             await this.sendHighScore(player);
         });
     }
 
-    private savePlayersScore(socketId: string[], roomId: string): void {
+    private async savePlayersScore(socketId: string[], roomId: string) {
         const players = socketId.map((socket) => {
             const player = this.gamesHandler.players.get(socket);
             if (player?.room === roomId) return player;
@@ -325,9 +330,16 @@ export class GamesStateService {
         const winnerPlayer = players.reduce((acc, cur) => {
             return cur.score > acc.score ? cur : acc;
         });
-        players.forEach((player) => {
-            if (player === winnerPlayer) console.log(`The winner is ${player.name} with ${player.score} points`);
-            else console.log(`${player.name} has ${player.score} points`);
+        const roomUsers = this.gamesHandler.gamePlayers.get(roomId)?.gameInfo.players;
+        players.forEach(async (player) => {
+            const userInfos = roomUsers?.find((user) => {
+                return user.username === player.name;
+            });
+            let newScore: number;
+            if (player === winnerPlayer) {
+                newScore = this.playerScore.calculateScore(userInfos?.score as number, true);
+            } else newScore = this.playerScore.calculateScore(userInfos?.score as number, false);
+            await this.accountStorage.updateScore(userInfos?.username as string, newScore);
         });
     }
 
