@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import * as constants from '@app/constants/board-view';
+import { LetterTile } from '@common/classes/letter-tile.class';
 import * as multipliers from '@common/constants/board-multiplier-coords';
 import { Coordinate } from '@common/interfaces/coordinate';
 import { Letter } from '@common/interfaces/letter';
-import { LetterTileInterface } from '@common/interfaces/letter-tile-interface';
 
 @Injectable({
     providedIn: 'root',
@@ -27,7 +27,7 @@ export class GridService {
         this.boardTileSize = constants.BOARD_TILE_SIZE;
     }
 
-    drawGrid(gameboard: LetterTileInterface[]) {
+    drawGrid(gameboard: LetterTile[]) {
         this.gridContext.clearRect(0, 0, constants.GRID_CANVAS_WIDTH, constants.GRID_CANVAS_HEIGHT);
         this.drawRowNumbers();
         this.drawColumnLetters();
@@ -40,7 +40,7 @@ export class GridService {
             this.fillTile({ x: letterTile.coordinate.x, y: letterTile.coordinate.y });
             // Reason : underscore indicates private attribute server side
             // eslint-disable-next-line no-underscore-dangle
-            this.drawLetter({ x: letterTile.coordinate.x, y: letterTile.coordinate.y }, letterTile._letter.toUpperCase());
+            this.drawLetter({ x: letterTile.coordinate.x, y: letterTile.coordinate.y }, letterTile.letter.toUpperCase());
             this.drawLetterPoints({ x: letterTile.coordinate.x, y: letterTile.coordinate.y }, String(letterTile.points));
         });
     }

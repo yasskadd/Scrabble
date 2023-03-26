@@ -1,9 +1,8 @@
 import { Game } from '@app/classes/game.class';
-import { LetterTile } from '@common/classes/letter-tile.class';
 import { Letter } from '@common/interfaces/letter';
 import { Objective } from '@common/interfaces/objective';
 
-type PlayerInformation = { name: string; score: number; rack: Letter[]; room: string; gameboard: LetterTile[] };
+type PlayerInformation = { name: string; score: number; rack: Letter[]; room: string; gameboard: string[] };
 
 export class Player {
     rack: Letter[];
@@ -32,7 +31,7 @@ export class Player {
             score: this.score,
             rack: this.rack,
             room: this.room,
-            gameboard: this.game.gameboard.gameboardTiles,
+            gameboard: this.game.gameboard.toStringArray(),
         };
     }
 
