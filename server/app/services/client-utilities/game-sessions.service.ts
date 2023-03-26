@@ -43,8 +43,8 @@ export class GameSessions {
     }
 
     initSocketEvents() {
-        this.socketManager.io(SocketEvents.CreateWaitingRoom, (server: Server, socket: SocketType, gameQuery: GameCreationQuery) => {
-            this.createGame(server, socket, gameQuery);
+        this.socketManager.io(SocketEvents.CreateWaitingRoom, async (server: Server, socket: SocketType, gameQuery: GameCreationQuery) => {
+            await this.createWaitingRoom(server, socket, gameQuery);
         });
 
         this.socketManager.io(SocketEvents.JoinWaitingRoom, (server: Server, socket: SocketType, userRoomQuery: UserRoomQuery) => {
@@ -195,7 +195,7 @@ export class GameSessions {
         }
     }
 
-    private async createGame(server: Server, socket: SocketType, gameQuery: GameCreationQuery): Promise<void> {
+    private async createWaitingRoom(server: Server, socket: SocketType, gameQuery: GameCreationQuery): Promise<void> {
         const room: GameRoom = await this.setupNewGameRoom(gameQuery, socket.id);
         this.gameRooms.push(room);
 
@@ -234,7 +234,8 @@ export class GameSessions {
             // TODO : Change that
             state: GameRoomState.Waiting,
             visibility: parameters.visibility,
-            password: parameters.password?.length ? parameters.password : '',
+            password: parameters.password,
+            difficulty: parameters.botDifficulty,
         };
     }
 

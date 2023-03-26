@@ -14,6 +14,7 @@ import { GameVisibility } from '@common/models/game-visibility';
 import { UserRoomQuery } from '@common/interfaces/user-room-query';
 import { window as tauriWindow } from '@tauri-apps/api';
 import { TauriEvent } from '@tauri-apps/api/event';
+import { GameDifficulty } from '@common/models/game-difficulty';
 
 @Injectable({
     providedIn: 'root',
@@ -142,6 +143,7 @@ export class GameConfigurationService implements OnDestroy {
             state: GameRoomState.Waiting,
             visibility: GameVisibility.Public,
             password: '',
+            difficulty: GameDifficulty.Easy,
         };
     }
 
