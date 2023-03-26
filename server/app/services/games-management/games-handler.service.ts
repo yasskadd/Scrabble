@@ -6,11 +6,10 @@ import { WordSolver } from '@app/classes/word-solver.class';
 import { DictionaryContainer } from '@app/interfaces/dictionaryContainer';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryStorageService } from '@app/services/database/dictionary-storage.service';
-import { RackService } from '@app/services/rack.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
-import { Container, Service } from 'typedi';
+import { Service } from 'typedi';
 import { Socket } from 'socket.io';
 import { PlayerInformation } from '@common/interfaces/player-information';
 
@@ -75,7 +74,7 @@ export class GamesHandler {
         dictionaries.forEach((dictionary) => {
             const dictionaryValidation = new DictionaryValidation(dictionary.words);
             const wordSolver = new WordSolver(dictionaryValidation);
-            const letterPlacement = new LetterPlacement(dictionaryValidation, Container.get(RackService));
+            const letterPlacement = new LetterPlacement(dictionaryValidation);
             const behavior = {
                 dictionaryValidation: dictionaryValidation as DictionaryValidation,
                 wordSolver: wordSolver as WordSolver,
@@ -93,7 +92,7 @@ export class GamesHandler {
             await this.dictionaryStorage.addDictionary(dictionary.title, JSON.stringify(dictionary));
             const dictionaryValidation = new DictionaryValidation(dictionary.words);
             const wordSolver = new WordSolver(dictionaryValidation);
-            const letterPlacement = new LetterPlacement(dictionaryValidation, Container.get(RackService));
+            const letterPlacement = new LetterPlacement(dictionaryValidation);
             const dictionaryContainer = {
                 dictionaryValidation: dictionaryValidation as DictionaryValidation,
                 wordSolver: wordSolver as WordSolver,

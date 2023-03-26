@@ -1,5 +1,4 @@
 import { GamesHandler } from '@app/services/games-management/games-handler.service';
-import { GamesStateService } from '@app/services/games-management/games-state.service';
 import { GameHistoryInfo } from '@common/interfaces/game-history-info';
 import { Document } from 'mongodb';
 import { Service } from 'typedi';
@@ -11,14 +10,7 @@ const MINIMUM_TWO_UNITS = 10;
 
 @Service()
 export class HistoryStorageService {
-    constructor(private databaseService: DatabaseService, private gamesState: GamesStateService, private gamesHandler: GamesHandler) {
-        this.gamesState.gameEnded.subscribe((room) => {
-            const gameInfo = this.formatGameInfo(room);
-            if (!gameInfo) return;
-
-            this.addToHistory(gameInfo).then();
-        });
-    }
+    constructor(private databaseService: DatabaseService, private gamesHandler: GamesHandler) {}
 
     async getHistory(): Promise<Document[]> {
         return (await this.databaseService.histories.fetchDocuments({})).reverse();
@@ -28,11 +20,11 @@ export class HistoryStorageService {
         await this.databaseService.histories.resetCollection();
     }
 
-    private async addToHistory(gameInfo: GameHistoryInfo) {
+    async addToHistory(gameInfo: GameHistoryInfo) {
         await this.databaseService.histories.addDocument(gameInfo);
     }
 
-    private formatGameInfo(roomId: string): GameHistoryInfo | undefined {
+    formatGameInfo(roomId: string): GameHistoryInfo | undefined {
         const players = this.gamesHandler.getPlayersFromRoomId(roomId);
         if (!players) return;
 
