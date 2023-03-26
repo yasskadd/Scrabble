@@ -23,6 +23,6 @@ export class RealPlayer extends GamePlayer {
     }
     skipTurn() {
         if (this.game === undefined) return;
-        this.game.skip(this.name);
+        this.game.skip(this.player.user.username);
     }
 }

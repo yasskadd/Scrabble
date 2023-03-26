@@ -11,46 +11,61 @@ import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
 import { Container, Service } from 'typedi';
-import { GameRoom } from '@common/interfaces/game-room';
-import { RoomPlayer } from '@common/interfaces/room-player';
 import { Socket } from 'socket.io';
+import { PlayerInformation } from '@common/interfaces/player-information';
 
 @Service()
 export class GamesHandler {
-    players: Map<string, GamePlayer>;
-    gamePlayers: Map<string, { room: GameRoom; players: GamePlayer[] }>;
+    players: GamePlayer[];
+    // gamePlayers: Map<string, { room: GameRoom; players: GamePlayer[] }>;
     dictionaries: Map<string, DictionaryContainer>;
 
     constructor(private socketManager: SocketManager, private dictionaryStorage: DictionaryStorageService) {
-        this.players = new Map();
-        this.gamePlayers = new Map();
+        // this.gamePlayers = new Map();
         this.dictionaries = new Map();
         this.setDictionaries().then();
     }
 
-    updatePlayerInfo(roomId: string, game: Game) {
-        const gameInfos = this.gamePlayers.get(roomId);
-        const players = gameInfos?.players;
-        if (!players) return;
-        if ((gameInfos?.players as GamePlayer[]) === undefined) return;
+    updatePlayersInfo(roomId: string, game: Game) {
+        // const gameRoom = this.gamePlayers.get(roomId);
+        // const players = gameRoom?.players;
+        // if (!players) return;
+        // if ((gameRoom?.players as GamePlayer[]) === undefined) return;
 
-        gameInfos?.room.players.forEach((roomPlayer: RoomPlayer, i) => {
-            const socket: Socket | undefined = this.socketManager.getSocketFromId(roomPlayer.socketId);
+        this.players.forEach((gamePlayer: GamePlayer) => {
+            const socket: Socket | undefined = this.socketManager.getSocketFromId(gamePlayer.player.socketId);
             if (!socket) return;
 
-            socket.emit(SocketEvents.UpdatePlayerInformation, players[i].getInformation());
+            socket.emit(SocketEvents.UpdatePlayerInformation, gamePlayer.getInformation());
 
-            const opponentPlayers = players.filter((player: GamePlayer) => {
-                return player !== players[i];
+            const opponentPlayersInfos: (PlayerInformation | undefined)[] = this.players.map((player: GamePlayer) => {
+                if (player.player.user.username !== gamePlayer.player.user.username) {
+                    return player.getInformation();
+                }
+                return;
             });
-            const opponentPlayersInfos = opponentPlayers.map((player) => {
-                return player.getInformation();
-            });
+            console.log(opponentPlayersInfos);
 
             socket.broadcast.to(roomId).emit(SocketEvents.UpdateOpponentInformation, opponentPlayersInfos);
         });
 
         this.socketManager.emitRoom(roomId, SocketEvents.LetterReserveUpdated, game.letterReserve.lettersReserve);
+    }
+
+    getPlayerFromSocketId(socketId: string): GamePlayer | undefined {
+        return this.players.find((gamePlayer: GamePlayer) => gamePlayer.player.socketId === socketId);
+    }
+
+    getPlayersFromRoomId(roomId: string): GamePlayer[] {
+        return this.players.filter((gamePlayer: GamePlayer) => gamePlayer.player.roomId === roomId);
+    }
+
+    removePlayerFromSocketId(socketId: string): void {
+        this.players = this.players.filter((gamePlayer: GamePlayer) => gamePlayer.player.socketId !== socketId);
+    }
+
+    removeRoomFromRoomId(roomId: string): void {
+        this.players = this.players.filter((gamePlayer: GamePlayer) => gamePlayer.player.roomId !== roomId);
     }
 
     async setDictionaries() {

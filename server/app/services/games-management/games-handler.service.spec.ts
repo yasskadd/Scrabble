@@ -108,7 +108,7 @@ describe('GamesHandler Service', () => {
 
             gamesHandler['players'].set(serverSocket.id, playerOne);
 
-            gamesHandler['updatePlayerInfo'](serverSocket, ROOM, game);
+            gamesHandler['updatePlayersInfo'](serverSocket, ROOM, game);
         });
 
         it('updatePlayerInfo() should broadcast correct info to the second Player', (done) => {
@@ -122,7 +122,7 @@ describe('GamesHandler Service', () => {
             playerOne.isPlayerOne = false;
             gamesHandler['gamePlayers'].set(playerOne.room, [playerOne, playerTwo]);
 
-            gamesHandler['updatePlayerInfo'](serverSocket, ROOM, game);
+            gamesHandler['updatePlayersInfo'](serverSocket, ROOM, game);
         });
 
         it('updatePlayerInfo() should broadcast correct info to the first Player when we play with a bot', (done) => {
@@ -136,7 +136,7 @@ describe('GamesHandler Service', () => {
             playerOne.isPlayerOne = true;
             gamesHandler['gamePlayers'].set(playerOne.room, [playerOne, playerTwo]);
 
-            gamesHandler['updatePlayerInfo'](serverSocket, ROOM, game);
+            gamesHandler['updatePlayersInfo'](serverSocket, ROOM, game);
         });
 
         it("updatePlayerInfo() should broadcast correct info if it isn't the first player", (done) => {
@@ -155,13 +155,13 @@ describe('GamesHandler Service', () => {
 
             gamesHandler['players'].set(serverSocket.id, playerOne);
 
-            gamesHandler['updatePlayerInfo'](serverSocket, ROOM, game);
+            gamesHandler['updatePlayersInfo'](serverSocket, ROOM, game);
         });
 
         it('updatePlayerInfo() should emit the letterReserve to the room', () => {
             gamesHandler['players'].set(serverSocket.id, playerOne);
 
-            gamesHandler['updatePlayerInfo'](serverSocket, ROOM, game);
+            gamesHandler['updatePlayersInfo'](serverSocket, ROOM, game);
             expect(socketManagerStub.emitRoom.calledWith(ROOM, SocketEvents.LetterReserveUpdated, RESERVE));
         });
 
@@ -170,7 +170,7 @@ describe('GamesHandler Service', () => {
 
             gamesHandler['gamePlayers'].set(playerOne.room, undefined as unknown as GamePlayer[]);
 
-            gamesHandler['updatePlayerInfo'](serverSocket, playerOne.room, playerOne.game);
+            gamesHandler['updatePlayersInfo'](serverSocket, playerOne.room, playerOne.game);
             expect(socketManagerStub.emitRoom.called).to.not.be.equal(true);
         });
 
@@ -179,7 +179,7 @@ describe('GamesHandler Service', () => {
 
             gamesHandler['gamePlayers'].set(playerOne.room, undefined as unknown as GamePlayer[]);
 
-            gamesHandler['updatePlayerInfo'](serverSocket, playerOne.room, playerOne.game);
+            gamesHandler['updatePlayersInfo'](serverSocket, playerOne.room, playerOne.game);
             expect(socketManagerStub.emitRoom.called).to.not.be.equal(true);
         });
     });

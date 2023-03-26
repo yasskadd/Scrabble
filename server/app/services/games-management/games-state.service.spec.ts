@@ -752,7 +752,7 @@ describe('GamesState Service', () => {
             gameInfo.socketId[1] = '3249adf8243';
 
             gamesStateService['createGame'](serverSocket, gameInfo);
-            expect(gamesHandlerStub.updatePlayerInfo.called).to.equal(true);
+            expect(gamesHandlerStub.updatePlayersInfo.called).to.equal(true);
             done();
         });
 
@@ -770,7 +770,7 @@ describe('GamesState Service', () => {
             gamesStateService['updateNewBot'](serverSocket, botPlayer.game, botPlayer.room, botPlayer);
             expect(botPlayer.setGame.called).to.equal(true);
             expect(botPlayer.start.called).to.equal(true);
-            expect(gamesHandlerStub.updatePlayerInfo.called).to.equal(true);
+            expect(gamesHandlerStub.updatePlayersInfo.called).to.equal(true);
             done();
         });
 

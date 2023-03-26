@@ -1,37 +1,34 @@
 import { Game } from '@app/classes/game.class';
-import { LetterTile } from '@common/classes/letter-tile.class';
 import { Letter } from '@common/interfaces/letter';
 import { Objective } from '@common/interfaces/objective';
-
-type PlayerInformation = { name: string; score: number; rack: Letter[]; room: string; gameboard: LetterTile[] };
+import { RoomPlayer } from '@common/interfaces/room-player';
+import { PlayerInformation } from '@common/interfaces/player-information';
 
 export class GamePlayer {
     rack: Letter[];
     score: number;
-    name: string;
-    room: string;
-    isPlayerOne: boolean;
+    player: RoomPlayer;
     game: Game;
     objectives: Objective[];
     fiveLettersPlacedCount: number;
     clueCommandUseCount: number;
 
-    constructor(name: string) {
+    constructor(player: RoomPlayer) {
+        this.player = player;
         this.rack = [];
         this.score = 0;
-        this.name = name;
         this.objectives = [];
         this.fiveLettersPlacedCount = 0;
         this.clueCommandUseCount = 0;
     }
 
-    getInformation(): PlayerInformation {
-        if (this.game === undefined) return {} as PlayerInformation;
+    getInformation(): PlayerInformation | undefined {
+        if (!this.game) return;
+
         return {
-            name: this.name,
+            player: this.player,
             score: this.score,
             rack: this.rack,
-            room: this.room,
             gameboard: this.game.gameboard.gameboardTiles,
         };
     }

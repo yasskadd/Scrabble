@@ -56,7 +56,10 @@ export class ObjectivesHandler {
         players.forEach((player) => {
             if (player.clueCommandUseCount === 0 && player.objectives.includes(ObjectivesInfo.clueCommandNeverUsed)) {
                 player.score += ObjectivesInfo.clueCommandNeverUsed.points;
-                this.socketManager.emitRoom(player.room, 'CompletedObjective', { objective: ObjectivesInfo.clueCommandNeverUsed, name: player.name });
+                this.socketManager.emitRoom(player.player.roomId, 'CompletedObjective', {
+                    objective: ObjectivesInfo.clueCommandNeverUsed,
+                    name: player.player.user.username,
+                });
             }
         });
     }
@@ -152,6 +155,6 @@ export class ObjectivesHandler {
             secondPlayerObjectives.splice(secondPlayerObjectives.indexOf(objective), 1);
         } else player.objectives.splice(player.objectives.indexOf(objective), 1);
         this.addObjectivePoints(player, objective);
-        this.socketManager.emitRoom(player.room, 'CompletedObjective', { objective, name: player.name });
+        this.socketManager.emitRoom(player.player.roomId, 'CompletedObjective', { objective, name: player.player.user.username });
     }
 }

@@ -14,13 +14,14 @@ export class HistoryStorageService {
     constructor(private databaseService: DatabaseService, private gamesState: GamesStateService, private gamesHandler: GamesHandler) {
         this.gamesState.gameEnded.subscribe((room) => {
             const gameInfo = this.formatGameInfo(room);
-            this.addToHistory(gameInfo);
+            if (!gameInfo) return;
+
+            this.addToHistory(gameInfo).then();
         });
     }
 
     async getHistory(): Promise<Document[]> {
-        const history = await (await this.databaseService.histories.fetchDocuments({})).reverse();
-        return history;
+        return (await this.databaseService.histories.fetchDocuments({})).reverse();
     }
 
     async clearHistory() {
@@ -31,9 +32,10 @@ export class HistoryStorageService {
         await this.databaseService.histories.addDocument(gameInfo);
     }
 
-    private formatGameInfo(room: string): GameHistoryInfo {
-        const players = this.gamesHandler.gamePlayers.get(room)?.players;
-        if (players === undefined) return {} as GameHistoryInfo;
+    private formatGameInfo(roomId: string): GameHistoryInfo | undefined {
+        const players = this.gamesHandler.getPlayersFromRoomId(roomId);
+        if (!players) return;
+
         const endTime = new Date();
         return {
             mode: players[0].game.gameMode,
@@ -41,9 +43,9 @@ export class HistoryStorageService {
             beginningTime: players[0].game.beginningTime,
             endTime,
             duration: this.computeDuration(players[0].game.beginningTime, endTime),
-            firstPlayerName: players[0].name,
+            firstPlayerName: players[0].player.user.username,
             firstPlayerScore: players[0].score,
-            secondPlayerName: players[1].name,
+            secondPlayerName: players[1].player.user.username,
             secondPlayerScore: players[1].score,
         } as GameHistoryInfo;
     }

@@ -66,6 +66,7 @@ export class Game {
 
     skip(playerName: string): boolean {
         if (!this.turn.validating(playerName)) return false;
+
         this.turn.skipTurn();
         return true;
     }
@@ -75,7 +76,7 @@ export class Game {
         let placeLettersReturn: PlaceLettersReturn = { hasPassed: false, gameboard: this.gameboard, invalidWords: [] as Word[] };
         const numberOfLetterPlaced = commandInfo.letters.length;
 
-        if (this.turn.validating(player.name)) {
+        if (this.turn.validating(player.player.user.username)) {
             const validationInfo = this.letterPlacement.globalCommandVerification(commandInfo, this.gameboard, player);
             const newWord = validationInfo[0];
             const errorType = validationInfo[1] as string;
@@ -90,12 +91,12 @@ export class Game {
         return placeLettersReturn;
     }
 
-    exchange(letters: string[], player: GamePlayer): Letter[] {
-        if (this.turn.validating(player.name)) {
-            player.rack = this.letterReserve.exchangeLetter(letters, player.rack);
+    exchange(letters: string[], gamePlayer: GamePlayer): Letter[] {
+        if (this.turn.validating(gamePlayer.player.user.username)) {
+            gamePlayer.rack = this.letterReserve.exchangeLetter(letters, gamePlayer.rack);
             this.turn.resetSkipCounter();
             this.turn.end();
-            return player.rack;
+            return gamePlayer.rack;
         }
         return [];
     }
