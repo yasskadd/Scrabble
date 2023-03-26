@@ -3,11 +3,11 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable dot-notation */
 import { Game } from '@app/classes/game.class';
-import { Gameboard } from '@app/classes/gameboard.class';
 import { ObjectivesHandler } from '@app/classes/objectives-handler.class';
 import { Player } from '@app/classes/player/player.class';
 import { Word } from '@app/classes/word.class';
 import { RackService } from '@app/services/rack.service';
+import { Gameboard } from '@common/classes/gameboard.class';
 import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { expect } from 'chai';
 import * as Sinon from 'sinon';

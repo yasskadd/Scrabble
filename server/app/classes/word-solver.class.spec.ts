@@ -1,5 +1,5 @@
 /* eslint-disable dot-notation */
-import { Gameboard } from '@app/classes/gameboard.class';
+import { Gameboard } from '@common/classes/gameboard.class';
 import { Coordinate } from '@common/interfaces/coordinate';
 import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { expect } from 'chai';

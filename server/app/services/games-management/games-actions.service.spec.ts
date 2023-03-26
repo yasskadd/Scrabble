@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function*/
 /* eslint-disable dot-notation*/
 import { Game } from '@app/classes/game.class';
-import { Gameboard } from '@app/classes/gameboard.class';
 import { LetterReserve } from '@app/classes/letter-reserve.class';
 import { RealPlayer } from '@app/classes/player/real-player.class';
 import { Turn } from '@app/classes/turn.class';
@@ -12,6 +11,7 @@ import { PlaceLettersReturn } from '@app/interfaces/place-letters-return';
 import { GamesHandler } from '@app/services/games-management/games-handler.service';
 import { RackService } from '@app/services/rack.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
+import { Gameboard } from '@common/classes/gameboard.class';
 import { SocketEvents } from '@common/constants/socket-events';
 import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { Letter } from '@common/interfaces/letter';
