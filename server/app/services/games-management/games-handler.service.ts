@@ -22,6 +22,7 @@ export class GamesHandler {
 
     constructor(private socketManager: SocketManager, private dictionaryStorage: DictionaryStorageService) {
         // this.gamePlayers = new Map();
+        this.players = [];
         this.dictionaries = new Map();
         this.setDictionaries().then();
     }
