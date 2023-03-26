@@ -5,7 +5,7 @@ import { Player } from '@app/classes/player/player.class';
 import { Turn } from '@app/classes/turn.class';
 import { Word } from '@app/classes/word.class';
 import { PlaceLettersReturn } from '@app/interfaces/place-letters-return';
-import { CommandInfo } from '@common/interfaces/command-info';
+import { PlayCommandInfo } from '@common/interfaces/game-actions';
 import { Letter } from '@common/interfaces/letter';
 import { DictionaryValidation } from './dictionary-validation.class';
 import { LetterPlacement } from './letter-placement.class';
@@ -73,7 +73,7 @@ export class Game {
         return true;
     }
 
-    play(player: Player, commandInfo: CommandInfo): PlaceLettersReturn | string {
+    play(player: Player, commandInfo: PlayCommandInfo): PlaceLettersReturn | string {
         if (commandInfo.letters.length === 1) commandInfo.isHorizontal = undefined;
         let placeLettersReturn: PlaceLettersReturn = { hasPassed: false, gameboard: this.gameboard, invalidWords: [] as Word[] };
         const numberOfLetterPlaced = commandInfo.letters.length;

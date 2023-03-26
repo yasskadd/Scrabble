@@ -1,6 +1,6 @@
 import * as Constant from '@app/constants/bot';
 import { SocketEvents } from '@common/constants/socket-events';
-import { CommandInfo } from '@common/interfaces/command-info';
+import { PlayCommandInfo } from '@common/interfaces/game-actions';
 import { Bot } from './bot.class';
 
 export class BeginnerBot extends Bot {
@@ -41,7 +41,7 @@ export class BeginnerBot extends Bot {
         else if (this.countUp < 3) setTimeout(() => this.play(randomCommandInfo), Constant.SECOND_3 - this.countUp * Constant.SECOND_1);
     }
 
-    protected addCommandInfoToList(commandInfoMap: Map<CommandInfo, number>, randomNumber: number): CommandInfo[] {
+    protected addCommandInfoToList(commandInfoMap: Map<PlayCommandInfo, number>, randomNumber: number): PlayCommandInfo[] {
         const commandInfoList = new Array();
         if (this.inRange(randomNumber, 1, Constant.PROB_4)) {
             commandInfoMap.forEach((value, key) => {

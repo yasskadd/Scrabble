@@ -1,7 +1,7 @@
 /* eslint-disable dot-notation -- testing private methods or attributes */
 import { TestBed } from '@angular/core/testing';
 import { SocketEvents } from '@common/constants/socket-events';
-import { CommandInfo } from '@common/interfaces/command-info';
+import { PlayCommandInfo } from '@common/interfaces/game-actions';
 import { CommandHandlerService } from './command-handler.service';
 
 describe('CommandHandlerService', () => {
@@ -59,7 +59,7 @@ describe('CommandHandlerService', () => {
     it('sendCommandPlacer() should send to the server all the information of the command in an object if the placement is vertical', () => {
         const spy = spyOn(service['clientSocket'], 'send');
         const commandTest = '!placer e3v bonjour';
-        const commandInformation: CommandInfo = {
+        const commandInformation: PlayCommandInfo = {
             firstCoordinate: { x: 3, y: 5 },
             isHorizontal: false,
             letters: ['b', 'o', 'n', 'j', 'o', 'u', 'r'],
@@ -72,7 +72,7 @@ describe('CommandHandlerService', () => {
     it('sendCommandPlacer() should send to the server all the information of the command in an object if the placement is horizontal', () => {
         const spy = spyOn(service['clientSocket'], 'send');
         const commandTest = '!placer e3h bonjour';
-        const commandInformation: CommandInfo = {
+        const commandInformation: PlayCommandInfo = {
             firstCoordinate: { x: 3, y: 5 },
             isHorizontal: true,
             letters: ['b', 'o', 'n', 'j', 'o', 'u', 'r'],
@@ -85,7 +85,7 @@ describe('CommandHandlerService', () => {
     it('sendCommandPlacer() should send to the server all the information of the command in an object if the placement is one letter', () => {
         const spy = spyOn(service['clientSocket'], 'send');
         const commandTest = '!placer e3 b';
-        const commandInformation: CommandInfo = {
+        const commandInformation: PlayCommandInfo = {
             firstCoordinate: { x: 3, y: 5 },
             isHorizontal: undefined,
             letters: ['b'],

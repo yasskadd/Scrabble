@@ -7,8 +7,8 @@ import { Turn } from '@app/classes/turn.class';
 import { WordSolver } from '@app/classes/word-solver.class';
 import { BotInformation } from '@app/interfaces/bot-information';
 import { SocketEvents } from '@common/constants/socket-events';
-import { CommandInfo } from '@common/interfaces/command-info';
 import { Coordinate } from '@common/interfaces/coordinate';
+import { PlayCommandInfo } from '@common/interfaces/game-actions';
 import { Letter } from '@common/interfaces/letter';
 import { expect } from 'chai';
 import { ReplaySubject } from 'rxjs';
@@ -61,7 +61,7 @@ describe('Expert Bot Tests', () => {
         });
 
         it('should call EmitPlaceCommand() and not exchangeLetters() if CommandInfo is not undefined', () => {
-            const commandInfoStub = {} as CommandInfo;
+            const commandInfoStub = {} as PlayCommandInfo;
             expertBot.play(commandInfoStub);
             mockEmitPlaceCommand.exactly(1).withExactArgs(commandInfoStub).verify();
             expect(spyExchangeLetters.called).to.be.equal(false);
@@ -141,16 +141,16 @@ describe('Expert Bot Tests', () => {
     context('playTurn() Tests', () => {
         let spyPlay: Sinon.SinonSpy;
         let stubProcessWordSolver: Sinon.SinonStub;
-        let stubMapCommandInfo: Map<CommandInfo, number>;
-        let stubCommandInfo1: CommandInfo;
-        let stubCommandInfo2: CommandInfo;
-        let stubCommandInfo3: CommandInfo;
+        let stubMapCommandInfo: Map<PlayCommandInfo, number>;
+        let stubCommandInfo1: PlayCommandInfo;
+        let stubCommandInfo2: PlayCommandInfo;
+        let stubCommandInfo3: PlayCommandInfo;
         beforeEach(() => {
             spyPlay = Sinon.spy(expertBot, 'play');
             stubProcessWordSolver = Sinon.stub(expertBot, 'processWordSolver' as keyof ExpertBot);
-            stubCommandInfo1 = { firstCoordinate: { x: 1, y: 1 } as Coordinate } as CommandInfo;
-            stubCommandInfo2 = { firstCoordinate: { x: 5, y: 5 } as Coordinate } as CommandInfo;
-            stubCommandInfo3 = { firstCoordinate: { x: 8, y: 8 } as Coordinate } as CommandInfo;
+            stubCommandInfo1 = { firstCoordinate: { x: 1, y: 1 } as Coordinate } as PlayCommandInfo;
+            stubCommandInfo2 = { firstCoordinate: { x: 5, y: 5 } as Coordinate } as PlayCommandInfo;
+            stubCommandInfo3 = { firstCoordinate: { x: 8, y: 8 } as Coordinate } as PlayCommandInfo;
             stubMapCommandInfo = new Map([
                 [stubCommandInfo1, 20],
                 [stubCommandInfo2, 50],

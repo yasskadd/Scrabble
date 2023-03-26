@@ -13,7 +13,7 @@ import { GamesHandler } from '@app/services/games-management/games-handler.servi
 import { RackService } from '@app/services/rack.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
-import { CommandInfo } from '@common/interfaces/command-info';
+import { PlayCommandInfo } from '@common/interfaces/game-actions';
 import { Letter } from '@common/interfaces/letter';
 import { expect } from 'chai';
 import { createServer, Server } from 'http';
@@ -124,25 +124,25 @@ describe('GamesActions Service', () => {
     });
     it('configureClueCommand() should return an array with the one placement possible when there is only one available ', (done) => {
         const placementPossible = [
-            { firstCoordinate: { x: 0, y: 0 }, lettersPlaced: ['p', 'a', 'r'] as string[], direction: 'v' } as unknown as CommandInfo,
+            { firstCoordinate: { x: 0, y: 0 }, lettersPlaced: ['p', 'a', 'r'] as string[], direction: 'v' } as unknown as PlayCommandInfo,
         ];
 
         expect(gamesActionsService['configureClueCommand'](placementPossible)).to.deep.include.members([
-            { firstCoordinate: { x: 0, y: 0 }, lettersPlaced: ['p', 'a', 'r'] as string[], direction: 'v' } as unknown as CommandInfo,
+            { firstCoordinate: { x: 0, y: 0 }, lettersPlaced: ['p', 'a', 'r'] as string[], direction: 'v' } as unknown as PlayCommandInfo,
         ]);
         done();
     });
     it('clueCommand() should return three placement possible when there is three or more available ', (done) => {
         const placementPossible = [
-            { firstCoordinate: { x: 0, y: 0 }, lettersPlaced: ['p', 'a', 'r'] as string[], direction: 'v' } as unknown as CommandInfo,
-            { firstCoordinate: { x: 4, y: 4 }, lettersPlaced: ['r', 'a', 'p'] as string[], direction: 'v' } as unknown as CommandInfo,
-            { firstCoordinate: { x: 8, y: 8 }, lettersPlaced: ['c', 'a', 'r'] as string[], direction: 'h' } as unknown as CommandInfo,
+            { firstCoordinate: { x: 0, y: 0 }, lettersPlaced: ['p', 'a', 'r'] as string[], direction: 'v' } as unknown as PlayCommandInfo,
+            { firstCoordinate: { x: 4, y: 4 }, lettersPlaced: ['r', 'a', 'p'] as string[], direction: 'v' } as unknown as PlayCommandInfo,
+            { firstCoordinate: { x: 8, y: 8 }, lettersPlaced: ['c', 'a', 'r'] as string[], direction: 'h' } as unknown as PlayCommandInfo,
         ];
 
         expect(gamesActionsService['configureClueCommand'](placementPossible)).to.deep.include.members([
-            { firstCoordinate: { x: 0, y: 0 }, lettersPlaced: ['p', 'a', 'r'] as string[], direction: 'v' } as unknown as CommandInfo,
-            { firstCoordinate: { x: 4, y: 4 }, lettersPlaced: ['r', 'a', 'p'] as string[], direction: 'v' } as unknown as CommandInfo,
-            { firstCoordinate: { x: 8, y: 8 }, lettersPlaced: ['c', 'a', 'r'] as string[], direction: 'h' } as unknown as CommandInfo,
+            { firstCoordinate: { x: 0, y: 0 }, lettersPlaced: ['p', 'a', 'r'] as string[], direction: 'v' } as unknown as PlayCommandInfo,
+            { firstCoordinate: { x: 4, y: 4 }, lettersPlaced: ['r', 'a', 'p'] as string[], direction: 'v' } as unknown as PlayCommandInfo,
+            { firstCoordinate: { x: 8, y: 8 }, lettersPlaced: ['c', 'a', 'r'] as string[], direction: 'h' } as unknown as PlayCommandInfo,
         ]);
         done();
     });
@@ -274,7 +274,7 @@ describe('GamesActions Service', () => {
 
     it('playGame() should emit an impossible command', (done) => {
         const RETURNED_STRING = 'suffering';
-        const commandInfo = { firstCoordinate: { x: 0, y: 0 }, letters: [] as string[] } as unknown as CommandInfo;
+        const commandInfo = { firstCoordinate: { x: 0, y: 0 }, letters: [] as string[] } as unknown as PlayCommandInfo;
         const player = sinon.createStubInstance(RealPlayer);
         player.name = '';
         player.room = ROOM;
@@ -302,7 +302,7 @@ describe('GamesActions Service', () => {
             activePlayer: '',
         };
 
-        const commandInfo = { firstCoordinate: { x: 0, y: 0 }, letters: [] as string[] } as unknown as CommandInfo;
+        const commandInfo = { firstCoordinate: { x: 0, y: 0 }, letters: [] as string[] } as unknown as PlayCommandInfo;
         const player = sinon.createStubInstance(RealPlayer);
         player.name = '';
         player.room = ROOM;
@@ -326,7 +326,7 @@ describe('GamesActions Service', () => {
         serverSocket.join(ROOM);
         const RETURNED_BOOLEAN = true;
 
-        const commandInfo = { firstCoordinate: { x: 0, y: 0 }, letters: [] as string[] } as unknown as CommandInfo;
+        const commandInfo = { firstCoordinate: { x: 0, y: 0 }, letters: [] as string[] } as unknown as PlayCommandInfo;
         const player = sinon.createStubInstance(RealPlayer);
         player.name = '';
         player.room = ROOM;
@@ -351,7 +351,7 @@ describe('GamesActions Service', () => {
         const RETURNED_BOOLEAN = false;
         const EXPECTED_MESSAGE = 'Le mot "' + 'HELLO' + '" ne fait pas partie du dictionnaire français';
 
-        const commandInfo = { firstCoordinate: { x: 0, y: 0 }, letters: [] as string[] } as unknown as CommandInfo;
+        const commandInfo = { firstCoordinate: { x: 0, y: 0 }, letters: [] as string[] } as unknown as PlayCommandInfo;
         const player = sinon.createStubInstance(RealPlayer);
         player.name = '';
         player.room = ROOM;
@@ -375,7 +375,7 @@ describe('GamesActions Service', () => {
         gamesActionsService['sendValidCommand'](player.placeLetter(commandInfo) as PlaceLettersReturn, serverSocket, player.room, EXPECTED_MESSAGE);
     });
     it("playGame() shouldn't do anything if the socket.id isn't in players", () => {
-        const commandInfo = { firstCoordinate: { x: 0, y: 0 }, letters: [] as string[] } as unknown as CommandInfo;
+        const commandInfo = { firstCoordinate: { x: 0, y: 0 }, letters: [] as string[] } as unknown as PlayCommandInfo;
         const gameStub = sinon.createStubInstance(Game);
 
         gameStub.turn = { activePlayer: '' } as unknown as Turn;
@@ -440,7 +440,7 @@ describe('GamesActions Service', () => {
             const sendValidCommandStub = sinon.stub(gamesActionsService, 'sendValidCommand' as never);
             serverSocket.join(ROOM);
             const RETURNED_BOOLEAN = true;
-            const commandInfo = { firstCoordinate: { x: 0, y: 0 }, letters: [] as string[], isHorizontal: false } as unknown as CommandInfo;
+            const commandInfo = { firstCoordinate: { x: 0, y: 0 }, letters: [] as string[], isHorizontal: false } as unknown as PlayCommandInfo;
             const player = sinon.createStubInstance(RealPlayer);
             player.name = '';
             player.room = ROOM;
@@ -463,7 +463,7 @@ describe('GamesActions Service', () => {
             const sendValidCommandStub = sinon.stub(gamesActionsService, 'sendValidCommand' as never);
             serverSocket.join(ROOM);
             const RETURNED_BOOLEAN = true;
-            const commandInfo = { firstCoordinate: { x: 0, y: 0 }, letters: [] as string[], isHorizontal: true } as unknown as CommandInfo;
+            const commandInfo = { firstCoordinate: { x: 0, y: 0 }, letters: [] as string[], isHorizontal: true } as unknown as PlayCommandInfo;
             const player = sinon.createStubInstance(RealPlayer);
             player.name = '';
             player.room = ROOM;
@@ -487,7 +487,7 @@ describe('GamesActions Service', () => {
             const RETURNED_BOOLEAN = true;
             const EXPECTED_MESSAGE = '!placer `0v ';
 
-            const commandInfo = { firstCoordinate: { x: 0, y: 0 }, letters: [] as string[], isHorizontal: false } as unknown as CommandInfo;
+            const commandInfo = { firstCoordinate: { x: 0, y: 0 }, letters: [] as string[], isHorizontal: false } as unknown as PlayCommandInfo;
             const player = sinon.createStubInstance(RealPlayer);
             player.name = '';
             player.room = ROOM;

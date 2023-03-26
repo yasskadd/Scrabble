@@ -1,7 +1,7 @@
 /* eslint-disable dot-notation */
 import { Gameboard } from '@app/classes/gameboard.class';
-import { CommandInfo } from '@common/interfaces/command-info';
 import { Coordinate } from '@common/interfaces/coordinate';
+import { PlayCommandInfo } from '@common/interfaces/game-actions';
 import { expect } from 'chai';
 import * as Sinon from 'sinon';
 import { DictionaryValidation } from './dictionary-validation.class';
@@ -294,7 +294,7 @@ describe('Word solver', () => {
     it('createCommandInfo() should create correct commandInfo if there is placed letters on the board', () => {
         gameboard.placeLetter({ x: 2, y: 1 }, 'e');
         wordSolver['isHorizontal'] = true;
-        const expectedCommandInfo: CommandInfo = {
+        const expectedCommandInfo: PlayCommandInfo = {
             firstCoordinate: { x: 1, y: 1 },
             isHorizontal: true,
             letters: ['t', 's', 't'],
@@ -324,7 +324,7 @@ describe('Word solver', () => {
 
     context('CommandInfoScore() Tests', () => {
         it('should return an empty Map if commandInfoList passed as parameter is empty', () => {
-            const mapResult: Map<CommandInfo, number> = wordSolver.commandInfoScore([]);
+            const mapResult: Map<PlayCommandInfo, number> = wordSolver.commandInfoScore([]);
             expect(mapResult.size).to.be.equal(0);
         });
 
@@ -332,7 +332,7 @@ describe('Word solver', () => {
             wordSolver['rack'] = ['a', 'l', 'l'];
             gameboard.placeLetter({ x: 8, y: 8 } as Coordinate, 'e');
             gameboard.placeLetter({ x: 5, y: 5 } as Coordinate, 'o');
-            const mapResult: Map<CommandInfo, number> = wordSolver.commandInfoScore(wordSolver.findAllOptions(wordSolver['rack']));
+            const mapResult: Map<PlayCommandInfo, number> = wordSolver.commandInfoScore(wordSolver.findAllOptions(wordSolver['rack']));
             mapResult.forEach((value) => {
                 expect(value).to.be.greaterThan(0);
             });
