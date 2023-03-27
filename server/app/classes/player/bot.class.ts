@@ -24,7 +24,7 @@ export class Bot extends GamePlayer {
 
     setGame(game: Game): void {
         this.game = game;
-        if (game.turn.activePlayer === this.player.user.username) this.playTurn();
+        if (game.turn.activePlayer?.username === this.player.user.username) this.playTurn();
     }
 
     // Reason : virtual method that is reimplemented in child classes
@@ -36,7 +36,7 @@ export class Bot extends GamePlayer {
     start(): void {
         this.game.turn.countdown.subscribe((countdown) => {
             this.countUp = this.timer - (countdown as number);
-            if (this.countUp === Constant.TIME_SKIP && this.player.user.username === this.game.turn.activePlayer) this.skipTurn();
+            if (this.countUp === Constant.TIME_SKIP && this.player.user === this.game.turn.activePlayer) this.skipTurn();
         });
         this.game.turn.endTurn.subscribe((activePlayer) => {
             this.isNotTurn = false;

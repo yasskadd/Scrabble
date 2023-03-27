@@ -1,8 +1,9 @@
 import { Coordinate } from './coordinate';
+import { IUser } from './user';
 
 export interface ViewUpdateInfo {
     gameboard: string[];
-    activePlayer: string | undefined;
+    activePlayer: IUser | undefined;
 }
 
 export interface ExchangePublicInfo {

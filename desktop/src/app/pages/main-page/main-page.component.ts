@@ -10,6 +10,7 @@ import { UserService } from '@app/services/user.service';
 import { SocketEvents } from '@common/constants/socket-events';
 import { LanguageService } from '@services/language.service';
 import { Subject } from 'rxjs';
+import { ClientSocketService } from '@services/communication/client-socket.service';
 
 @Component({
     selector: 'app-main-page',
@@ -31,6 +32,7 @@ export class MainPageComponent implements OnDestroy {
         protected chatBoxHandlerService: ChatboxHandlerService,
         protected userService: UserService,
         protected languageService: LanguageService,
+        private clientSocketService: ClientSocketService,
         private dialog: MatDialog,
         private highScore: MatDialog,
     ) {
@@ -38,7 +40,11 @@ export class MainPageComponent implements OnDestroy {
         this.userNameForm = new FormControl('', Validators.required);
         this.chatIsOpen = false;
 
-        this.subscribeConnectionEvents();
+        this.clientSocketService.connected.subscribe((connected: boolean) => {
+            if (connected) {
+                this.subscribeConnectionEvents();
+            }
+        });
     }
 
     protected get loggedIn(): boolean {
@@ -46,8 +52,8 @@ export class MainPageComponent implements OnDestroy {
     }
 
     ngOnDestroy() {
-        this.connectionSubject.unsubscribe();
-        this.disconnectionSubject.unsubscribe();
+        // this.connectionSubject.unsubscribe();
+        // this.disconnectionSubject.unsubscribe();
     }
 
     openGameTypeDialog(gameModeValue: string): void {

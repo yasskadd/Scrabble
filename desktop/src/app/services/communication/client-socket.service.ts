@@ -27,7 +27,7 @@ export class ClientSocketService implements OnDestroy {
     }
 
     ngOnDestroy() {
-        this.disconnect();
+        this.disconnect().then();
     }
 
     isSocketAlive() {
@@ -59,18 +59,23 @@ export class ClientSocketService implements OnDestroy {
         }
     }
 
-    establishConnection(cookie?: string) {
-        if (this.connected.value) {
-            this.disconnect();
+    async establishConnection(cookie?: string) {
+        const connection = () => {
+            if (this.useTauriSocket) {
+                this.connectTauri(cookie);
+            } else if (!this.isSocketAlive()) {
+                this.connect(cookie);
+            }
+
+            this.connected.next(true);
+        };
+
+        if (this.connected.getValue()) {
+            await this.disconnect().then(connection);
+            return;
         }
 
-        if (this.useTauriSocket) {
-            this.connectTauri(cookie);
-        } else if (!this.isSocketAlive()) {
-            this.connect(cookie);
-        }
-
-        this.connected.next(true);
+        connection();
     }
 
     listenToTauriEvents(): void {
@@ -83,9 +88,9 @@ export class ClientSocketService implements OnDestroy {
             .then();
     }
 
-    disconnect() {
+    async disconnect() {
         if (this.useTauriSocket) {
-            tauri.tauri.invoke(RustCommand.Disconnect).then(() => {
+            await tauri.tauri.invoke(RustCommand.Disconnect).then(() => {
                 tauri.event
                     .listen(RustEvent.SocketDisconnectionFailed, (error: Event<unknown>) => {
                         this.languageService.getWord('error.socket.disconnection_failed').subscribe((word: string) => {

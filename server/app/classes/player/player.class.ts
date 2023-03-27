@@ -22,9 +22,7 @@ export class GamePlayer {
         this.clueCommandUseCount = 0;
     }
 
-    getInformation(): PlayerInformation | undefined {
-        if (!this.game) return;
-
+    getInformation(): PlayerInformation {
         return {
             player: this.player,
             score: this.score,

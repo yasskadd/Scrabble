@@ -155,7 +155,7 @@ describe('GameClientService', () => {
 
     it('should update the player information', () => {
         service.playerOne = { rack: [] as Letter[] } as Player;
-        socketEmulator.peerSideEmit(SocketEvents.UpdatePlayerInformation, PLAYER_ONE);
+        socketEmulator.peerSideEmit(SocketEvents.UpdatePlayersInformation, PLAYER_ONE);
         expect(service.playerOne.name).toEqual(PLAYER_ONE.name);
         expect(service.playerOne.rack).toEqual(PLAYER_ONE.rack);
         expect(service.playerOne.score).toEqual(PLAYER_ONE.score);

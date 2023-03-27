@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { GameClientService } from '@app/services/game-client.service';
 import { first } from 'rxjs/operators';
 
@@ -7,7 +7,7 @@ import { first } from 'rxjs/operators';
     templateUrl: './game-page.component.html',
     styleUrls: ['./game-page.component.scss'],
 })
-export class GamePageComponent implements OnInit {
+export class GamePageComponent implements OnInit, OnDestroy {
     isLoading: boolean;
 
     constructor(private gameClientService: GameClientService) {
@@ -19,7 +19,10 @@ export class GamePageComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.gameClientService.resetGameInformation();
         this.gameClientService.gameboardUpdated.pipe(first()).subscribe(() => (this.isLoading = false));
+    }
+
+    ngOnDestroy() {
+        this.gameClientService.resetGameInformation();
     }
 }

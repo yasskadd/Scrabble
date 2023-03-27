@@ -4,16 +4,18 @@ import { Word } from '@app/classes/word.class';
 import { RackService } from '@app/services/rack.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
-import { ExchangePublicInfo, PlaceWordCommandInfo, ViewUpdateInfo } from '@common/interfaces/game-actions';
+import { ExchangePublicInfo, PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { Socket } from 'socket.io';
 import { Service } from 'typedi';
-import { GamesHandler } from './games-handler.service';
+import { GamesHandlerService } from './games-handler.service';
+import { GameInfo } from '@common/interfaces/game-state';
+import { PlayerInformation } from '@common/interfaces/player-information';
 
 const CLUE_COUNT_PER_COMMAND_CALL = 3;
 
 @Service()
 export class GamesActionsService {
-    constructor(private socketManager: SocketManager, private gamesHandler: GamesHandler, private rackService: RackService) {}
+    constructor(private socketManager: SocketManager, private gamesHandler: GamesHandlerService, private rackService: RackService) {}
 
     initSocketsEvents(): void {
         this.socketManager.on(SocketEvents.PlaceWordCommand, this.playGame);
@@ -89,6 +91,10 @@ export class GamesActionsService {
         const gamePlayer = this.gamesHandler.getPlayerFromSocketId(socket.id) as RealPlayer;
         if (!gamePlayer) return;
 
+        const playersInfo: PlayerInformation[] = this.gamesHandler.players.map((player: GamePlayer) => {
+            return player.getInformation();
+        });
+
         const placementResult = gamePlayer.placeLetter(commandInfo);
 
         if (typeof placementResult === 'string') {
@@ -96,8 +102,9 @@ export class GamesActionsService {
             return;
         }
 
-        const viewUpdateInfo: ViewUpdateInfo = {
+        const viewUpdateInfo: GameInfo = {
             gameboard: placementResult.gameboard.toStringArray(),
+            players: playersInfo,
             activePlayer: gamePlayer.game.turn.activePlayer,
         };
         this.socketManager.emitRoom(gamePlayer.player.roomId, SocketEvents.PublicViewUpdate, viewUpdateInfo);

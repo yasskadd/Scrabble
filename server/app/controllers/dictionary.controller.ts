@@ -1,5 +1,5 @@
 import { Dictionary } from '@app/interfaces/dictionary';
-import { GamesHandler } from '@app/services/games-management/games-handler.service';
+import { GamesHandlerService } from '@app/services/games-management/games-handler.service';
 import { Request, Response, Router } from 'express';
 import { Service } from 'typedi';
 import { HTTP_STATUS } from '@common/models/http-status';
@@ -8,7 +8,7 @@ import { HTTP_STATUS } from '@common/models/http-status';
 export class DictionaryController {
     router: Router;
 
-    constructor(private gamesHandler: GamesHandler) {
+    constructor(private gamesHandler: GamesHandlerService) {
         this.configureRouter();
     }
 

@@ -2,7 +2,7 @@
 import { DatabaseCollection } from '@app/classes/database-collection.class';
 import { Game } from '@app/classes/game.class';
 import { GamePlayer } from '@app/classes/player/player.class';
-import { GamesHandler } from '@app/services/games-management/games-handler.service';
+import { GamesHandlerService } from '@app/services/games-management/games-handler.service';
 import { GamesStateService } from '@app/services/games-management/games-state.service';
 import { expect } from 'chai';
 import { Subject } from 'rxjs';
@@ -42,7 +42,7 @@ const GAMES_HISTORY = [
 describe('historyStorage Service', () => {
     let databaseServiceStub: Sinon.SinonStubbedInstance<DatabaseService>;
     let gamesStateStub: Sinon.SinonStubbedInstance<GamesStateService>;
-    let gamesHandlerStub: Sinon.SinonStubbedInstance<GamesHandler>;
+    let gamesHandlerStub: Sinon.SinonStubbedInstance<GamesHandlerService>;
 
     let gameEndedSubjectStub: Subject<string>;
 
@@ -51,7 +51,7 @@ describe('historyStorage Service', () => {
     beforeEach(async () => {
         databaseServiceStub = Sinon.createStubInstance(DatabaseService);
         gamesStateStub = Sinon.createStubInstance(GamesStateService);
-        gamesHandlerStub = Sinon.createStubInstance(GamesHandler);
+        gamesHandlerStub = Sinon.createStubInstance(GamesHandlerService);
 
         gameEndedSubjectStub = new Subject();
         gamesStateStub.gameEnded = gameEndedSubjectStub;

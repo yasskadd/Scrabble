@@ -72,7 +72,7 @@ export class GameConfigurationService implements OnDestroy {
         });
 
         this.clientSocket.on(SocketEvents.GameAboutToStart, () => {
-            this.router.navigate([AppRoutes.GamePage]).then();
+            this.router.navigate([`${AppRoutes.GamePage}`]).then();
         });
 
         this.clientSocket.on(SocketEvents.PlayerJoinedWaitingRoom, (opponent: RoomPlayer) => {
@@ -96,12 +96,12 @@ export class GameConfigurationService implements OnDestroy {
     }
 
     ngOnDestroy() {
-        if (this.localGameRoom) {
-            this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
-                roomId: this.localGameRoom.id,
-                user: this.userService.user,
-            } as UserRoomQuery);
-        }
+        // if (this.localGameRoom) {
+        //     this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
+        //         roomId: this.localGameRoom.id,
+        //         user: this.userService.user,
+        //     } as UserRoomQuery);
+        // }
     }
 
     rejectOpponent(player: RoomPlayer): void {

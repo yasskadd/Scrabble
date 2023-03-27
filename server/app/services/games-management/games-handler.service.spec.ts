@@ -9,7 +9,7 @@ import { RealPlayer } from '@app/classes/player/real-player.class';
 import { Turn } from '@app/classes/turn.class';
 import { WordSolver } from '@app/classes/word-solver.class';
 import { DictionaryStorageService } from '@app/services/database/dictionary-storage.service';
-import { GamesHandler } from '@app/services/games-management/games-handler.service';
+import { GamesHandlerService } from '@app/services/games-management/games-handler.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { Gameboard } from '@common/classes/gameboard.class';
 import { SocketEvents } from '@common/constants/socket-events';
@@ -25,7 +25,7 @@ import { io as Client, Socket } from 'socket.io-client';
 const ROOM = '0';
 
 describe('GamesHandler Service', () => {
-    let gamesHandler: GamesHandler;
+    let gamesHandler: GamesHandlerService;
     let socketManagerStub: sinon.SinonStubbedInstance<SocketManager>;
     let dictionaryStorageStub: sinon.SinonStubbedInstance<DictionaryStorageService>;
 
@@ -48,7 +48,10 @@ describe('GamesHandler Service', () => {
         game.letterReserve.lettersReserve = [{ value: 'c', quantity: 2, points: 1 }];
         game.gameboard = sinon.createStubInstance(Gameboard);
 
-        gamesHandler = new GamesHandler(socketManagerStub as unknown as SocketManager, dictionaryStorageStub as unknown as DictionaryStorageService);
+        gamesHandler = new GamesHandlerService(
+            socketManagerStub as unknown as SocketManager,
+            dictionaryStorageStub as unknown as DictionaryStorageService,
+        );
 
         httpServer = createServer();
         sio = new ioServer(httpServer);
@@ -100,7 +103,7 @@ describe('GamesHandler Service', () => {
                 expect(information).to.be.eql(playerOne.getInformation());
                 done();
             });
-            clientSocket.on(SocketEvents.UpdatePlayerInformation, (information) => {
+            clientSocket.on(SocketEvents.UpdatePlayersInformation, (information) => {
                 expect(information).to.be.eql(playerTwo.getInformation());
             });
 
@@ -116,7 +119,7 @@ describe('GamesHandler Service', () => {
                 expect(information).to.be.eql(playerTwo.getInformation());
                 done();
             });
-            secondSocket.on(SocketEvents.UpdatePlayerInformation, (information) => {
+            secondSocket.on(SocketEvents.UpdatePlayersInformation, (information) => {
                 expect(information).to.be.eql(playerOne.getInformation());
             });
             playerOne.isPlayerOne = false;
@@ -130,7 +133,7 @@ describe('GamesHandler Service', () => {
                 expect(information).to.be.eql(playerOne.getInformation());
                 done();
             });
-            secondSocket.on(SocketEvents.UpdatePlayerInformation, (information) => {
+            secondSocket.on(SocketEvents.UpdatePlayersInformation, (information) => {
                 expect(information).to.be.eql(playerTwo.getInformation());
             });
             playerOne.isPlayerOne = true;
@@ -144,7 +147,7 @@ describe('GamesHandler Service', () => {
                 expect(information).to.be.eql(playerOne.getInformation());
                 done();
             });
-            secondSocket.on(SocketEvents.UpdatePlayerInformation, (information) => {
+            secondSocket.on(SocketEvents.UpdatePlayersInformation, (information) => {
                 expect(information).to.be.eql(playerTwo.getInformation());
             });
 

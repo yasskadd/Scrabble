@@ -3,14 +3,14 @@ import { Gameboard } from '@common/classes/gameboard.class';
 import { SocketEvents } from '@common/constants/socket-events';
 import { GameInfo } from '@common/interfaces/game-state';
 import { Letter } from '@common/interfaces/letter';
-import { AlphabetLetter } from '@common/models/alphabet-letter';
 import { ReplaySubject, Subject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
 import { PlayerInformation } from '@common/interfaces/player-information';
+import { UserService } from '@services/user.service';
+import { IUser } from '@common/interfaces/user';
 
 // type CompletedObjective = { objective: Objective; name: string };
 // type InitObjective = { objectives1: Objective[]; objectives2: Objective[]; playerName: string };
-type PlayInfo = { gameboard: string[]; activePlayer: string };
 const TIMEOUT_PASS = 30;
 
 @Injectable({
@@ -19,9 +19,9 @@ const TIMEOUT_PASS = 30;
 export class GameClientService {
     timer: number;
     gameboard: Gameboard;
-    playerOne: PlayerInformation;
-    secondPlayer: PlayerInformation;
-    playerOneTurn: boolean;
+    activePlayer: IUser;
+    players: PlayerInformation[];
+    playerTurn: number;
     letterReserveLength: number;
     isGameFinish: boolean;
     winner: string;
@@ -29,13 +29,13 @@ export class GameClientService {
     gameboardUpdated: Subject<boolean>;
     turnFinish: ReplaySubject<boolean>;
 
-    constructor(private clientSocketService: ClientSocketService) {
+    constructor(private clientSocketService: ClientSocketService, private userService: UserService) {
         this.timer = 0;
         this.letterReserveLength = 0;
-        this.playerOne = {} as PlayerInformation;
-        this.secondPlayer = undefined;
+        this.activePlayer = undefined;
+        this.players = [];
+        this.playerTurn = 0;
         this.winningMessage = '';
-        this.playerOneTurn = false;
         this.isGameFinish = false;
         this.gameboardUpdated = new Subject();
         this.turnFinish = new ReplaySubject<boolean>(1);
@@ -49,8 +49,8 @@ export class GameClientService {
     }
 
     configureBaseSocketFeatures() {
-        this.clientSocketService.on(SocketEvents.UpdatePlayerInformation, (player: PlayerInformation) => {
-            this.updatePlayerInformationEvent(player);
+        this.clientSocketService.on(SocketEvents.UpdatePlayersInformation, (players: PlayerInformation[]) => {
+            this.updatePlayersInformationEvent(players);
         });
 
         this.clientSocketService.on(SocketEvents.UpdateOpponentInformation, (player: PlayerInformation[]) => {
@@ -69,7 +69,11 @@ export class GameClientService {
             this.opponentLeaveGameEvent();
         });
 
-        this.clientSocketService.on(SocketEvents.PublicViewUpdate, (info: PlayInfo) => {
+        this.clientSocketService.on(SocketEvents.PublicViewUpdate, (info: GameInfo) => {
+            this.viewUpdateEvent(info);
+        });
+
+        this.clientSocketService.on(SocketEvents.NextTurn, (info: GameInfo) => {
             this.viewUpdateEvent(info);
         });
 
@@ -98,7 +102,6 @@ export class GameClientService {
 
     abandonGame() {
         this.clientSocketService.send('AbandonGame');
-        this.playerOneTurn = false;
     }
 
     quitGame() {
@@ -109,49 +112,22 @@ export class GameClientService {
         // TODO : Update that
         this.timer = 0;
         this.gameboard = new Gameboard();
-        this.playerOne = {
-            player: undefined,
-            score: 0,
-            rack: [
-                {
-                    value: AlphabetLetter.A,
-                    quantity: 5,
-                    points: 3,
-                },
-                {
-                    value: AlphabetLetter.B,
-                    quantity: 5,
-                    points: 3,
-                },
-                {
-                    value: AlphabetLetter.C,
-                    quantity: 5,
-                    points: 3,
-                },
-                {
-                    value: AlphabetLetter.D,
-                    quantity: 5,
-                    points: 3,
-                },
-                {
-                    value: AlphabetLetter.E,
-                    quantity: 5,
-                    points: 3,
-                },
-            ],
-            gameboard: [],
-        };
-        this.secondPlayer = { player: undefined, score: 0, rack: [], gameboard: [] };
-
-        // TODO : change that back
-        this.playerOneTurn = true;
-        this.playerOne.rack = [];
-        // this.playerOneTurn = false;
-
+        this.activePlayer = undefined;
+        this.players = [];
+        this.playerTurn = 0;
         this.letterReserveLength = 0;
         this.isGameFinish = false;
         this.winningMessage = '';
         this.winner = '';
+    }
+
+    getLocalPlayer(): PlayerInformation {
+        console.log(this.players.find((info: PlayerInformation) => info.player.user.username === this.userService.user.username));
+        return this.players.find((info: PlayerInformation) => info.player.user.username === this.userService.user.username);
+    }
+
+    currentlyPlaying(): boolean {
+        return this.activePlayer?.username === this.userService.user.username;
     }
 
     // private completeObjective(completedObjective: CompletedObjective) {
@@ -179,9 +155,8 @@ export class GameClientService {
     //     this.playerOne.objective = objective.objectives2;
     // }
 
-    private updateOpponentInformationEvent(player: PlayerInformation[]) {
-        // TODO : Update that
-        this.secondPlayer = player[1];
+    private updateOpponentInformationEvent(players: PlayerInformation[]) {
+        this.players = players;
     }
 
     private timerClientUpdateEvent(newTimer: number) {
@@ -190,22 +165,27 @@ export class GameClientService {
     }
 
     private isTurnFinish(newTimer: number): void {
-        if (newTimer === 0 && this.playerOneTurn) {
+        if (newTimer === 0 && this.players[this.playerTurn].player.user.username === this.userService.user.username) {
             this.turnFinish.next(true);
             this.turnFinish.next(false);
         }
     }
 
-    private viewUpdateEvent(info: PlayInfo) {
-        this.playerOneTurn = info.activePlayer === this.playerOne.player.user.username;
+    private viewUpdateEvent(info: GameInfo) {
+        this.activePlayer = info.activePlayer;
+        this.players = info.players;
+        console.log(
+            this.players.map((player: PlayerInformation) => {
+                return player.player.user;
+            }),
+        );
         this.updateNewGameboard(info.gameboard);
     }
 
-    private updatePlayerInformationEvent(player: PlayerInformation) {
-        const updatedRack = this.updateRack(player.rack);
-        this.playerOne = { ...player };
-        this.playerOne.rack = updatedRack;
-        this.updateNewGameboard(player.gameboard);
+    private updatePlayersInformationEvent(players: PlayerInformation[]) {
+        this.players = players;
+        // this.getLocalPlayer().rack = this.updateRack(this.getLocalPlayer().rack);
+        this.updateNewGameboard(this.getLocalPlayer().gameboard);
     }
 
     private updateRack(newRack: Letter[]): Letter[] {
@@ -215,8 +195,9 @@ export class GameClientService {
             if (dictionaryLetter === undefined) dictionary.set(letter.value, { counter: 1, letter });
             else dictionaryLetter.counter++;
         });
+
         const resultingRack = [] as Letter[];
-        this.playerOne.rack.forEach((letter) => {
+        this.getLocalPlayer().rack.forEach((letter) => {
             const dictionaryLetter = dictionary.get(letter.value);
             if (dictionaryLetter !== undefined && dictionaryLetter.counter > 0) {
                 resultingRack.push(letter);
@@ -229,6 +210,8 @@ export class GameClientService {
                 dictionaryLetter.counter--;
             }
         });
+
+        console.log(resultingRack);
         return resultingRack;
     }
 
@@ -245,31 +228,36 @@ export class GameClientService {
     }
 
     private opponentLeaveGameEvent() {
-        this.playerOneTurn = false;
         this.isGameFinish = true;
         this.winningMessage = "Bravo vous avez gagné la partie, l'adversaire a quitté la partie";
     }
 
     private skipEvent(gameInfo: GameInfo) {
         this.gameboard.updateFromStringArray(gameInfo.gameboard);
-        const playerOneIndex = this.playerOne.player.user.username === gameInfo.players[0].player.user.username ? 0 : 1;
-        const secondPlayerIndex = Math.abs(playerOneIndex - 1);
-        const updatedRack = this.updateRack(gameInfo.players[playerOneIndex].rack);
-        this.playerOne = { ...gameInfo.players[playerOneIndex] };
-        this.playerOne.rack = updatedRack;
-
-        this.secondPlayer = { ...gameInfo.players[secondPlayerIndex] };
-        this.playerOneTurn = gameInfo.activePlayer === this.playerOne.player.user.username;
+        this.getLocalPlayer().rack = this.updateRack(this.getLocalPlayer().rack);
         this.updateGameboard();
     }
 
     private findWinnerByScore(): void {
-        if (this.playerOne.score === this.secondPlayer.score) {
+        let score = this.players[0].score;
+        const differentScores: PlayerInformation[] = this.players.filter((info: PlayerInformation) => info.score !== score);
+        if (differentScores.length > 0) {
             this.winningMessage = 'game.state.equality';
             return;
         }
-        this.winningMessage = 'game.state.winned';
-        this.winner = this.playerOne.score > this.secondPlayer.score ? this.playerOne.player.user.username : this.secondPlayer.player.user.username;
+
+        let winningPlayer: PlayerInformation;
+        this.players.forEach((info: PlayerInformation) => {
+            if (info.score > score) {
+                score = info.score;
+                winningPlayer = info;
+            }
+        });
+
+        if (winningPlayer.player.user.username === this.userService.user.username) {
+            this.winningMessage = 'game.state.winned';
+        }
+        this.winner = winningPlayer.player.user.username;
     }
 
     private getAllLetterReserve(lettersReserveUpdated: Letter[]): void {
