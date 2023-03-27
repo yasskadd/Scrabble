@@ -31,7 +31,13 @@ export class ClientSocketService implements OnDestroy {
     }
 
     isSocketAlive() {
-        return this.socket && this.socket.connected;
+        if (this.useTauriSocket) {
+            return tauri.tauri.invoke(RustCommand.IsSocketAlive).then((res) => {
+                return res === RustEvent.SocketAlive ? true : res === RustEvent.SocketNotAlive ? false : false;
+            });
+        } else {
+            return this.socket && this.socket.connected;
+        }
     }
 
     connect(cookie?: string) {
@@ -60,22 +66,17 @@ export class ClientSocketService implements OnDestroy {
     }
 
     async establishConnection(cookie?: string) {
-        const connection = () => {
-            if (this.useTauriSocket) {
-                this.connectTauri(cookie);
-            } else if (!this.isSocketAlive()) {
-                this.connect(cookie);
-            }
-
-            this.connected.next(true);
-        };
-
-        if (this.connected.getValue()) {
-            await this.disconnect().then(connection);
-            return;
+        if (this.isSocketAlive() || this.connected.getValue()) {
+            await this.disconnect();
         }
 
-        connection();
+        if (this.useTauriSocket) {
+            this.connectTauri(cookie);
+        } else {
+            this.connect(cookie);
+        }
+
+        this.connected.next(true);
     }
 
     listenToTauriEvents(): void {

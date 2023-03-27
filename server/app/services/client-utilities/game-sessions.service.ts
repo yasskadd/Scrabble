@@ -286,6 +286,7 @@ export class GameSessions {
     private removeRoom(server: Server, roomId: string): void {
         const roomIndex = this.gameRooms.findIndex((room: GameRoom) => room.id === roomId);
         this.gameRooms.splice(roomIndex, 1);
+
         server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
 
