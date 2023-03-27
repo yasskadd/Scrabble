@@ -4,7 +4,7 @@ import { DictionaryValidation } from '@app/classes/dictionary-validation.class';
 import { Game } from '@app/classes/game.class';
 import { LetterPlacement } from '@app/classes/letter-placement.class';
 import { LetterReserve } from '@app/classes/letter-reserve.class';
-import { Player } from '@app/classes/player/player.class';
+import { GamePlayer } from '@app/classes/player/player.class';
 import { RealPlayer } from '@app/classes/player/real-player.class';
 import { Turn } from '@app/classes/turn.class';
 import { WordSolver } from '@app/classes/word-solver.class';
@@ -108,7 +108,7 @@ describe('GamesHandler Service', () => {
 
             gamesHandler['players'].set(serverSocket.id, playerOne);
 
-            gamesHandler['updatePlayerInfo'](serverSocket, ROOM, game);
+            gamesHandler['updatePlayersInfo'](serverSocket, ROOM, game);
         });
 
         it('updatePlayerInfo() should broadcast correct info to the second Player', (done) => {
@@ -122,7 +122,7 @@ describe('GamesHandler Service', () => {
             playerOne.isPlayerOne = false;
             gamesHandler['gamePlayers'].set(playerOne.room, [playerOne, playerTwo]);
 
-            gamesHandler['updatePlayerInfo'](serverSocket, ROOM, game);
+            gamesHandler['updatePlayersInfo'](serverSocket, ROOM, game);
         });
 
         it('updatePlayerInfo() should broadcast correct info to the first Player when we play with a bot', (done) => {
@@ -136,7 +136,7 @@ describe('GamesHandler Service', () => {
             playerOne.isPlayerOne = true;
             gamesHandler['gamePlayers'].set(playerOne.room, [playerOne, playerTwo]);
 
-            gamesHandler['updatePlayerInfo'](serverSocket, ROOM, game);
+            gamesHandler['updatePlayersInfo'](serverSocket, ROOM, game);
         });
 
         it("updatePlayerInfo() should broadcast correct info if it isn't the first player", (done) => {
@@ -155,31 +155,31 @@ describe('GamesHandler Service', () => {
 
             gamesHandler['players'].set(serverSocket.id, playerOne);
 
-            gamesHandler['updatePlayerInfo'](serverSocket, ROOM, game);
+            gamesHandler['updatePlayersInfo'](serverSocket, ROOM, game);
         });
 
         it('updatePlayerInfo() should emit the letterReserve to the room', () => {
             gamesHandler['players'].set(serverSocket.id, playerOne);
 
-            gamesHandler['updatePlayerInfo'](serverSocket, ROOM, game);
+            gamesHandler['updatePlayersInfo'](serverSocket, ROOM, game);
             expect(socketManagerStub.emitRoom.calledWith(ROOM, SocketEvents.LetterReserveUpdated, RESERVE));
         });
 
         it("updatePlayerInfo() shouldn't do anything if the players are undefined", () => {
             gamesHandler['players'].set(serverSocket.id, playerOne);
 
-            gamesHandler['gamePlayers'].set(playerOne.room, undefined as unknown as Player[]);
+            gamesHandler['gamePlayers'].set(playerOne.room, undefined as unknown as GamePlayer[]);
 
-            gamesHandler['updatePlayerInfo'](serverSocket, playerOne.room, playerOne.game);
+            gamesHandler['updatePlayersInfo'](serverSocket, playerOne.room, playerOne.game);
             expect(socketManagerStub.emitRoom.called).to.not.be.equal(true);
         });
 
         it("updatePlayerInfo() shouldn't do anything if the players are undefined", () => {
             gamesHandler['players'].set(serverSocket.id, playerOne);
 
-            gamesHandler['gamePlayers'].set(playerOne.room, undefined as unknown as Player[]);
+            gamesHandler['gamePlayers'].set(playerOne.room, undefined as unknown as GamePlayer[]);
 
-            gamesHandler['updatePlayerInfo'](serverSocket, playerOne.room, playerOne.game);
+            gamesHandler['updatePlayersInfo'](serverSocket, playerOne.room, playerOne.game);
             expect(socketManagerStub.emitRoom.called).to.not.be.equal(true);
         });
     });

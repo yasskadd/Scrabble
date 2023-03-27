@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { restore, SinonFakeTimers, spy, stub, useFakeTimers } from 'sinon';
-import { Player } from './player/player.class';
+import { GamePlayer } from './player/player.class';
 import { Turn } from './turn.class';
 
 const SECOND = 1000;
@@ -9,8 +9,8 @@ describe('turn', () => {
     let turn: Turn;
     let clock: SinonFakeTimers;
     let time: number;
-    let player1: Player;
-    let player2: Player;
+    let player1: GamePlayer;
+    let player2: GamePlayer;
 
     beforeEach(() => {
         // Reason : magic number for tests
@@ -18,8 +18,8 @@ describe('turn', () => {
         time = 30;
         turn = new Turn(time);
         clock = useFakeTimers();
-        player1 = new Player('player1');
-        player2 = new Player('player2');
+        player1 = new GamePlayer('player1');
+        player2 = new GamePlayer('player2');
     });
 
     afterEach(() => {

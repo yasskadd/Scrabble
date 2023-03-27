@@ -1,9 +1,9 @@
 import { Game } from '@app/classes/game.class';
 import { PlaceLettersReturn } from '@app/interfaces/place-letters-return';
 import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
-import { Player } from './player.class';
+import { GamePlayer } from './player.class';
 
-export class RealPlayer extends Player {
+export class RealPlayer extends GamePlayer {
     game: Game;
     isPlayerOne: boolean;
 
@@ -23,6 +23,6 @@ export class RealPlayer extends Player {
     }
     skipTurn() {
         if (this.game === undefined) return;
-        this.game.skip(this.name);
+        this.game.skip(this.player.user.username);
     }
 }

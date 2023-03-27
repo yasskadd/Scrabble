@@ -14,6 +14,7 @@ import { GameVisibility } from '@common/models/game-visibility';
 import { UserRoomQuery } from '@common/interfaces/user-room-query';
 import { window as tauriWindow } from '@tauri-apps/api';
 import { TauriEvent } from '@tauri-apps/api/event';
+import { GameDifficulty } from '@common/models/game-difficulty';
 
 @Injectable({
     providedIn: 'root',
@@ -36,9 +37,12 @@ export class GameConfigurationService implements OnDestroy {
 
         this.isRoomJoinable = new Subject<boolean>();
         // this.isGameStarted = new Subject<boolean>();
-        this.configureBaseSocketFeatures();
+        this.clientSocket.connected.subscribe((connected: boolean) => {
+            if (connected) {
+                this.configureBaseSocketFeatures();
+            }
+        });
 
-        // TODO : Move this somewhere more logic
         // eslint-disable-next-line no-underscore-dangle
         if (window.__TAURI_IPC__) {
             tauriWindow
@@ -50,6 +54,7 @@ export class GameConfigurationService implements OnDestroy {
                             roomId: this.localGameRoom.id,
                             user: this.userService.user,
                         } as UserRoomQuery);
+                        this.clientSocket.disconnect();
                     }
                     tauriWindow.getCurrent().close().then();
                 })
@@ -112,6 +117,7 @@ export class GameConfigurationService implements OnDestroy {
             socketId: '',
             user: this.userService.user,
             password: room.password,
+            isCreator: false,
         } as RoomPlayer);
     }
 
@@ -142,6 +148,7 @@ export class GameConfigurationService implements OnDestroy {
             state: GameRoomState.Waiting,
             visibility: GameVisibility.Public,
             password: '',
+            difficulty: GameDifficulty.Easy,
         };
     }
 

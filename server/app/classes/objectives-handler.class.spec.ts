@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable dot-notation */
-import { Player } from '@app/classes/player/player.class';
+import { GamePlayer } from '@app/classes/player/player.class';
 import { Word } from '@app/classes/word.class';
 import * as ObjectivesInfo from '@app/constants/objectives-description';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
@@ -14,8 +14,8 @@ import { ObjectivesHandler } from './objectives-handler.class';
 describe('Objectives Handler Tests', () => {
     let objectivesHandler: ObjectivesHandler;
     let socketManagerStub: Sinon.SinonStubbedInstance<SocketManager>;
-    let player1: Player;
-    let player2: Player;
+    let player1: GamePlayer;
+    let player2: GamePlayer;
     let wordStub1: Word;
     let wordStub2: Word;
     let wordStub3: Word;
@@ -26,9 +26,9 @@ describe('Objectives Handler Tests', () => {
         const gameStub = Sinon.createStubInstance(Game) as Game & Sinon.SinonStubbedInstance<Game>;
         socketManagerStub = Sinon.createStubInstance(SocketManager);
         gameStub.isMode2990 = true;
-        player1 = new Player('Rick');
+        player1 = new GamePlayer('Rick');
         player1.game = gameStub;
-        player2 = new Player('Morty');
+        player2 = new GamePlayer('Morty');
         player2.game = gameStub;
         objectivesHandler = new ObjectivesHandler(player1, player2);
         objectivesHandler['socketManager'] = socketManagerStub as never;

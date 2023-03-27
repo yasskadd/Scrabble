@@ -262,7 +262,7 @@ describe('GamesActions Service', () => {
         rackServiceStub.areLettersInRack.returns(true);
 
         gamesActionsService['exchange'](serverSocket, ['c']);
-        expect(gamesHandlerStub.updatePlayerInfo.called).to.be.equal(true);
+        expect(gamesHandlerStub.updatePlayersInfo.called).to.be.equal(true);
     });
 
     it("exchange() shouldn't do anything if the socket doesn't exist call updatePlayerInfo()", () => {
@@ -275,7 +275,7 @@ describe('GamesActions Service', () => {
         gamesHandlerStub['gamePlayers'].set(player1.room, [player1, player2]);
 
         gamesActionsService['exchange'](serverSocket, []);
-        expect(gamesHandlerStub.updatePlayerInfo.called).to.be.equal(false);
+        expect(gamesHandlerStub.updatePlayersInfo.called).to.be.equal(false);
         expect(socketManagerStub.emitRoom.called).to.not.be.equal(true);
     });
 
@@ -350,7 +350,7 @@ describe('GamesActions Service', () => {
         gamesHandlerStub['gamePlayers'].set(player1.room, [player1]);
 
         gamesActionsService['playGame'](serverSocket, commandInfo);
-        expect(gamesHandlerStub.updatePlayerInfo.called).to.be.equal(true);
+        expect(gamesHandlerStub.updatePlayersInfo.called).to.be.equal(true);
     });
 
     // it('sendValidCommand() should return an impossible command error if boolean is true', (done) => {
@@ -393,7 +393,7 @@ describe('GamesActions Service', () => {
         gamesHandlerStub['gamePlayers'].set(player1.room, [player1]);
 
         gamesActionsService['playGame'](serverSocket, commandInfo);
-        expect(gamesHandlerStub.updatePlayerInfo.called).to.not.be.equal(true);
+        expect(gamesHandlerStub.updatePlayersInfo.called).to.not.be.equal(true);
     });
 
     context('Two Clientsocket tests', () => {

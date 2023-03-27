@@ -7,7 +7,7 @@ import { LetterPlacement } from '@app/classes/letter-placement.class';
 import { LetterReserve } from '@app/classes/letter-reserve.class';
 import { ObjectivesHandler } from '@app/classes/objectives-handler.class';
 import { BeginnerBot } from '@app/classes/player/beginner-bot.class';
-import { Player } from '@app/classes/player/player.class';
+import { GamePlayer } from '@app/classes/player/player.class';
 import { RealPlayer } from '@app/classes/player/real-player.class';
 import { Turn } from '@app/classes/turn.class';
 import { WordSolver } from '@app/classes/word-solver.class';
@@ -147,7 +147,7 @@ describe('GamesState Service', () => {
     it('setAndGetPlayer() should set a new player and return him for the first player', () => {
         const FIRST_PLAYER = 'BIGBROTHER';
         const FIRST_PLAYER_SOCKET_ID = '0';
-        const EXPECTED_NEW_PLAYER = new Player(FIRST_PLAYER);
+        const EXPECTED_NEW_PLAYER = new GamePlayer(FIRST_PLAYER);
         EXPECTED_NEW_PLAYER.room = ROOM;
 
         const gameInformation = {
@@ -160,17 +160,17 @@ describe('GamesState Service', () => {
             dictionary: 'Francais',
         };
 
-        const newPlayer = gamesStateService['setAndGetPlayer'](gameInformation) as Player;
-        expect(newPlayer).to.be.eql(EXPECTED_NEW_PLAYER as Player);
+        const newPlayer = gamesStateService['setAndGetPlayer'](gameInformation) as GamePlayer;
+        expect(newPlayer).to.be.eql(EXPECTED_NEW_PLAYER as GamePlayer);
 
-        expect(gamesHandlerStub['players'].get(FIRST_PLAYER_SOCKET_ID) as Player).to.be.eql(EXPECTED_NEW_PLAYER as Player);
+        expect(gamesHandlerStub['players'].get(FIRST_PLAYER_SOCKET_ID) as GamePlayer).to.be.eql(EXPECTED_NEW_PLAYER as GamePlayer);
     });
     it('setAndGetPlayer() should set a new player and return him for the second player', () => {
         const FIRST_PLAYER = 'BIGBROTHER';
         const SECOND_PLAYER = 'LITTLEBROTHER';
         const FIRST_PLAYER_SOCKET_ID = '0';
         const SECOND_PLAYER_SOCKET_ID = '1';
-        const EXPECTED_NEW_PLAYER = new Player(SECOND_PLAYER);
+        const EXPECTED_NEW_PLAYER = new GamePlayer(SECOND_PLAYER);
         EXPECTED_NEW_PLAYER.room = ROOM;
 
         const gameInformation = {
@@ -183,12 +183,12 @@ describe('GamesState Service', () => {
             dictionary: 'Francais',
         };
 
-        gamesStateService['setAndGetPlayer'](gameInformation) as Player;
+        gamesStateService['setAndGetPlayer'](gameInformation) as GamePlayer;
 
-        const newPlayer = gamesStateService['setAndGetPlayer'](gameInformation) as Player;
-        expect(newPlayer).to.be.eql(EXPECTED_NEW_PLAYER as Player);
+        const newPlayer = gamesStateService['setAndGetPlayer'](gameInformation) as GamePlayer;
+        expect(newPlayer).to.be.eql(EXPECTED_NEW_PLAYER as GamePlayer);
 
-        expect(gamesHandlerStub['players'].get(SECOND_PLAYER_SOCKET_ID) as Player).to.be.eql(EXPECTED_NEW_PLAYER as Player);
+        expect(gamesHandlerStub['players'].get(SECOND_PLAYER_SOCKET_ID) as GamePlayer).to.be.eql(EXPECTED_NEW_PLAYER as GamePlayer);
     });
     it('setAndGetPlayer() should set a Beginner bot player and return him for the second player', () => {
         const FIRST_PLAYER = 'BIGBROTHER';
@@ -219,10 +219,10 @@ describe('GamesState Service', () => {
             wordSolver: wordSolver as WordSolver,
             letterPlacement: letterPlacement as LetterPlacement,
         });
-        gamesStateService['setAndGetPlayer'](gameInformation) as Player;
+        gamesStateService['setAndGetPlayer'](gameInformation) as GamePlayer;
 
-        const newPlayer = gamesStateService['setAndGetPlayer'](gameInformation) as Player;
-        expect(newPlayer).to.be.eql(EXPECTED_NEW_PLAYER as Player);
+        const newPlayer = gamesStateService['setAndGetPlayer'](gameInformation) as GamePlayer;
+        expect(newPlayer).to.be.eql(EXPECTED_NEW_PLAYER as GamePlayer);
     });
 
     it('setAndGetPlayer() should set a  Expert bot player and return him for the second player', () => {
@@ -253,9 +253,9 @@ describe('GamesState Service', () => {
             wordSolver: wordSolver as WordSolver,
             letterPlacement: letterPlacement as LetterPlacement,
         });
-        gamesStateService['setAndGetPlayer'](gameInformation) as Player;
-        const newPlayer = gamesStateService['setAndGetPlayer'](gameInformation) as Player;
-        expect(newPlayer).to.be.eql(EXPECTED_NEW_PLAYER as Player);
+        gamesStateService['setAndGetPlayer'](gameInformation) as GamePlayer;
+        const newPlayer = gamesStateService['setAndGetPlayer'](gameInformation) as GamePlayer;
+        expect(newPlayer).to.be.eql(EXPECTED_NEW_PLAYER as GamePlayer);
     });
 
     it('createNewGame() should return a new game created in classique mode', () => {
@@ -330,7 +330,7 @@ describe('GamesState Service', () => {
     it('abandonGame() should emit to the room that the opponent left when it his a multiplayerGame', () => {
         const switchToSoloStub = sinon.stub(gamesStateService, 'switchToSolo' as never);
         const gameStub = sinon.createStubInstance(Game);
-        const player = sinon.createStubInstance(Player);
+        const player = sinon.createStubInstance(GamePlayer);
         player.game = gameStub as unknown as Game;
         player.room = ROOM;
 
@@ -344,7 +344,7 @@ describe('GamesState Service', () => {
     it('abandonGame() should not emit to the room that the opponent left when it his a solo Game', () => {
         const switchToSoloStub = sinon.stub(gamesStateService, 'switchToSolo' as never);
         const gameStub = sinon.createStubInstance(Game);
-        const player = sinon.createStubInstance(Player);
+        const player = sinon.createStubInstance(GamePlayer);
         player.game = gameStub as unknown as Game;
         player.room = ROOM;
         player.game.isModeSolo = true;
@@ -422,7 +422,7 @@ describe('GamesState Service', () => {
 
     it('disconnect() should call this.waitBeforeDisconnect() when the game is not already finish', () => {
         const waitBeforeDisconnectStub = sinon.stub(gamesStateService, 'waitBeforeDisconnect' as never);
-        const player = new Player('Jean');
+        const player = new GamePlayer('Jean');
         player.room = ROOM;
         const gameHolderTest = sinon.createStubInstance(Game);
         gameHolderTest.gameboard = { gameboardCoords: [] } as unknown as Gameboard;
@@ -437,7 +437,7 @@ describe('GamesState Service', () => {
         expect(waitBeforeDisconnectStub.called).to.equal(true);
     });
     it('disconnect() should emit to the room that the opponent left when the game is already finish', (done) => {
-        const player = new Player('Jean');
+        const player = new GamePlayer('Jean');
         player.room = ROOM;
         const gameHolderTest = sinon.createStubInstance(Game);
         gameHolderTest.gameboard = { gameboardCoords: [] } as unknown as Gameboard;
@@ -454,7 +454,7 @@ describe('GamesState Service', () => {
         done();
     });
     it('disconnect() should not do anything if the socket is invalid', (done) => {
-        const player = new Player('Jean');
+        const player = new GamePlayer('Jean');
         player.room = ROOM;
         const gameHolderTest = sinon.createStubInstance(Game);
         gameHolderTest.gameboard = { gameboardCoords: [] } as unknown as Gameboard;
@@ -473,7 +473,7 @@ describe('GamesState Service', () => {
     it('waitBeforeDisconnect() should call abandonGame after 5 seconds of waiting for a reconnect', (done) => {
         const abandonGameStub = sinon.stub(gamesStateService, 'abandonGame' as never);
         const clock = sinon.useFakeTimers();
-        const player = new Player('Jean');
+        const player = new GamePlayer('Jean');
         player.room = ROOM;
         const gameHolderTest = sinon.createStubInstance(Game);
         gameHolderTest.gameboard = { gameboardCoords: [] } as unknown as Gameboard;
@@ -492,14 +492,14 @@ describe('GamesState Service', () => {
     });
 
     it('generateBotName() should call scoreStorage.getBeginnerBot', () => {
-        const player = { name: 'Vincent', room: ROOM, score: 40 } as Player;
+        const player = { name: 'Vincent', room: ROOM, score: 40 } as GamePlayer;
 
         gamesStateService['generateBotName'](player.name);
         expect(virtualPlayersStorageStub.getBeginnerBot.called).to.equal(true);
     });
 
     it('generateBotName() should return a name for the bot', async () => {
-        const player = { name: 'Vincent', room: ROOM, score: 40 } as Player;
+        const player = { name: 'Vincent', room: ROOM, score: 40 } as GamePlayer;
         virtualPlayersStorageStub.getBeginnerBot.resolves([
             {
                 username: 'Paul',
@@ -520,7 +520,7 @@ describe('GamesState Service', () => {
 
     it('sendHighScore() should call scoreStorage.addTopScore', () => {
         const gameStub = sinon.createStubInstance(Game);
-        const player = { name: 'Vincent', room: ROOM, score: 40 } as Player;
+        const player = { name: 'Vincent', room: ROOM, score: 40 } as GamePlayer;
         player.game = gameStub as unknown as Game;
         player.game.gameMode = 'classique';
         gamesHandlerStub['players'].set(serverSocket.id, player);
@@ -752,7 +752,7 @@ describe('GamesState Service', () => {
             gameInfo.socketId[1] = '3249adf8243';
 
             gamesStateService['createGame'](serverSocket, gameInfo);
-            expect(gamesHandlerStub.updatePlayerInfo.called).to.equal(true);
+            expect(gamesHandlerStub.updatePlayersInfo.called).to.equal(true);
             done();
         });
 
@@ -770,7 +770,7 @@ describe('GamesState Service', () => {
             gamesStateService['updateNewBot'](serverSocket, botPlayer.game, botPlayer.room, botPlayer);
             expect(botPlayer.setGame.called).to.equal(true);
             expect(botPlayer.start.called).to.equal(true);
-            expect(gamesHandlerStub.updatePlayerInfo.called).to.equal(true);
+            expect(gamesHandlerStub.updatePlayersInfo.called).to.equal(true);
             done();
         });
 
