@@ -158,7 +158,7 @@ export class GameClientService {
     }
 
     private isTurnFinish(newTimer: number): void {
-        if (newTimer === 0 && this.players[this.playerTurn].player.user.username === this.userService.user.username) {
+        if (newTimer === 0 && this.activePlayer.username === this.userService.user.username) {
             this.turnFinish.next(true);
             this.turnFinish.next(false);
         }
