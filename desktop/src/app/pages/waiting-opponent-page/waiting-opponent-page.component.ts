@@ -28,7 +28,6 @@ export class WaitingOpponentPageComponent implements OnDestroy {
     }
 
     ngOnDestroy() {
-        // this.gameConfiguration.exitWaitingRoom();
         this.gameConfiguration.isRoomJoinable.unsubscribe();
     }
 
@@ -42,6 +41,7 @@ export class WaitingOpponentPageComponent implements OnDestroy {
         } else {
             this.router.navigate([`${AppRoutes.MultiJoinPage}/${this.gameMode}`]).then();
         }
+        this.gameConfiguration.exitWaitingRoom();
     }
 
     protected isValidGame(): boolean {

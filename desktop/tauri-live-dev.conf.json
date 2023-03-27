@@ -19,6 +19,11 @@
             "dialog": {
                 "all": true
             },
+            "http": {
+                "scope": ["http://**", "https://**", "ws://**"],
+                "all": true,
+                "request": true
+            },
             "shell": {
                 "all": false,
                 "open": true
@@ -52,7 +57,7 @@
             }
         },
         "security": {
-            "csp": "default-src blob: data: filesystem: ws: wss: http: https: tauri: 'unsafe-eval' 'unsafe-inline' 'self' img-src: 'self'; script-src https: 'unsafe-inline'"
+            "csp": "default-src blob: data: filesystem: ws: wss: http: https: tauri: 'unsafe-eval' 'unsafe-inline' 'self' img-src: 'self'; script-src 'self' https://www.google.com https://www.gstatic.com 'unsafe-inline'"
         },
         "updater": {
             "active": false
@@ -64,7 +69,10 @@
                 "resizable": true,
                 "title": "PolyScrabble - live dev",
                 "width": 800,
-                "focus": false
+                "focus": false,
+                "minWidth": 1000,
+                "minHeight": 800,
+                "label": "main"
             }
         ]
     }

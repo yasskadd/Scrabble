@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
 import {
-    ROOMID_LENGTH,
     ROOM_NOT_AVAILABLE_ERROR,
+    ROOMID_LENGTH,
     SAME_USER_IN_ROOM_ERROR,
     UNAVAILABLE_ELEMENT_INDEX,
     WRONG_ROOM_PASSWORD,
@@ -119,8 +119,6 @@ export class GameSessions {
     }
 
     private exitWaitingRoom(server: Server, socket: SocketType, userQuery: UserRoomQuery): void {
-        console.log('exitWaitingRoom query');
-        console.log(userQuery);
         // TODO : Replace player with observer if present
         // TODO : Replace player with bot if no observers
         const room: GameRoom | undefined = this.getRoom(userQuery.roomId);
@@ -133,10 +131,14 @@ export class GameSessions {
 
             this.rejectOpponent(server, socket, player);
 
+            if (room.players.length === 0) {
+                this.removeRoom(server, userQuery.roomId);
+            }
+
             return;
         }
 
-        for (const player of [...room.players]) {
+        for (const player of room.players) {
             this.rejectOpponent(server, socket, player);
         }
 
@@ -282,7 +284,8 @@ export class GameSessions {
     }
 
     private removeRoom(server: Server, roomId: string): void {
-        this.gameRooms = this.gameRooms.filter((room: GameRoom) => room.id !== roomId);
+        const roomIndex = this.gameRooms.findIndex((room: GameRoom) => room.id === roomId);
+        this.gameRooms.splice(roomIndex, 1);
         server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
 

@@ -60,17 +60,22 @@ export class ClientSocketService implements OnDestroy {
     }
 
     async establishConnection(cookie?: string) {
+        const connection = () => {
+            if (this.useTauriSocket) {
+                this.connectTauri(cookie);
+            } else if (!this.isSocketAlive()) {
+                this.connect(cookie);
+            }
+
+            this.connected.next(true);
+        };
+
         if (this.connected.value) {
-            await this.disconnect();
+            await this.disconnect().then(connection);
+            return;
         }
 
-        if (this.useTauriSocket) {
-            this.connectTauri(cookie);
-        } else if (!this.isSocketAlive()) {
-            this.connect(cookie);
-        }
-
-        this.connected.next(true);
+        connection();
     }
 
     listenToTauriEvents(): void {
