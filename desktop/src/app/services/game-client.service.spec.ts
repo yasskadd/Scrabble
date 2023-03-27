@@ -476,7 +476,7 @@ describe('GameClientService', () => {
         service.letterReserveLength = 0;
         service.isGameFinish = true;
         service.winningMessage = 'Believe in me that believes in you';
-        service.resetGameInformation();
+        service.initGameInformation();
         expect(service.timer).toEqual(0);
         expect(service.gameboard).toEqual([]);
         expect(service.playerOne).toEqual({ name: '', score: 0, rack: [], objective: undefined });

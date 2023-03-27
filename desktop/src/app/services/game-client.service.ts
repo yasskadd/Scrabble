@@ -21,7 +21,6 @@ export class GameClientService {
     gameboard: Gameboard;
     activePlayer: IUser;
     players: PlayerInformation[];
-    playerTurn: number;
     letterReserveLength: number;
     isGameFinish: boolean;
     winner: string;
@@ -30,13 +29,8 @@ export class GameClientService {
     turnFinish: ReplaySubject<boolean>;
 
     constructor(private clientSocketService: ClientSocketService, private userService: UserService) {
-        this.timer = 0;
-        this.letterReserveLength = 0;
-        this.activePlayer = undefined;
-        this.players = [];
-        this.playerTurn = 0;
-        this.winningMessage = '';
-        this.isGameFinish = false;
+        this.initGameInformation();
+
         this.gameboardUpdated = new Subject();
         this.turnFinish = new ReplaySubject<boolean>(1);
         this.gameboard = new Gameboard();
@@ -108,13 +102,12 @@ export class GameClientService {
         this.clientSocketService.send('quitGame');
     }
 
-    resetGameInformation() {
+    initGameInformation() {
         // TODO : Update that
         this.timer = 0;
         this.gameboard = new Gameboard();
         this.activePlayer = undefined;
         this.players = [];
-        this.playerTurn = 0;
         this.letterReserveLength = 0;
         this.isGameFinish = false;
         this.winningMessage = '';
@@ -122,7 +115,7 @@ export class GameClientService {
     }
 
     getLocalPlayer(): PlayerInformation {
-        console.log(this.players.find((info: PlayerInformation) => info.player.user.username === this.userService.user.username));
+        // console.log(this.players.find((info: PlayerInformation) => info.player.user.username === this.userService.user.username));
         return this.players.find((info: PlayerInformation) => info.player.user.username === this.userService.user.username);
     }
 
