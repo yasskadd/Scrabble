@@ -10,11 +10,10 @@ import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
 import { Service } from 'typedi';
-import { Socket } from 'socket.io';
 import { PlayerInformation } from '@common/interfaces/player-information';
 
 @Service()
-export class GamesHandler {
+export class GamesHandlerService {
     players: GamePlayer[];
     // gamePlayers: Map<string, { room: GameRoom; players: GamePlayer[] }>;
     dictionaries: Map<string, DictionaryContainer>;
@@ -32,24 +31,15 @@ export class GamesHandler {
         // if (!players) return;
         // if ((gameRoom?.players as GamePlayer[]) === undefined) return;
 
-        this.players.forEach((gamePlayer: GamePlayer) => {
-            const socket: Socket | undefined = this.socketManager.getSocketFromId(gamePlayer.player.socketId);
-            if (!socket) return;
+        const infos: PlayerInformation[] = this.players.map((player: GamePlayer) => player.getInformation());
+        // this.players.forEach((gamePlayer: GamePlayer) => {
+        //     const socket: Socket | undefined = this.socketManager.getSocketFromId(gamePlayer.player.socketId);
+        //     if (!socket) return;
+        //
+        //     socket.emit(SocketEvents.UpdatePlayersInformation, infos);
+        // });
 
-            socket.emit(SocketEvents.UpdatePlayerInformation, gamePlayer.getInformation());
-
-            // TODO : Update that
-            const opponentPlayersInfos: (PlayerInformation | undefined)[] = this.players.map((player: GamePlayer) => {
-                if (player.player.user.username !== gamePlayer.player.user.username) {
-                    return player.getInformation();
-                }
-                return;
-            });
-            console.log(opponentPlayersInfos);
-
-            socket.broadcast.to(roomId).emit(SocketEvents.UpdateOpponentInformation, opponentPlayersInfos);
-        });
-
+        this.socketManager.emitRoom(roomId, SocketEvents.UpdatePlayersInformation, infos);
         this.socketManager.emitRoom(roomId, SocketEvents.LetterReserveUpdated, game.letterReserve.lettersReserve);
     }
 

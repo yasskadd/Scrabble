@@ -8,7 +8,7 @@ import { Turn } from '@app/classes/turn.class';
 import { WordSolver } from '@app/classes/word-solver.class';
 import { Word } from '@app/classes/word.class';
 import { PlaceLettersReturn } from '@app/interfaces/place-letters-return';
-import { GamesHandler } from '@app/services/games-management/games-handler.service';
+import { GamesHandlerService } from '@app/services/games-management/games-handler.service';
 import { RackService } from '@app/services/rack.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { Gameboard } from '@common/classes/gameboard.class';
@@ -28,7 +28,7 @@ const ROOM = '0';
 
 describe('GamesActions Service', () => {
     let gamesActionsService: GamesActionsService;
-    let gamesHandlerStub: sinon.SinonStubbedInstance<GamesHandler>;
+    let gamesHandlerStub: sinon.SinonStubbedInstance<GamesHandlerService>;
     let socketManagerStub: sinon.SinonStubbedInstance<SocketManager>;
     let rackServiceStub: sinon.SinonStubbedInstance<RackService>;
     let game: sinon.SinonStubbedInstance<Game> & Game;
@@ -63,7 +63,7 @@ describe('GamesActions Service', () => {
         player1.game = game;
 
         socketManagerStub = sinon.createStubInstance(SocketManager);
-        gamesHandlerStub = sinon.createStubInstance(GamesHandler);
+        gamesHandlerStub = sinon.createStubInstance(GamesHandlerService);
         rackServiceStub = sinon.createStubInstance(RackService);
         gamesActionsService = new GamesActionsService(socketManagerStub as never, gamesHandlerStub as never, rackServiceStub as never);
 

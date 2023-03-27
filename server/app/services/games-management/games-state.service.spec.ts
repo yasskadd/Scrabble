@@ -13,7 +13,7 @@ import { Turn } from '@app/classes/turn.class';
 import { WordSolver } from '@app/classes/word-solver.class';
 import { ScoreStorageService } from '@app/services/database/score-storage.service';
 import { VirtualPlayersStorageService } from '@app/services/database/virtual-players-storage.service';
-import { GamesHandler } from '@app/services/games-management/games-handler.service';
+import { GamesHandlerService } from '@app/services/games-management/games-handler.service';
 import { RackService } from '@app/services/rack.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { Gameboard } from '@common/classes/gameboard.class';
@@ -32,7 +32,7 @@ const ROOM = '0';
 
 describe('GamesState Service', () => {
     let gamesStateService: GamesStateService;
-    let gamesHandlerStub: sinon.SinonStubbedInstance<GamesHandler>;
+    let gamesHandlerStub: sinon.SinonStubbedInstance<GamesHandlerService>;
     let socketManagerStub: sinon.SinonStubbedInstance<SocketManager>;
     let scoreStorageStub: sinon.SinonStubbedInstance<ScoreStorageService>;
     let virtualPlayersStorageStub: sinon.SinonStubbedInstance<VirtualPlayersStorageService>;
@@ -84,7 +84,7 @@ describe('GamesState Service', () => {
 
         socketManagerStub = sinon.createStubInstance(SocketManager);
         scoreStorageStub = sinon.createStubInstance(ScoreStorageService);
-        gamesHandlerStub = sinon.createStubInstance(GamesHandler);
+        gamesHandlerStub = sinon.createStubInstance(GamesHandlerService);
         virtualPlayersStorageStub = sinon.createStubInstance(VirtualPlayersStorageService);
         gamesStateService = new GamesStateService(
             socketManagerStub as never,

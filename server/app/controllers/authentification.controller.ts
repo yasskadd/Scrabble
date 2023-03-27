@@ -15,7 +15,7 @@ const TEMP_REDIRECT = 307;
 export class AuthentificationController {
     router: Router;
 
-    constructor(private readonly accountStorage: AccountStorageService) {
+    constructor(private accountStorage: AccountStorageService) {
         this.configureRouter();
     }
 

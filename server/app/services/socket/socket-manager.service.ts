@@ -8,7 +8,7 @@ import { CallbackSignature, OnSioCallbackSignature } from '@app/types/sockets';
 
 @Service()
 export class SocketManager {
-    private readonly socketUsernameMap: Map<io.Socket, string>;
+    private socketUsernameMap: Map<io.Socket, string>;
     private onEvents: Map<string, CallbackSignature[]>;
     private onAndSioEvents: Map<string, OnSioCallbackSignature[]>;
     private sio: io.Server;

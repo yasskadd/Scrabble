@@ -1,4 +1,4 @@
-import { GamesHandler } from '@app/services/games-management/games-handler.service';
+import { GamesHandlerService } from '@app/services/games-management/games-handler.service';
 import { GameHistoryInfo } from '@common/interfaces/game-history-info';
 import { Document } from 'mongodb';
 import { Service } from 'typedi';
@@ -10,7 +10,7 @@ const MINIMUM_TWO_UNITS = 10;
 
 @Service()
 export class HistoryStorageService {
-    constructor(private databaseService: DatabaseService, private gamesHandler: GamesHandler) {}
+    constructor(private databaseService: DatabaseService, private gamesHandler: GamesHandlerService) {}
 
     async getHistory(): Promise<Document[]> {
         return (await this.databaseService.histories.fetchDocuments({})).reverse();

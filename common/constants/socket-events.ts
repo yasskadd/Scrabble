@@ -35,7 +35,7 @@ export enum SocketEvents {
     OpponentDisconnect = 'user disconnect',
     UpdateGameBoard = 'updateGameBoard',
     RackViewUpdate = 'updateRackClient',
-    UpdatePlayerInformation = 'UpdateMyPlayerInformation',
+    UpdatePlayersInformation = 'UpdateMyPlayerInformation',
     UpdateOpponentInformation = 'UpdateOpponentInformation',
     TimerClientUpdate = 'timerUpdate',
     OpponentGameLeave = 'OpponentLeftTheGame',

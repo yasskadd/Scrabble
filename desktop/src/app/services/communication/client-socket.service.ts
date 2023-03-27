@@ -59,9 +59,9 @@ export class ClientSocketService implements OnDestroy {
         }
     }
 
-    establishConnection(cookie?: string) {
+    async establishConnection(cookie?: string) {
         if (this.connected.value) {
-            this.disconnect();
+            await this.disconnect();
         }
 
         if (this.useTauriSocket) {
@@ -83,9 +83,9 @@ export class ClientSocketService implements OnDestroy {
             .then();
     }
 
-    disconnect() {
+    async disconnect() {
         if (this.useTauriSocket) {
-            tauri.tauri.invoke(RustCommand.Disconnect).then(() => {
+            await tauri.tauri.invoke(RustCommand.Disconnect).then(() => {
                 tauri.event
                     .listen(RustEvent.SocketDisconnectionFailed, (error: Event<unknown>) => {
                         this.languageService.getWord('error.socket.disconnection_failed').subscribe((word: string) => {

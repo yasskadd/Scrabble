@@ -28,7 +28,7 @@ export class WaitingOpponentPageComponent implements OnDestroy {
     }
 
     ngOnDestroy() {
-        this.gameConfiguration.exitWaitingRoom();
+        // this.gameConfiguration.exitWaitingRoom();
         this.gameConfiguration.isRoomJoinable.unsubscribe();
     }
 

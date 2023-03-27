@@ -1,11 +1,12 @@
 import { ReplaySubject } from 'rxjs';
 import { GamePlayer } from './player/player.class';
+import { IUser } from '@common/interfaces/user';
 
 const SECOND = 1000;
 
 export class Turn {
-    activePlayer: string | undefined;
-    inactivePlayers: string[] | undefined;
+    activePlayer: IUser | undefined;
+    inactivePlayers: IUser[] | undefined;
     endTurn: ReplaySubject<string | undefined>;
     countdown: ReplaySubject<number | undefined>;
     skipCounter: number;
@@ -33,23 +34,26 @@ export class Turn {
 
     determineStartingPlayer(players: GamePlayer[]): void {
         const randomNumber: number = Math.floor(Math.random() * players.length);
-        this.activePlayer = players[randomNumber].player.user.username;
-        const inactivePlayers = players.filter((player) => {
-            return player.player.user.username !== this.activePlayer;
-        });
-        this.inactivePlayers = inactivePlayers.map((player) => {
-            return player.player.user.username;
-        });
+        this.activePlayer = players[randomNumber].player.user;
+        this.inactivePlayers = players
+            .filter((player) => {
+                return player.player.user !== this.activePlayer;
+            })
+            .map((player) => {
+                return player.player.user;
+            });
     }
 
     end(endGame?: boolean): void {
         clearInterval(this.timeOut as number);
         if (!endGame) {
-            const tempInactivePlayer: string | undefined = (this.inactivePlayers as string[]).shift();
-            this.inactivePlayers?.push(this.activePlayer as string);
+            const tempInactivePlayer: IUser | undefined = this.inactivePlayers?.shift();
+            if (this.activePlayer) {
+                this.inactivePlayers?.push(this.activePlayer);
+            }
             this.activePlayer = tempInactivePlayer;
             this.start();
-            this.endTurn.next(this.activePlayer);
+            this.endTurn.next(this.activePlayer?.username);
             return;
         }
         this.activePlayer = undefined;

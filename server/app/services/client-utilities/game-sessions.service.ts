@@ -119,6 +119,8 @@ export class GameSessions {
     }
 
     private exitWaitingRoom(server: Server, socket: SocketType, userQuery: UserRoomQuery): void {
+        console.log('exitWaitingRoom query');
+        console.log(userQuery);
         // TODO : Replace player with observer if present
         // TODO : Replace player with bot if no observers
         const room: GameRoom | undefined = this.getRoom(userQuery.roomId);
@@ -170,8 +172,10 @@ export class GameSessions {
         const room = this.getRoom(roomId);
 
         if (room) {
-            await this.gameStateService.createGame(server, room);
-            server.to(roomId).emit(SocketEvents.GameAboutToStart);
+            await this.gameStateService.createGame(server, room).then(() => {
+                console.log('sending to game page');
+                server.to(roomId).emit(SocketEvents.GameAboutToStart);
+            });
             // // TODO : Changed GameScrabbleInformation to simply using GameRoom
             // const users: IUser[] = [];
             // const socketIds: string[] = [];
