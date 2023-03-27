@@ -1,9 +1,15 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { IUser } from '@common/interfaces/user';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { AppCookieService } from './communication/app-cookie.service';
 import { HttpHandlerService } from './communication/http-handler.service';
+import { AvatarData } from '@common/interfaces/avatar-data';
+import { ImageInfo } from '@common/interfaces/image-info';
+import { ImageType } from '@common/models/image-type';
+import { AppRoutes } from '@app/models/app-routes';
+import { Router } from '@angular/router';
+import { ClientSocketService } from '@services/communication/client-socket.service';
 
 @Injectable({
     providedIn: 'root',
@@ -11,7 +17,12 @@ import { HttpHandlerService } from './communication/http-handler.service';
 export class UserService {
     user: IUser;
 
-    constructor(private httpHandlerService: HttpHandlerService, private cookieService: AppCookieService) {
+    constructor(
+        private httpHandlerService: HttpHandlerService,
+        private clientSocketService: ClientSocketService,
+        private cookieService: AppCookieService,
+        private router: Router,
+    ) {
         this.initUser();
     }
 
@@ -24,24 +35,7 @@ export class UserService {
 
         this.httpHandlerService.login(user).subscribe({
             next: (loginRes: { userData: IUser }) => {
-                if (loginRes.userData.profilePicture.isDefaultPicture) {
-                    this.httpHandlerService.getDefaultImages().subscribe((map: Map<string, string[]>) => {
-                        // Set url in userData for local access to the default image
-                        // (yes we download all of the keys, but it's easier like that)
-                        Object.entries(map).forEach((entry: [string, string[]]) => {
-                            if (entry[0] === loginRes.userData.profilePicture.name) {
-                                loginRes.userData.profilePicture.key = entry[1][0];
-                            }
-                        });
-                    });
-                } else {
-                    this.httpHandlerService.getProfilePicture().subscribe((res: { url: string }) => {
-                        // Set url in userData for local access to the image
-                        loginRes.userData.profilePicture.key = res.url;
-                    });
-                }
-                this.user = loginRes.userData;
-
+                this.updateUserWithImageUrl(loginRes.userData);
                 this.cookieService.updateUserSessionCookie();
                 subject.next('');
             },
@@ -57,7 +51,22 @@ export class UserService {
     logout(): void {
         this.httpHandlerService.logout().subscribe(() => {
             this.initUser();
+            this.cookieService.removeSessionCookie();
+            this.clientSocketService.disconnect();
+            this.router.navigate([AppRoutes.ConnectionPage]).then();
         });
+    }
+
+    submitNewProfilePic(avatarData: AvatarData): Subscription {
+        return this.httpHandlerService
+            .modifyProfilePicture(avatarData, this.avatarDataToImageInfo(avatarData).isDefaultPicture)
+            .subscribe((data: { userData: IUser }) => {
+                if (data.userData) {
+                    this.updateUserWithImageUrl(data.userData);
+                    return true;
+                }
+                return false;
+            });
     }
 
     private initUser(): void {
@@ -67,5 +76,44 @@ export class UserService {
             password: '',
             profilePicture: undefined,
         };
+    }
+
+    private avatarDataToImageInfo(avatarData: AvatarData): ImageInfo {
+        const isDefaultPicture = avatarData.type === ImageType.Url;
+        let imageInfo: ImageInfo;
+        if (isDefaultPicture) {
+            imageInfo = {
+                name: avatarData.name,
+                isDefaultPicture,
+                key: avatarData.url,
+            };
+        } else {
+            imageInfo = {
+                name: avatarData.name,
+                isDefaultPicture,
+            };
+        }
+
+        return imageInfo;
+    }
+
+    private updateUserWithImageUrl(user: IUser): void {
+        if (user.profilePicture.isDefaultPicture) {
+            this.httpHandlerService.getDefaultImages().subscribe((map: Map<string, string[]>) => {
+                // Set url in userData for local access to the default image
+                // (yes we download all of the keys, but it's easier like that)
+                Object.entries(map).forEach((entry: [string, string[]]) => {
+                    if (entry[0] === user.profilePicture.name) {
+                        user.profilePicture.key = entry[1][0];
+                    }
+                });
+            });
+        } else {
+            this.httpHandlerService.getProfilePicture().subscribe((res: { url: string }) => {
+                // Set url in userData for local access to the image
+                user.profilePicture.key = res.url;
+            });
+        }
+        this.user = user;
     }
 }

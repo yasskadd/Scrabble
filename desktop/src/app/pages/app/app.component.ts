@@ -1,16 +1,18 @@
-import { ChangeDetectorRef, Component, ElementRef } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit } from '@angular/core';
 import { ClientSocketService } from '@app/services/communication/client-socket.service';
 import { ThemeService } from '@services/theme.service';
+import { AppCookieService } from '@services/communication/app-cookie.service';
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
     constructor(
         private themeService: ThemeService,
         private clientSocketService: ClientSocketService,
+        private cookieService: AppCookieService,
         private changeDetector: ChangeDetectorRef,
         private elementRef: ElementRef,
     ) {
@@ -24,5 +26,9 @@ export class AppComponent {
                 this.elementRef.nativeElement.classList.remove('darkMode');
             }
         });
+    }
+
+    ngOnInit() {
+        this.cookieService.removeSessionCookie();
     }
 }

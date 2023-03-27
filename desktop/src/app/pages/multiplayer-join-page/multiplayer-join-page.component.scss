@@ -1,12 +1,7 @@
-body {
-    margin: auto;
-    height: 100%;
-}
-
 .wrapper {
     width: 50%;
     min-width: 500px;
-    padding: 30px;
+    padding: 20px 20px 0px 20px;
 }
 
 .main-title {
@@ -40,8 +35,8 @@ button .join-random-game {
     margin: 10px;
 }
 
-button .join-game {
-    margin: 0px 0px 0px 10px;
+button.join-game {
+    margin: 8px 8px 8px 24px;
 }
 
 .return-button {
@@ -50,6 +45,7 @@ button .join-game {
 
 .wrapper {
     text-align: center;
+    width: auto;
 }
 
 .max {
@@ -57,7 +53,6 @@ button .join-game {
 }
 
 .list-container {
-    background-color: rgb(255 255 255 / 36%);
     margin: 2% auto;
 }
 
@@ -72,15 +67,31 @@ button .join-game {
     flex-direction: row;
 }
 
+.players-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    margin-bottom: 8px;
+
+    mat-icon {
+        margin-right: 8px;
+    }
+}
+
 table {
     justify-content: space-evenly;
     margin: 0 auto;
 }
 
 th {
-    padding: 0px 20px 20px 20px;
+    padding: 16px 32px 16px 32px;
 }
 
 td {
     padding: 2% 0;
+}
+
+tr {
+    vertical-align: top;
 }

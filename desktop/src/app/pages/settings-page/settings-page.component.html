@@ -1,25 +1,41 @@
 <div class="encapsulating-div">
     <app-header></app-header>
-
     <body class="mat-app-background">
-        <form class="justified settings-form">
-            <mat-form-field appearance="outline">
-                <!-- TODO : Language AND display current username-->
-                <mat-label>Changer le nom d'utilisateur</mat-label>
-                <input matInput />
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-                <!-- TODO : Language -->
-                <mat-label>Changer votre mot de passe</mat-label>
-                <input matInput />
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-                <!-- TODO : Language -->
-                <mat-label>Confirmer le mot de passe</mat-label>
-                <input matInput />
-            </mat-form-field>
-        </form>
+        <button mat-fab *ngIf="!userService.user.profilePicture" color="primary" (click)="openAvatarSelector()" class="avatar-selector">
+            <mat-icon>person</mat-icon>
+        </button>
+        <img
+            *ngIf="userService.user.profilePicture && !profilePicForm.value"
+            [src]="userService.user.profilePicture.key"
+            (click)="openAvatarSelector()"
+            class="selecter-avatar mat-elevation-z5"
+        />
+        <img
+            *ngIf="profilePicForm.value && profilePicForm.value.type === imageTypes.Url"
+            [src]="profilePicForm.value.url"
+            (click)="openAvatarSelector()"
+            class="selecter-avatar mat-elevation-z5"
+        />
+        <img
+            *ngIf="profilePicForm.value && profilePicForm.value.type === imageTypes.ImageData"
+            [src]="profilePicForm.value.rawData"
+            (click)="openAvatarSelector()"
+            class="selecter-avatar mat-elevation-z5"
+        />
+        <mat-form-field appearance="outline">
+            <!-- TODO : Language -->
+            <mat-label>Nouveau nom d'utilisateur</mat-label>
+            <input matInput [formControl]="newUsername" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+            <!-- TODO : Language -->
+            <mat-label>Confirmation de nom d'utilisateur</mat-label>
+            <input matInput [formControl]="newUsernameConfirmation" />
+        </mat-form-field>
+        <button mat-raised-button (click)="submitUsername()" class="username-confirmation">
+            <!-- TODO : Language-->
+            Submit
+        </button>
     </body>
-
     <app-footer></app-footer>
 </div>

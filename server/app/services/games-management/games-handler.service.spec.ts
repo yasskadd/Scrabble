@@ -2,7 +2,6 @@
 /* eslint-disable dot-notation*/
 import { DictionaryValidation } from '@app/classes/dictionary-validation.class';
 import { Game } from '@app/classes/game.class';
-import { Gameboard } from '@app/classes/gameboard.class';
 import { LetterPlacement } from '@app/classes/letter-placement.class';
 import { LetterReserve } from '@app/classes/letter-reserve.class';
 import { Player } from '@app/classes/player/player.class';
@@ -12,6 +11,7 @@ import { WordSolver } from '@app/classes/word-solver.class';
 import { DictionaryStorageService } from '@app/services/database/dictionary-storage.service';
 import { GamesHandler } from '@app/services/games-management/games-handler.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
+import { Gameboard } from '@common/classes/gameboard.class';
 import { SocketEvents } from '@common/constants/socket-events';
 import { Letter } from '@common/interfaces/letter';
 import { expect } from 'chai';

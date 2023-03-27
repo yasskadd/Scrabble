@@ -207,6 +207,31 @@ export class HttpHandlerService {
             .pipe(catchError(this.handleError<{ url: string }>('get-profile-picture')));
     }
 
+    modifyProfilePicture(image: AvatarData, isDefault: boolean): Observable<{ userData: IUser }> {
+        if (isDefault) {
+            return this.http
+                .patch<{ userData: IUser }>(
+                    `${this.baseUrl}/image/profile-picture`,
+                    { fileName: image.name },
+                    {
+                        withCredentials: true,
+                    },
+                )
+                .pipe(catchError(this.handleError<{ userData: IUser }>('modify-image-to-default')));
+        }
+
+        const header = new HttpHeaders();
+        header.append('Content-Type', 'multipart/form-data');
+
+        const data = new FormData();
+        data.append('image', image.file);
+
+        return this.http.put<{ userData: IUser }>(`${this.baseUrl}/image/profile-picture`, data, {
+            headers: this.header,
+            withCredentials: true,
+        });
+    }
+
     private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
         return () => of(result as T);
     }

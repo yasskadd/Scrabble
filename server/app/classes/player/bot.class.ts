@@ -4,18 +4,16 @@ import * as Constant from '@app/constants/bot';
 import { BotInformation } from '@app/interfaces/bot-information';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
-import { CommandInfo } from '@common/interfaces/command-info';
+import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { Container } from 'typedi';
 import { Player } from './player.class';
 
 export class Bot extends Player {
-    isPlayerOne: boolean;
     roomId: string;
-    game: Game;
     protected countUp: number = 0;
     protected socketManager: SocketManager = Container.get(SocketManager);
     protected wordSolver: WordSolver;
-    protected playedTurned: boolean = false;
+    protected isNotTurn: boolean = false;
     private timer: number;
 
     constructor(isPlayerOne: boolean, name: string, protected botInfo: BotInformation) {
@@ -43,7 +41,7 @@ export class Bot extends Player {
             if (this.countUp === Constant.TIME_SKIP && this.name === this.game.turn.activePlayer) this.skipTurn();
         });
         this.game.turn.endTurn.subscribe((activePlayer) => {
-            this.playedTurned = false;
+            this.isNotTurn = false;
             if (activePlayer === this.name) {
                 this.countUp = 0;
                 this.playTurn();
@@ -52,27 +50,27 @@ export class Bot extends Player {
     }
 
     skipTurn(): void {
-        if (this.game === undefined || this.playedTurned) return;
+        if (this.game === undefined || this.isNotTurn) return;
         this.socketManager.emitRoom(this.botInfo.roomId, SocketEvents.GameMessage, '!passer');
         this.game.skip(this.name);
-        this.playedTurned = true;
+        this.isNotTurn = true;
     }
 
-    protected play(commandInfo: CommandInfo): void {
-        if (commandInfo === undefined || this.playedTurned) {
+    protected play(commandInfo: PlaceWordCommandInfo): void {
+        if (commandInfo === undefined || this.isNotTurn) {
             this.skipTurn();
             return;
         }
         this.emitPlaceCommand(commandInfo);
-        this.playedTurned = true;
+        this.isNotTurn = true;
     }
 
-    protected processWordSolver(): Map<CommandInfo, number> {
+    protected processWordSolver(): Map<PlaceWordCommandInfo, number> {
         this.wordSolver.setGameboard(this.game.gameboard);
         return this.wordSolver.commandInfoScore(this.wordSolver.findAllOptions(this.rackToString()));
     }
 
-    protected emitPlaceCommand(randomCommandInfo: CommandInfo): void {
+    protected emitPlaceCommand(randomCommandInfo: PlaceWordCommandInfo): void {
         const coordString = `${String.fromCharCode(Constant.CHAR_ASCII + randomCommandInfo.firstCoordinate.y)}${randomCommandInfo.firstCoordinate.x}`;
         const placeCommand = `!placer ${coordString}${randomCommandInfo.isHorizontal ? 'h' : 'v'} ${randomCommandInfo.letters.join('')}`;
         this.socketManager.emitRoom(this.botInfo.roomId, SocketEvents.GameMessage, placeCommand);

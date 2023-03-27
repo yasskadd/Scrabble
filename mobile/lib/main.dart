@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
+import 'package:flutter_i18n/flutter_i18n_delegate.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mobile/domain/services/auth-service.dart';
 import 'package:mobile/domain/services/chat-service.dart';
@@ -12,7 +13,7 @@ import 'package:mobile/domain/services/http-handler-service.dart';
 import 'package:mobile/domain/services/language-service.dart';
 import 'package:mobile/domain/services/room-service.dart';
 import 'package:mobile/domain/services/theme-service.dart';
-import 'package:mobile/screens/menu-screen.dart';
+import 'package:mobile/screens/login-screen.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
 Future<void> setup() async {
@@ -21,13 +22,17 @@ Future<void> setup() async {
   String envFile = kDebugMode ? 'development.env' : 'production.env';
 
   // kDebugMode = APK, so hardcoding it for now
-  // envFile = 'production.env';
+  envFile = 'production.env';
 
   await dotenv.load(fileName: envFile);
   var serverAddress = dotenv.env["SERVER_URL"];
 
-  getIt.registerLazySingleton<Socket>(() =>
-      io(serverAddress, OptionBuilder().setTransports(["websocket"]).build()));
+  getIt.registerLazySingleton<Socket>(() => io(
+      serverAddress,
+      OptionBuilder()
+          .setTransports(["websocket"])
+          .disableAutoConnect()
+          .build()));
 
   Socket socket = getIt<Socket>();
   socket.onConnect((_) => debugPrint('Socket connection established'));
@@ -41,6 +46,8 @@ Future<void> setup() async {
   getIt.registerLazySingleton<LanguageService>(() => LanguageService());
   getIt.registerLazySingleton<RoomService>(() => RoomService());
   getIt.registerLazySingleton<GameService>(() => GameService());
+
+  getIt.registerSingleton<GlobalKey<NavigatorState>>(GlobalKey<NavigatorState>());
 }
 
 Future<void> main() async {
@@ -69,13 +76,13 @@ class _PolyScrabbleState extends State<PolyScrabble> {
 
     return MaterialApp(
       title: 'PolyScrabble 110',
-      theme: _themeService
-          .getTheme(), // Static mode, will be light theme in dynamic
-      darkTheme: _themeService
-          .getDarkMode(), // Dark mode will be used only in dynamic mode
+      theme: _themeService.getTheme(),
+      // Static mode, will be light theme in dynamic
+      darkTheme: _themeService.getDarkMode(),
+      // Dark mode will be used only in dynamic mode
       themeMode: _themeService.isDynamic ? ThemeMode.system : ThemeMode.light,
       debugShowCheckedModeBanner: false,
-      home: const MenuScreen(title: 'PolyScrabble 101 - Prototype'),
+      home: const LoginScreen(title: 'PolyScrabble 101 - Prototype'),
       localizationsDelegates: [
         FlutterI18nDelegate(
           translationLoader: FileTranslationLoader(
@@ -86,6 +93,7 @@ class _PolyScrabbleState extends State<PolyScrabble> {
           },
         )
       ],
+      navigatorKey: GetIt.I.get<GlobalKey<NavigatorState>>(),
     );
   }
 }

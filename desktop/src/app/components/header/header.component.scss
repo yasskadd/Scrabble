@@ -29,7 +29,8 @@ mat-toolbar {
 }
 
 .selector-avatar {
-    margin-bottom: 20px;
+    position: absolute;
+    right: 8px;
     align-self: center;
     height: 56px;
     aspect-ratio: 1;

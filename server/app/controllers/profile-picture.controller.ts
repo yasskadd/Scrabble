@@ -59,8 +59,8 @@ export class ProfilePictureController {
          * HTTP POST request to send an image to the S3 bucket
          *
          * @param { FormatData } files - Container for the files necessary for the request
-         *             { image } files[0] - File of the image to post
-         *          { imageKey } files[1] - File containing the imageKey in the text/html data
+         * @param      { image } files[0] - File of the image to post
+         * @param   { imageKey } files[1] - File containing the imageKey in the text/html data
          * @return { number } HTTP Status - The return status of the request
          */
         this.router.post('/profile-picture', uploadImage.any(), async (req: FileRequest, res: Response) => {
@@ -95,10 +95,13 @@ export class ProfilePictureController {
             res.status(StatusCodes.OK).send({ url: signedURL });
         });
 
-        /** PUT request to UPLOAD modify existing profile picture from an
-         * AvatarData object, we need to get imageKey in database and to PutCommand
-         * to override the image in the bucket. Then create a new signed URL and
-         * send it to client
+        /**
+         * HTTP PUT request to send a new image for a specific user
+         *
+         * @param { string } session_token - String of the connected user token
+         * @param { File } file - File containing the actual image
+         * @return {{ userData: IUser }} data - new user data containing the new image key (already synced in the database)
+         * @return { number } HTTP Status - The return status of the request
          */
         this.router.put('/profile-picture', verifyToken, uploadImage.single('image'), async (req: FileRequest, res: Response) => {
             if (req.fileValidationError || !req.file) {
@@ -125,7 +128,7 @@ export class ProfilePictureController {
                     }
                     // Update image in DB
                     await this.accountStorage.updateUploadedImage(username, newImageKey as string, req.file?.originalname as string);
-                    res.status(StatusCodes.OK).send();
+                    res.status(StatusCodes.OK).send({ userData: await this.accountStorage.getUserData(username) });
                 })
                 .catch((err) => {
                     res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
@@ -136,6 +139,14 @@ export class ProfilePictureController {
         });
 
         /* PATCH route only do modify profile picture to a default one, delete image in bucket if it exists and return file name */
+
+        /**
+         * HTTP PATCH request to update a user profile picture with a default one
+         *
+         * @param {{ fileName: string }} body - String of the default image name to use
+         * @return {{ userData: IUser }} data - new user data containing the new image key (already synced in the database)
+         * @return { number } HTTP Status - The return status of the request
+         */
         this.router.patch('/profile-picture', verifyToken, async (req: Request, res: Response) => {
             // We just need to put hasDefaultImage to true and modify the image name, and delete the image in the bucket if it exists
             const username = res.locals.user.name;
@@ -153,9 +164,7 @@ export class ProfilePictureController {
             this.accountStorage
                 .updateDefaultImage(username, req.body.fileName, this.defaultImagesMap.get(req.body.fileName) as string)
                 .then(async () => {
-                    const getImageCommand = this.CreateGetCommand(this.defaultImagesMap.get(req.body.fileName) as string);
-                    const signedURL = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 3600 });
-                    res.status(StatusCodes.OK).send({ signedURL });
+                    res.status(StatusCodes.OK).send({ userData: await this.accountStorage.getUserData(username) });
                 })
                 .catch((err) => {
                     res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({

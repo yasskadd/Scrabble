@@ -21,37 +21,70 @@ export class AccountStorageService {
         await this.database.users.addDocument(newUser);
     }
 
-    async loginValidator(user: Document): Promise<boolean> {
-        const userDocument = (await this.database.users.collection.findOne({ username: user.username })) as Document;
+    async loginValidator(user: IUser): Promise<boolean> {
+        const userDocument = (await this.database.users.collection?.findOne({ username: user.username })) as Document;
+        if (!userDocument) return false;
         const hashedPassword = userDocument.password;
+
         return await this.compareHash(user.password, hashedPassword);
     }
 
-    async isUserRegistered(name: string): Promise<boolean> {
-        return (await this.database.users.collection.findOne({ username: name })) !== null;
+    async isUsernameRegistered(name: string): Promise<boolean> {
+        return (await this.database.users.collection?.findOne({ username: name })) !== null;
     }
 
     async getUserData(username: string): Promise<IUser> {
-        const userDocument = (await this.database.users.collection.findOne({ username })) as Document;
+        const userDocument = (await this.database.users.collection?.findOne({ username })) as Document;
         return userDocument as IUser;
     }
 
     async getProfilePicInfo(username: string): Promise<ImageInfo> {
-        const userDocument = (await this.database.users.collection.findOne({ username })) as Document;
+        const userDocument = (await this.database.users.collection?.findOne({ username })) as Document;
         return userDocument.profilePicture as ImageInfo;
     }
 
     async updateUploadedImage(username: string, imageKey: string, fileName: string): Promise<void> {
-        await this.database.users.collection.updateOne(
+        await this.database.users.collection?.updateOne(
             { username },
-            { $set: { 'profilePicture.key': imageKey, 'profilePicture.name': fileName, 'profilePicture.isDefaultPicture': false } },
+            {
+                $set: {
+                    'profilePicture.key': imageKey,
+                    'profilePicture.name': fileName,
+                    'profilePicture.isDefaultPicture': false,
+                },
+            },
         );
     }
 
     async updateDefaultImage(username: string, fileName: string, imageKey: string): Promise<void> {
         await this.database.users.collection.updateOne(
             { username },
-            { $set: { 'profilePicture.isDefaultPicture': true, 'profilePicture.key': imageKey, 'profilePicture.name': fileName } },
+            {
+                $set: {
+                    'profilePicture.isDefaultPicture': true,
+                    'profilePicture.key': imageKey,
+                    'profilePicture.name': fileName,
+                },
+            },
+        );
+    }
+
+    async updateUsername(oldUsername: string, newUsername: string): Promise<void> {
+        await this.database.users.collection.updateOne({ username: oldUsername }, { $set: { username: newUsername } });
+    }
+
+    async isSamePassword(username: string, newPassword: string): Promise<boolean> {
+        const userDocument = (await this.database.users.collection?.findOne({ username })) as IUser | null;
+        return await this.compareHash(newPassword, userDocument?.password as string);
+    }
+
+    async updatePassword(username: string, newPassword: string): Promise<void> {
+        const newHashedPassword = await this.generateHash(newPassword);
+        await this.database.users.collection.updateOne(
+            { username },
+            {
+                $set: { password: newHashedPassword },
+            },
         );
     }
 

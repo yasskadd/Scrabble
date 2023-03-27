@@ -4,8 +4,9 @@
     windows_subsystem = "windows"
 )]
 
-use rust_socketio::{client::Client, ClientBuilder, Payload};
 use std::sync::Mutex;
+
+use rust_socketio::{client::Client, ClientBuilder, Payload};
 
 struct SocketClient {
     socket: Mutex<Option<Client>>,
@@ -37,44 +38,81 @@ fn greet(name: &str) -> String {
 fn socketEstablishConnection(
     address: &str,
     cookie: Option<&str>,
-    socketClient: tauri::State<SocketClient>,
+    state: tauri::State<SocketClient>,
     window: tauri::Window,
 ) {
-    let mut socket = socketClient.socket.lock().expect("Couldn't get the lock");
+    let mut socket = state.socket.lock().expect("Error locking the socket");
+
     if socket.is_some() {
+        let disconnect = match socket.take() {
+            None => return,
+            Some(socket_client) => socket_client.disconnect(),
+        };
+
+        match disconnect {
+            Ok(()) => {
+                println!("Disconnected from socket");
+            }
+            Err(error) => {
+                window
+                    .emit(
+                        RustEvent::SocketDisconnectionFailed.to_string(),
+                        error.to_string(),
+                    )
+                    .expect("oups");
+            }
+        }
         return;
     }
-    let socketEventWindow = window.clone();
-    let connection;
 
-    if cookie.is_some() {
-        connection = ClientBuilder::new(address)
-            .opening_header("Cookie", cookie.unwrap())
-            .on_any(move |event, payload, _raw_client| {
-                // println!("Got event: {:?} {:?}", event, payload);
-                if let Payload::String(payload) = payload {
-                    socketEventWindow
-                        .emit(&String::from(event), payload)
-                        .expect("Couldn't emit the event to Angular");
-                }
-            })
-            .connect();
-    } else {
-        connection = ClientBuilder::new(address)
-            .on_any(move |event, payload, _raw_client| {
-                // println!("Got event: {:?} {:?}", event, payload);
-                if let Payload::String(payload) = payload {
-                    socketEventWindow
-                        .emit(&String::from(event), payload)
-                        .expect("Couldn't emit the event to Angular");
-                }
-            })
-            .connect();
-    }
+    let socketEventWindow = window.clone();
+    // let connection;
+
+    // if cookie.is_some() {
+    //     connection = ClientBuilder::new(address)
+    //         .opening_header("Cookie", cookie.unwrap())
+    //         .on_any(move |event, payload, _raw_client| {
+    //             // println!("Got event: {:?} {:?}", event, payload);
+    //             if let Payload::String(payload) = payload {
+    //                 socketEventWindow
+    //                     .emit(&String::from(event), payload)
+    //                     .expect("Couldn't emit the event to Angular");
+    //             }
+    //         })
+    //         .connect();
+    // } else {
+    //     connection = ClientBuilder::new(address)
+    //         .on_any(move |event, payload, _raw_client| {
+    //             // println!("Got event: {:?} {:?}", event, payload);
+    //             if let Payload::String(payload) = payload {
+    //                 socketEventWindow
+    //                     .emit(&String::from(event), payload)
+    //                     .expect("Couldn't emit the event to Angular");
+    //             }
+    //         })
+    //         .connect();
+    // }
+    let clientBuilder = match cookie {
+        Some(c) => ClientBuilder::new(address).opening_header("Cookie", c),
+        None => ClientBuilder::new(address),
+    };
+
+    let connection = clientBuilder
+        .on_any(move |event, payload, _raw_client| {
+            // println!("Got event: {:?} {:?}", event, payload);
+            if let Payload::String(payload) = payload {
+                println!("Got payload: {}", payload);
+                socketEventWindow
+                    .emit(&String::from(event), payload)
+                    .expect("Couldn't emit the event to Angular");
+            }
+        })
+        .connect();
 
     match connection {
         Ok(client) => {
             *socket = Some(client);
+            println!("Connected to socket");
         }
         Err(error) => {
             window
@@ -88,22 +126,25 @@ fn socketEstablishConnection(
 }
 
 #[tauri::command]
-fn socketDisconnect(socketClient: tauri::State<SocketClient>, window: tauri::Window) {
-    let client = socketClient.socket.lock().expect("Couldn't get the lock");
-    if let Some(socket_client) = &*client {
-        let disconnection = socket_client.disconnect();
-        println!("Disconnected from socket");
+fn socketDisconnect(state: tauri::State<SocketClient>, window: tauri::Window) {
+    let mut socket = state.socket.lock().expect("Error locking the socket");
 
-        match disconnection {
-            Ok(..) => {}
-            Err(error) => {
-                window
-                    .emit(
-                        RustEvent::SocketDisconnectionFailed.to_string(),
-                        error.to_string(),
-                    )
-                    .expect("oups");
-            }
+    let disconnect = match socket.take() {
+        None => return,
+        Some(socket_client) => socket_client.disconnect(),
+    };
+
+    match disconnect {
+        Ok(()) => {
+            println!("Disconnected from socket");
+        }
+        Err(error) => {
+            window
+                .emit(
+                    RustEvent::SocketDisconnectionFailed.to_string(),
+                    error.to_string(),
+                )
+                .expect("oups");
         }
     }
 }
@@ -112,21 +153,21 @@ fn socketDisconnect(socketClient: tauri::State<SocketClient>, window: tauri::Win
 fn socketSend(
     eventName: &str,
     data: Option<&str>,
-    socketClient: tauri::State<SocketClient>,
+    state: tauri::State<SocketClient>,
     window: tauri::Window,
 ) {
-    let client = socketClient.socket.lock().expect("Couldn't get the lock");
-    if let Some(socket_client) = &*client {
-        let send = socket_client.emit(eventName, data.unwrap_or(""));
+    let socket = state.socket.lock().expect("Error locking the socket");
 
-        match send {
-            Ok(..) => {}
-            Err(error) => {
-                window
-                    .emit(RustEvent::SocketSendFailed.to_string(), error.to_string())
-                    .expect("oups");
-            }
-        }
+    let send = match &*socket {
+        Some(s) => s.emit(eventName, data.unwrap_or("")),
+        None => return,
+    };
+
+    match send {
+        Ok(()) => (),
+        Err(error) => window
+            .emit(RustEvent::SocketSendFailed.to_string(), error.to_string())
+            .expect("oups"),
     }
 }
 

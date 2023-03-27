@@ -209,7 +209,7 @@ export class LetterPlacementService {
     }
 
     resetGameBoardView() {
-        this.gridService.drawGrid(this.gameClientService.gameboard);
+        this.gridService.drawGrid(this.gameClientService.gameboard.gameboardTiles);
     }
 
     noLettersPlaced() {
