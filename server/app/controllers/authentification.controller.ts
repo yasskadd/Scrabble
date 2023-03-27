@@ -30,8 +30,7 @@ export class AuthentificationController {
          */
         this.router.post('/signUp', async (req: Request, res: Response) => {
             const user: IUser = req.body;
-
-            if (!(await this.accountStorage.isUserRegistered(user.username))) {
+            if (!(await this.accountStorage.isUsernameRegistered(user.username))) {
                 // Generating an image key if the profile pic is not a default one
                 let imageKey = '';
                 if (user.profilePicture && !user.profilePicture.isDefaultPicture) {
@@ -59,7 +58,7 @@ export class AuthentificationController {
          */
         this.router.post('/login', async (req: Request, res: Response) => {
             const user: IUser = req.body;
-            if (await this.accountStorage.isUserRegistered(user.username)) {
+            if (await this.accountStorage.isUsernameRegistered(user.username)) {
                 const isLoginValid = await this.accountStorage.loginValidator(user);
                 if (isLoginValid) {
                     const userData = await this.accountStorage.getUserData(user.username);

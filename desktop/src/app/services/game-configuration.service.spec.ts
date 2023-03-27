@@ -67,7 +67,7 @@ describe('GameConfigurationService', () => {
         const spyOnSocket = spyOn(service['clientSocket'], 'send');
 
         service.joinPage(ROOM_INFORMATION.mode);
-        expect(spyOnSocket).toHaveBeenCalledWith(SocketEvents.RoomLobby);
+        expect(spyOnSocket).toHaveBeenCalledWith(SocketEvents.EnterRoomLobby);
     });
 
     it('updateAvailableRooms() should update and add the games available for a player to join', () => {
@@ -89,7 +89,7 @@ describe('GameConfigurationService', () => {
         const usernamePlayer = 'Maurice';
         const spyOnSocket = spyOn(service['clientSocket'], 'send');
         service.joinGame(roomID, usernamePlayer);
-        expect(spyOnSocket).toHaveBeenCalledWith(SocketEvents.PlayerJoinGameAvailable, { id: roomID, name: usernamePlayer });
+        expect(spyOnSocket).toHaveBeenCalledWith(SocketEvents.JoinWaitingRoom, { id: roomID, name: usernamePlayer });
         expect(service.roomInformation.playerName[0]).toEqual(usernamePlayer);
         expect(service.roomInformation.roomId).toEqual(roomID);
     });
@@ -105,7 +105,7 @@ describe('GameConfigurationService', () => {
         const testStatusGame = "En Attente d'un Adversaire ...";
         const spyOnSocket = spyOn(service['clientSocket'], 'send');
         service.gameInitialization(testGameConfiguration);
-        expect(spyOnSocket).toHaveBeenCalledWith(SocketEvents.CreateGame, testGameConfiguration);
+        expect(spyOnSocket).toHaveBeenCalledWith(SocketEvents.CreateWaitingRoom, testGameConfiguration);
         expect(service.roomInformation.playerName[0]).toEqual(testGameConfiguration.username);
         expect(service.roomInformation.isCreator).toBeTruthy();
         expect(service.roomInformation.statusGame).toEqual(testStatusGame);
@@ -225,20 +225,20 @@ describe('GameConfigurationService', () => {
             { id: '2', users: ['Poulin', 'George'], dictionary: 'francais', timer: 1, mode: 'classique' },
         ];
 
-        socketEmulator.peerSideEmit(SocketEvents.UpdateRoomJoinable, testRoom);
+        socketEmulator.peerSideEmit(SocketEvents.UpdateGameRooms, testRoom);
         expect(spy).toHaveBeenCalledWith(testRoom as never);
     });
 
     it('should handle gameCreatedConfirmation event with the ID of the game he just created', () => {
         const roomId = '3';
-        socketEmulator.peerSideEmit(SocketEvents.GameCreatedConfirmation, roomId);
+        socketEmulator.peerSideEmit(SocketEvents.UpdateWaitingRoom, roomId);
         expect(service.roomInformation.roomId).toEqual(roomId);
     });
 
     it('should handle foundOpponent event with the username of the opponent that wants to join his game', () => {
         const opponentName = 'Marcel';
         const spyONFoundAnOpponentEvent = spyOn(service, 'foundAnOpponentEvent' as never);
-        socketEmulator.peerSideEmit(SocketEvents.FoundAnOpponent, opponentName);
+        socketEmulator.peerSideEmit(SocketEvents.PlayerJoinedWaitingRoom, opponentName);
         expect(spyONFoundAnOpponentEvent).toHaveBeenCalled();
     });
 
@@ -266,7 +266,7 @@ describe('GameConfigurationService', () => {
     it('should handle rejectByOtherPlayer event with a reason why he was rejected from the other player ', () => {
         const playerRejectFromRoomError = "L'adversaire à rejeter votre demande";
         const spyOnRejectByOtherPlayerEvent = spyOn(service, 'rejectByOtherPlayerEvent' as never);
-        socketEmulator.peerSideEmit(SocketEvents.RejectByOtherPlayer, playerRejectFromRoomError);
+        socketEmulator.peerSideEmit(SocketEvents.KickedFromGameRoom, playerRejectFromRoomError);
         expect(spyOnRejectByOtherPlayerEvent).toHaveBeenCalled();
     });
 
@@ -282,7 +282,7 @@ describe('GameConfigurationService', () => {
     it('should handle joinValid event with the name of the other player in the game you want to join ', () => {
         const playerName = 'Marc';
         const spyOnjoinValidGameEvent = spyOn(service, 'joinValidGameEvent' as never);
-        socketEmulator.peerSideEmit(SocketEvents.JoinValidGame, playerName);
+        socketEmulator.peerSideEmit(SocketEvents.JoinedValidWaitingRoom, playerName);
         expect(spyOnjoinValidGameEvent).toHaveBeenCalled();
     });
 
@@ -385,7 +385,7 @@ describe('GameConfigurationService', () => {
         expect(service.roomInformation.roomId).toEqual('1');
         expect(service.roomInformation.statusGame).toEqual('Adversaire Trouvé');
         expect(service.roomInformation.isCreator).toEqual(true);
-        service['resetRoomInformation']();
+        service['resetRoomInformations']();
         expect(service.roomInformation.playerName).toEqual([]);
         expect(service.roomInformation.roomId).toEqual('');
         expect(service.roomInformation.statusGame).toEqual('');
@@ -402,6 +402,6 @@ describe('GameConfigurationService', () => {
         service.availableRooms = testRoom;
         service.joinRandomRoom(playerName);
         const information = { id: service.roomInformation.roomId, name: playerName };
-        expect(spy).toHaveBeenCalledWith(SocketEvents.PlayerJoinGameAvailable, information);
+        expect(spy).toHaveBeenCalledWith(SocketEvents.JoinWaitingRoom, information);
     });
 });

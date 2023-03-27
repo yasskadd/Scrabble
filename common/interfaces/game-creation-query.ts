@@ -1,14 +1,14 @@
 import { GameVisibility } from '../models/game-visibility';
 import { IUser } from './user';
+import { GameMode } from '../models/game-mode';
+import { GameDifficulty } from '../models/game-difficulty';
 
-export interface GameParameters {
+export interface GameCreationQuery {
     user: IUser;
     dictionary: string;
     timer: number;
-    mode: string;
-    isMultiplayer: boolean;
+    mode: GameMode;
     visibility: GameVisibility;
     password?: string;
-    opponents?: IUser[];
-    botDifficulty?: string;
+    botDifficulty: GameDifficulty;
 }

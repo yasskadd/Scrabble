@@ -2,7 +2,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { SocketEvents } from '@common/constants/socket-events';
 import { ChatboxMessage } from '@common/interfaces/chatbox-message';
-// import { CommandInfo } from '@common/interfaces/command-info';
+// import { CommandInfo } from '@common/interfaces/game-actions';
 // import { Letter } from '@common/interfaces/letter';
 import { CommandHandlerService } from '@app/services/command-handler.service';
 import { ClientSocketService } from '@app/services/communication/client-socket.service';
@@ -114,6 +114,8 @@ export class ChatboxHandlerService implements OnDestroy {
         this.clientSocket.on(SocketEvents.UserLeftHomeRoom, (userName: string) => {
             this.messages.push(this.createDisconnectedUserMessage(userName));
         });
+
+        // TODO: Implement listeners for new socket events (PlacementSuccess/Failure, ExchangeSuccess/Failure, nextTurn...)
 
         // this.clientSocket.on(SocketEvents.ImpossibleCommandError, (error: string) => {
         //     this.messages.push(this.createImpossibleCommandMessage(error));

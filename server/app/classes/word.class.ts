@@ -1,6 +1,6 @@
-import { CommandInfo } from '@common/interfaces/command-info';
+import { Gameboard } from '@common/classes/gameboard.class';
 import { Coordinate } from '@common/interfaces/coordinate';
-import { Gameboard } from './gameboard.class';
+import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 
 const SEVEN_LETTERS = 7;
 const SEVEN_LETTER_BONUS = 50;
@@ -13,7 +13,7 @@ export class Word {
     points: number;
     private isHorizontal: boolean | undefined;
 
-    constructor(commandInfo: CommandInfo, gameboard: Gameboard) {
+    constructor(commandInfo: PlaceWordCommandInfo, gameboard: Gameboard) {
         this.isValid = true;
         this.isHorizontal = commandInfo.isHorizontal;
         this.points = 0;

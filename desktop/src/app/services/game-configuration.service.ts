@@ -1,30 +1,29 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { GameRoomClient } from '@app/interfaces/game-room-client';
-import { RoomInformation } from '@app/interfaces/room-information';
 import { AppRoutes } from '@app/models/app-routes';
-import { GameStatus } from '@app/models/game-status';
-import { NUMBER_OF_PLAYERS } from '@common/constants/players';
 import { SocketEvents } from '@common/constants/socket-events';
-import { GameParameters } from '@common/interfaces/game-parameters';
-import { GameScrabbleInformation } from '@common/interfaces/game-scrabble-information';
-import { PlayerRoomInfo } from '@common/interfaces/player-room-info';
-import { IUser } from '@common/interfaces/user';
+import { RoomPlayer } from '@common/interfaces/room-player';
 import { SnackBarService } from '@services/snack-bar.service';
 import { UserService } from '@services/user.service';
 import { Subject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
+import { GameRoom } from '@common/interfaces/game-room';
+import { GameRoomState } from '@common/models/game-room-state';
+import { GameMode } from '@common/models/game-mode';
+import { GameVisibility } from '@common/models/game-visibility';
+import { UserRoomQuery } from '@common/interfaces/user-room-query';
+import { window as tauriWindow } from '@tauri-apps/api';
+import { TauriEvent } from '@tauri-apps/api/event';
 
 @Injectable({
     providedIn: 'root',
 })
-export class GameConfigurationService {
-    roomInformation: RoomInformation;
-    isGameStarted: Subject<boolean>;
+export class GameConfigurationService implements OnDestroy {
+    localGameRoom: GameRoom;
+    // isGameStarted: Subject<boolean>;
     isRoomJoinable: Subject<boolean>;
     errorReason: string;
-    availableRooms: GameRoomClient[];
-    gameMode: string;
+    availableRooms: GameRoom[];
 
     constructor(
         private snackBarService: SnackBarService,
@@ -32,225 +31,143 @@ export class GameConfigurationService {
         private clientSocket: ClientSocketService,
         private router: Router,
     ) {
+        this.resetRoomInformations();
         this.availableRooms = [];
-        this.roomInformation = {
-            players: [],
-            roomId: '',
-            timer: 0,
-            isCreator: false,
-            statusGame: '',
-            mode: '',
-            botDifficulty: undefined,
-            dictionary: '',
-        };
-        this.clientSocket.establishConnection();
+
         this.isRoomJoinable = new Subject<boolean>();
-        this.isGameStarted = new Subject<boolean>();
+        // this.isGameStarted = new Subject<boolean>();
         this.configureBaseSocketFeatures();
+
+        // TODO : Move this somewhere more logic
+        // eslint-disable-next-line no-underscore-dangle
+        if (window.__TAURI_IPC__) {
+            tauriWindow
+                .getCurrent()
+                .listen(TauriEvent.WINDOW_CLOSE_REQUESTED, () => {
+                    if (this.localGameRoom) {
+                        alert('Disconnecting from socket!');
+                        this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
+                            roomId: this.localGameRoom.id,
+                            user: this.userService.user,
+                        } as UserRoomQuery);
+                    }
+                    tauriWindow.getCurrent().close().then();
+                })
+                .then();
+        }
     }
 
     configureBaseSocketFeatures() {
-        this.clientSocket.on(SocketEvents.JoinValidGame, (allPlayers: IUser[]) => {
-            this.joinValidGameEvent(allPlayers);
+        this.clientSocket.on(SocketEvents.JoinedValidWaitingRoom, (gameRoom: GameRoom) => {
+            this.joinedValidGame(gameRoom);
         });
 
-        this.clientSocket.on(SocketEvents.RejectByOtherPlayer, (user: IUser) => {
-            this.rejectByOtherPlayerEvent(user);
+        this.clientSocket.on(SocketEvents.KickedFromGameRoom, () => {
+            this.kickedFromGameRoom();
         });
 
-        this.clientSocket.on(SocketEvents.GameAboutToStart, (socketIDUserRoom: string[]) => {
-            this.gameAboutToStartEvent(socketIDUserRoom);
+        this.clientSocket.on(SocketEvents.GameAboutToStart, () => {
+            this.router.navigate([AppRoutes.GamePage]).then();
         });
 
-        this.clientSocket.on(SocketEvents.FoundAnOpponent, (opponent: IUser) => {
-            this.foundAnOpponentEvent(opponent);
+        this.clientSocket.on(SocketEvents.PlayerJoinedWaitingRoom, (opponent: RoomPlayer) => {
+            this.localGameRoom.players.push(opponent);
         });
 
-        this.clientSocket.on(SocketEvents.GameCreatedConfirmation, (roomId: string) => {
-            this.gameCreatedConfirmationEvent(roomId);
+        this.clientSocket.on(SocketEvents.UpdateWaitingRoom, (room: GameRoom) => {
+            this.localGameRoom = room;
         });
 
-        this.clientSocket.on(SocketEvents.UpdateRoomJoinable, (gamesToJoin: GameRoomClient[]) => {
-            // this.availableRooms = this.filterGameMode(this.roomInformation.mode, gamesToJoin);
+        this.clientSocket.on(SocketEvents.UpdateGameRooms, (gamesToJoin: GameRoom[]) => {
             this.availableRooms = gamesToJoin;
         });
 
         this.clientSocket.on(SocketEvents.ErrorJoining, (reason: string) => {
             if (reason) {
                 this.snackBarService.openError(reason);
-                this.exitRoom(false);
             }
-            this.exitRoom();
-        });
-
-        this.clientSocket.on(SocketEvents.OpponentLeave, (player: IUser) => {
-            this.opponentLeaveEvent(player);
+            this.exitWaitingRoom();
         });
     }
 
-    removeRoom(): void {
-        if (this.roomInformation.players.length > 1) {
-            for (let i = 1; i < this.roomInformation.players.length; i++) {
-                this.rejectOpponent(this.roomInformation.players[i]);
-            }
+    ngOnDestroy() {
+        if (this.localGameRoom) {
+            this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
+                roomId: this.localGameRoom.id,
+                user: this.userService.user,
+            } as UserRoomQuery);
         }
-        this.clientSocket.send(SocketEvents.RemoveRoom, this.roomInformation.roomId);
-        this.roomInformation.roomId = '';
-        this.roomInformation.players = [this.roomInformation.players[0]];
     }
 
-    exitWaitingRoom(): void {
+    rejectOpponent(player: RoomPlayer): void {
         this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
-            roomId: this.roomInformation.roomId,
-            player: this.userService.user,
-        } as PlayerRoomInfo);
-        this.resetRoomInformation();
+            user: player.user,
+            roomId: player.roomId,
+        } as UserRoomQuery);
     }
 
-    rejectOpponent(player: IUser): void {
-        this.clientSocket.send(SocketEvents.RejectOpponent, {
-            roomId: this.roomInformation.roomId,
-            player,
-        } as PlayerRoomInfo);
-        this.roomInformation.players = this.roomInformation.players.filter((playerElement: IUser) => {
-            return playerElement.username !== player.username && playerElement.profilePicture.name !== player.profilePicture.name;
-        });
-        if (this.roomInformation.players.length > 1) {
-            this.roomInformation.statusGame = GameStatus.SearchingOpponent;
-        }
-    }
-
-    gameInitialization(parameters: GameParameters): void {
-        this.roomInformation.statusGame = GameStatus.SearchingOpponent;
-        if (parameters.opponents && parameters.opponents.length !== 0) {
-            parameters.opponents.forEach((opponent: IUser) => {
-                this.roomInformation.players.push(opponent);
-            });
-            this.roomInformation.botDifficulty = parameters.botDifficulty;
-        }
-        this.clientSocket.send(SocketEvents.CreateGame, parameters);
-        this.roomInformation.timer = parameters.timer;
-        this.roomInformation.dictionary = parameters.dictionary;
-        this.roomInformation.players.push(parameters.user);
-        this.roomInformation.isCreator = true;
-        this.roomInformation.mode = parameters.mode;
-    }
-
-    joinGame(room: GameRoomClient, player: IUser): void {
-        this.clientSocket.send(SocketEvents.PlayerJoinGameAvailable, {
+    joinRoom(room: GameRoom): void {
+        this.clientSocket.send(SocketEvents.JoinWaitingRoom, {
             roomId: room.id,
-            player,
-        } as PlayerRoomInfo);
-
-        this.roomInformation.roomId = room.id;
-        this.roomInformation.players = [...room.users];
-        this.roomInformation.dictionary = room.dictionary;
-        this.roomInformation.timer = room.timer;
-        this.roomInformation.mode = room.mode;
+            socketId: '',
+            user: this.userService.user,
+            password: room.password,
+        } as RoomPlayer);
     }
 
-    joinPage(gameMode: string): void {
-        this.clientSocket.send(SocketEvents.RoomLobby);
-        this.roomInformation.mode = gameMode;
+    joinSecretRoom(roomId: string): void {
+        this.clientSocket.send(SocketEvents.JoinWaitingRoom, {
+            roomId,
+            socketId: '',
+            user: this.userService.user,
+        } as RoomPlayer);
+    }
+
+    navigateJoinPage(gameMode: GameMode): void {
+        this.clientSocket.send(SocketEvents.EnterRoomLobby);
+        this.localGameRoom.mode = gameMode;
     }
 
     beginScrabbleGame(): void {
-        this.clientSocket.send(SocketEvents.StartScrabbleGame, this.roomInformation.roomId);
+        this.clientSocket.send(SocketEvents.StartScrabbleGame, this.localGameRoom.id);
     }
 
-    resetRoomInformation(): void {
-        this.roomInformation.roomId = '';
-        this.roomInformation.botDifficulty = undefined;
-        this.roomInformation.mode = '';
-        this.roomInformation.players = [];
-        this.roomInformation.statusGame = '';
-        this.roomInformation.isCreator = false;
-
-        this.availableRooms = [];
+    resetRoomInformations(): void {
+        this.localGameRoom = {
+            id: '',
+            players: [],
+            dictionary: '',
+            timer: -1,
+            mode: GameMode.Solo,
+            state: GameRoomState.Waiting,
+            visibility: GameVisibility.Public,
+            password: '',
+        };
     }
 
-    joinRandomRoom(): void {
-        const random = Math.floor(Math.random() * this.availableRooms.length);
-        const roomToJoinId = this.availableRooms[random].id;
-        this.roomInformation.players = [this.userService.user];
-        this.roomInformation.roomId = roomToJoinId;
-        this.clientSocket.send(SocketEvents.PlayerJoinGameAvailable, {
-            roomId: roomToJoinId,
-            player: this.roomInformation.players[0],
-        } as PlayerRoomInfo);
+    exitWaitingRoom() {
+        this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
+            roomId: this.localGameRoom.id,
+            user: this.userService.user,
+        } as RoomPlayer);
+
+        this.resetRoomInformations();
     }
 
-    exitRoom(exitByIsOwn?: boolean) {
-        if (this.roomInformation.isCreator) {
-            this.router.navigate([`${AppRoutes.MultiGameCreationPage}/${this.gameMode}`]).then();
-            this.removeRoom();
-            return;
-        }
-
-        this.router.navigate([`${AppRoutes.MultiJoinPage}/${this.gameMode}`]).then();
-
-        if (!exitByIsOwn) return;
-        this.exitWaitingRoom();
+    isGameCreator(): boolean {
+        return !!this.localGameRoom.players.find((player: RoomPlayer) => player.isCreator && player.user.username === this.userService.user.username);
     }
 
-    private gameCreatedConfirmationEvent(roomId: string): void {
-        this.roomInformation.roomId = roomId;
-        // if (this.roomInformation.playerName[1]) this.clientSocket.send(SocketEvents.StartScrabbleGame, this.roomInformation.roomId);
-    }
+    private kickedFromGameRoom(): void {
+        this.resetRoomInformations();
 
-    private opponentLeaveEvent(player: IUser): void {
-        this.roomInformation.statusGame = GameStatus.SearchingOpponent;
-        this.roomInformation.players = this.roomInformation.players.filter((playerElement: IUser) => {
-            return !this.arePlayersTheSame(player, playerElement);
-        });
-    }
-
-    private foundAnOpponentEvent(opponent: IUser): void {
-        if (this.roomInformation.players.length < NUMBER_OF_PLAYERS) {
-            this.roomInformation.players.push(opponent);
-        }
-        this.roomInformation.statusGame = GameStatus.FoundOpponent;
-    }
-
-    private gameAboutToStartEvent(socketIDUserRoom: string[]): void {
-        if (this.roomInformation.isCreator) {
-            this.clientSocket.send(SocketEvents.CreateScrabbleGame, {
-                players: this.roomInformation.players,
-                roomId: this.roomInformation.roomId,
-                timer: this.roomInformation.timer,
-                dictionary: this.roomInformation.dictionary,
-                socketId: socketIDUserRoom,
-                mode: this.roomInformation.mode,
-                botDifficulty: this.roomInformation.botDifficulty,
-            } as GameScrabbleInformation);
-        }
-
-        this.isGameStarted.next(true);
-    }
-
-    private rejectByOtherPlayerEvent(user: IUser): void {
-        this.clientSocket.send(SocketEvents.RejectByOtherPlayer, {
-            roomId: this.roomInformation.roomId,
-            player: user,
-        } as PlayerRoomInfo);
-        this.resetRoomInformation();
-
+        this.router.navigate([`${AppRoutes.MultiJoinPage}/multi`]).then();
         // TODO : Language
         this.snackBarService.openError('Rejected by other player');
-        this.exitRoom(false);
     }
 
-    private joinValidGameEvent(allPlayers: IUser[]): void {
-        this.roomInformation.isCreator = false;
-        this.roomInformation.statusGame = GameStatus.WaitingOpponentConfirmation;
-        this.roomInformation.players = [...allPlayers];
-
-        this.router.navigate([`${AppRoutes.MultiWaitingPage}/${this.gameMode}`]).then();
-    }
-
-    private arePlayersTheSame(player1: IUser, player2: IUser): boolean {
-        return (
-            player1.username === player2.username && player1.email === player2.email && player1.profilePicture.name === player2.profilePicture.name
-        );
+    private joinedValidGame(gameRoom: GameRoom): void {
+        this.localGameRoom = gameRoom;
+        this.router.navigate([`${AppRoutes.MultiWaitingPage}/${gameRoom.mode}`]).then();
     }
 }

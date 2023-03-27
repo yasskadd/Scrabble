@@ -1,4 +1,6 @@
 export enum GameVisibility {
-	Public = 'public',
-	Private = 'private',
+    // TODO : Language
+    Public = 'public',
+    Locked = 'locked',
+    Private = 'private',
 }

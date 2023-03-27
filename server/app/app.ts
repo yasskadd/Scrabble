@@ -13,6 +13,7 @@ import { AuthentificationController } from './controllers/authentification.contr
 import { DictionaryController } from './controllers/dictionary.controller';
 import { HistoryController } from './controllers/history.controller';
 import { ProfilePictureController } from './controllers/profile-picture.controller';
+import { UserProfileController } from './controllers/user-profile.controller';
 import { VirtualPlayerController } from './controllers/virtual-players.controller';
 
 @Service()
@@ -28,6 +29,7 @@ export class Application {
         private readonly dictionaryController: DictionaryController,
         private readonly authentificationController: AuthentificationController,
         private readonly profilePictureController: ProfilePictureController,
+        private readonly userProfileController: UserProfileController,
     ) {
         this.app = express();
 
@@ -55,6 +57,7 @@ export class Application {
         this.app.use('/virtualPlayer', this.virtualPlayerController.router);
         this.app.use('/auth', this.authentificationController.router);
         this.app.use('/image', this.profilePictureController.router);
+        this.app.use('/profile', this.userProfileController.router);
         this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerJSDoc(this.swaggerOptions)));
         this.app.use('/', (req, res) => {
             res.redirect('/docs');
