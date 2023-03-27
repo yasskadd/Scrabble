@@ -1,31 +1,31 @@
 /* eslint-disable max-lines */
-import { SocketManager } from '@app/services/socket/socket-manager.service';
-import { SocketEvents } from '@common/constants/socket-events';
-import { GameCreationQuery } from '@common/interfaces/game-creation-query';
-import { GameRoom } from '@common/interfaces/game-room';
-import { UserRoomQuery } from '@common/interfaces/user-room-query';
-import { IUser } from '@common/interfaces/user';
-import { Server, Socket } from 'socket.io';
-import { Service } from 'typedi';
-import * as uuid from 'uuid';
-import { SocketType } from '@app/types/sockets';
 import {
-    ROOM_NOT_AVAILABLE_ERROR,
     ROOMID_LENGTH,
+    ROOM_NOT_AVAILABLE_ERROR,
     SAME_USER_IN_ROOM_ERROR,
     UNAVAILABLE_ELEMENT_INDEX,
     WRONG_ROOM_PASSWORD,
 } from '@app/constants/rooms';
-import { GameRoomState } from '@common/models/game-room-state';
-import { RoomPlayer } from '@common/interfaces/room-player';
-import { PlayerType } from '@common/models/player-type';
-import { GameVisibility } from '@common/models/game-visibility';
-import { GAME_LOBBY_ROOM_ID } from '@common/constants/room';
-import { GamesStateService } from '@app/services/games-management/games-state.service';
-import { GameDifficulty } from '@common/models/game-difficulty';
 import { VirtualPlayersStorageService } from '@app/services/database/virtual-players-storage.service';
+import { GamesStateService } from '@app/services/games-management/games-state.service';
+import { SocketManager } from '@app/services/socket/socket-manager.service';
+import { SocketType } from '@app/types/sockets';
 import { INVALID_INDEX } from '@common/constants/board-info';
 import { NUMBER_OF_PLAYERS } from '@common/constants/players';
+import { GAME_LOBBY_ROOM_ID } from '@common/constants/room';
+import { SocketEvents } from '@common/constants/socket-events';
+import { GameCreationQuery } from '@common/interfaces/game-creation-query';
+import { GameRoom } from '@common/interfaces/game-room';
+import { RoomPlayer } from '@common/interfaces/room-player';
+import { IUser } from '@common/interfaces/user';
+import { UserRoomQuery } from '@common/interfaces/user-room-query';
+import { GameDifficulty } from '@common/models/game-difficulty';
+import { GameRoomState } from '@common/models/game-room-state';
+import { GameVisibility } from '@common/models/game-visibility';
+import { PlayerType } from '@common/models/player-type';
+import { Server, Socket } from 'socket.io';
+import { Service } from 'typedi';
+import * as uuid from 'uuid';
 
 // const PLAYERS_REJECT_FROM_ROOM_ERROR = "L'adversaire à rejeter votre demande";
 
