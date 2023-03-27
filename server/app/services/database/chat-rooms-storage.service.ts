@@ -38,4 +38,8 @@ export class ChatRoomsStorageService {
     async changeRoomName(oldRoomName: string, newRoomName: string) {
         await this.databaseService.chatRooms.updateDocument({ name: oldRoomName }, { $set: { name: newRoomName } });
     }
+
+    async roomExists(roomName: string): Promise<boolean> {
+        return (await this.databaseService.chatRooms.collection?.findOne({ name: roomName })) !== null;
+    }
 }
