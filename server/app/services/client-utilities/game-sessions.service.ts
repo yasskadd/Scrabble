@@ -131,7 +131,7 @@ export class GameSessions {
 
             this.rejectOpponent(server, socket, player);
 
-            if (room.players.length === 0) {
+            if (room.players.filter((playerElement: RoomPlayer) => playerElement.type === PlayerType.User).length === 0) {
                 this.removeRoom(server, userQuery.roomId);
             }
 

@@ -27,7 +27,7 @@ export class ClientSocketService implements OnDestroy {
     }
 
     ngOnDestroy() {
-        this.disconnect();
+        this.disconnect().then();
     }
 
     isSocketAlive() {
@@ -70,7 +70,7 @@ export class ClientSocketService implements OnDestroy {
             this.connected.next(true);
         };
 
-        if (this.connected.value) {
+        if (this.connected.getValue()) {
             await this.disconnect().then(connection);
             return;
         }

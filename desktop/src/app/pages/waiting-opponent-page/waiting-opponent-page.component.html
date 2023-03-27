@@ -52,7 +52,7 @@
                 class='startButton'
                 (click)='gameConfiguration.beginScrabbleGame()'
                 mat-raised-button
-                [disabled]='isValidGame()'
+                [disabled]='!isValidGame()'
             >
                 {{ "action.start" | translate }}
             </button>
