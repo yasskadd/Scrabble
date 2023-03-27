@@ -1,4 +1,4 @@
-import { Collection, Document, Filter, FindOptions, MongoClient, ObjectId } from 'mongodb';
+import { Collection, Document, Filter, FindOptions, MongoClient, ObjectId, UpdateFilter } from 'mongodb';
 
 const DB_USERNAME = 'ProjectAdmin';
 const DB_PASSWORD = 'sd2yRYUAl1f8de9j';
@@ -29,6 +29,11 @@ export class DatabaseCollection {
     async addDocument(object: MongoDocument) {
         await this.connect();
         await this.collection.insertOne(object);
+    }
+
+    async updateDocument(query: Filter<Document>, object: Partial<Document> | UpdateFilter<Document>) {
+        await this.connect();
+        await this.collection.updateOne(query, object);
     }
 
     async removeDocument(parameters: Filter<Document>) {
