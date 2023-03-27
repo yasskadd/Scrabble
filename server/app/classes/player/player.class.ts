@@ -27,7 +27,6 @@ export class GamePlayer {
             player: this.player,
             score: this.score,
             rack: this.rack,
-            gameboard: this.game.gameboard.toStringArray(),
         };
     }
 

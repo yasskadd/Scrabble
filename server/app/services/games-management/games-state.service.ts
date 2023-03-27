@@ -11,9 +11,11 @@ import { ScoreRelatedBot } from '@app/classes/player/score-related-bot.class';
 import { Turn } from '@app/classes/turn.class';
 import { MAX_QUANTITY } from '@app/constants/letter-reserve';
 import { DictionaryContainer } from '@app/interfaces/dictionaryContainer';
+import { HistoryStorageService } from '@app/services/database/history-storage.service';
 import { ScoreStorageService } from '@app/services/database/score-storage.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
+import { GameHistoryInfo } from '@common/interfaces/game-history-info';
 import { GameRoom } from '@common/interfaces/game-room';
 import { GameInfo } from '@common/interfaces/game-state';
 import { PlayerInformation } from '@common/interfaces/player-information';
@@ -25,8 +27,6 @@ import { Subject } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import { GamesHandlerService } from './games-handler.service';
-import { HistoryStorageService } from '@app/services/database/history-storage.service';
-import { GameHistoryInfo } from '@common/interfaces/game-history-info';
 
 const MAX_SKIP = 6;
 const SECOND = 1000;
@@ -412,8 +412,6 @@ export class GamesStateService {
         const playersInfo: PlayerInformation[] = this.gamesHandler.players.map((player: GamePlayer) => {
             return player.getInformation();
         });
-
-        console.log(playersInfo);
 
         server.to(room.id).emit(SocketEvents.PublicViewUpdate, {
             gameboard: game.gameboard.toStringArray(),
