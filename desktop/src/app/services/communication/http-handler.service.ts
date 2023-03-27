@@ -144,14 +144,13 @@ export class HttpHandlerService {
             .pipe(catchError(this.handleError<{ imageKey: string }>('sign-up')));
     }
 
-    login(user: IUser): Observable<{ userData: IUser }> {
+    login(user: IUser): Observable<any> {
         const httpOptions = {
             withCredentials: true,
+            observe: 'response' as 'response',
         };
 
-        return this.http
-            .post<{ userData: IUser }>(`${this.baseUrl}/auth/login`, user, httpOptions)
-            .pipe(catchError(this.handleError<{ userData: IUser }>('login')));
+        return this.http.post<any>(`${this.baseUrl}/auth/login`, user, httpOptions).pipe(catchError(this.handleError<any>('login')));
     }
 
     logout(): Observable<any> {
