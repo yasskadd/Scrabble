@@ -5,13 +5,17 @@ import { Service } from 'typedi';
 import { DatabaseService } from './services/database/database.service';
 import { SocketManager } from './services/socket/socket-manager.service';
 import { SocketSubscribeHandler } from './services/socket/socket-subscribe-handler.service';
+import * as https from 'https';
+import * as fs from 'fs';
 
 @Service()
 export class Server {
     private static readonly appPort: string | number | boolean = Server.normalizePort(process.env.PORT || '3000');
+    // private static readonly secureAppPort: string | number | boolean = Server.normalizePort(process.env.PORT || '443');
     // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     private static readonly baseTen: number = 10;
     private server: http.Server;
+    private secureServer: https.Server;
 
     constructor(
         private readonly application: Application,
@@ -35,13 +39,24 @@ export class Server {
         this.application.app.set('port', Server.appPort);
 
         this.server = http.createServer(this.application.app);
+        this.secureServer = https.createServer(
+            {
+                key: fs.readFileSync('app/certs/myCA.key'),
+                cert: fs.readFileSync('app/certs/myCA.pem'),
+                passphrase: '2345',
+            },
+            this.application.app,
+        );
         this.socketManager.init(this.server);
         this.socketManager.handleSockets();
         this.handler.initSocketsEvents();
 
         this.server.listen(Server.appPort);
+        this.secureServer.listen(443);
         this.server.on('error', (error: NodeJS.ErrnoException) => this.onError(error));
-        this.server.on('listening', () => this.onListening());
+        this.server.on('listening', () => this.onListening(this.server));
+        this.secureServer.on('error', (error: NodeJS.ErrnoException) => this.onError(error));
+        this.secureServer.on('listening', () => this.onListening(this.secureServer));
 
         try {
             await this.databaseService.connect();
@@ -71,8 +86,8 @@ export class Server {
         }
     }
 
-    private onListening(): void {
-        const addr = this.server.address() as AddressInfo;
+    private onListening(server: any): void {
+        const addr = server.address() as AddressInfo;
         const bind: string = typeof addr === 'string' ? `pipe ${addr}` : `port ${addr.port}`;
         // eslint-disable-next-line no-console
         console.log(`Listening on ${bind}`);
