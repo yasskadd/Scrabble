@@ -74,12 +74,10 @@ export class GamesStateService {
 
         await this.gameSubscriptions(room, game);
 
-        // start() that was in Game
         gamePlayers.forEach((player: GamePlayer) => {
             this.gamesHandler.players.push(player);
             game.letterReserve.generateLetters(MAX_QUANTITY, player.rack);
         });
-        // this.gamesHandler.updatePlayersInfo(room.id, game);
 
         game.turn.determineStartingPlayer(gamePlayers);
 
