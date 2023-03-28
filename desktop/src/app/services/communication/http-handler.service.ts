@@ -208,6 +208,7 @@ export class HttpHandlerService {
         } else {
             httpOptions = {
                 withCredentials: true,
+                // eslint-disable-next-line @typescript-eslint/naming-convention
                 headers: new HttpHeaders({ 'Set-Cookie': `session_token=${this.appCookieService.userSessionCookie}` }),
             };
         }

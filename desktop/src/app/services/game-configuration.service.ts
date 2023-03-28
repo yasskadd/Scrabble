@@ -1,4 +1,4 @@
-import { Injectable, NgZone, OnDestroy } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { useTauri } from '@app/pages/app/app.component';
@@ -20,7 +20,7 @@ import { ClientSocketService } from './communication/client-socket.service';
 @Injectable({
     providedIn: 'root',
 })
-export class GameConfigurationService implements OnDestroy {
+export class GameConfigurationService {
     localGameRoom: GameRoom;
     // isGameStarted: Subject<boolean>;
     isRoomJoinable: Subject<boolean>;
@@ -75,8 +75,6 @@ export class GameConfigurationService implements OnDestroy {
         });
 
         this.clientSocket.on(SocketEvents.GameAboutToStart, () => {
-            console.log('going to the game');
-
             if (useTauri) {
                 this.zone.run(() => {
                     this.router.navigate([`${AppRoutes.GamePage}`]).then();
@@ -95,8 +93,6 @@ export class GameConfigurationService implements OnDestroy {
         });
 
         this.clientSocket.on(SocketEvents.UpdateGameRooms, (gamesToJoin: GameRoom[]) => {
-            console.log('received new room list');
-            console.log(gamesToJoin);
             this.availableRooms = gamesToJoin;
         });
 
@@ -106,15 +102,6 @@ export class GameConfigurationService implements OnDestroy {
             }
             this.exitWaitingRoom();
         });
-    }
-
-    ngOnDestroy() {
-        // if (this.localGameRoom) {
-        //     this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
-        //         roomId: this.localGameRoom.id,
-        //         user: this.userService.user,
-        //     } as UserRoomQuery);
-        // }
     }
 
     rejectOpponent(player: RoomPlayer): void {

@@ -45,8 +45,6 @@ export class WaitingOpponentPageComponent implements OnDestroy {
     }
 
     protected isValidGame(): boolean {
-        console.log(this.gameConfiguration.localGameRoom.players.filter((player: RoomPlayer) => player.type === PlayerType.User).length);
-        console.log(this.gameConfiguration.localGameRoom.players.filter((player: RoomPlayer) => player.type === PlayerType.User).length > 1);
         return this.gameConfiguration.localGameRoom.players.filter((player: RoomPlayer) => player.type === PlayerType.User).length > 1;
     }
 }

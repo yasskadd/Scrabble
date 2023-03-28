@@ -102,7 +102,6 @@ export class WaitingRoomService {
         // TODO : Add user as an observer if room full
         socket.leave(GAME_LOBBY_ROOM_ID);
         socket.join(joinGameQuery.roomId);
-        console.log('putting player ' + joinGameQuery.user.username + ' in room ' + joinGameQuery.roomId);
 
         const newPlayer: RoomPlayer = {
             user: joinGameQuery.user,

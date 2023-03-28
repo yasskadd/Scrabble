@@ -10,7 +10,7 @@ import { RealPlayer } from '@app/classes/player/real-player.class';
 import { ScoreRelatedBot } from '@app/classes/player/score-related-bot.class';
 import { Turn } from '@app/classes/turn.class';
 import { MAX_QUANTITY } from '@app/constants/letter-reserve';
-import { DictionaryContainer } from '@app/interfaces/dictionaryContainer';
+import { DictionaryContainer } from '@app/interfaces/dictionary-container';
 import { HistoryStorageService } from '@app/services/database/history-storage.service';
 import { ScoreStorageService } from '@app/services/database/score-storage.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
@@ -81,7 +81,6 @@ export class GamesStateService {
 
         game.turn.determineStartingPlayer(gamePlayers);
 
-        console.log('sending view update');
         this.sendPublicViewUpdate(server, game, room);
         server.to(room.id).emit(SocketEvents.LetterReserveUpdated, game.letterReserve.lettersReserve);
         game.turn.start();
@@ -410,8 +409,6 @@ export class GamesStateService {
         const playersInfo: PlayerInformation[] = this.gamesHandler.players.map((player: GamePlayer) => {
             return player.getInformation();
         });
-
-        console.log(playersInfo);
 
         server.to(room.id).emit(SocketEvents.PublicViewUpdate, {
             gameboard: game.gameboard.toStringArray(),

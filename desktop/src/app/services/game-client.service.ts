@@ -173,11 +173,6 @@ export class GameClientService {
     private viewUpdateEvent(info: GameInfo) {
         this.activePlayer = info.activePlayer;
         this.players = info.players;
-        console.log(
-            this.players.map((player: PlayerInformation) => {
-                return player.player.user;
-            }),
-        );
         this.updateNewGameboard(info.gameboard);
     }
 
@@ -210,7 +205,6 @@ export class GameClientService {
             }
         });
 
-        console.log(resultingRack);
         return resultingRack;
     }
 

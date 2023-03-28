@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogBoxGameTypeComponent } from '@app/components/dialog-box-game-type/dialog-box-game-type.component';
@@ -17,7 +17,7 @@ import { ClientSocketService } from '@services/communication/client-socket.servi
     templateUrl: './main-page.component.html',
     styleUrls: ['./main-page.component.scss'],
 })
-export class MainPageComponent implements OnDestroy {
+export class MainPageComponent {
     protected userNameForm: FormControl;
     protected homeConnectionResponse: SocketResponse;
     protected connectionSubject: Subject<SocketResponse>;
@@ -49,11 +49,6 @@ export class MainPageComponent implements OnDestroy {
 
     protected get loggedIn(): boolean {
         return this.chatBoxHandlerService.loggedIn;
-    }
-
-    ngOnDestroy() {
-        // this.connectionSubject.unsubscribe();
-        // this.disconnectionSubject.unsubscribe();
     }
 
     openGameTypeDialog(gameModeValue: string): void {

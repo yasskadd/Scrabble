@@ -60,8 +60,6 @@ export class GameCreationPageComponent implements OnInit {
         private snackBarService: SnackBarService,
     ) {
         this.gameMode = this.activatedRoute.snapshot.params.id as GameMode;
-        console.log(this.gameMode);
-        console.log(this.activatedRoute.snapshot.params.id);
         this.selectedFile = null;
         this.difficultyList = [];
         this.timerList = [];

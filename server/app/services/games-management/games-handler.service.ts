@@ -3,7 +3,7 @@ import { Game } from '@app/classes/game.class';
 import { LetterPlacement } from '@app/classes/letter-placement.class';
 import { GamePlayer } from '@app/classes/player/player.class';
 import { WordSolver } from '@app/classes/word-solver.class';
-import { DictionaryContainer } from '@app/interfaces/dictionaryContainer';
+import { DictionaryContainer } from '@app/interfaces/dictionary-container';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryStorageService } from '@app/services/database/dictionary-storage.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
@@ -78,9 +78,7 @@ export class GamesHandlerService {
                 playerIndexes.push(index);
             }
         });
-        console.log(playerIndexes);
         playerIndexes.reverse();
-        console.log(playerIndexes);
         playerIndexes.forEach((index: number) => {
             this.players.slice(index, 1);
         });
