@@ -31,8 +31,8 @@ export class InformationPanelComponent {
     }
 
     leaveGame(): void {
-        this.router.navigate([AppRoutes.HomePage]).then();
         this.gameClientService.quitGame();
+        this.router.navigate([AppRoutes.HomePage]).then();
     }
 
     openHelpDialog() {

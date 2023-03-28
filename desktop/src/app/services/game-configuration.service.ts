@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, NgZone, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { SocketEvents } from '@common/constants/socket-events';
@@ -15,6 +15,7 @@ import { UserRoomQuery } from '@common/interfaces/user-room-query';
 import { window as tauriWindow } from '@tauri-apps/api';
 import { TauriEvent } from '@tauri-apps/api/event';
 import { GameDifficulty } from '@common/models/game-difficulty';
+import { useTauri } from '@app/pages/app/app.component';
 
 @Injectable({
     providedIn: 'root',
@@ -25,6 +26,8 @@ export class GameConfigurationService implements OnDestroy {
     isRoomJoinable: Subject<boolean>;
     errorReason: string;
     availableRooms: GameRoom[];
+
+    private zone: NgZone;
 
     constructor(
         private snackBarService: SnackBarService,
@@ -44,7 +47,7 @@ export class GameConfigurationService implements OnDestroy {
         });
 
         // eslint-disable-next-line no-underscore-dangle
-        if (window.__TAURI_IPC__) {
+        if (useTauri) {
             tauriWindow
                 .getCurrent()
                 .listen(TauriEvent.WINDOW_CLOSE_REQUESTED, () => {
@@ -72,7 +75,15 @@ export class GameConfigurationService implements OnDestroy {
         });
 
         this.clientSocket.on(SocketEvents.GameAboutToStart, () => {
-            this.router.navigate([`${AppRoutes.GamePage}`]).then();
+            console.log('going to the game');
+
+            if (useTauri) {
+                this.zone.run(() => {
+                    this.router.navigate([`${AppRoutes.GamePage}`]).then();
+                });
+            } else {
+                this.router.navigate([`${AppRoutes.GamePage}`]).then();
+            }
         });
 
         this.clientSocket.on(SocketEvents.PlayerJoinedWaitingRoom, (opponent: RoomPlayer) => {

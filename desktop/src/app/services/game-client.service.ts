@@ -8,6 +8,7 @@ import { ClientSocketService } from './communication/client-socket.service';
 import { PlayerInformation } from '@common/interfaces/player-information';
 import { UserService } from '@services/user.service';
 import { IUser } from '@common/interfaces/user';
+import { GameConfigurationService } from '@services/game-configuration.service';
 
 // type CompletedObjective = { objective: Objective; name: string };
 // type InitObjective = { objectives1: Objective[]; objectives2: Objective[]; playerName: string };
@@ -28,7 +29,11 @@ export class GameClientService {
     gameboardUpdated: Subject<boolean>;
     turnFinish: ReplaySubject<boolean>;
 
-    constructor(private clientSocketService: ClientSocketService, private userService: UserService) {
+    constructor(
+        private clientSocketService: ClientSocketService,
+        private gameConfigurationService: GameConfigurationService,
+        private userService: UserService,
+    ) {
         this.initGameInformation();
 
         this.gameboardUpdated = new Subject();
@@ -99,7 +104,8 @@ export class GameClientService {
     }
 
     quitGame() {
-        this.clientSocketService.send('quitGame');
+        this.clientSocketService.send(SocketEvents.QuitGame);
+        this.gameConfigurationService.exitWaitingRoom();
     }
 
     initGameInformation() {
