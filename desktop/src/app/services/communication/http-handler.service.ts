@@ -12,6 +12,8 @@ import { IUser } from '@common/interfaces/user';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { useTauri } from '@app/pages/app/app.component';
+import { AppCookieService } from '@services/communication/app-cookie.service';
 
 @Injectable({
     providedIn: 'root',
@@ -20,7 +22,7 @@ export class HttpHandlerService {
     private readonly baseUrl: string = environment.serverUrl;
     private header: HttpHeaders;
 
-    constructor(private readonly http: HttpClient) {}
+    constructor(private readonly http: HttpClient, private appCookieService: AppCookieService) {}
 
     getClassicHighScore(): Observable<HighScores[]> {
         return this.http
@@ -198,9 +200,17 @@ export class HttpHandlerService {
     }
 
     getProfilePicture(): Observable<{ url: string }> {
-        const httpOptions = {
-            withCredentials: true,
-        };
+        let httpOptions;
+        if (useTauri) {
+            httpOptions = {
+                withCredentials: true,
+            };
+        } else {
+            httpOptions = {
+                withCredentials: true,
+                headers: new HttpHeaders({ 'Set-Cookie': `session_token=${this.appCookieService.userSessionCookie}` }),
+            };
+        }
 
         return this.http
             .get<{ url: string }>(`${this.baseUrl}/image/profile-picture`, httpOptions)

@@ -6,7 +6,7 @@ import { ClientSocketService } from '@services/communication/client-socket.servi
     providedIn: 'root',
 })
 export class AppCookieService {
-    private userSessionCookie: string;
+    userSessionCookie: string;
 
     constructor(private cookieService: CookieService, private clientSocketService: ClientSocketService) {}
 

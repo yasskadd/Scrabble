@@ -180,35 +180,35 @@ export class WaitingRoomService {
     }
 
     private async startScrabbleGame(server: Server, roomId: string): Promise<void> {
-        const room = this.getRoom(roomId);
+        const room: GameRoom | undefined = this.getRoom(roomId);
+        if (!room) return;
 
-        if (room) {
-            await this.gameStateService.createGame(server, room).then(() => {
-                this.socketManager.emitRoom(roomId, SocketEvents.GameAboutToStart);
-                // server.to(roomId).emit(SocketEvents.GameAboutToStart);
-            });
-            // // TODO : Changed GameScrabbleInformation to simply using GameRoom
-            // const users: IUser[] = [];
-            // const socketIds: string[] = [];
-            // room.players.forEach((player: RoomPlayer) => {
-            //     users.push(player.user);
-            //     socketIds.push(player.socketId);
-            // });
-            //
-            // this.gameStateService
-            //     .createGame(server, {
-            //         players: users,
-            //         roomId,
-            //         timer: room.timer,
-            //         socketId: socketIds,
-            //         mode: room.mode,
-            //         botDifficulty: 'easy',
-            //         dictionary: room.dictionary,
-            //     } as GameScrabbleInformation)
-            //     .then(() => {
-            //         server.to(roomId).emit(SocketEvents.GameAboutToStart);
-            //     });
-        }
+        await this.gameStateService.createGame(server, room).then(() => {
+            this.socketManager.emitRoom(roomId, SocketEvents.GameAboutToStart);
+            // server.to(roomId).emit(SocketEvents.GameAboutToStart);
+        });
+
+        // // TODO : Changed GameScrabbleInformation to simply using GameRoom
+        // const users: IUser[] = [];
+        // const socketIds: string[] = [];
+        // room.players.forEach((player: RoomPlayer) => {
+        //     users.push(player.user);
+        //     socketIds.push(player.socketId);
+        // });
+        //
+        // this.gameStateService
+        //     .createGame(server, {
+        //         players: users,
+        //         roomId,
+        //         timer: room.timer,
+        //         socketId: socketIds,
+        //         mode: room.mode,
+        //         botDifficulty: 'easy',
+        //         dictionary: room.dictionary,
+        //     } as GameScrabbleInformation)
+        //     .then(() => {
+        //         server.to(roomId).emit(SocketEvents.GameAboutToStart);
+        //     });
     }
 
     private async createWaitingRoom(server: Server, socket: SocketType, gameQuery: GameCreationQuery): Promise<void> {
