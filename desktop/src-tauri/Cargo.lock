@@ -1629,11 +1629,12 @@ dependencies = [
 
 [[package]]
 name = "notify-rust"
-version = "4.7.1"
+version = "4.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "260208751689b605138bb55ab6af43ad75f628619a7e0b818d63bf6629e59467"
+checksum = "2bfa211d18e360f08e36c364308f394b5eb23a6629150690e109a916dc6f610e"
 dependencies = [
  "dbus",
+ "log",
  "mac-notification-sys",
  "tauri-winrt-notification",
 ]
@@ -1811,9 +1812,9 @@ dependencies = [
 
 [[package]]
 name = "os_info"
-version = "3.6.0"
+version = "3.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5c424bc68d15e0778838ac013b5b3449544d8133633d8016319e7e05a820b8c0"
+checksum = "006e42d5b888366f1880eda20371fedde764ed2213dc8496f49622fa0c99cd5e"
 dependencies = [
  "log",
  "serde",

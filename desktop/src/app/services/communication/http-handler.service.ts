@@ -14,6 +14,7 @@ import { catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { useTauri } from '@app/pages/app/app.component';
 import { AppCookieService } from '@services/communication/app-cookie.service';
+import { getClient, Client, Body } from '@tauri-apps/api/http';
 
 @Injectable({
     providedIn: 'root',
@@ -21,8 +22,13 @@ import { AppCookieService } from '@services/communication/app-cookie.service';
 export class HttpHandlerService {
     private readonly baseUrl: string = environment.serverUrl;
     private header: HttpHeaders;
+    private backendHttp: Client;
 
-    constructor(private readonly http: HttpClient, private appCookieService: AppCookieService) {}
+    constructor(private readonly http: HttpClient, private appCookieService: AppCookieService) {
+        getClient().then((client: Client) => {
+            this.backendHttp = client;
+        });
+    }
 
     getClassicHighScore(): Observable<HighScores[]> {
         return this.http
@@ -150,6 +156,10 @@ export class HttpHandlerService {
         const httpOptions = {
             withCredentials: true,
         };
+
+        this.backendHttp.post<{ userData: IUser; sessionToken: string }>(`${this.baseUrl}/auth/login`, Body.json(user)).then((res: any) => {
+            console.log(res);
+        });
 
         return this.http
             .post<{ userData: IUser; sessionToken: string }>(`${this.baseUrl}/auth/login`, user, httpOptions)
