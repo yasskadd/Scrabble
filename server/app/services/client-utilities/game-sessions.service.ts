@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
 import {
-    ROOM_NOT_AVAILABLE_ERROR,
     ROOMID_LENGTH,
+    ROOM_NOT_AVAILABLE_ERROR,
     SAME_USER_IN_ROOM_ERROR,
     UNAVAILABLE_ELEMENT_INDEX,
     WRONG_ROOM_PASSWORD,
@@ -205,6 +205,8 @@ export class GameSessions {
     private async createWaitingRoom(server: Server, socket: SocketType, gameQuery: GameCreationQuery): Promise<void> {
         const room: GameRoom = await this.setupNewGameRoom(gameQuery, socket.id);
         this.gameRooms.push(room);
+
+        console.log(gameQuery);
 
         server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
         socket.leave(GAME_LOBBY_ROOM_ID);

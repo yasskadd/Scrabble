@@ -434,6 +434,8 @@ export class GamesStateService {
         const players = this.gamesHandler.getPlayersFromRoomId(roomId);
         if (!players) return;
 
+        console.log(players);
+
         const endTime = new Date();
         return {
             mode: players[0].game.gameMode,
