@@ -2,19 +2,19 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { SocketEvents } from '@common/constants/socket-events';
+import { GameRoom } from '@common/interfaces/game-room';
 import { RoomPlayer } from '@common/interfaces/room-player';
+import { UserRoomQuery } from '@common/interfaces/user-room-query';
+import { GameDifficulty } from '@common/models/game-difficulty';
+import { GameMode } from '@common/models/game-mode';
+import { GameRoomState } from '@common/models/game-room-state';
+import { GameVisibility } from '@common/models/game-visibility';
 import { SnackBarService } from '@services/snack-bar.service';
 import { UserService } from '@services/user.service';
-import { Subject } from 'rxjs';
-import { ClientSocketService } from './communication/client-socket.service';
-import { GameRoom } from '@common/interfaces/game-room';
-import { GameRoomState } from '@common/models/game-room-state';
-import { GameMode } from '@common/models/game-mode';
-import { GameVisibility } from '@common/models/game-visibility';
-import { UserRoomQuery } from '@common/interfaces/user-room-query';
 import { window as tauriWindow } from '@tauri-apps/api';
 import { TauriEvent } from '@tauri-apps/api/event';
-import { GameDifficulty } from '@common/models/game-difficulty';
+import { Subject } from 'rxjs';
+import { ClientSocketService } from './communication/client-socket.service';
 
 @Injectable({
     providedIn: 'root',
@@ -37,12 +37,9 @@ export class GameConfigurationService implements OnDestroy {
 
         this.isRoomJoinable = new Subject<boolean>();
         // this.isGameStarted = new Subject<boolean>();
-        this.clientSocket.connected.subscribe((connected: boolean) => {
-            if (connected) {
-                this.configureBaseSocketFeatures();
-            }
-        });
+        this.configureBaseSocketFeatures();
 
+        // TODO : Move this somewhere more logic
         // eslint-disable-next-line no-underscore-dangle
         if (window.__TAURI_IPC__) {
             tauriWindow
@@ -54,7 +51,6 @@ export class GameConfigurationService implements OnDestroy {
                             roomId: this.localGameRoom.id,
                             user: this.userService.user,
                         } as UserRoomQuery);
-                        this.clientSocket.disconnect();
                     }
                     tauriWindow.getCurrent().close().then();
                 })
@@ -72,7 +68,7 @@ export class GameConfigurationService implements OnDestroy {
         });
 
         this.clientSocket.on(SocketEvents.GameAboutToStart, () => {
-            this.router.navigate([`${AppRoutes.GamePage}`]).then();
+            this.router.navigate([AppRoutes.GamePage]).then();
         });
 
         this.clientSocket.on(SocketEvents.PlayerJoinedWaitingRoom, (opponent: RoomPlayer) => {
@@ -84,8 +80,6 @@ export class GameConfigurationService implements OnDestroy {
         });
 
         this.clientSocket.on(SocketEvents.UpdateGameRooms, (gamesToJoin: GameRoom[]) => {
-            console.log('received new room list');
-            console.log(gamesToJoin);
             this.availableRooms = gamesToJoin;
         });
 
