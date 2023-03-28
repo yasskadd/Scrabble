@@ -47,9 +47,15 @@ export class GamesStateService {
             await this.createGame(server, gameInfo);
         });
 
-        this.socketManager.on(SocketEvents.Disconnect, this.disconnect);
-        this.socketManager.on(SocketEvents.AbandonGame, this.abandonGame);
-        this.socketManager.on(SocketEvents.QuitGame, this.disconnect);
+        this.socketManager.on(SocketEvents.Disconnect, (socket) => {
+            this.disconnect(socket);
+        });
+        this.socketManager.on(SocketEvents.AbandonGame, (socket) => {
+            this.abandonGame(socket);
+        });
+        this.socketManager.on(SocketEvents.QuitGame, (socket) => {
+            this.disconnect(socket);
+        });
     }
 
     async createGame(server: Server, gameInfo: GameScrabbleInformation) {
@@ -190,7 +196,7 @@ export class GamesStateService {
         this.socketManager.emitRoom(roomId, SocketEvents.TimerClientUpdate, timer);
     }
 
-    private abandonGame(socket: Socket) {
+    private abandonGame(this: GamesStateService, socket: Socket) {
         if (!this.gamesHandler.players.has(socket.id)) return;
 
         const player = this.gamesHandler.players.get(socket.id) as Player;
@@ -255,7 +261,7 @@ export class GamesStateService {
         this.gamesHandler.updatePlayerInfo(roomId, game);
     }
 
-    private disconnect(socket: Socket) {
+    private disconnect(this: GamesStateService, socket: Socket) {
         if (!this.gamesHandler.players.has(socket.id)) return;
         const player = this.gamesHandler.players.get(socket.id) as Player;
         const room = player.room;
