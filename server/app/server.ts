@@ -52,7 +52,7 @@ export class Server {
         this.handler.initSocketsEvents();
 
         this.server.listen(Server.appPort);
-        this.secureServer.listen(443);
+        this.secureServer.listen(3443);
         this.server.on('error', (error: NodeJS.ErrnoException) => this.onError(error));
         this.server.on('listening', () => this.onListening(this.server));
         this.secureServer.on('error', (error: NodeJS.ErrnoException) => this.onError(error));
