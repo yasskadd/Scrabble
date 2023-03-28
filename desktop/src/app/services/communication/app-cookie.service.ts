@@ -15,11 +15,7 @@ export class AppCookieService {
     }
 
     updateUserSessionCookie(cookie?: string): void {
-        if (!cookie) {
-            this.userSessionCookie = this.cookieService.get('session_token');
-        }
-        console.log('connecting');
-        console.log(this.userSessionCookie);
+        this.userSessionCookie = cookie ? cookie : this.cookieService.get('session_token');
         this.clientSocketService.establishConnection(this.userSessionCookie).then();
     }
 }
