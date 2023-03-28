@@ -14,9 +14,12 @@ export class AppCookieService {
         this.cookieService.remove('session_token');
     }
 
-    updateUserSessionCookie(): void {
-        this.userSessionCookie = this.cookieService.get('session_token');
+    updateUserSessionCookie(cookie?: string): void {
+        if (!cookie) {
+            this.userSessionCookie = this.cookieService.get('session_token');
+        }
         console.log('connecting');
+        console.log(this.userSessionCookie);
         this.clientSocketService.establishConnection(this.userSessionCookie).then();
     }
 }
