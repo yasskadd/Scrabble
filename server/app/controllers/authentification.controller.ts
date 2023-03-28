@@ -15,7 +15,7 @@ const TEMP_REDIRECT = 307;
 export class AuthentificationController {
     router: Router;
 
-    constructor(private readonly accountStorage: AccountStorageService) {
+    constructor(private accountStorage: AccountStorageService) {
         this.configureRouter();
     }
 
@@ -64,7 +64,7 @@ export class AuthentificationController {
                     const userData = await this.accountStorage.getUserData(user.username);
                     const token = this.createJWToken(user.username);
                     // Sending updated IUser with email and profile picture data added
-                    res.status(SUCCESS).cookie('session_token', token).send({ userData });
+                    res.status(SUCCESS).cookie('session_token', token).send({ userData, sessionToken: token });
                     return;
                 }
             }

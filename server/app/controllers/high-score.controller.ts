@@ -6,7 +6,7 @@ import { Service } from 'typedi';
 export class HighScoreController {
     router: Router;
 
-    constructor(private readonly scoreStorage: ScoreStorageService) {
+    constructor(private scoreStorage: ScoreStorageService) {
         this.configureRouter();
     }
 

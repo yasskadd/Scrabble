@@ -4,7 +4,7 @@
 /* eslint-disable dot-notation */
 import { Game } from '@app/classes/game.class';
 import { ObjectivesHandler } from '@app/classes/objectives-handler.class';
-import { Player } from '@app/classes/player/player.class';
+import { GamePlayer } from '@app/classes/player/player.class';
 import { Word } from '@app/classes/word.class';
 import { RackService } from '@app/services/rack.service';
 import { Gameboard } from '@common/classes/gameboard.class';
@@ -16,7 +16,7 @@ import { DictionaryValidation } from './dictionary-validation.class';
 import { LetterPlacement } from './letter-placement.class';
 
 describe('Letter Placement', () => {
-    let player: Player;
+    let player: GamePlayer;
     let commandInfo: PlaceWordCommandInfo;
     let gameboard: Gameboard;
     let rackService: RackService;
@@ -25,7 +25,7 @@ describe('Letter Placement', () => {
     let word: Word;
 
     beforeEach(() => {
-        player = new Player('test');
+        player = new GamePlayer('test');
         player.rack = [
             { value: 'a', quantity: 1, points: 1 },
             { value: 'b', quantity: 1, points: 1 },

@@ -1,6 +1,6 @@
 import { AuthenticationService } from '@app/services/authentication/authentication.service';
 import { ChatboxHandlerService } from '@app/services/client-utilities/chatbox-handler.service';
-import { GameSessions } from '@app/services/client-utilities/game-sessions.service';
+import { WaitingRoomService } from '@app/services/client-utilities/waiting-room.service';
 import { HomeChatBoxHandlerService } from '@app/services/client-utilities/home-chatbox-handler.service';
 import { GamesActionsService } from '@app/services/games-management/games-actions.service';
 import { GamesStateService } from '@app/services/games-management/games-state.service';
@@ -11,7 +11,7 @@ export class SocketSubscribeHandler {
     constructor(
         private chatBoxHandlerService: ChatboxHandlerService,
         private homeChatBoxHandler: HomeChatBoxHandlerService,
-        private gameSessions: GameSessions,
+        private gameSessions: WaitingRoomService,
         private gameActions: GamesActionsService,
         private gamesState: GamesStateService,
         private authentication: AuthenticationService,

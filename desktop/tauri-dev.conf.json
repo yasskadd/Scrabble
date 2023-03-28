@@ -23,6 +23,10 @@
                 "scope": ["http://**", "https://**", "ws://**"],
                 "all": true,
                 "request": true
+            },
+            "shell": {
+                "all": false,
+                "open": true
             }
         },
         "bundle": {

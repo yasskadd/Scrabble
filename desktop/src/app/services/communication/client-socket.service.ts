@@ -1,32 +1,43 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { RustCommand, RustEvent } from '@app/models/rust-command';
 import { LanguageService } from '@services/language.service';
 import { SnackBarService } from '@services/snack-bar.service';
 import * as tauri from '@tauri-apps/api';
 import { Event } from '@tauri-apps/api/event';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
     providedIn: 'root',
 })
-export class ClientSocketService {
+export class ClientSocketService implements OnDestroy {
     updateSubject: Subject<void>;
+    connected: BehaviorSubject<boolean>;
     private socket: Socket;
-    private connected: boolean;
 
     private readonly useTauriSocket: boolean;
 
     constructor(private snackBarService: SnackBarService, private languageService: LanguageService) {
+        this.connected = new BehaviorSubject<boolean>(false);
         this.updateSubject = new Subject<void>();
 
         // eslint-disable-next-line no-underscore-dangle
         this.useTauriSocket = !!window.__TAURI_IPC__;
     }
 
+    ngOnDestroy() {
+        this.disconnect().then();
+    }
+
     isSocketAlive() {
-        return this.socket && this.socket.connected;
+        if (this.useTauriSocket) {
+            return tauri.tauri.invoke(RustCommand.IsSocketAlive).then((res) => {
+                return res === RustEvent.SocketAlive ? true : res === RustEvent.SocketNotAlive ? false : false;
+            });
+        } else {
+            return this.socket && this.socket.connected;
+        }
     }
 
     connect(cookie?: string) {
@@ -40,33 +51,32 @@ export class ClientSocketService {
         } else {
             this.socket = io(environment.serverUrl, { transports: ['websocket'], upgrade: false });
         }
-
-        this.connected = true;
     }
 
-    establishConnection(cookie?: string) {
-        if (this.connected) {
-            this.disconnect();
+    connectTauri(cookie?: string) {
+        if (cookie) {
+            tauri.tauri.invoke(RustCommand.EstablishConnection, { address: environment.serverUrl, cookie: `session_token=${cookie}` }).then(() => {
+                this.listenToTauriEvents();
+            });
+        } else {
+            tauri.tauri.invoke(RustCommand.EstablishConnection, { address: environment.serverUrl }).then(() => {
+                this.listenToTauriEvents();
+            });
         }
+    }
+
+    async establishConnection(cookie?: string) {
+        if (this.isSocketAlive() || this.connected.getValue()) {
+            await this.disconnect();
+        }
+
         if (this.useTauriSocket) {
-            if (cookie) {
-                tauri.tauri
-                    .invoke(RustCommand.EstablishConnection, { address: environment.serverUrl, cookie: `session_token=${cookie}` })
-                    .then(() => {
-                        this.listenToTauriEvents();
-                    });
-            } else {
-                tauri.tauri.invoke(RustCommand.EstablishConnection, { address: environment.serverUrl }).then(() => {
-                    this.listenToTauriEvents();
-                });
-            }
-        } else if (!this.isSocketAlive()) {
-            if (cookie) {
-                this.connect(cookie);
-            } else {
-                this.connect();
-            }
+            this.connectTauri(cookie);
+        } else {
+            this.connect(cookie);
         }
+
+        this.connected.next(true);
     }
 
     listenToTauriEvents(): void {
@@ -79,9 +89,9 @@ export class ClientSocketService {
             .then();
     }
 
-    disconnect() {
+    async disconnect() {
         if (this.useTauriSocket) {
-            tauri.tauri.invoke(RustCommand.Disconnect).then(() => {
+            await tauri.tauri.invoke(RustCommand.Disconnect).then(() => {
                 tauri.event
                     .listen(RustEvent.SocketDisconnectionFailed, (error: Event<unknown>) => {
                         this.languageService.getWord('error.socket.disconnection_failed').subscribe((word: string) => {
@@ -94,7 +104,7 @@ export class ClientSocketService {
             this.socket.disconnect();
         }
 
-        this.connected = false;
+        this.connected.next(false);
     }
 
     on<T>(eventName: string, action: (data: T) => void): void {
@@ -111,6 +121,8 @@ export class ClientSocketService {
     }
 
     send<T>(event: string, data?: T): void {
+        if (!this.connected.value) return;
+
         if (this.useTauriSocket) {
             if (data) {
                 tauri.tauri.invoke(RustCommand.Send, { eventName: event, data: JSON.stringify(data) }).then(() => {

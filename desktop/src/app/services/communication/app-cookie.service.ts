@@ -6,7 +6,7 @@ import { ClientSocketService } from '@services/communication/client-socket.servi
     providedIn: 'root',
 })
 export class AppCookieService {
-    private userSessionCookie: string;
+    userSessionCookie: string;
 
     constructor(private cookieService: CookieService, private clientSocketService: ClientSocketService) {}
 
@@ -14,8 +14,8 @@ export class AppCookieService {
         this.cookieService.remove('session_token');
     }
 
-    updateUserSessionCookie(): void {
-        this.userSessionCookie = this.cookieService.get('session_token');
-        this.clientSocketService.establishConnection(this.userSessionCookie);
+    updateUserSessionCookie(cookie?: string): void {
+        this.userSessionCookie = cookie ? cookie : this.cookieService.get('session_token');
+        this.clientSocketService.establishConnection(this.userSessionCookie).then();
     }
 }

@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
 import {
-    ROOMID_LENGTH,
     ROOM_NOT_AVAILABLE_ERROR,
+    ROOMID_LENGTH,
     SAME_USER_IN_ROOM_ERROR,
     UNAVAILABLE_ELEMENT_INDEX,
     WRONG_ROOM_PASSWORD,
@@ -16,35 +16,35 @@ import { GAME_LOBBY_ROOM_ID } from '@common/constants/room';
 import { SocketEvents } from '@common/constants/socket-events';
 import { GameCreationQuery } from '@common/interfaces/game-creation-query';
 import { GameRoom } from '@common/interfaces/game-room';
-import { GameScrabbleInformation } from '@common/interfaces/game-scrabble-information';
 import { RoomPlayer } from '@common/interfaces/room-player';
 import { IUser } from '@common/interfaces/user';
 import { UserRoomQuery } from '@common/interfaces/user-room-query';
 import { GameDifficulty } from '@common/models/game-difficulty';
-import { GameRoomState } from '@common/models/game-room-state';
 import { GameVisibility } from '@common/models/game-visibility';
 import { PlayerType } from '@common/models/player-type';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import * as uuid from 'uuid';
+import { GameMode } from '@common/models/game-mode';
+import { GameRoomState } from '@common/models/game-room-state';
 
 // const PLAYERS_REJECT_FROM_ROOM_ERROR = "L'adversaire à rejeter votre demande";
 
 @Service()
-export class GameSessions {
-    private gameRooms: GameRoom[];
+export class WaitingRoomService {
+    private waitingRooms: GameRoom[];
 
     constructor(
         private gameStateService: GamesStateService,
         private virtualPlayerStorageService: VirtualPlayersStorageService,
         private socketManager: SocketManager,
     ) {
-        this.gameRooms = [];
+        this.waitingRooms = [];
     }
 
     initSocketEvents() {
-        this.socketManager.io(SocketEvents.CreateWaitingRoom, (server: Server, socket: SocketType, gameQuery: GameCreationQuery) => {
-            this.createGame(server, socket, gameQuery);
+        this.socketManager.io(SocketEvents.CreateWaitingRoom, async (server: Server, socket: SocketType, gameQuery: GameCreationQuery) => {
+            await this.createWaitingRoom(server, socket, gameQuery);
         });
 
         this.socketManager.io(SocketEvents.JoinWaitingRoom, (server: Server, socket: SocketType, userRoomQuery: UserRoomQuery) => {
@@ -59,9 +59,16 @@ export class GameSessions {
             this.exitWaitingRoom(server, socket, userQuery);
         });
 
-        this.socketManager.io(SocketEvents.StartScrabbleGame, (server: Server, socket: SocketType, roomId: string) => {
-            this.startScrabbleGame(server, roomId);
+        this.socketManager.io(SocketEvents.StartScrabbleGame, async (server: Server, socket: SocketType, roomId: string) => {
+            await this.startScrabbleGame(server, roomId);
         });
+    }
+
+    removeRoom(server: Server, roomId: string): void {
+        const roomIndex = this.waitingRooms.findIndex((room: GameRoom) => room.id === roomId);
+        this.waitingRooms.splice(roomIndex, 1);
+
+        server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
 
     private enterRoomLobby(server: Server, socket: Socket): void {
@@ -132,10 +139,14 @@ export class GameSessions {
 
             this.rejectOpponent(server, socket, player);
 
+            if (room.players.filter((playerElement: RoomPlayer) => playerElement.type === PlayerType.User).length === 0) {
+                this.removeRoom(server, userQuery.roomId);
+            }
+
             return;
         }
 
-        for (const player of [...room.players]) {
+        for (const player of room.players) {
             this.rejectOpponent(server, socket, player);
         }
 
@@ -146,7 +157,7 @@ export class GameSessions {
         const playerSocket: Socket | undefined = this.socketManager.getSocketFromId(player.socketId);
         if (!playerSocket) return;
 
-        this.exitGameRoom(server, playerSocket, {
+        this.exitRoom(server, playerSocket, {
             user: player.user,
             roomId: player.roomId,
         });
@@ -158,7 +169,7 @@ export class GameSessions {
         server.to(player.roomId).emit(SocketEvents.UpdateWaitingRoom, this.getRoom(player.roomId));
     }
 
-    private exitGameRoom(server: Server, socket: SocketType, userQuery: UserRoomQuery): void {
+    private exitRoom(server: Server, socket: SocketType, userQuery: UserRoomQuery): void {
         const player: RoomPlayer | undefined = this.getPlayerFromQuery(userQuery);
         if (!player) return;
 
@@ -167,37 +178,41 @@ export class GameSessions {
         server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
 
-    private startScrabbleGame(server: Server, roomId: string): void {
-        const room = this.getRoom(roomId);
+    private async startScrabbleGame(server: Server, roomId: string): Promise<void> {
+        const room: GameRoom | undefined = this.getRoom(roomId);
+        if (!room) return;
 
-        if (room) {
-            // TODO : Changed GameScrabbleInformation to simply using GameRoom
-            const users: IUser[] = [];
-            const socketIds: string[] = [];
-            room.players.forEach((player: RoomPlayer) => {
-                users.push(player.user);
-                socketIds.push(player.socketId);
-            });
+        await this.gameStateService.createGame(server, room).then(() => {
+            this.socketManager.emitRoom(roomId, SocketEvents.GameAboutToStart);
+            // server.to(roomId).emit(SocketEvents.GameAboutToStart);
+        });
 
-            this.gameStateService
-                .createGame(server, {
-                    players: users,
-                    roomId,
-                    timer: room.timer,
-                    socketId: socketIds,
-                    mode: room.mode,
-                    botDifficulty: 'easy',
-                    dictionary: room.dictionary,
-                } as GameScrabbleInformation)
-                .then(() => {
-                    server.to(roomId).emit(SocketEvents.GameAboutToStart);
-                });
-        }
+        // // TODO : Changed GameScrabbleInformation to simply using GameRoom
+        // const users: IUser[] = [];
+        // const socketIds: string[] = [];
+        // room.players.forEach((player: RoomPlayer) => {
+        //     users.push(player.user);
+        //     socketIds.push(player.socketId);
+        // });
+        //
+        // this.gameStateService
+        //     .createGame(server, {
+        //         players: users,
+        //         roomId,
+        //         timer: room.timer,
+        //         socketId: socketIds,
+        //         mode: room.mode,
+        //         botDifficulty: 'easy',
+        //         dictionary: room.dictionary,
+        //     } as GameScrabbleInformation)
+        //     .then(() => {
+        //         server.to(roomId).emit(SocketEvents.GameAboutToStart);
+        //     });
     }
 
-    private async createGame(server: Server, socket: SocketType, gameQuery: GameCreationQuery): Promise<void> {
+    private async createWaitingRoom(server: Server, socket: SocketType, gameQuery: GameCreationQuery): Promise<void> {
         const room: GameRoom = await this.setupNewGameRoom(gameQuery, socket.id);
-        this.gameRooms.push(room);
+        this.waitingRooms.push(room);
 
         server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
         socket.leave(GAME_LOBBY_ROOM_ID);
@@ -212,7 +227,7 @@ export class GameSessions {
 
     private async setupNewGameRoom(parameters: GameCreationQuery, socketId: string): Promise<GameRoom> {
         const roomId = this.generateRoomId();
-        const bots = await this.makeThreeBots(parameters.botDifficulty);
+        const bots = await this.makeThreeBots(parameters.botDifficulty, roomId);
 
         return {
             id: roomId,
@@ -231,10 +246,10 @@ export class GameSessions {
             dictionary: parameters.dictionary,
             timer: parameters.timer,
             mode: parameters.mode,
-            // TODO : Change that
-            state: GameRoomState.Waiting,
+            state: parameters.mode === GameMode.Solo ? GameRoomState.Playing : GameRoomState.Waiting,
             visibility: parameters.visibility,
-            password: parameters.password?.length ? parameters.password : '',
+            password: parameters.password,
+            difficulty: parameters.botDifficulty,
         };
     }
 
@@ -272,12 +287,7 @@ export class GameSessions {
     }
 
     private getRoom(roomId: string): GameRoom | undefined {
-        return this.gameRooms.find((room: GameRoom) => room.id === roomId);
-    }
-
-    private removeRoom(server: Server, roomId: string): void {
-        this.gameRooms = this.gameRooms.filter((room: GameRoom) => room.id !== roomId);
-        server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
+        return this.waitingRooms.find((room: GameRoom) => room.id === roomId);
     }
 
     /**
@@ -288,8 +298,8 @@ export class GameSessions {
     private getClientSafeAvailableRooms(): GameRoom[] {
         const roomAvailableArray: GameRoom[] = [];
 
-        this.gameRooms.forEach((gameRoom) => {
-            if (gameRoom.visibility !== GameVisibility.Private) {
+        this.waitingRooms.forEach((gameRoom) => {
+            if (gameRoom.visibility !== GameVisibility.Private && gameRoom.mode === GameMode.Multi) {
                 roomAvailableArray.push(this.stripPlayersPassword(gameRoom));
             }
         });
@@ -331,7 +341,7 @@ export class GameSessions {
         return this.getRoom(userQuery.roomId)?.players.find((playerElement: RoomPlayer) => this.areUsersTheSame(playerElement.user, userQuery.user));
     }
 
-    private async makeThreeBots(difficulty: GameDifficulty): Promise<RoomPlayer[]> {
+    private async makeThreeBots(difficulty: GameDifficulty, roomId: string): Promise<RoomPlayer[]> {
         const virtualPlayers: RoomPlayer[] = [];
 
         // TODO : Add image getter - we should create a profile pic service from the methods in the controller
@@ -350,7 +360,7 @@ export class GameSessions {
                     },
                 },
                 socketId: '',
-                roomId: '',
+                roomId,
                 type: PlayerType.Bot,
                 isCreator: false,
             });

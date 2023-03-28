@@ -23,7 +23,7 @@ export class ProfilePictureController {
     private s3Client: S3Client;
     private defaultImagesMap: Map<string, string>; // Map (key, )
 
-    constructor(private readonly accountStorage: AccountStorageService) {
+    constructor(private accountStorage: AccountStorageService) {
         this.configureRouter();
         this.s3Client = this.configureS3Client();
         this.defaultImagesMap = new Map([

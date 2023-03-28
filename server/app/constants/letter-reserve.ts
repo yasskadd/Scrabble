@@ -1,6 +1,8 @@
 import { Letter } from '@common/interfaces/letter';
 import { AlphabetLetter } from '@common/models/alphabet-letter';
 
+export const MAX_QUANTITY = 7;
+
 export const LETTERS: Letter[] = [
     {
         value: AlphabetLetter.A,

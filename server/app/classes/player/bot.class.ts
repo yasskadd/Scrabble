@@ -6,27 +6,25 @@ import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
 import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { Container } from 'typedi';
-import { Player } from './player.class';
+import { GamePlayer } from './player.class';
+import { RoomPlayer } from '@common/interfaces/room-player';
 
-export class Bot extends Player {
-    roomId: string;
+export class Bot extends GamePlayer {
     protected countUp: number = 0;
     protected socketManager: SocketManager = Container.get(SocketManager);
     protected wordSolver: WordSolver;
     protected isNotTurn: boolean = false;
     private timer: number;
 
-    constructor(isPlayerOne: boolean, name: string, protected botInfo: BotInformation) {
-        super(name);
-        this.isPlayerOne = isPlayerOne;
-        this.room = botInfo.roomId;
+    constructor(isPlayerOne: boolean, roomPlayer: RoomPlayer, protected botInfo: BotInformation) {
+        super(roomPlayer);
         this.timer = botInfo.timer;
         this.wordSolver = new WordSolver(botInfo.dictionaryValidation);
     }
 
     setGame(game: Game): void {
         this.game = game;
-        if (game.turn.activePlayer === this.name) this.playTurn();
+        if (game.turn.activePlayer?.username === this.player.user.username) this.playTurn();
     }
 
     // Reason : virtual method that is reimplemented in child classes
@@ -38,11 +36,11 @@ export class Bot extends Player {
     start(): void {
         this.game.turn.countdown.subscribe((countdown) => {
             this.countUp = this.timer - (countdown as number);
-            if (this.countUp === Constant.TIME_SKIP && this.name === this.game.turn.activePlayer) this.skipTurn();
+            if (this.countUp === Constant.TIME_SKIP && this.player.user === this.game.turn.activePlayer) this.skipTurn();
         });
         this.game.turn.endTurn.subscribe((activePlayer) => {
             this.isNotTurn = false;
-            if (activePlayer === this.name) {
+            if (activePlayer === this.player.user.username) {
                 this.countUp = 0;
                 this.playTurn();
             }
@@ -52,7 +50,7 @@ export class Bot extends Player {
     skipTurn(): void {
         if (this.game === undefined || this.isNotTurn) return;
         this.socketManager.emitRoom(this.botInfo.roomId, SocketEvents.GameMessage, '!passer');
-        this.game.skip(this.name);
+        this.game.skip(this.player.user.username);
         this.isNotTurn = true;
     }
 
