@@ -7,8 +7,8 @@ import { Turn } from '@app/classes/turn.class';
 import { WordSolver } from '@app/classes/word-solver.class';
 import { BotInformation } from '@app/interfaces/bot-information';
 import { SocketEvents } from '@common/constants/socket-events';
-import { CommandInfo } from '@common/interfaces/command-info';
 import { Coordinate } from '@common/interfaces/coordinate';
+import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { Letter } from '@common/interfaces/letter';
 import { expect } from 'chai';
 import { ReplaySubject } from 'rxjs';
@@ -61,7 +61,7 @@ describe('Expert Bot Tests', () => {
         });
 
         it('should call EmitPlaceCommand() and not exchangeLetters() if CommandInfo is not undefined', () => {
-            const commandInfoStub = {} as CommandInfo;
+            const commandInfoStub = {} as PlaceWordCommandInfo;
             expertBot.play(commandInfoStub);
             mockEmitPlaceCommand.exactly(1).withExactArgs(commandInfoStub).verify();
             expect(spyExchangeLetters.called).to.be.equal(false);
@@ -78,13 +78,13 @@ describe('Expert Bot Tests', () => {
             stubReserveQuantity = Sinon.stub(expertBot.game.letterReserve, 'totalQuantity');
             stubGetRandom = Sinon.stub(expertBot, 'getRandomNumber' as keyof ExpertBot);
             rackStub = [
-                { value: 'a' } as Letter,
-                { value: 'b' } as Letter,
-                { value: 'c' } as Letter,
-                { value: 'd' } as Letter,
-                { value: 'e' } as Letter,
-                { value: 'f' } as Letter,
-                { value: 'g' } as Letter,
+                { value: 'a' } as unknown as Letter,
+                { value: 'b' } as unknown as Letter,
+                { value: 'c' } as unknown as Letter,
+                { value: 'd' } as unknown as Letter,
+                { value: 'e' } as unknown as Letter,
+                { value: 'f' } as unknown as Letter,
+                { value: 'g' } as unknown as Letter,
             ];
             expertBot.rack = rackStub;
         });
@@ -141,16 +141,16 @@ describe('Expert Bot Tests', () => {
     context('playTurn() Tests', () => {
         let spyPlay: Sinon.SinonSpy;
         let stubProcessWordSolver: Sinon.SinonStub;
-        let stubMapCommandInfo: Map<CommandInfo, number>;
-        let stubCommandInfo1: CommandInfo;
-        let stubCommandInfo2: CommandInfo;
-        let stubCommandInfo3: CommandInfo;
+        let stubMapCommandInfo: Map<PlaceWordCommandInfo, number>;
+        let stubCommandInfo1: PlaceWordCommandInfo;
+        let stubCommandInfo2: PlaceWordCommandInfo;
+        let stubCommandInfo3: PlaceWordCommandInfo;
         beforeEach(() => {
             spyPlay = Sinon.spy(expertBot, 'play');
             stubProcessWordSolver = Sinon.stub(expertBot, 'processWordSolver' as keyof ExpertBot);
-            stubCommandInfo1 = { firstCoordinate: { x: 1, y: 1 } as Coordinate } as CommandInfo;
-            stubCommandInfo2 = { firstCoordinate: { x: 5, y: 5 } as Coordinate } as CommandInfo;
-            stubCommandInfo3 = { firstCoordinate: { x: 8, y: 8 } as Coordinate } as CommandInfo;
+            stubCommandInfo1 = { firstCoordinate: { x: 1, y: 1 } as Coordinate } as PlaceWordCommandInfo;
+            stubCommandInfo2 = { firstCoordinate: { x: 5, y: 5 } as Coordinate } as PlaceWordCommandInfo;
+            stubCommandInfo3 = { firstCoordinate: { x: 8, y: 8 } as Coordinate } as PlaceWordCommandInfo;
             stubMapCommandInfo = new Map([
                 [stubCommandInfo1, 20],
                 [stubCommandInfo2, 50],

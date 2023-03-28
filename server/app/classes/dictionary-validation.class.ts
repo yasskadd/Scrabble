@@ -1,7 +1,7 @@
-import { Gameboard } from '@app/classes/gameboard.class';
 import { LetterTree } from '@app/classes/trie/letter-tree.class';
 import { Word } from '@app/classes/word.class';
 import { ValidateWordReturn } from '@app/interfaces/validate-word-return';
+import { Gameboard } from '@common/classes/gameboard.class';
 
 export class DictionaryValidation {
     dictionary: Set<string> = new Set();

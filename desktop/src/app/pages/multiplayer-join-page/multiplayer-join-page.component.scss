@@ -1,7 +1,7 @@
 .wrapper {
     width: 50%;
     min-width: 500px;
-    padding: 30px;
+    padding: 20px 20px 0px 20px;
 }
 
 .main-title {
@@ -67,6 +67,18 @@ button.join-game {
     flex-direction: row;
 }
 
+.players-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    margin-bottom: 8px;
+
+    mat-icon {
+        margin-right: 8px;
+    }
+}
+
 table {
     justify-content: space-evenly;
     margin: 0 auto;
@@ -78,4 +90,8 @@ th {
 
 td {
     padding: 2% 0;
+}
+
+tr {
+    vertical-align: top;
 }

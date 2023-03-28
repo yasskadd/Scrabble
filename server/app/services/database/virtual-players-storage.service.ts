@@ -4,6 +4,8 @@ import { Service } from 'typedi';
 import { DatabaseService } from './database.service';
 import { BotNameSwitcher } from '@common/interfaces/bot-name-switcher';
 import { VirtualPlayerDifficulty } from '@common/models/virtual-player-difficulty';
+import { GameDifficulty } from '@common/models/game-difficulty';
+import { Bot } from '@common/interfaces/bot';
 
 @Service()
 export class VirtualPlayersStorageService {
@@ -19,6 +21,25 @@ export class VirtualPlayersStorageService {
         await this.populateDb();
 
         return await this.database.virtualNames.fetchDocuments({ difficulty: VirtualPlayerDifficulty.Beginner });
+    }
+
+    async getBotName(quantity: number, difficulty: GameDifficulty): Promise<string[]> {
+        const names: string[] = [];
+        let bots: Bot[] = [];
+
+        // TODO : Add names for relative difficulty bots
+        // TODO : Change GameDifficulty for VirtualPlayerDifficulty
+        if (difficulty === GameDifficulty.Easy) {
+            bots = (await this.database.virtualNames.fetchDocuments({ difficulty: VirtualPlayerDifficulty.Beginner })) as Bot[];
+        } else if (difficulty === GameDifficulty.Hard) {
+            bots = (await this.database.virtualNames.fetchDocuments({ difficulty: VirtualPlayerDifficulty.Expert })) as Bot[];
+        }
+
+        bots.forEach((bot: Bot) => {
+            names.push(bot.username);
+        });
+
+        return names;
     }
 
     async replaceBotName(botNameSwitcher: BotNameSwitcher) {

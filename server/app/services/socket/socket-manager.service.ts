@@ -3,12 +3,8 @@ import * as cookie from 'cookie';
 import * as http from 'http';
 import * as jwt from 'jsonwebtoken';
 import * as io from 'socket.io';
-import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import { Service } from 'typedi';
-
-type SocketType = io.Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, unknown>;
-type CallbackSignature = (socket: SocketType, ...args: unknown[]) => void;
-type OnSioCallbackSignature = (sio: io.Server, socket: SocketType, ...args: unknown[]) => void;
+import { CallbackSignature, OnSioCallbackSignature } from '@app/types/sockets';
 
 @Service()
 export class SocketManager {
@@ -43,12 +39,27 @@ export class SocketManager {
         onElement.push(callback);
     }
 
+    getSocketFromId(socketId: string): io.Socket | undefined {
+        for (const [socket] of this.socketUsernameMap) {
+            if (socket.id === socketId) {
+                return socket;
+            }
+        }
+
+        return undefined;
+    }
+
     emitRoom(room: string, event: string, ...args: unknown[]) {
         this.sio.to(room).emit(event, ...args);
     }
 
-    getUsername(socket: io.Socket): string | undefined {
-        return this.socketUsernameMap.get(socket);
+    modifyUsername(oldUsername: string, newUsername: string): void {
+        this.socketUsernameMap.forEach((value: string, key: io.Socket) => {
+            if (value === oldUsername) {
+                this.socketUsernameMap.set(key, newUsername);
+                return;
+            }
+        });
     }
 
     handleSockets(): void {
@@ -97,6 +108,7 @@ export class SocketManager {
                 if (this.socketUsernameMap.has(socket)) {
                     this.socketUsernameMap.delete(socket);
                 }
+
                 // eslint-disable-next-line no-console
                 console.log('Disconnection of client with id = ' + socket.id + ' from : ' + socket.handshake.headers.origin);
             });

@@ -1,10 +1,10 @@
-import { Gameboard } from '@app/classes/gameboard.class';
 import { Player } from '@app/classes/player/player.class';
 import { Word } from '@app/classes/word.class';
 import { PlaceLettersReturn } from '@app/interfaces/place-letters-return';
 import { RackService } from '@app/services/rack.service';
-import { CommandInfo } from '@common/interfaces/command-info';
+import { Gameboard } from '@common/classes/gameboard.class';
 import { Coordinate } from '@common/interfaces/coordinate';
+import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { DictionaryValidation } from './dictionary-validation.class';
 
 const MIDDLE_X = 8;
@@ -22,7 +22,7 @@ export class LetterPlacement {
         this.dictionaryValidation = dictionaryValidation;
     }
 
-    globalCommandVerification(commandInfo: CommandInfo, gameboard: Gameboard, player: Player): [Word, ErrorType | null] {
+    globalCommandVerification(commandInfo: PlaceWordCommandInfo, gameboard: Gameboard, player: Player): [Word, ErrorType | null] {
         if (!this.validateCommandCoordinate(commandInfo.firstCoordinate, gameboard)) return [{} as Word, ErrorType.CommandCoordinateOutOfBounds];
         if (!this.rackService.areLettersInRack(commandInfo.letters, player)) return [{} as Word, ErrorType.LettersNotInRack];
 
@@ -32,7 +32,7 @@ export class LetterPlacement {
         return [commandWord, null];
     }
 
-    placeLetters(commandWord: Word, commandInfo: CommandInfo, player: Player, currentGameboard: Gameboard): PlaceLettersReturn {
+    placeLetters(commandWord: Word, commandInfo: PlaceWordCommandInfo, player: Player, currentGameboard: Gameboard): PlaceLettersReturn {
         this.placeNewLettersOnBoard(commandInfo, commandWord, currentGameboard);
 
         const validateWordReturn = this.dictionaryValidation.validateWord(commandWord, currentGameboard);
@@ -95,7 +95,7 @@ export class LetterPlacement {
         );
     }
 
-    private placeNewLettersOnBoard(commandInfo: CommandInfo, commandWord: Word, gameboard: Gameboard) {
+    private placeNewLettersOnBoard(commandInfo: PlaceWordCommandInfo, commandWord: Word, gameboard: Gameboard) {
         const commandLettersCopy = commandInfo.letters.slice();
         commandWord.newLetterCoords.forEach((coord) => {
             gameboard.placeLetter(coord, commandLettersCopy[0]);

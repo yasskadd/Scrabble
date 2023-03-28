@@ -27,24 +27,24 @@ export class HeaderComponent {
 
     redirectHome() {
         // this.isHomePage = true;
-        this.router.navigate([AppRoutes.HomePage]).then();
+        this.router.navigate([`${AppRoutes.HomePage}`]).then();
     }
 
     redirectSettingsPage() {
-        this.router.navigate(['/settings']);
+        this.router.navigate(['/settings']).then();
     }
 
     redirectUserPage() {
-        this.router.navigate(['/user']);
+        this.router.navigate(['/user']).then();
     }
 
     redirectLoginPage() {
-        this.router.navigate(['/login']);
+        this.router.navigate(['/login']).then();
     }
 
     redirectAdmin() {
         this.isHomePage = false;
-        this.router.navigate([AppRoutes.AdminPage]).then();
+        this.router.navigate([`${AppRoutes.AdminPage}`]).then();
     }
 
     getLetters(translation: string): string[] {

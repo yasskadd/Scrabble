@@ -1,9 +1,15 @@
 import { AfterViewInit, Component, OnDestroy } from '@angular/core';
+import { FormControl } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
+import { DialogBoxPasswordComponent } from '@app/components/dialog-box-password/dialog-box-password.component';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
-import { UserService } from '@app/services/user.service';
+import { GameRoom } from '@common/interfaces/game-room';
 import { TimeService } from '@services/time.service';
-import { GameRoomClient } from '@app/interfaces/game-room-client';
+import { RoomPlayer } from '@common/interfaces/room-player';
+import { PlayerType } from '@common/models/player-type';
+import { GameVisibility } from '@common/models/game-visibility';
+import { GameMode } from '@common/models/game-mode';
 
 @Component({
     selector: 'app-multiplayer-join-page',
@@ -12,17 +18,19 @@ import { GameRoomClient } from '@app/interfaces/game-room-client';
 })
 export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
     gameMode: string;
+    protected roomIdForm: FormControl;
 
     constructor(
         protected timer: TimeService,
         protected gameConfiguration: GameConfigurationService,
-        private userService: UserService,
         private activatedRoute: ActivatedRoute,
+        private dialog: MatDialog,
     ) {
         this.gameMode = this.activatedRoute.snapshot.params.id;
+        this.roomIdForm = new FormControl('');
     }
 
-    get availableRooms(): GameRoomClient[] {
+    get availableRooms(): GameRoom[] {
         return this.gameConfiguration.availableRooms;
     }
 
@@ -31,15 +39,54 @@ export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
     }
 
     ngAfterViewInit() {
-        this.gameConfiguration.resetRoomInformation();
-        this.gameConfiguration.joinPage(this.gameMode);
+        this.gameConfiguration.resetRoomInformations();
+        this.gameConfiguration.navigateJoinPage(
+            this.gameMode === 'solo' ? GameMode.Solo : this.gameMode === 'multi' ? GameMode.Multi : GameMode.Null,
+        );
     }
 
-    joinRoom(room: GameRoomClient) {
-        this.gameConfiguration.joinGame(room, this.userService.user);
+    joinRoom(gameRoom: GameRoom): void {
+        if (this.isGameRoomLocked(gameRoom)) {
+            this.dialog
+                .open(DialogBoxPasswordComponent)
+                .afterClosed()
+                .subscribe((data: string) => {
+                    if (data) {
+                        gameRoom.password = data;
+                        this.gameConfiguration.joinRoom(gameRoom);
+                    }
+                });
+            return;
+        }
+
+        this.gameConfiguration.joinRoom(gameRoom);
     }
 
-    joinRandomGame() {
-        this.gameConfiguration.joinRandomRoom();
+    joinSecretRoom(): void {
+        this.gameConfiguration.joinSecretRoom(this.roomIdForm.value);
+    }
+
+    joinRandomRoom(): void {
+        this.joinRoom(this.availableRooms[Math.floor(Math.random() * this.availableRooms.length)]);
+    }
+
+    protected getPlayers(room: GameRoom) {
+        return room.players.filter((player: RoomPlayer) => player.type === PlayerType.User);
+    }
+
+    protected getBots(room: GameRoom): RoomPlayer[] | undefined {
+        return room.players.filter((player: RoomPlayer) => player.type === PlayerType.Bot);
+    }
+
+    protected getObservers(room: GameRoom): RoomPlayer[] {
+        return room.players.filter((player: RoomPlayer) => player.type === PlayerType.Observer);
+    }
+
+    protected isGameRoomLocked(gameRoom: GameRoom) {
+        return gameRoom.visibility === GameVisibility.Locked;
+    }
+
+    protected getGameCreator(gameRoom: GameRoom): RoomPlayer {
+        return gameRoom.players.find((player: RoomPlayer) => player.isCreator);
     }
 }

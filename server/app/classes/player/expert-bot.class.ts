@@ -1,11 +1,11 @@
 import * as Constant from '@app/constants/bot';
 import { SocketEvents } from '@common/constants/socket-events';
-import { CommandInfo } from '@common/interfaces/command-info';
+import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { Bot } from './bot.class';
 
 export class ExpertBot extends Bot {
     playTurn(): void {
-        const bestCommandInfo: CommandInfo = [...this.processWordSolver().entries()].reduce(
+        const bestCommandInfo: PlaceWordCommandInfo = [...this.processWordSolver().entries()].reduce(
             (highestScore, currentScore) => {
                 return currentScore[1] > highestScore[1] ? currentScore : highestScore;
             },
@@ -18,29 +18,29 @@ export class ExpertBot extends Bot {
         }
     }
 
-    play(commandInfo: CommandInfo): void {
+    play(commandInfo: PlaceWordCommandInfo): void {
         if (commandInfo === undefined) {
             this.exchangeLetters();
             return;
         }
         this.emitPlaceCommand(commandInfo);
-        this.playedTurned = true;
+        this.isNotTurn = true;
     }
 
     exchangeLetters(): void {
-        if (this.game === undefined || this.playedTurned) return;
+        if (this.game === undefined || this.isNotTurn) return;
         let lettersLeftInReserve: number = this.game.letterReserve.totalQuantity();
         const rackStringArray: string[] = [...this.rackToString()];
         if (lettersLeftInReserve === 0) {
             this.skipTurn();
-            this.playedTurned = true;
+            this.isNotTurn = true;
             return;
         }
 
         if (lettersLeftInReserve >= Constant.letterReserveMinQuantity) {
             this.socketManager.emitRoom(this.botInfo.roomId, SocketEvents.GameMessage, `!echanger ${rackStringArray.length} lettres`);
             this.game.exchange(rackStringArray, this);
-            this.playedTurned = true;
+            this.isNotTurn = true;
             return;
         }
         const lettersToExchange: string[] = new Array();
@@ -51,6 +51,6 @@ export class ExpertBot extends Bot {
         this.socketManager.emitRoom(this.botInfo.roomId, SocketEvents.GameMessage, `!echanger ${lettersToExchange.length} lettres`);
         this.rack = this.game.exchange(lettersToExchange, this);
 
-        this.playedTurned = true;
+        this.isNotTurn = true;
     }
 }
