@@ -79,7 +79,6 @@ export class GameConfigurationService implements OnDestroy {
         });
 
         this.clientSocket.on(SocketEvents.UpdateGameRooms, (gamesToJoin: GameRoom[]) => {
-            console.log(gamesToJoin);
             this.availableRooms = gamesToJoin;
         });
 
