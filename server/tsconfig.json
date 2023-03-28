@@ -27,9 +27,6 @@
             ],
             "@common/*": [
                 "../common/*"
-            ],
-            "@app-types/*": [
-                "./types/*"
             ]
         }
     }

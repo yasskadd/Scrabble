@@ -9,7 +9,7 @@ const HTTP_STATUS_CREATED = StatusCodes.CREATED;
 export class VirtualPlayerController {
     router: Router;
 
-    constructor(private readonly virtualPlayerStorage: VirtualPlayersStorageService) {
+    constructor(private virtualPlayerStorage: VirtualPlayersStorageService) {
         this.configureRouter();
     }
 

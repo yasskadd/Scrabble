@@ -16,6 +16,8 @@ enum RustEvent {
     SocketConnectionFailed,
     SocketDisconnectionFailed,
     SocketSendFailed,
+    SocketAlive,
+    SocketNotAlive,
 }
 
 impl RustEvent {
@@ -24,6 +26,8 @@ impl RustEvent {
             Self::SocketConnectionFailed => "socketConnectionFailed",
             Self::SocketDisconnectionFailed => "socketDisconnectionFailed",
             Self::SocketSendFailed => "socketSendFailed",
+            Self::SocketAlive => "socketAlive",
+            Self::SocketNotAlive => "socketNotAlive",
         }
     }
 }
@@ -171,6 +175,16 @@ fn socketSend(
     }
 }
 
+#[tauri::command]
+fn isSocketAlive(state: tauri::State<SocketClient>) -> String {
+    let socket = state.socket.lock().expect("Error locking the socket");
+
+    match &*socket {
+        Some(_s) => RustEvent::SocketAlive.to_string().into(),
+        None => RustEvent::SocketNotAlive.to_string().into(),
+    }
+}
+
 fn main() {
     // std::env::set_var("RUST_BACKTRACE", "full");
     tauri::Builder::default()
@@ -181,7 +195,8 @@ fn main() {
             greet,
             socketEstablishConnection,
             socketDisconnect,
-            socketSend
+            socketSend,
+            isSocketAlive
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

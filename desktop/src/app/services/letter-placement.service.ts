@@ -62,7 +62,7 @@ export class LetterPlacementService {
             this.origin = tile.coord;
         }
 
-        if (this.placingMode !== PlacingState.Drag || this.hasPlacingEnded || !this.gameClientService.playerOneTurn) {
+        if (this.placingMode !== PlacingState.Drag || this.hasPlacingEnded || !this.gameClientService.currentlyPlaying()) {
             return;
         }
         if (index === constants.INVALID_INDEX) {
@@ -76,7 +76,7 @@ export class LetterPlacementService {
         if (this.placedLetters.length === 0) {
             this.placingMode = PlacingState.Keyboard;
         }
-        if (this.placingMode !== PlacingState.Keyboard || this.hasPlacingEnded || !this.gameClientService.playerOneTurn) {
+        if (this.placingMode !== PlacingState.Keyboard || this.hasPlacingEnded || !this.gameClientService.currentlyPlaying()) {
             return;
         }
 
@@ -85,7 +85,7 @@ export class LetterPlacementService {
             return;
         }
 
-        const placedLetter: Letter = this.gameClientService.playerOne.rack[indexOfLetter];
+        const placedLetter: Letter = this.gameClientService.getLocalPlayer().rack[indexOfLetter];
         if (placedLetter?.value === '*') {
             placedLetter.value = keyPressed.toUpperCase() as AlphabetLetter;
         }
@@ -125,7 +125,7 @@ export class LetterPlacementService {
 
         // this.resetGameBoardView();
         const removedBoardTile = this.placedLetters[this.placedLetters.length - 1];
-        this.gameClientService.playerOne.rack.push(removedBoardTile.letter);
+        this.gameClientService.getLocalPlayer().rack.push(removedBoardTile.letter);
 
         this.resetTile(removedBoardTile.coord);
         this.resetSelectionPositions(removedBoardTile);
@@ -133,7 +133,7 @@ export class LetterPlacementService {
 
     undoEverything() {
         this.placedLetters.forEach((letter) => {
-            this.gameClientService.playerOne.rack.push(letter.letter);
+            this.gameClientService.getLocalPlayer().rack.push(letter.letter);
             this.resetTile(letter.coord);
         });
         this.resetView();
@@ -187,8 +187,8 @@ export class LetterPlacementService {
         };
         this.boardTiles[boardTile.coord] = playedTile;
 
-        this.gameClientService.playerOne.rack.splice(
-            this.gameClientService.playerOne.rack.findIndex((letterElement: Letter) => {
+        this.gameClientService.getLocalPlayer().rack.splice(
+            this.gameClientService.getLocalPlayer().rack.findIndex((letterElement: Letter) => {
                 return letterElement.value === letter.value;
             }),
             1,
@@ -252,7 +252,7 @@ export class LetterPlacementService {
 
     private findLetterFromRack(letterValue: string): number {
         const letterTreated = this.treatLetter(letterValue);
-        return this.gameClientService.playerOne.rack.findIndex((letter) => letter.value === letterTreated.toUpperCase());
+        return this.gameClientService.getLocalPlayer().rack.findIndex((letter) => letter.value === letterTreated.toUpperCase());
     }
 
     // private computeNextCoordinate(startingPoint: Coordinate): Coordinate {

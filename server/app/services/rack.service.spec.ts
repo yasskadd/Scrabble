@@ -1,13 +1,13 @@
-import { Player } from '@app/classes/player/player.class';
+import { GamePlayer } from '@app/classes/player/player.class';
 import { expect } from 'chai';
 import { RackService } from './rack.service';
 
 describe('Rack Service', () => {
-    let player: Player;
+    let player: GamePlayer;
     let rackService: RackService;
 
     beforeEach(() => {
-        player = new Player('test');
+        player = new GamePlayer('test');
         player.rack = [
             { value: 'a', quantity: 1, points: 1 },
             { value: 'b', quantity: 1, points: 1 },

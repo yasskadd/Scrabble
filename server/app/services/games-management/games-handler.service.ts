@@ -1,56 +1,71 @@
 import { DictionaryValidation } from '@app/classes/dictionary-validation.class';
 import { Game } from '@app/classes/game.class';
 import { LetterPlacement } from '@app/classes/letter-placement.class';
-import { Player } from '@app/classes/player/player.class';
+import { GamePlayer } from '@app/classes/player/player.class';
 import { WordSolver } from '@app/classes/word-solver.class';
-import { Behavior } from '@app/interfaces/behavior';
+import { DictionaryContainer } from '@app/interfaces/dictionaryContainer';
 import { Dictionary } from '@app/interfaces/dictionary';
-import { GameScrabbleInformation } from '@common/interfaces/game-scrabble-information';
 import { DictionaryStorageService } from '@app/services/database/dictionary-storage.service';
-import { RackService } from '@app/services/rack.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
-import { Container, Service } from 'typedi';
+import { Service } from 'typedi';
+import { PlayerInformation } from '@common/interfaces/player-information';
 
 @Service()
-export class GamesHandler {
-    players: Map<string, Player>;
-    gamePlayers: Map<string, { gameInfo: GameScrabbleInformation; players: Player[] }>;
-    dictionaries: Map<string, Behavior>;
+export class GamesHandlerService {
+    players: GamePlayer[];
+    // gamePlayers: Map<string, { room: GameRoom; players: GamePlayer[] }>;
+    dictionaries: Map<string, DictionaryContainer>;
 
     constructor(private socketManager: SocketManager, private dictionaryStorage: DictionaryStorageService) {
-        this.players = new Map();
-        this.gamePlayers = new Map();
+        // this.gamePlayers = new Map();
+        this.players = [];
         this.dictionaries = new Map();
         this.setDictionaries().then();
     }
 
-    updatePlayerInfo(roomId: string, game: Game) {
-        const gameInfos = this.gamePlayers.get(roomId);
-        const players = gameInfos?.players as Player[];
-        if ((gameInfos?.players as Player[]) === undefined) return;
-        gameInfos?.gameInfo.socketId.forEach((socket, i) => {
-            const myPlayer = players[i];
-            this.socketManager.emitRoom(socket, SocketEvents.UpdatePlayerInformation, myPlayer.getInformation());
-            const opponentPlayers = players.filter((player) => {
-                return player !== myPlayer;
-            });
-            const opponentPlayersInfos = opponentPlayers.map((player) => {
-                return player.getInformation();
-            });
-            this.socketManager.emitRoom(socket, SocketEvents.UpdateOpponentInformation, opponentPlayersInfos);
-        });
-        this.socketManager.emitRoom(gameInfos?.gameInfo.roomId as string, SocketEvents.LetterReserveUpdated, game.letterReserve.lettersReserve);
+    updatePlayersInfo(roomId: string, game: Game) {
+        // const gameRoom = this.gamePlayers.get(roomId);
+        // const players = gameRoom?.players;
+        // if (!players) return;
+        // if ((gameRoom?.players as GamePlayer[]) === undefined) return;
+
+        const infos: PlayerInformation[] = this.players.map((player: GamePlayer) => player.getInformation());
+        // this.players.forEach((gamePlayer: GamePlayer) => {
+        //     const socket: Socket | undefined = this.socketManager.getSocketFromId(gamePlayer.player.socketId);
+        //     if (!socket) return;
+        //
+        //     socket.emit(SocketEvents.UpdatePlayersInformation, infos);
+        // });
+
+        this.socketManager.emitRoom(roomId, SocketEvents.UpdatePlayersInformation, infos);
+        this.socketManager.emitRoom(roomId, SocketEvents.LetterReserveUpdated, game.letterReserve.lettersReserve);
+    }
+
+    getPlayerFromSocketId(socketId: string): GamePlayer | undefined {
+        return this.players.find((gamePlayer: GamePlayer) => gamePlayer.player.socketId === socketId);
+    }
+
+    getPlayersFromRoomId(roomId: string): GamePlayer[] {
+        return this.players.filter((gamePlayer: GamePlayer) => gamePlayer.player.roomId === roomId);
+    }
+
+    removePlayerFromSocketId(socketId: string): void {
+        this.players = this.players.filter((gamePlayer: GamePlayer) => gamePlayer.player.socketId !== socketId);
+    }
+
+    removeRoomFromRoomId(roomId: string): void {
+        this.players = this.players.filter((gamePlayer: GamePlayer) => gamePlayer.player.roomId !== roomId);
     }
 
     async setDictionaries() {
         const dictionaries = await this.getDictionaries();
-        const tempDictionariesMap: Map<string, Behavior> = new Map();
+        const tempDictionariesMap: Map<string, DictionaryContainer> = new Map();
         dictionaries.forEach((dictionary) => {
             const dictionaryValidation = new DictionaryValidation(dictionary.words);
             const wordSolver = new WordSolver(dictionaryValidation);
-            const letterPlacement = new LetterPlacement(dictionaryValidation, Container.get(RackService));
+            const letterPlacement = new LetterPlacement(dictionaryValidation);
             const behavior = {
                 dictionaryValidation: dictionaryValidation as DictionaryValidation,
                 wordSolver: wordSolver as WordSolver,
@@ -68,19 +83,19 @@ export class GamesHandler {
             await this.dictionaryStorage.addDictionary(dictionary.title, JSON.stringify(dictionary));
             const dictionaryValidation = new DictionaryValidation(dictionary.words);
             const wordSolver = new WordSolver(dictionaryValidation);
-            const letterPlacement = new LetterPlacement(dictionaryValidation, Container.get(RackService));
-            const behavior = {
+            const letterPlacement = new LetterPlacement(dictionaryValidation);
+            const dictionaryContainer = {
                 dictionaryValidation: dictionaryValidation as DictionaryValidation,
                 wordSolver: wordSolver as WordSolver,
                 letterPlacement: letterPlacement as LetterPlacement,
             };
-            this.dictionaries.set(dictionary.title, behavior);
+            this.dictionaries.set(dictionary.title, dictionaryContainer);
         }
     }
 
     async updateDictionary(dictionaryModification: ModifiedDictionaryInfo) {
         await this.dictionaryStorage.updateDictionary(dictionaryModification);
-        const behavior = this.dictionaries.get(dictionaryModification.title) as Behavior;
+        const behavior = this.dictionaries.get(dictionaryModification.title) as DictionaryContainer;
         this.dictionaries.delete(dictionaryModification.title);
         this.dictionaries.set(dictionaryModification.newTitle, behavior);
     }

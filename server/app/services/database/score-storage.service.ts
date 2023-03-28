@@ -28,13 +28,11 @@ export class ScoreStorageService {
 
     async getLOG2990TopScores(): Promise<Document[]> {
         await this.populateDb();
-        const currentTopScores = await this.database.scores.fetchDocuments({ type: 'LOG2990' });
-        return currentTopScores;
+        return await this.database.scores.fetchDocuments({ type: 'LOG2990' });
     }
     async getClassicTopScores(): Promise<Document[]> {
         await this.populateDb();
-        const currentTopScores = await this.database.scores.fetchDocuments({ type: 'classique' });
-        return currentTopScores;
+        return await this.database.scores.fetchDocuments({ type: 'classique' });
     }
 
     async resetHighScores() {
@@ -84,7 +82,7 @@ export class ScoreStorageService {
                 );
             }
         });
-        this.database.scores.replaceDocument(
+        await this.database.scores.replaceDocument(
             { position: scorePlace, type: scoreInfo.type },
             { position: scorePlace, username: scoreInfo.username, type: scoreInfo.type, score: scoreInfo.score },
         );
