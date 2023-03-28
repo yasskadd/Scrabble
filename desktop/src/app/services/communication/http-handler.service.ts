@@ -14,7 +14,7 @@ import { catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { useTauri } from '@app/pages/app/app.component';
 import { AppCookieService } from '@services/communication/app-cookie.service';
-import { getClient, Client, Body } from '@tauri-apps/api/http';
+import { Body, Client, getClient } from '@tauri-apps/api/http';
 
 @Injectable({
     providedIn: 'root',
@@ -158,7 +158,7 @@ export class HttpHandlerService {
         };
 
         this.backendHttp.post<{ userData: IUser; sessionToken: string }>(`${this.baseUrl}/auth/login`, Body.json(user)).then((res: any) => {
-            console.log(res);
+            console.log(res.data);
         });
 
         return this.http

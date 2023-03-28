@@ -41,8 +41,8 @@ export class Server {
         this.server = http.createServer(this.application.app);
         this.secureServer = https.createServer(
             {
-                key: fs.readFileSync('app/certs/myCA.key'),
-                cert: fs.readFileSync('app/certs/myCA.pem'),
+                key: fs.readFileSync('app/certs/server.key'),
+                cert: fs.readFileSync('app/certs/server.pem'),
                 passphrase: '2345',
             },
             this.application.app,

@@ -42,7 +42,7 @@
             "longDescription": "",
             "macOS": {
                 "entitlements": null,
-                "exceptionDomain": "",
+                "exceptionDomain": "ec2-35-183-107-112.ca-central-1.compute.amazonaws.com",
                 "frameworks": [],
                 "providerShortName": null,
                 "signingIdentity": null
