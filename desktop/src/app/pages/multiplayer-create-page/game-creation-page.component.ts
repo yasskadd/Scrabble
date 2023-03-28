@@ -19,6 +19,7 @@ import { GameVisibility } from '@common/models/game-visibility';
 import { SnackBarService } from '@services/snack-bar.service';
 import { SocketEvents } from '@common/constants/socket-events';
 import { ClientSocketService } from '@services/communication/client-socket.service';
+import { GameMode } from '@common/models/game-mode';
 
 @Component({
     selector: 'app-multiplayer-create-page',
@@ -43,7 +44,7 @@ export class GameCreationPageComponent implements OnInit {
     protected isGameLocked: boolean;
     protected isGamePublic: boolean;
 
-    private readonly gameMode: string;
+    private readonly gameMode: GameMode;
 
     constructor(
         protected virtualPlayers: VirtualPlayersService,
@@ -58,7 +59,9 @@ export class GameCreationPageComponent implements OnInit {
         private readonly httpHandler: HttpHandlerService,
         private snackBarService: SnackBarService,
     ) {
-        this.gameMode = this.activatedRoute.snapshot.params.id;
+        this.gameMode = this.activatedRoute.snapshot.params.id as GameMode;
+        console.log(this.gameMode);
+        console.log(this.activatedRoute.snapshot.params.id);
         this.selectedFile = null;
         this.difficultyList = [];
         this.timerList = [];

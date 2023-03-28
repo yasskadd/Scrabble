@@ -20,12 +20,13 @@ import { RoomPlayer } from '@common/interfaces/room-player';
 import { IUser } from '@common/interfaces/user';
 import { UserRoomQuery } from '@common/interfaces/user-room-query';
 import { GameDifficulty } from '@common/models/game-difficulty';
-import { GameRoomState } from '@common/models/game-room-state';
 import { GameVisibility } from '@common/models/game-visibility';
 import { PlayerType } from '@common/models/player-type';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import * as uuid from 'uuid';
+import { GameMode } from '@common/models/game-mode';
+import { GameRoomState } from '@common/models/game-room-state';
 
 // const PLAYERS_REJECT_FROM_ROOM_ERROR = "L'adversaire à rejeter votre demande";
 
@@ -175,7 +176,6 @@ export class GameSessions {
 
         if (room) {
             await this.gameStateService.createGame(server, room).then(() => {
-                console.log('sending to game page');
                 server.to(roomId).emit(SocketEvents.GameAboutToStart);
             });
             // // TODO : Changed GameScrabbleInformation to simply using GameRoom
@@ -238,8 +238,7 @@ export class GameSessions {
             dictionary: parameters.dictionary,
             timer: parameters.timer,
             mode: parameters.mode,
-            // TODO : Change that
-            state: GameRoomState.Waiting,
+            state: parameters.mode === GameMode.Solo ? GameRoomState.Playing : GameRoomState.Waiting,
             visibility: parameters.visibility,
             password: parameters.password,
             difficulty: parameters.botDifficulty,
@@ -299,7 +298,7 @@ export class GameSessions {
         const roomAvailableArray: GameRoom[] = [];
 
         this.gameRooms.forEach((gameRoom) => {
-            if (gameRoom.visibility !== GameVisibility.Private) {
+            if (gameRoom.visibility !== GameVisibility.Private && gameRoom.mode === GameMode.Multi) {
                 roomAvailableArray.push(this.stripPlayersPassword(gameRoom));
             }
         });
