@@ -1,7 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:get_it/get_it.dart';
-import 'package:mobile/domain/models/room-model.dart';
+import 'package:mobile/domain/models/iuser-model.dart';
 import 'package:mobile/domain/services/http-handler-service.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:socket_io_client/socket_io_client.dart';
@@ -32,7 +33,8 @@ class AuthService {
       _socket
         ..disconnect()
         ..connect();
-      user = IUser(username: username, password: "");
+
+      user = IUser.fromJson(jsonDecode(response.body)['userData']);
       notifyLogin.add(true);
       return;
     }
