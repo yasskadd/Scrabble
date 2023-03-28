@@ -17,6 +17,7 @@ export class AccountStorageService {
             username: user.username,
             password: hashedPassword,
             profilePicture: user.profilePicture as ImageInfo,
+            chatRooms: user.chatRooms,
         };
         await this.database.users.addDocument(newUser);
     }
