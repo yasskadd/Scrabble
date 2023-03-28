@@ -185,11 +185,9 @@ export class HttpHandlerService {
             withCredentials: true,
         };
 
-        // Creation of 2 files because the request only accepts files
-        const imageKeyFile = new File([imageKey], 'imageKey', { type: 'text/html' });
         const data = new FormData();
-        data.append('data', avatarData.file);
-        data.append('imageKey', imageKeyFile);
+        data.append('ImageKey', imageKey); // Sending Key of the image
+        data.append('data', avatarData.file); // Sending actual image
 
         return this.http
             .post<void>(`${this.baseUrl}/image/profile-picture`, data, httpOptions)

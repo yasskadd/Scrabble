@@ -7,6 +7,7 @@ import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:flutter_i18n/flutter_i18n_delegate.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mobile/domain/services/auth-service.dart';
+import 'package:mobile/domain/services/avatar-service.dart';
 import 'package:mobile/domain/services/chat-service.dart';
 import 'package:mobile/domain/services/game-service.dart';
 import 'package:mobile/domain/services/http-handler-service.dart';
@@ -22,7 +23,7 @@ Future<void> setup() async {
   String envFile = kDebugMode ? 'development.env' : 'production.env';
 
   // kDebugMode = APK, so hardcoding it for now
-  envFile = 'production.env';
+  // envFile = 'production.env';
 
   await dotenv.load(fileName: envFile);
   var serverAddress = dotenv.env["SERVER_URL"];
@@ -45,6 +46,7 @@ Future<void> setup() async {
   getIt.registerLazySingleton<ThemeService>(() => ThemeService());
   getIt.registerLazySingleton<LanguageService>(() => LanguageService());
   getIt.registerLazySingleton<RoomService>(() => RoomService());
+  getIt.registerLazySingleton<AvatarService>(() => AvatarService());
   getIt.registerLazySingleton<GameService>(() => GameService());
 
   getIt.registerSingleton<GlobalKey<NavigatorState>>(GlobalKey<NavigatorState>());
