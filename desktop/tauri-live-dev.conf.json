@@ -27,6 +27,9 @@
             "shell": {
                 "all": false,
                 "open": true
+            },
+            "fs": {
+                "scope": ["$RESOURCE/*"]
             }
         },
         "bundle": {
@@ -47,7 +50,7 @@
                 "providerShortName": null,
                 "signingIdentity": null
             },
-            "resources": [],
+            "resources": ["../certs/server.pem", "../certs/server.key"],
             "shortDescription": "",
             "targets": "all",
             "windows": {

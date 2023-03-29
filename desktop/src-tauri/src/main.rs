@@ -180,8 +180,8 @@ async fn loginTest(handle: tauri::AppHandle) -> String {
         .expect("http client build failed");
 
     let res = client
-        // .post("https://ec2-35-183-107-112.ca-central-1.compute.amazonaws.com:3443/auth/login")
-        .post("https://localhost:3443/auth/login")
+        .post("https://ec2-35-183-107-112.ca-central-1.compute.amazonaws.com:3443/auth/login")
+        // .post("https://localhost:3443/auth/login")
         .json(&json!({
             "username": "test",
             "password": "test",
