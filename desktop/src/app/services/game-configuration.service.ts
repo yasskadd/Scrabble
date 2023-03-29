@@ -1,29 +1,33 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
+import { useTauri } from '@app/pages/app/app.component';
 import { SocketEvents } from '@common/constants/socket-events';
+import { GameRoom } from '@common/interfaces/game-room';
 import { RoomPlayer } from '@common/interfaces/room-player';
+import { UserRoomQuery } from '@common/interfaces/user-room-query';
+import { GameDifficulty } from '@common/models/game-difficulty';
+import { GameMode } from '@common/models/game-mode';
+import { GameRoomState } from '@common/models/game-room-state';
+import { GameVisibility } from '@common/models/game-visibility';
 import { SnackBarService } from '@services/snack-bar.service';
 import { UserService } from '@services/user.service';
-import { Subject } from 'rxjs';
-import { ClientSocketService } from './communication/client-socket.service';
-import { GameRoom } from '@common/interfaces/game-room';
-import { GameRoomState } from '@common/models/game-room-state';
-import { GameMode } from '@common/models/game-mode';
-import { GameVisibility } from '@common/models/game-visibility';
-import { UserRoomQuery } from '@common/interfaces/user-room-query';
 import { window as tauriWindow } from '@tauri-apps/api';
 import { TauriEvent } from '@tauri-apps/api/event';
+import { Subject } from 'rxjs';
+import { ClientSocketService } from './communication/client-socket.service';
 
 @Injectable({
     providedIn: 'root',
 })
-export class GameConfigurationService implements OnDestroy {
+export class GameConfigurationService {
     localGameRoom: GameRoom;
     // isGameStarted: Subject<boolean>;
     isRoomJoinable: Subject<boolean>;
     errorReason: string;
     availableRooms: GameRoom[];
+
+    private zone: NgZone;
 
     constructor(
         private snackBarService: SnackBarService,
@@ -36,11 +40,14 @@ export class GameConfigurationService implements OnDestroy {
 
         this.isRoomJoinable = new Subject<boolean>();
         // this.isGameStarted = new Subject<boolean>();
-        this.configureBaseSocketFeatures();
+        this.clientSocket.connected.subscribe((connected: boolean) => {
+            if (connected) {
+                this.configureBaseSocketFeatures();
+            }
+        });
 
-        // TODO : Move this somewhere more logic
         // eslint-disable-next-line no-underscore-dangle
-        if (window.__TAURI_IPC__) {
+        if (useTauri) {
             tauriWindow
                 .getCurrent()
                 .listen(TauriEvent.WINDOW_CLOSE_REQUESTED, () => {
@@ -50,6 +57,7 @@ export class GameConfigurationService implements OnDestroy {
                             roomId: this.localGameRoom.id,
                             user: this.userService.user,
                         } as UserRoomQuery);
+                        this.clientSocket.disconnect();
                     }
                     tauriWindow.getCurrent().close().then();
                 })
@@ -67,7 +75,13 @@ export class GameConfigurationService implements OnDestroy {
         });
 
         this.clientSocket.on(SocketEvents.GameAboutToStart, () => {
-            this.router.navigate([AppRoutes.GamePage]).then();
+            if (useTauri) {
+                this.zone.run(() => {
+                    this.router.navigate([`${AppRoutes.GamePage}`]).then();
+                });
+            } else {
+                this.router.navigate([`${AppRoutes.GamePage}`]).then();
+            }
         });
 
         this.clientSocket.on(SocketEvents.PlayerJoinedWaitingRoom, (opponent: RoomPlayer) => {
@@ -90,15 +104,6 @@ export class GameConfigurationService implements OnDestroy {
         });
     }
 
-    ngOnDestroy() {
-        if (this.localGameRoom) {
-            this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
-                roomId: this.localGameRoom.id,
-                user: this.userService.user,
-            } as UserRoomQuery);
-        }
-    }
-
     rejectOpponent(player: RoomPlayer): void {
         this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
             user: player.user,
@@ -112,6 +117,7 @@ export class GameConfigurationService implements OnDestroy {
             socketId: '',
             user: this.userService.user,
             password: room.password,
+            isCreator: false,
         } as RoomPlayer);
     }
 
@@ -142,6 +148,7 @@ export class GameConfigurationService implements OnDestroy {
             state: GameRoomState.Waiting,
             visibility: GameVisibility.Public,
             password: '',
+            difficulty: GameDifficulty.Easy,
         };
     }
 

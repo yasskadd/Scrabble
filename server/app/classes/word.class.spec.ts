@@ -1,8 +1,8 @@
 /* eslint-disable max-lines */
 /* eslint-disable dot-notation*/
-import { CommandInfo } from '@common/interfaces/command-info';
+import { Gameboard } from '@common/classes/gameboard.class';
+import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { expect } from 'chai';
-import { Gameboard } from './gameboard.class';
 import { Word } from './word.class';
 
 describe('Word', () => {
@@ -170,7 +170,7 @@ describe('Word', () => {
     });
 
     context('isHorizontal is not specified', () => {
-        let commandInfo: CommandInfo;
+        let commandInfo: PlaceWordCommandInfo;
 
         it('setIsHorizontal() should set isHorizontal to true if one letter is right from letter you want to place', () => {
             commandInfo = {
@@ -238,7 +238,7 @@ describe('Word', () => {
     });
 
     describe('Find adjacent words', () => {
-        let commandInfo: CommandInfo;
+        let commandInfo: PlaceWordCommandInfo;
 
         const placeLettersWordTest = () => {
             word.newLetterCoords.forEach((coord) => {

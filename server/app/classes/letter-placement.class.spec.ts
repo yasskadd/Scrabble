@@ -3,12 +3,12 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable dot-notation */
 import { Game } from '@app/classes/game.class';
-import { Gameboard } from '@app/classes/gameboard.class';
 import { ObjectivesHandler } from '@app/classes/objectives-handler.class';
-import { Player } from '@app/classes/player/player.class';
+import { GamePlayer } from '@app/classes/player/player.class';
 import { Word } from '@app/classes/word.class';
 import { RackService } from '@app/services/rack.service';
-import { CommandInfo } from '@common/interfaces/command-info';
+import { Gameboard } from '@common/classes/gameboard.class';
+import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { expect } from 'chai';
 import * as Sinon from 'sinon';
 import { Container } from 'typedi';
@@ -16,8 +16,8 @@ import { DictionaryValidation } from './dictionary-validation.class';
 import { LetterPlacement } from './letter-placement.class';
 
 describe('Letter Placement', () => {
-    let player: Player;
-    let commandInfo: CommandInfo;
+    let player: GamePlayer;
+    let commandInfo: PlaceWordCommandInfo;
     let gameboard: Gameboard;
     let rackService: RackService;
     let dictionaryValidation: Sinon.SinonStubbedInstance<DictionaryValidation> & DictionaryValidation;
@@ -25,7 +25,7 @@ describe('Letter Placement', () => {
     let word: Word;
 
     beforeEach(() => {
-        player = new Player('test');
+        player = new GamePlayer('test');
         player.rack = [
             { value: 'a', quantity: 1, points: 1 },
             { value: 'b', quantity: 1, points: 1 },

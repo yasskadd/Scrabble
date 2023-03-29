@@ -9,6 +9,6 @@ export interface GameCreationQuery {
     timer: number;
     mode: GameMode;
     visibility: GameVisibility;
-    password?: string;
     botDifficulty: GameDifficulty;
+    password: string;
 }

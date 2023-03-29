@@ -18,7 +18,10 @@
             <div class='pending-player' *ngFor='let player of gameConfiguration.localGameRoom.players; index as i'>
                 <!-- TODO : Language -->
                 <span class='player-infos'>
-                    <img [src]='player.user.profilePicture.key' class='selecter-avatar' alt='player.user profile picture' />
+                    <button *ngIf="!player.user.profilePicture" mat-fab color="primary" class="avatar-selector">
+                        <mat-icon>person</mat-icon>
+                    </button>
+                    <img [src]='player.user.profilePicture.key' *ngIf='player.user.profilePicture' class='selecter-avatar' alt='player.user profile picture' />
                     {{ player.user.username }}
                     </span>
                 <button
@@ -52,7 +55,7 @@
                 class='startButton'
                 (click)='gameConfiguration.beginScrabbleGame()'
                 mat-raised-button
-                [disabled]='isValidGame()'
+                [disabled]='!isValidGame()'
             >
                 {{ "action.start" | translate }}
             </button>

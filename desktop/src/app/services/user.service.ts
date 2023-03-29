@@ -34,9 +34,9 @@ export class UserService {
         const subject = new Subject<string>();
 
         this.httpHandlerService.login(user).subscribe({
-            next: (loginRes: { userData: IUser }) => {
+            next: (loginRes: { userData: IUser; sessionToken: string }) => {
                 this.updateUserWithImageUrl(loginRes.userData);
-                this.cookieService.updateUserSessionCookie();
+                this.cookieService.updateUserSessionCookie(loginRes.sessionToken);
                 subject.next('');
             },
             error: (error: HttpErrorResponse) => {

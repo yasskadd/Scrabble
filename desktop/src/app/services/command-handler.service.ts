@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { SocketEvents } from '@common/constants/socket-events';
-import { CommandInfo } from '@common/interfaces/command-info';
 import { Coordinate } from '@common/interfaces/coordinate';
+import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { ClientSocketService } from './communication/client-socket.service';
 
 @Injectable({
@@ -44,12 +44,12 @@ export class CommandHandlerService {
         if (coordsAndDirection[1] === 'h') boolDirection = true;
         if (coordsAndDirection[1] === 'v') boolDirection = false;
 
-        const commandInformation: CommandInfo = {
+        const commandInformation: PlaceWordCommandInfo = {
             firstCoordinate: coordsAndDirection[0] as Coordinate,
             isHorizontal: boolDirection,
             letters: this.getLetters(command, 2),
         };
-        this.clientSocket.send(SocketEvents.Play, commandInformation);
+        this.clientSocket.send(SocketEvents.PlaceWordCommand, commandInformation);
     }
 
     private sendCommandEchanger(command: string[]) {

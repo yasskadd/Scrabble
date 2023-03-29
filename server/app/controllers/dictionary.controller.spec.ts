@@ -1,6 +1,6 @@
 import { Application } from '@app/app';
 import { Dictionary } from '@app/interfaces/dictionary';
-import { GamesHandler } from '@app/services/games-management/games-handler.service';
+import { GamesHandlerService } from '@app/services/games-management/games-handler.service';
 import { expect } from 'chai';
 import { StatusCodes } from 'http-status-codes';
 import { createStubInstance, SinonStubbedInstance } from 'sinon';
@@ -30,11 +30,11 @@ const DICTIONARY: Dictionary = {
 };
 
 describe('DictionaryController', () => {
-    let gamesHandler: SinonStubbedInstance<GamesHandler>;
+    let gamesHandler: SinonStubbedInstance<GamesHandlerService>;
     let expressApp: Express.Application;
 
     beforeEach(async () => {
-        gamesHandler = createStubInstance(GamesHandler);
+        gamesHandler = createStubInstance(GamesHandlerService);
         const app = Container.get(Application);
         // Reason : testing private attribute
         // eslint-disable-next-line dot-notation

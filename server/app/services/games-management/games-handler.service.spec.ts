@@ -2,16 +2,16 @@
 /* eslint-disable dot-notation*/
 import { DictionaryValidation } from '@app/classes/dictionary-validation.class';
 import { Game } from '@app/classes/game.class';
-import { Gameboard } from '@app/classes/gameboard.class';
 import { LetterPlacement } from '@app/classes/letter-placement.class';
 import { LetterReserve } from '@app/classes/letter-reserve.class';
-import { Player } from '@app/classes/player/player.class';
+import { GamePlayer } from '@app/classes/player/player.class';
 import { RealPlayer } from '@app/classes/player/real-player.class';
 import { Turn } from '@app/classes/turn.class';
 import { WordSolver } from '@app/classes/word-solver.class';
 import { DictionaryStorageService } from '@app/services/database/dictionary-storage.service';
-import { GamesHandler } from '@app/services/games-management/games-handler.service';
+import { GamesHandlerService } from '@app/services/games-management/games-handler.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
+import { Gameboard } from '@common/classes/gameboard.class';
 import { SocketEvents } from '@common/constants/socket-events';
 import { Letter } from '@common/interfaces/letter';
 import { expect } from 'chai';
@@ -25,7 +25,7 @@ import { io as Client, Socket } from 'socket.io-client';
 const ROOM = '0';
 
 describe('GamesHandler Service', () => {
-    let gamesHandler: GamesHandler;
+    let gamesHandler: GamesHandlerService;
     let socketManagerStub: sinon.SinonStubbedInstance<SocketManager>;
     let dictionaryStorageStub: sinon.SinonStubbedInstance<DictionaryStorageService>;
 
@@ -48,7 +48,10 @@ describe('GamesHandler Service', () => {
         game.letterReserve.lettersReserve = [{ value: 'c', quantity: 2, points: 1 }];
         game.gameboard = sinon.createStubInstance(Gameboard);
 
-        gamesHandler = new GamesHandler(socketManagerStub as unknown as SocketManager, dictionaryStorageStub as unknown as DictionaryStorageService);
+        gamesHandler = new GamesHandlerService(
+            socketManagerStub as unknown as SocketManager,
+            dictionaryStorageStub as unknown as DictionaryStorageService,
+        );
 
         httpServer = createServer();
         sio = new ioServer(httpServer);
@@ -100,7 +103,7 @@ describe('GamesHandler Service', () => {
                 expect(information).to.be.eql(playerOne.getInformation());
                 done();
             });
-            clientSocket.on(SocketEvents.UpdatePlayerInformation, (information) => {
+            clientSocket.on(SocketEvents.UpdatePlayersInformation, (information) => {
                 expect(information).to.be.eql(playerTwo.getInformation());
             });
 
@@ -108,7 +111,7 @@ describe('GamesHandler Service', () => {
 
             gamesHandler['players'].set(serverSocket.id, playerOne);
 
-            gamesHandler['updatePlayerInfo'](serverSocket, ROOM, game);
+            gamesHandler['updatePlayersInfo'](serverSocket, ROOM, game);
         });
 
         it('updatePlayerInfo() should broadcast correct info to the second Player', (done) => {
@@ -116,13 +119,13 @@ describe('GamesHandler Service', () => {
                 expect(information).to.be.eql(playerTwo.getInformation());
                 done();
             });
-            secondSocket.on(SocketEvents.UpdatePlayerInformation, (information) => {
+            secondSocket.on(SocketEvents.UpdatePlayersInformation, (information) => {
                 expect(information).to.be.eql(playerOne.getInformation());
             });
             playerOne.isPlayerOne = false;
             gamesHandler['gamePlayers'].set(playerOne.room, [playerOne, playerTwo]);
 
-            gamesHandler['updatePlayerInfo'](serverSocket, ROOM, game);
+            gamesHandler['updatePlayersInfo'](serverSocket, ROOM, game);
         });
 
         it('updatePlayerInfo() should broadcast correct info to the first Player when we play with a bot', (done) => {
@@ -130,13 +133,13 @@ describe('GamesHandler Service', () => {
                 expect(information).to.be.eql(playerOne.getInformation());
                 done();
             });
-            secondSocket.on(SocketEvents.UpdatePlayerInformation, (information) => {
+            secondSocket.on(SocketEvents.UpdatePlayersInformation, (information) => {
                 expect(information).to.be.eql(playerTwo.getInformation());
             });
             playerOne.isPlayerOne = true;
             gamesHandler['gamePlayers'].set(playerOne.room, [playerOne, playerTwo]);
 
-            gamesHandler['updatePlayerInfo'](serverSocket, ROOM, game);
+            gamesHandler['updatePlayersInfo'](serverSocket, ROOM, game);
         });
 
         it("updatePlayerInfo() should broadcast correct info if it isn't the first player", (done) => {
@@ -144,7 +147,7 @@ describe('GamesHandler Service', () => {
                 expect(information).to.be.eql(playerOne.getInformation());
                 done();
             });
-            secondSocket.on(SocketEvents.UpdatePlayerInformation, (information) => {
+            secondSocket.on(SocketEvents.UpdatePlayersInformation, (information) => {
                 expect(information).to.be.eql(playerTwo.getInformation());
             });
 
@@ -155,31 +158,31 @@ describe('GamesHandler Service', () => {
 
             gamesHandler['players'].set(serverSocket.id, playerOne);
 
-            gamesHandler['updatePlayerInfo'](serverSocket, ROOM, game);
+            gamesHandler['updatePlayersInfo'](serverSocket, ROOM, game);
         });
 
         it('updatePlayerInfo() should emit the letterReserve to the room', () => {
             gamesHandler['players'].set(serverSocket.id, playerOne);
 
-            gamesHandler['updatePlayerInfo'](serverSocket, ROOM, game);
+            gamesHandler['updatePlayersInfo'](serverSocket, ROOM, game);
             expect(socketManagerStub.emitRoom.calledWith(ROOM, SocketEvents.LetterReserveUpdated, RESERVE));
         });
 
         it("updatePlayerInfo() shouldn't do anything if the players are undefined", () => {
             gamesHandler['players'].set(serverSocket.id, playerOne);
 
-            gamesHandler['gamePlayers'].set(playerOne.room, undefined as unknown as Player[]);
+            gamesHandler['gamePlayers'].set(playerOne.room, undefined as unknown as GamePlayer[]);
 
-            gamesHandler['updatePlayerInfo'](serverSocket, playerOne.room, playerOne.game);
+            gamesHandler['updatePlayersInfo'](serverSocket, playerOne.room, playerOne.game);
             expect(socketManagerStub.emitRoom.called).to.not.be.equal(true);
         });
 
         it("updatePlayerInfo() shouldn't do anything if the players are undefined", () => {
             gamesHandler['players'].set(serverSocket.id, playerOne);
 
-            gamesHandler['gamePlayers'].set(playerOne.room, undefined as unknown as Player[]);
+            gamesHandler['gamePlayers'].set(playerOne.room, undefined as unknown as GamePlayer[]);
 
-            gamesHandler['updatePlayerInfo'](serverSocket, playerOne.room, playerOne.game);
+            gamesHandler['updatePlayersInfo'](serverSocket, playerOne.room, playerOne.game);
             expect(socketManagerStub.emitRoom.called).to.not.be.equal(true);
         });
     });

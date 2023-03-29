@@ -23,7 +23,7 @@ export class ProfilePictureController {
     private s3Client: S3Client;
     private defaultImagesMap: Map<string, string>; // Map (key, )
 
-    constructor(private readonly accountStorage: AccountStorageService) {
+    constructor(private accountStorage: AccountStorageService) {
         this.configureRouter();
         this.s3Client = this.configureS3Client();
         this.defaultImagesMap = new Map([
@@ -64,7 +64,7 @@ export class ProfilePictureController {
          * @return { number } HTTP Status - The return status of the request
          */
         this.router.post('/profile-picture', uploadImage.any(), async (req: FileRequest, res: Response) => {
-            if (!req.files || req.fileValidationError || req.files.length !== 2 || !req.files[0] || !req.files[1]) {
+            if (!req.files || req.fileValidationError || req.files.length !== 1 || !req.files[0] || req.body.ImageKey === undefined) {
                 res.status(StatusCodes.BAD_REQUEST).send({
                     message: 'No file received or invalid file type',
                     success: false,
@@ -72,7 +72,7 @@ export class ProfilePictureController {
                 return;
             }
 
-            const s3UploadCommand = this.createPutCommand(req.files[0], req.files[1].buffer.toString());
+            const s3UploadCommand = this.createPutCommand(req.files[0], req.body.ImageKey);
             await this.s3Client.send(s3UploadCommand);
 
             res.sendStatus(StatusCodes.CREATED);

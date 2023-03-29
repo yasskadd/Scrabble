@@ -8,6 +8,7 @@
         "disconnect": "Se déconnecter",
         "sign_up_screen": "Page de création de compte",
         "sign_up": "Créer un compte",
+        "sign_up_screen": "Création de compte",
         "create_game": "Créer une partie",
         "join_game": "Rejoindre une partie",
         "join_chat": "Rejoindre une salle de clavardage",
@@ -102,5 +103,11 @@
     },
     "chat": {
         "screen_name": "Salle de clavardage"
+    },
+    "avatar": {
+        "title": "Choisis ton avatar",
+        "close": "Fermer",
+        "error": "Erreur lors du chargement des images. Veuillez réessayer.",
+        "take_image": "Prendre une photo"
     }
 }

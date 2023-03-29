@@ -2,7 +2,7 @@
 /* eslint-disable max-lines */
 /* eslint-disable dot-notation*/
 import { GameRoom } from '@common/interfaces/game-room';
-import { GameSessions } from '@app/services/client-utilities/game-sessions.service';
+import { WaitingRoomService } from '@app/services/client-utilities/waiting-room.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
 import { GameCreationQuery } from '@common/interfaces/game-creation-query';
@@ -56,7 +56,7 @@ const GAME_PARAMETERS_SOLO: GameCreationQuery = {
 };
 
 describe('GameSession Service', () => {
-    let gameSessions: GameSessions;
+    let gameSessions: WaitingRoomService;
     let service: sinon.SinonStubbedInstance<SocketManager>;
     let httpServer: Server;
     let clientSocket: Socket;
@@ -65,7 +65,7 @@ describe('GameSession Service', () => {
     let sio: SioSignature;
     beforeEach((done) => {
         service = sinon.createStubInstance(SocketManager);
-        gameSessions = new GameSessions(service as unknown as SocketManager);
+        gameSessions = new WaitingRoomService(service as unknown as SocketManager);
         httpServer = createServer();
         sio = new ioServer(httpServer);
         httpServer.listen(() => {

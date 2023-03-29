@@ -1,14 +1,14 @@
 import { Game } from '@app/classes/game.class';
-import { Gameboard } from '@app/classes/gameboard.class';
+import { Gameboard } from '@common/classes/gameboard.class';
 import { Letter } from '@common/interfaces/letter';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
-import { Player } from './player.class';
+import { GamePlayer } from './player.class';
 
 describe('Player', () => {
-    let player: Player;
+    let player: GamePlayer;
     beforeEach(() => {
-        player = new Player('player');
+        player = new GamePlayer('player');
     });
 
     it('should return true if the rack is empty', () => {

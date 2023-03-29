@@ -6,5 +6,5 @@ export interface RoomPlayer {
     socketId: string;
     roomId: string;
     type?: PlayerType;
-    isCreator?: boolean;
+    isCreator: boolean;
 }
