@@ -4,9 +4,12 @@
     windows_subsystem = "windows"
 )]
 
+use std::fs;
+use std::sync::Mutex;
+
 use reqwest;
 use rust_socketio::{client::Client, ClientBuilder, Payload};
-use std::sync::Mutex;
+use serde_json::json;
 
 struct SocketClient {
     socket: Mutex<Option<Client>>,
@@ -160,9 +163,42 @@ fn isSocketAlive(state: tauri::State<SocketClient>) -> String {
 }
 
 #[tauri::command]
-fn loginTest() -> String {
-    let request =
-        reqwest::post("https://ec2-35-183-107-112.ca-central-1.compute.amazonaws.com:3443/signUp");
+async fn loginTest(handle: tauri::AppHandle) -> String {
+    let resource_path = handle
+        .path_resolver()
+        .resolve_resource("../certs/server.pem")
+        .expect("failed to resolve resource");
+
+    let cert = fs::read(resource_path).expect("error opening the cert");
+    let certificate =
+        reqwest::Certificate::from_pem(&cert).expect("Error creating the cert object");
+
+    let client = reqwest::Client::builder()
+        .danger_accept_invalid_certs(true)
+        .add_root_certificate(certificate)
+        .build()
+        .expect("http client build failed");
+
+    let res = client
+        // .post("https://ec2-35-183-107-112.ca-central-1.compute.amazonaws.com:3443/auth/login")
+        .post("https://localhost:3443/auth/login")
+        .json(&json!({
+            "username": "test",
+            "password": "test",
+        }))
+        .send()
+        .await
+        .unwrap()
+        .text()
+        .await;
+
+    match res {
+        Ok(response) => {
+            println!("{}", response);
+            return response;
+        }
+        Err(error) => error.to_string().into(),
+    }
 }
 
 fn main() {

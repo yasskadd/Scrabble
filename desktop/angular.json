@@ -108,12 +108,7 @@
                             "browserTarget": "desktop:build:live-development"
                         }
                     },
-                    "defaultConfiguration": "production",
-                    "options": {
-                        "ssl": true,
-                        "sslCert": "certs/server.pem",
-                        "sslKey": "certs/server.key",
-                    }
+                    "defaultConfiguration": "production"
                 },
                 "extract-i18n": {
                     "builder": "@angular-devkit/build-angular:extract-i18n",

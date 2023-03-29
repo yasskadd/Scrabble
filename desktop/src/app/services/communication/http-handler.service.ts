@@ -14,7 +14,7 @@ import { catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { useTauri } from '@app/pages/app/app.component';
 import { AppCookieService } from '@services/communication/app-cookie.service';
-import { Body, Client, Response, getClient } from '@tauri-apps/api/http';
+import { Body, Client, getClient, Response } from '@tauri-apps/api/http';
 
 @Injectable({
     providedIn: 'root',
