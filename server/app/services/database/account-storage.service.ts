@@ -75,6 +75,7 @@ export class AccountStorageService {
         await this.database.users.collection.updateOne({ username: oldUsername }, { $set: { username: newUsername } });
     }
 
+    // TODO : Change username to userId
     async updateScore(username: string, newScore: number): Promise<void> {
         await this.database.users.collection.updateOne({ username }, { $set: { score: newScore } });
     }
