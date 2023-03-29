@@ -1,4 +1,4 @@
-import { HttpErrorResponse } from '@angular/common/http';
+// import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { IUser } from '@common/interfaces/user';
 import { Subject, Subscription } from 'rxjs';
@@ -33,17 +33,19 @@ export class UserService {
     login(user: IUser): Subject<string> {
         const subject = new Subject<string>();
 
-        this.httpHandlerService.login(user).subscribe({
-            next: (loginRes: { userData: IUser; sessionToken: string }) => {
+        this.httpHandlerService.login(user).then(
+            (loginRes: { userData: IUser; sessionToken: string }) => {
                 this.updateUserWithImageUrl(loginRes.userData);
                 this.cookieService.updateUserSessionCookie(loginRes.sessionToken);
                 subject.next('');
             },
-            error: (error: HttpErrorResponse) => {
+            (error: any) => {
+                console.log(error);
+
                 // TODO : Language
                 subject.next(error.error.message);
             },
-        });
+        );
 
         return subject;
     }

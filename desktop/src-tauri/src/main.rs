@@ -4,9 +4,9 @@
     windows_subsystem = "windows"
 )]
 
-use std::sync::Mutex;
-
+use reqwest;
 use rust_socketio::{client::Client, ClientBuilder, Payload};
+use std::sync::Mutex;
 
 struct SocketClient {
     socket: Mutex<Option<Client>>,
@@ -159,6 +159,12 @@ fn isSocketAlive(state: tauri::State<SocketClient>) -> String {
     }
 }
 
+#[tauri::command]
+fn loginTest() -> String {
+    let request =
+        reqwest::post("https://ec2-35-183-107-112.ca-central-1.compute.amazonaws.com:3443/signUp");
+}
+
 fn main() {
     // std::env::set_var("RUST_BACKTRACE", "full");
     tauri::Builder::default()
@@ -170,7 +176,8 @@ fn main() {
             socketEstablishConnection,
             socketDisconnect,
             socketSend,
-            isSocketAlive
+            isSocketAlive,
+            loginTest
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

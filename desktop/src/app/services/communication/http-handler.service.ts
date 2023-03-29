@@ -14,7 +14,7 @@ import { catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { useTauri } from '@app/pages/app/app.component';
 import { AppCookieService } from '@services/communication/app-cookie.service';
-import { Body, Client, getClient } from '@tauri-apps/api/http';
+import { Body, Client, Response, getClient } from '@tauri-apps/api/http';
 
 @Injectable({
     providedIn: 'root',
@@ -152,18 +152,20 @@ export class HttpHandlerService {
             .pipe(catchError(this.handleError<{ imageKey: string }>('sign-up')));
     }
 
-    login(user: IUser): Observable<{ userData: IUser; sessionToken: string }> {
-        const httpOptions = {
-            withCredentials: true,
-        };
+    async login(user: IUser): Promise<{ userData: IUser; sessionToken: string }> {
+        // const httpOptions = {
+        //     withCredentials: true,
+        // };
 
-        this.backendHttp.post<{ userData: IUser; sessionToken: string }>(`${this.baseUrl}/auth/login`, Body.json(user)).then((res: any) => {
-            console.log(res.data);
-        });
+        return this.backendHttp
+            .post<{ userData: IUser; sessionToken: string }>(`${this.baseUrl}/auth/login`, Body.json(user))
+            .then((res: Response<{ userData: IUser; sessionToken: string }>) => {
+                return res.data;
+            });
 
-        return this.http
-            .post<{ userData: IUser; sessionToken: string }>(`${this.baseUrl}/auth/login`, user, httpOptions)
-            .pipe(catchError(this.handleError<{ userData: IUser; sessionToken: string }>('login')));
+        // return this.http
+        //     .post<{ userData: IUser; sessionToken: string }>(`${this.baseUrl}/auth/login`, user, httpOptions)
+        //     .pipe(catchError(this.handleError<{ userData: IUser; sessionToken: string }>('login')));
     }
 
     logout(): Observable<any> {
