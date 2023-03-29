@@ -370,14 +370,14 @@ export class GamesStateService {
             }
         }, SECOND);
     }
-    private async endGame(socketIds: string[]) {
-        const gamePlayer = this.gamesHandler.getPlayerFromSocketId(socketIds[0]);
+    private async endGame(socketId: string) {
+        const gamePlayer = this.gamesHandler.getPlayerFromSocketId(socketId);
         if (!gamePlayer) return;
         if (this.gamesHandler.getPlayersFromRoomId(gamePlayer.player.roomId).length === 0 && gamePlayer.game.isGameFinish) return;
 
         this.gameEnded.next(gamePlayer.player.roomId);
         gamePlayer.game.isGameFinish = true;
-        await this.savePlayersScore(socketIds, gamePlayer.player.roomId);
+        await this.savePlayersScore(gamePlayer.player.roomId);
         this.socketManager.emitRoom(gamePlayer.player.roomId, SocketEvents.GameEnd);
         this.gamesHandler.removeRoomFromRoomId(gamePlayer.player.roomId);
     }
@@ -409,25 +409,18 @@ export class GamesStateService {
         });
     }
 
-    private async savePlayersScore(socketId: string[], roomId: string) {
-        const players = socketId.map((socket) => {
-            const player = this.gamesHandler.players.get(socket);
-            if (player?.room === roomId) return player;
-            return;
-        }) as Player[];
-        const winnerPlayer = players.reduce((acc, cur) => {
+    private async savePlayersScore(roomId: string) {
+        const playersInRoom = this.gamesHandler.getPlayersFromRoomId(roomId);
+        const winnerPlayer = playersInRoom.reduce((acc, cur) => {
             return cur.score > acc.score ? cur : acc;
         });
-        const roomUsers = this.gamesHandler.gamePlayers.get(roomId)?.gameInfo.players;
-        players.forEach(async (player) => {
-            const userInfos = roomUsers?.find((user) => {
-                return user.username === player.name;
-            });
+        playersInRoom.forEach(async (player) => {
             let newScore: number;
             if (player === winnerPlayer) {
-                newScore = this.playerScore.calculateScore(userInfos?.score as number, true);
-            } else newScore = this.playerScore.calculateScore(userInfos?.score as number, false);
-            await this.accountStorage.updateScore(userInfos?.username as string, newScore);
+                newScore = this.playerScore.calculateScore(player.score, true);
+            } else newScore = this.playerScore.calculateScore(player.score as number, false);
+            // TODO : Change layer.player.user.username to userId instead
+            await this.accountStorage.updateScore(player.player.user.username, newScore);
         });
     }
 
