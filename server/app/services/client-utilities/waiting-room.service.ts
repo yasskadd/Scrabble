@@ -358,7 +358,7 @@ export class WaitingRoomService {
                         name: 'bot-image',
                         isDefaultPicture: true,
                     },
-                },
+                } as IUser,
                 socketId: '',
                 roomId,
                 type: PlayerType.Bot,
