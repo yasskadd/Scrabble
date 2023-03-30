@@ -47,7 +47,6 @@ export class GamesStateService {
         this.gameEnded = new Subject();
 
         this.gameEnded.subscribe((room) => {
-            console.log(this.gamesHandler.getPlayersFromRoomId(room));
             const gameInfo = this.formatGameInfo(room);
             if (!gameInfo) return;
 
@@ -116,19 +115,19 @@ export class GamesStateService {
 
                     let newBot: Bot;
                     if (room.difficulty === GameDifficulty.Easy) {
-                        newBot = new BeginnerBot(false, roomPlayer, {
+                        newBot = new BeginnerBot(roomPlayer, {
                             timer: room.timer,
                             roomId: room.id,
                             dictionaryValidation: dictionaryValidation as DictionaryValidation,
                         });
                     } else if (room.difficulty === GameDifficulty.Hard) {
-                        newBot = new ExpertBot(false, roomPlayer, {
+                        newBot = new ExpertBot(roomPlayer, {
                             timer: room.timer,
                             roomId: room.id,
                             dictionaryValidation: dictionaryValidation as DictionaryValidation,
                         });
                     } else {
-                        newBot = new ScoreRelatedBot(false, roomPlayer, {
+                        newBot = new ScoreRelatedBot(roomPlayer, {
                             timer: room.timer,
                             roomId: room.id,
                             dictionaryValidation: dictionaryValidation as DictionaryValidation,
@@ -234,7 +233,7 @@ export class GamesStateService {
             activePlayer: players[0].game.turn.activePlayer,
         };
 
-        console.log('Next turn...');
+        console.log('Next turn');
 
         this.socketManager.emitRoom(roomId, SocketEvents.NextTurn, gameInfo);
     }
@@ -293,7 +292,7 @@ export class GamesStateService {
         this.gameEnded.next(gamePlayer.player.roomId);
         gamePlayer.game.isGameFinish = true;
 
-        console.log('game ended');
+        console.log('Game ended');
 
         this.socketManager.emitRoom(gamePlayer.player.roomId, SocketEvents.GameEnd);
         this.gamesHandler.removeRoomFromRoomId(gamePlayer.player.roomId);

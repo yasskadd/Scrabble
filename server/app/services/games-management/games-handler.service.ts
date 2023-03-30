@@ -3,14 +3,14 @@ import { Game } from '@app/classes/game.class';
 import { LetterPlacement } from '@app/classes/letter-placement.class';
 import { GamePlayer } from '@app/classes/player/player.class';
 import { WordSolver } from '@app/classes/word-solver.class';
-import { DictionaryContainer } from '@app/interfaces/dictionaryContainer';
 import { Dictionary } from '@app/interfaces/dictionary';
+import { DictionaryContainer } from '@app/interfaces/dictionaryContainer';
 import { DictionaryStorageService } from '@app/services/database/dictionary-storage.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
-import { Service } from 'typedi';
 import { PlayerInformation } from '@common/interfaces/player-information';
+import { Service } from 'typedi';
 
 @Service()
 export class GamesHandlerService {

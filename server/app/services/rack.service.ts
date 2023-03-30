@@ -4,6 +4,10 @@ import { Service } from 'typedi';
 
 @Service()
 export class RackService {
+    constructor() {
+        console.log('Rack service init');
+    }
+
     areLettersInRack(commandLetters: string[], player: GamePlayer): boolean {
         const tempRack: Letter[] = this.createTempRack(player);
         const lettersPresentInRack = this.findLettersPresentInRack(commandLetters, tempRack);

@@ -1,13 +1,6 @@
-import { PlaceLettersReturn } from '@app/interfaces/place-letters-return';
-import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { GamePlayer } from './player.class';
 
 export class RealPlayer extends GamePlayer {
-    placeLetter(commandInfo: PlaceWordCommandInfo): PlaceLettersReturn | string {
-        if (this.game === undefined) return 'error';
-        return this.game.play(this, commandInfo);
-    }
-
     exchangeLetter(letters: string[]) {
         if (this.game === undefined) return;
         this.rack = this.game.exchange(letters, this);

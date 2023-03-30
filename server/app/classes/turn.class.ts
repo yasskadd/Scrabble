@@ -72,7 +72,6 @@ export class Turn {
             this.end();
             return;
         }
-        console.log('skippppp');
         this.end(true);
     }
 
