@@ -1,4 +1,6 @@
 import { SECRET_KEY } from '@app/../very-secret-file';
+import { AccountStorageService } from '@app/services/database/account-storage.service';
+import { HistoryActions } from '@common/models/history-actions';
 import * as cookie from 'cookie';
 import * as http from 'http';
 import * as jwt from 'jsonwebtoken';
@@ -14,7 +16,7 @@ export class SocketManager {
     private onEvents: Map<string, CallbackSignature[]>;
     private onAndSioEvents: Map<string, OnSioCallbackSignature[]>;
 
-    constructor() {
+    constructor(private accountStorageService: AccountStorageService) {
         this.onEvents = new Map<string, CallbackSignature[]>();
         this.onAndSioEvents = new Map<string, OnSioCallbackSignature[]>();
         this.socketUsernameMap = new Map<io.Socket, string>();
@@ -86,6 +88,8 @@ export class SocketManager {
 
                 this.socketUsernameMap.set(socket, username);
 
+                this.accountStorageService.addUserEventHistory(username, HistoryActions.Connection, new Date());
+
                 // eslint-disable-next-line no-console
                 console.log('Connection of authenticated client with id = ' + socket.id + ' from : ' + socket.handshake.headers.host);
             } else {
@@ -107,6 +111,7 @@ export class SocketManager {
             }
             socket.on('disconnect', () => {
                 if (this.socketUsernameMap.has(socket)) {
+                    this.accountStorageService.addUserEventHistory(this.socketUsernameMap.get(socket) as string, HistoryActions.Logout, new Date());
                     this.socketUsernameMap.delete(socket);
                 }
 
