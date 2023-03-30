@@ -415,6 +415,7 @@ export class GamesStateService {
             return cur.score > acc.score ? cur : acc;
         });
         playersInRoom.forEach(async (player) => {
+            if (player.player.type !== PlayerType.User) return;
             let newScore: number;
             if (player === winnerPlayer) {
                 newScore = this.playerScore.calculateScore(player.score, true);
