@@ -1,11 +1,5 @@
 /* eslint-disable max-lines */
-import {
-    ROOM_NOT_AVAILABLE_ERROR,
-    ROOMID_LENGTH,
-    SAME_USER_IN_ROOM_ERROR,
-    UNAVAILABLE_ELEMENT_INDEX,
-    WRONG_ROOM_PASSWORD,
-} from '@app/constants/rooms';
+import { ROOMID_LENGTH, UNAVAILABLE_ELEMENT_INDEX } from '@app/constants/rooms';
 import { VirtualPlayersStorageService } from '@app/services/database/virtual-players-storage.service';
 import { GamesStateService } from '@app/services/games-management/games-state.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
@@ -13,6 +7,7 @@ import { SocketType } from '@app/types/sockets';
 import { INVALID_INDEX } from '@common/constants/board-info';
 import { NUMBER_OF_PLAYERS } from '@common/constants/players';
 import { GAME_LOBBY_ROOM_ID } from '@common/constants/room';
+import { ServerErrors } from '@common/constants/server-errors';
 import { SocketEvents } from '@common/constants/socket-events';
 import { GameCreationQuery } from '@common/interfaces/game-creation-query';
 import { GameRoom } from '@common/interfaces/game-room';
@@ -20,13 +15,13 @@ import { RoomPlayer } from '@common/interfaces/room-player';
 import { IUser } from '@common/interfaces/user';
 import { UserRoomQuery } from '@common/interfaces/user-room-query';
 import { GameDifficulty } from '@common/models/game-difficulty';
+import { GameMode } from '@common/models/game-mode';
+import { GameRoomState } from '@common/models/game-room-state';
 import { GameVisibility } from '@common/models/game-visibility';
 import { PlayerType } from '@common/models/player-type';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import * as uuid from 'uuid';
-import { GameMode } from '@common/models/game-mode';
-import { GameRoomState } from '@common/models/game-room-state';
 
 // const PLAYERS_REJECT_FROM_ROOM_ERROR = "L'adversaire à rejeter votre demande";
 
@@ -87,15 +82,15 @@ export class WaitingRoomService {
     private joinGameRoom(server: Server, socket: SocketType, joinGameQuery: UserRoomQuery): void {
         const room: GameRoom | undefined = this.getRoom(joinGameQuery.roomId);
         if (this.userAlreadyConnected(joinGameQuery)) {
-            socket.emit(SocketEvents.ErrorJoining, SAME_USER_IN_ROOM_ERROR);
+            socket.emit(SocketEvents.ErrorJoining, ServerErrors.RoomSameUser);
             return;
         }
         if (!room) {
-            socket.emit(SocketEvents.ErrorJoining, ROOM_NOT_AVAILABLE_ERROR);
+            socket.emit(SocketEvents.ErrorJoining, ServerErrors.RoomNotAvailable);
             return;
         }
         if (room.visibility === GameVisibility.Locked && !this.passwordValid(joinGameQuery)) {
-            socket.emit(SocketEvents.ErrorJoining, WRONG_ROOM_PASSWORD);
+            socket.emit(SocketEvents.ErrorJoining, ServerErrors.RoomWrongPassword);
             return;
         }
 
