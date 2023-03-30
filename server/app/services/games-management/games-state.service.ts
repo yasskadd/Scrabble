@@ -15,7 +15,7 @@ import { HistoryStorageService } from '@app/services/database/history-storage.se
 import { ScoreStorageService } from '@app/services/database/score-storage.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
-import { GameHistoryInfo } from '@common/interfaces/game-history-info';
+import { GameHistoryInfo, PlayerGameResult } from '@common/interfaces/game-history-info';
 import { GameRoom } from '@common/interfaces/game-room';
 import { GameInfo } from '@common/interfaces/game-state';
 import { PlayerInformation } from '@common/interfaces/player-information';
@@ -47,6 +47,7 @@ export class GamesStateService {
         this.gameEnded = new Subject();
 
         this.gameEnded.subscribe((room) => {
+            console.log(this.gamesHandler.getPlayersFromRoomId(room));
             const gameInfo = this.formatGameInfo(room);
             if (!gameInfo) return;
 
@@ -72,7 +73,7 @@ export class GamesStateService {
 
         const gamePlayers: GamePlayer[] = this.initPlayers(game, room);
 
-        await this.gameSubscriptions(room, game);
+        await this.setupGameSubscriptions(room, game);
 
         // start() that was in Game
         gamePlayers.forEach((player: GamePlayer) => {
@@ -159,13 +160,12 @@ export class GamesStateService {
         return gamePlayers;
     }
 
-    private async gameSubscriptions(room: GameRoom, game: Game) {
+    private async setupGameSubscriptions(room: GameRoom, game: Game) {
         game.turn.endTurn.subscribe(async () => {
-            this.endGameScore(room.id);
-            this.changeTurn(room.id);
+            this.calculateEndGameScore(room.id);
             if (!game.turn.activePlayer) {
                 await this.broadcastHighScores(room.players, room.id);
-            }
+            } else this.changeTurn(room.id);
         });
 
         game.turn.countdown.subscribe((timer: number) => {
@@ -173,7 +173,7 @@ export class GamesStateService {
         });
     }
 
-    private endGameScore(roomID: string) {
+    private calculateEndGameScore(roomID: string) {
         const players = this.gamesHandler.getPlayersFromRoomId(roomID);
         if (!players) return;
 
@@ -184,28 +184,19 @@ export class GamesStateService {
             players.forEach((player) => {
                 player.deductPoints();
             });
-            // if (players[0].game.isMode2990) game.objectivesHandler.verifyClueCommandEndGame(players);
             return;
         }
 
-        if (
-            players.filter((player: GamePlayer) => {
-                return player.rackIsEmpty();
-            }).length > 0
-        ) {
-            // const winnerPlayer = players[0].rackIsEmpty() ? players[0] : players[1];
-            // const loserPlayer = players[0].rackIsEmpty() ? players[1] : players[0];
-            const winnerPlayer = players.find((player: GamePlayer) => player.rackIsEmpty());
-            if (!winnerPlayer) return;
+        if (players.filter((player: GamePlayer) => player.rackIsEmpty()).length > 0) {
+            const finishingPlayer = players.find((player: GamePlayer) => player.rackIsEmpty());
+            if (!finishingPlayer) return;
 
             players.filter((player: GamePlayer) => {
-                if (player.player.user.username !== winnerPlayer.player.user.username) {
+                if (player.player.user.username !== finishingPlayer.player.user.username) {
                     player.deductPoints();
-                    winnerPlayer.addPoints(player.rack);
+                    finishingPlayer.addPoints(player.rack);
                 }
             });
-
-            // if (players[0].game.isMode2990) game.objectivesHandler.verifyClueCommandEndGame(players);
         }
     }
 
@@ -243,6 +234,8 @@ export class GamesStateService {
             activePlayer: players[0].game.turn.activePlayer,
         };
 
+        console.log('Next turn...');
+
         this.socketManager.emitRoom(roomId, SocketEvents.NextTurn, gameInfo);
     }
 
@@ -260,8 +253,6 @@ export class GamesStateService {
         socket.leave(gamePlayer.player.roomId);
         if (!gamePlayer.game.isModeSolo) {
             this.socketManager.emitRoom(room, SocketEvents.UserDisconnect);
-            // TODO : Repair and make that better for 4 players and bots
-            // this.switchToSolo(gamePlayer).then();
             return;
         }
 
@@ -269,82 +260,6 @@ export class GamesStateService {
         this.gameEnded.next(gamePlayer.player.roomId);
         this.gamesHandler.removeRoomFromRoomId(gamePlayer.player.roomId);
     }
-
-    // private async switchToSolo(playerToReplace: GamePlayer): Promise<void> {
-    //     const info = playerToReplace.getInformation();
-    //     if (!info) return;
-    //     const players = this.gamesHandler.getPlayersFromRoomId(playerToReplace.player.roomId);
-    //     if (!players) return;
-    //
-    //     const botName = await this.generateBotName(
-    //         players[1] === playerToReplace ? players[0].player.user.username : players[1].player.user.username,
-    //     );
-    //
-    //     // TODO : Add bot image here
-    //     const botPlayer = new BeginnerBot(
-    //         false,
-    //         {
-    //             user: {
-    //                 username: botName,
-    //                 password: 'null',
-    //                 profilePicture: {
-    //                     name: 'bot-image',
-    //                     isDefaultPicture: true,
-    //                 },
-    //             },
-    //             socketId: '',
-    //             roomId: '',
-    //             type: PlayerType.Bot,
-    //             isCreator: false,
-    //         },
-    //         {
-    //             timer: playerToReplace.game.turn.time,
-    //             roomId: playerToReplace.player.roomId,
-    //             dictionaryValidation: playerToReplace.game.dictionaryValidation,
-    //         },
-    //     );
-    //     botPlayer.score = info.score;
-    //     botPlayer.rack = info.rack;
-    //
-    //     if (playerToReplace.game.turn.activePlayer === playerToReplace.player.user) playerToReplace.game.turn.activePlayer = botPlayer.player.user;
-    //     else {
-    //         this.findAndDeleteElementFromArray(playerToReplace.game.turn.inactivePlayers, playerToReplace.player.user);
-    //         playerToReplace.game.turn.inactivePlayers?.push(botPlayer.player.user);
-    //     }
-
-    // TODO : Do we still need that?
-    // const gameRoom = this.gamesHandler.gamePlayers.get(playerToReplace.room)?.gameRoom;
-    // if (!gameRoom) return;
-    //
-    // if (players[1] === playerToReplace)
-    //     this.gamesHandler.gamePlayers.set(playerToReplace.gameRoom, {
-    //         gameRoom,
-    //         players: [players[0], botPlayer],
-    //     });
-    // else
-    //     this.gamesHandler.gamePlayers.set(playerToReplace.gameRoom, {
-    //         gameRoom,
-    //         players: [botPlayer, players[1]],
-    //     });
-    //
-    // this.updateNewBot(playerToReplace.game, playerToReplace.gameRoom, botPlayer);
-    // }
-    //
-    // private async generateBotName(oldName: string): Promise<string> {
-    //     const playerBotList = await this.virtualPlayerStorage.getBeginnerBot();
-    //     let botName = oldName;
-    //     while (oldName.toString().toLowerCase() === botName.toString().toLowerCase()) {
-    //         botName = playerBotList[Math.floor(Math.random() * playerBotList.length)].username;
-    //     }
-    //     return botName;
-    // }
-
-    // private updateNewBot(game: Game, roomId: string, botPlayer: GamePlayer) {
-    //     game.isModeSolo = true;
-    //     (botPlayer as BeginnerBot).setGame(game);
-    //     (botPlayer as BeginnerBot).start();
-    //     this.gamesHandler.updatePlayersInfo(roomId, game);
-    // }
 
     private disconnect(socket: Socket) {
         const gamePlayer = this.gamesHandler.getPlayerFromSocketId(socket.id);
@@ -377,6 +292,9 @@ export class GamesStateService {
 
         this.gameEnded.next(gamePlayer.player.roomId);
         gamePlayer.game.isGameFinish = true;
+
+        console.log('game ended');
+
         this.socketManager.emitRoom(gamePlayer.player.roomId, SocketEvents.GameEnd);
         this.gamesHandler.removeRoomFromRoomId(gamePlayer.player.roomId);
     }
@@ -441,10 +359,9 @@ export class GamesStateService {
             beginningTime: players[0].game.beginningTime,
             endTime,
             duration: this.computeDuration(players[0].game.beginningTime, endTime),
-            firstPlayerName: players[0].player.user.username,
-            firstPlayerScore: players[0].score,
-            secondPlayerName: players[1].player.user.username,
-            secondPlayerScore: players[1].score,
+            gameResult: players.map<PlayerGameResult>((player: GamePlayer) => {
+                return { name: player.player.user.username, score: player.score };
+            }),
         } as GameHistoryInfo;
     }
 

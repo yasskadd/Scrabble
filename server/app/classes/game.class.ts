@@ -67,6 +67,7 @@ export class Game {
     }
 
     skip(playerName: string): boolean {
+        console.log(playerName);
         if (!this.turn.validating(playerName)) return false;
 
         this.turn.skipTurn();

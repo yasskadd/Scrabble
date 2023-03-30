@@ -5,11 +5,11 @@ import { RackService } from '@app/services/rack.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
 import { ExchangePublicInfo, PlaceWordCommandInfo } from '@common/interfaces/game-actions';
+import { GameInfo } from '@common/interfaces/game-state';
+import { PlayerInformation } from '@common/interfaces/player-information';
 import { Socket } from 'socket.io';
 import { Service } from 'typedi';
 import { GamesHandlerService } from './games-handler.service';
-import { GameInfo } from '@common/interfaces/game-state';
-import { PlayerInformation } from '@common/interfaces/player-information';
 
 const CLUE_COUNT_PER_COMMAND_CALL = 3;
 
@@ -18,11 +18,11 @@ export class GamesActionsService {
     constructor(private socketManager: SocketManager, private gamesHandler: GamesHandlerService, private rackService: RackService) {}
 
     initSocketsEvents(): void {
-        this.socketManager.on(SocketEvents.PlaceWordCommand, this.playGame);
-        this.socketManager.on(SocketEvents.Exchange, this.exchange);
-        this.socketManager.on(SocketEvents.ReserveCommand, this.reserveCommand);
-        this.socketManager.on(SocketEvents.Skip, this.skip);
-        this.socketManager.on(SocketEvents.ClueCommand, this.clueCommand);
+        this.socketManager.on(SocketEvents.PlaceWordCommand, (socket, commandInfo: PlaceWordCommandInfo) => this.placeWord(socket, commandInfo));
+        this.socketManager.on(SocketEvents.Exchange, (socket, letters: string[]) => this.exchange(socket, letters));
+        this.socketManager.on(SocketEvents.ReserveCommand, (socket) => this.reserveCommand(socket));
+        this.socketManager.on(SocketEvents.Skip, (socket) => this.skip(socket));
+        this.socketManager.on(SocketEvents.ClueCommand, (socket) => this.clueCommand(socket));
     }
 
     private clueCommand(socket: Socket) {
@@ -63,6 +63,8 @@ export class GamesActionsService {
         const gamePlayer = this.gamesHandler.getPlayerFromSocketId(socket.id) as RealPlayer;
         if (!gamePlayer) return;
 
+        console.log('skip');
+
         gamePlayer.skipTurn();
     }
 
@@ -87,7 +89,7 @@ export class GamesActionsService {
         // this.socketManager.emitRoom(gamePlayer.player.roomId, SocketEvents.Play, gamePlayer.getInformation(), gamePlayer.game.turn.activePlayer);
     }
 
-    private playGame(socket: Socket, commandInfo: PlaceWordCommandInfo) {
+    private placeWord(socket: Socket, commandInfo: PlaceWordCommandInfo) {
         const gamePlayer = this.gamesHandler.getPlayerFromSocketId(socket.id) as RealPlayer;
         if (!gamePlayer) return;
 

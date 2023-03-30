@@ -1,6 +1,6 @@
+import { IUser } from '@common/interfaces/user';
 import { ReplaySubject } from 'rxjs';
 import { GamePlayer } from './player/player.class';
-import { IUser } from '@common/interfaces/user';
 
 const SECOND = 1000;
 
@@ -62,7 +62,7 @@ export class Turn {
     }
 
     validating(playerName: string): boolean {
-        return String(this.activePlayer) === playerName;
+        return this.activePlayer?.username === playerName;
     }
 
     skipTurn(): void {
@@ -72,6 +72,7 @@ export class Turn {
             this.end();
             return;
         }
+        console.log('skippppp');
         this.end(true);
     }
 

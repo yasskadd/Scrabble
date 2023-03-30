@@ -206,8 +206,6 @@ export class GameSessions {
         const room: GameRoom = await this.setupNewGameRoom(gameQuery, socket.id);
         this.gameRooms.push(room);
 
-        console.log(gameQuery);
-
         server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
         socket.leave(GAME_LOBBY_ROOM_ID);
 
