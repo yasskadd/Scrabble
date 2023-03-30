@@ -58,7 +58,6 @@ export class AuthentificationController {
          */
         this.router.post('/login', async (req: Request, res: Response) => {
             const user: IUser = req.body;
-            console.log('a login request was made');
             if (await this.accountStorage.isUsernameRegistered(user.username)) {
                 const isLoginValid = await this.accountStorage.loginValidator(user);
                 if (isLoginValid) {

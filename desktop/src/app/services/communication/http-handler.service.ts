@@ -3,18 +3,18 @@ import { Injectable } from '@angular/core';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
 import { HighScores } from '@app/interfaces/high-score-parameters';
+import { useTauri } from '@app/pages/app/app.component';
 import { AvatarData } from '@common/interfaces/avatar-data';
 import { Bot } from '@common/interfaces/bot';
 import { BotNameSwitcher } from '@common/interfaces/bot-name-switcher';
 import { GameHistoryInfo } from '@common/interfaces/game-history-info';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
 import { IUser } from '@common/interfaces/user';
+import { AppCookieService } from '@services/communication/app-cookie.service';
+import { invoke } from '@tauri-apps/api';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { useTauri } from '@app/pages/app/app.component';
-import { AppCookieService } from '@services/communication/app-cookie.service';
-import { Body, Client, getClient, Response } from '@tauri-apps/api/http';
 
 @Injectable({
     providedIn: 'root',
@@ -22,13 +22,8 @@ import { Body, Client, getClient, Response } from '@tauri-apps/api/http';
 export class HttpHandlerService {
     private readonly baseUrl: string = environment.serverUrl;
     private header: HttpHeaders;
-    private backendHttp: Client;
 
-    constructor(private readonly http: HttpClient, private appCookieService: AppCookieService) {
-        getClient().then((client: Client) => {
-            this.backendHttp = client;
-        });
-    }
+    constructor(private readonly http: HttpClient, private appCookieService: AppCookieService) {}
 
     getClassicHighScore(): Observable<HighScores[]> {
         return this.http
@@ -153,19 +148,9 @@ export class HttpHandlerService {
     }
 
     async login(user: IUser): Promise<{ userData: IUser; sessionToken: string }> {
-        // const httpOptions = {
-        //     withCredentials: true,
-        // };
-
-        return this.backendHttp
-            .post<{ userData: IUser; sessionToken: string }>(`${this.baseUrl}/auth/login`, Body.json(user))
-            .then((res: Response<{ userData: IUser; sessionToken: string }>) => {
-                return res.data;
-            });
-
-        // return this.http
-        //     .post<{ userData: IUser; sessionToken: string }>(`${this.baseUrl}/auth/login`, user, httpOptions)
-        //     .pipe(catchError(this.handleError<{ userData: IUser; sessionToken: string }>('login')));
+        return invoke('httpPost', { url: `${this.baseUrl}/auth/login`, body: JSON.stringify(user) }).then((res: { body: string }) => {
+            return JSON.parse(res.body);
+        });
     }
 
     logout(): Observable<any> {
@@ -258,8 +243,4 @@ export class HttpHandlerService {
     private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
         return () => of(result as T);
     }
-
-    // private throwError<T>(error: HttpErrorResponse): Observable<T> {
-    //     return throwError(() => new HttpErrorResponse(error));
-    // }
 }

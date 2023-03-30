@@ -6,7 +6,6 @@ import { AppRoutes } from '@app/models/app-routes';
 import { UserService } from '@app/services/user.service';
 import { IUser } from '@common/interfaces/user';
 import { Subject } from 'rxjs';
-import { invoke } from '@tauri-apps/api/tauri';
 
 @Component({
     selector: 'app-connection-page',
@@ -27,12 +26,6 @@ export class ConnectionPageComponent {
         this.formGroup = this.formBuilder.group({
             usernameForm: this.usernameForm,
             passwordForm: this.passwordForm,
-        });
-    }
-
-    protected test(): void {
-        invoke('loginTest').then((res) => {
-            console.log(res);
         });
     }
 

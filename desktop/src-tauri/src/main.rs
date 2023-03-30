@@ -7,12 +7,20 @@
 use std::fs;
 use std::sync::Mutex;
 
-use reqwest;
+use reqwest::{self, header::CONTENT_TYPE};
 use rust_socketio::{client::Client, ClientBuilder, Payload};
-use serde_json::json;
+use serde::Serialize;
+use tauri::{self, Manager};
 
 struct SocketClient {
     socket: Mutex<Option<Client>>,
+}
+struct Http {
+    client: reqwest::Client,
+}
+#[derive(Serialize)]
+struct HttpResponse {
+    body: String,
 }
 
 enum RustEvent {
@@ -163,29 +171,13 @@ fn isSocketAlive(state: tauri::State<SocketClient>) -> String {
 }
 
 #[tauri::command]
-async fn loginTest(handle: tauri::AppHandle) -> String {
-    let resource_path = handle
-        .path_resolver()
-        .resolve_resource("../certs/server.pem")
-        .expect("failed to resolve resource");
-
-    let cert = fs::read(resource_path).expect("error opening the cert");
-    let certificate =
-        reqwest::Certificate::from_pem(&cert).expect("Error creating the cert object");
-
-    let client = reqwest::Client::builder()
-        .danger_accept_invalid_certs(true)
-        .add_root_certificate(certificate)
-        .build()
-        .expect("http client build failed");
-
-    let res = client
-        .post("https://ec2-35-183-107-112.ca-central-1.compute.amazonaws.com:3443/auth/login")
-        // .post("https://localhost:3443/auth/login")
-        .json(&json!({
-            "username": "test",
-            "password": "test",
-        }))
+async fn loginTest(httpState: tauri::State<'_, Http>) -> Result<HttpResponse, String> {
+    let res = httpState
+        .client
+        // .post("https://ec2-35-183-107-112.ca-central-1.compute.amazonaws.com:3443/auth/login")
+        .post("https://localhost:3443/auth/login")
+        .header(CONTENT_TYPE, "application/json")
+        .body("{\"username\": \"test\", \"password\": \"test\"}")
         .send()
         .await
         .unwrap()
@@ -195,9 +187,62 @@ async fn loginTest(handle: tauri::AppHandle) -> String {
     match res {
         Ok(response) => {
             println!("{}", response);
-            return response;
+            Ok(HttpResponse { body: response })
         }
-        Err(error) => error.to_string().into(),
+        Err(error) => Err(error.to_string()),
+    }
+}
+
+#[tauri::command]
+async fn httpGet(
+    url: &str,
+    body: Option<&str>,
+    httpState: tauri::State<'_, Http>,
+) -> Result<HttpResponse, String> {
+    println!("{}{}", "GET request to : ", url);
+
+    let mut req = httpState.client.get(url);
+
+    req = match body {
+        Some(body) => req
+            .header(CONTENT_TYPE, "application/json")
+            .body(body.to_owned()),
+        None => req,
+    };
+
+    let res = req.send().await.unwrap().text().await;
+
+    match res {
+        Ok(response) => {
+            println!("{}", response);
+            Ok(HttpResponse { body: response })
+        }
+        Err(error) => Err(error.to_string()),
+    }
+}
+
+#[tauri::command]
+async fn httpPost(
+    url: &str,
+    body: Option<&str>,
+    httpState: tauri::State<'_, Http>,
+) -> Result<HttpResponse, String> {
+    println!("{}{}", "POST request to : ", url);
+
+    let mut req = httpState.client.post(url);
+
+    req = match body {
+        Some(body) => req
+            .header(CONTENT_TYPE, "application/json")
+            .body(body.to_owned()),
+        None => req,
+    };
+
+    let res: Result<String, reqwest::Error> = req.send().await.unwrap().text().await;
+
+    match res {
+        Ok(response) => Ok(HttpResponse { body: response }),
+        Err(error) => Err(error.to_string()),
     }
 }
 
@@ -207,13 +252,38 @@ fn main() {
         .manage(SocketClient {
             socket: Mutex::new(None),
         })
+        .setup(|app| {
+            let certificate: reqwest::Certificate = reqwest::Certificate::from_pem(
+                &fs::read(
+                    app.handle()
+                        .path_resolver()
+                        .resolve_resource("../certs/server.pem")
+                        .expect("Error retriving the certificate file path"),
+                )
+                .expect("Error reading the certificate file"),
+            )
+            .expect("Error generating the certificate");
+
+            app.manage(Http {
+                client: reqwest::Client::builder()
+                    .cookie_store(true)
+                    .danger_accept_invalid_certs(true)
+                    .add_root_certificate(certificate)
+                    .build()
+                    .expect("Error creating the http client"),
+            });
+
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             greet,
             socketEstablishConnection,
             socketDisconnect,
             socketSend,
             isSocketAlive,
-            loginTest
+            loginTest,
+            httpGet,
+            httpPost
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
