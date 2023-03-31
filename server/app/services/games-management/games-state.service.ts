@@ -10,7 +10,7 @@ import { RealPlayer } from '@app/classes/player/real-player.class';
 import { ScoreRelatedBot } from '@app/classes/player/score-related-bot.class';
 import { Turn } from '@app/classes/turn.class';
 import { MAX_QUANTITY } from '@app/constants/letter-reserve';
-import { DictionaryContainer } from '@app/interfaces/dictionaryContainer';
+import { DictionaryContainer } from '@app/interfaces/dictionary-container';
 import { HistoryStorageService } from '@app/services/database/history-storage.service';
 import { ScoreStorageService } from '@app/services/database/score-storage.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
@@ -64,16 +64,6 @@ export class GamesStateService {
         this.socketManager.on(SocketEvents.QuitGame, (socket: Socket) => {
             this.disconnect(socket);
         });
-
-        this.socketManager.on(SocketEvents.Disconnect, (socket) => {
-            this.disconnect(socket);
-        });
-        this.socketManager.on(SocketEvents.AbandonGame, (socket) => {
-            this.abandonGame(socket);
-        });
-        this.socketManager.on(SocketEvents.QuitGame, (socket) => {
-            this.disconnect(socket);
-        });
     }
 
     async createGame(server: Server, room: GameRoom) {
@@ -84,12 +74,10 @@ export class GamesStateService {
 
         await this.gameSubscriptions(room, game);
 
-        // start() that was in Game
         gamePlayers.forEach((player: GamePlayer) => {
             this.gamesHandler.players.push(player);
             game.letterReserve.generateLetters(MAX_QUANTITY, player.rack);
         });
-        // this.gamesHandler.updatePlayersInfo(room.id, game);
 
         game.turn.determineStartingPlayer(gamePlayers);
 

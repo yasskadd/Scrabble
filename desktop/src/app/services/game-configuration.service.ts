@@ -1,6 +1,7 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
+import { useTauri } from '@app/pages/app/app.component';
 import { SocketEvents } from '@common/constants/socket-events';
 import { GameRoom } from '@common/interfaces/game-room';
 import { RoomPlayer } from '@common/interfaces/room-player';
@@ -19,12 +20,14 @@ import { ClientSocketService } from './communication/client-socket.service';
 @Injectable({
     providedIn: 'root',
 })
-export class GameConfigurationService implements OnDestroy {
+export class GameConfigurationService {
     localGameRoom: GameRoom;
     // isGameStarted: Subject<boolean>;
     isRoomJoinable: Subject<boolean>;
     errorReason: string;
     availableRooms: GameRoom[];
+
+    private zone: NgZone;
 
     constructor(
         private snackBarService: SnackBarService,
@@ -44,7 +47,7 @@ export class GameConfigurationService implements OnDestroy {
         });
 
         // eslint-disable-next-line no-underscore-dangle
-        if (window.__TAURI_IPC__) {
+        if (useTauri) {
             tauriWindow
                 .getCurrent()
                 .listen(TauriEvent.WINDOW_CLOSE_REQUESTED, () => {
@@ -72,7 +75,13 @@ export class GameConfigurationService implements OnDestroy {
         });
 
         this.clientSocket.on(SocketEvents.GameAboutToStart, () => {
-            this.router.navigate([`${AppRoutes.GamePage}`]).then();
+            if (useTauri) {
+                this.zone.run(() => {
+                    this.router.navigate([`${AppRoutes.GamePage}`]).then();
+                });
+            } else {
+                this.router.navigate([`${AppRoutes.GamePage}`]).then();
+            }
         });
 
         this.clientSocket.on(SocketEvents.PlayerJoinedWaitingRoom, (opponent: RoomPlayer) => {
@@ -84,8 +93,6 @@ export class GameConfigurationService implements OnDestroy {
         });
 
         this.clientSocket.on(SocketEvents.UpdateGameRooms, (gamesToJoin: GameRoom[]) => {
-            console.log('received new room list');
-            console.log(gamesToJoin);
             this.availableRooms = gamesToJoin;
         });
 
@@ -95,15 +102,6 @@ export class GameConfigurationService implements OnDestroy {
             }
             this.exitWaitingRoom();
         });
-    }
-
-    ngOnDestroy() {
-        // if (this.localGameRoom) {
-        //     this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
-        //         roomId: this.localGameRoom.id,
-        //         user: this.userService.user,
-        //     } as UserRoomQuery);
-        // }
     }
 
     rejectOpponent(player: RoomPlayer): void {

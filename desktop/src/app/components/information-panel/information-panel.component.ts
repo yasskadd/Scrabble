@@ -5,7 +5,6 @@ import { DialogBoxAbandonGameComponent } from '@app/components/dialog-box-abando
 import { DialogGameHelpComponent } from '@app/components/dialog-game-help/dialog-game-help.component';
 import { AppRoutes } from '@app/models/app-routes';
 import { GameClientService } from '@app/services/game-client.service';
-import { LetterPlacementService } from '@services/letter-placement.service';
 import { TimeService } from '@services/time.service';
 
 @Component({
@@ -14,13 +13,7 @@ import { TimeService } from '@services/time.service';
     styleUrls: ['./information-panel.component.scss'],
 })
 export class InformationPanelComponent {
-    constructor(
-        public gameClientService: GameClientService,
-        public timer: TimeService,
-        protected letterPlacementService: LetterPlacementService,
-        private dialog: MatDialog,
-        private router: Router,
-    ) {}
+    constructor(public gameClientService: GameClientService, public timer: TimeService, private dialog: MatDialog, private router: Router) {}
 
     abandonGame(): void {
         this.dialog.open(DialogBoxAbandonGameComponent, {
@@ -31,24 +24,11 @@ export class InformationPanelComponent {
     }
 
     leaveGame(): void {
-        this.router.navigate([AppRoutes.HomePage]).then();
         this.gameClientService.quitGame();
+        this.router.navigate([AppRoutes.HomePage]).then();
     }
 
     openHelpDialog() {
         this.dialog.open(DialogGameHelpComponent, { width: '50%' });
     }
-
-    // filterCompletedObjectives(isFirstPlayer: boolean) {
-    // const playerName: string = isFirstPlayer ? this.gameClientService.playerOne.player.user.username : this.gameClientService.secondPlayer.player.user.username;
-    // const objectives: Objective[] = isFirstPlayer
-    //     ? (this.gameClientService.playerOne.objective as Objective[])
-    //     : (this.gameClientService.secondPlayer.objective as Objective[]);
-    // return objectives.filter((objective) => objective.complete && objective.user === playerName);
-    // }
-
-    // filterNotCompletedObjectives() {
-    //     const objectives: Objective[] = this.gameClientService.playerOne.objective as Objective[];
-    //     return objectives.filter((objective) => !objective.complete);
-    // }
 }

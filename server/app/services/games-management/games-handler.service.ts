@@ -3,7 +3,7 @@ import { Game } from '@app/classes/game.class';
 import { LetterPlacement } from '@app/classes/letter-placement.class';
 import { GamePlayer } from '@app/classes/player/player.class';
 import { WordSolver } from '@app/classes/word-solver.class';
-import { DictionaryContainer } from '@app/interfaces/dictionaryContainer';
+import { DictionaryContainer } from '@app/interfaces/dictionary-container';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryStorageService } from '@app/services/database/dictionary-storage.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
@@ -11,6 +11,8 @@ import { SocketEvents } from '@common/constants/socket-events';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
 import { Service } from 'typedi';
 import { PlayerInformation } from '@common/interfaces/player-information';
+import { INVALID_INDEX } from '@common/constants/board-info';
+import { PlayerType } from '@common/models/player-type';
 
 @Service()
 export class GamesHandlerService {
@@ -52,11 +54,34 @@ export class GamesHandlerService {
     }
 
     removePlayerFromSocketId(socketId: string): void {
-        this.players = this.players.filter((gamePlayer: GamePlayer) => gamePlayer.player.socketId !== socketId);
+        const player = this.players.find((gamePlayer: GamePlayer) => gamePlayer.player.socketId === socketId);
+        if (!player) return;
+
+        const playerIndex = this.players.findIndex((gamePlayer: GamePlayer) => gamePlayer.player.socketId === socketId);
+        if (playerIndex !== INVALID_INDEX) {
+            this.players.splice(playerIndex, 1);
+        }
+
+        if (
+            this.players.filter(
+                (gamePlayer: GamePlayer) => gamePlayer.player.roomId === player.player.roomId && gamePlayer.player.type === PlayerType.User,
+            ).length === 0
+        ) {
+            this.removeRoomFromRoomId(player.player.roomId);
+        }
     }
 
     removeRoomFromRoomId(roomId: string): void {
-        this.players = this.players.filter((gamePlayer: GamePlayer) => gamePlayer.player.roomId !== roomId);
+        const playerIndexes: number[] = [];
+        this.players.forEach((gamePlayer: GamePlayer, index: number) => {
+            if (gamePlayer.player.roomId === roomId) {
+                playerIndexes.push(index);
+            }
+        });
+        playerIndexes.reverse();
+        playerIndexes.forEach((index: number) => {
+            this.players.slice(index, 1);
+        });
     }
 
     async setDictionaries() {
