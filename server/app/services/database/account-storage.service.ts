@@ -1,8 +1,11 @@
 /* eslint-disable quote-props */
+import { HistoryEvent } from '@common/interfaces/history-event';
 import { ImageInfo } from '@common/interfaces/image-info';
+import { Theme } from '@common/interfaces/theme';
 import { IUser } from '@common/interfaces/user';
+import { HistoryActions } from '@common/models/history-actions';
 import { compare, genSalt, hash } from 'bcrypt';
-import { Document } from 'mongodb';
+import { Document, ObjectId } from 'mongodb';
 import { Service } from 'typedi';
 import { DatabaseService } from './database.service';
 
@@ -19,6 +22,9 @@ export class AccountStorageService {
             password: hashedPassword,
             profilePicture: user.profilePicture as ImageInfo,
             score: DEFAULT_PLAYER_SCORE,
+            historyEventList: [],
+            language: user.language,
+            theme: user.theme,
         };
         await this.database.users.addDocument(newUser);
     }
@@ -35,19 +41,28 @@ export class AccountStorageService {
         return (await this.database.users.collection?.findOne({ username: name })) !== null;
     }
 
+    async isEmailRegistered(email: string): Promise<boolean> {
+        return (await this.database.users.collection.findOne({ email })) !== null;
+    }
+
     async getUserData(username: string): Promise<IUser> {
         const userDocument = (await this.database.users.collection?.findOne({ username })) as Document;
         return userDocument as IUser;
     }
 
-    async getProfilePicInfo(username: string): Promise<ImageInfo> {
-        const userDocument = (await this.database.users.collection?.findOne({ username })) as Document;
+    async getUserDataFromID(id: string): Promise<IUser> {
+        const userDocument = (await this.database.users.collection.findOne({ _id: new ObjectId(id) })) as Document;
+        return userDocument as IUser;
+    }
+
+    async getProfilePicInfoFromID(id: string): Promise<ImageInfo> {
+        const userDocument = (await this.database.users.collection?.findOne({ _id: new ObjectId(id) })) as Document;
         return userDocument.profilePicture as ImageInfo;
     }
 
-    async updateUploadedImage(username: string, imageKey: string, fileName: string): Promise<void> {
+    async updateUploadedImage(id: string, imageKey: string, fileName: string): Promise<void> {
         await this.database.users.collection?.updateOne(
-            { username },
+            { _id: new ObjectId(id) },
             {
                 $set: {
                     'profilePicture.key': imageKey,
@@ -58,9 +73,9 @@ export class AccountStorageService {
         );
     }
 
-    async updateDefaultImage(username: string, fileName: string, imageKey: string): Promise<void> {
+    async updateDefaultImage(id: string, fileName: string, imageKey: string): Promise<void> {
         await this.database.users.collection.updateOne(
-            { username },
+            { _id: new ObjectId(id) },
             {
                 $set: {
                     'profilePicture.isDefaultPicture': true,
@@ -71,28 +86,49 @@ export class AccountStorageService {
         );
     }
 
-    async updateUsername(oldUsername: string, newUsername: string): Promise<void> {
-        await this.database.users.collection.updateOne({ username: oldUsername }, { $set: { username: newUsername } });
+    async updateUsername(id: string, newUsername: string): Promise<void> {
+        await this.database.users.collection.updateOne({ _id: new ObjectId(id) }, { $set: { username: newUsername } });
     }
 
-    // TODO : Change username to userId
     async updateScore(username: string, newScore: number): Promise<void> {
         await this.database.users.collection.updateOne({ username }, { $set: { score: newScore } });
     }
 
-    async isSamePassword(username: string, newPassword: string): Promise<boolean> {
-        const userDocument = (await this.database.users.collection?.findOne({ username })) as IUser | null;
+    async updateLanguage(id: string, newLanguage: 'en' | 'fr'): Promise<void> {
+        await this.database.users.collection.updateOne({ _id: new ObjectId(id) }, { $set: { language: newLanguage } });
+    }
+
+    async updateTheme(id: string, newTheme: Theme): Promise<void> {
+        await this.database.users.collection.updateOne({ _id: new ObjectId(id) }, { $set: { theme: newTheme } });
+    }
+
+    async isSamePassword(id: string, newPassword: string): Promise<boolean> {
+        const userDocument = (await this.database.users.collection?.findOne({ _id: new ObjectId(id) })) as IUser | null;
         return await this.compareHash(newPassword, userDocument?.password as string);
     }
 
-    async updatePassword(username: string, newPassword: string): Promise<void> {
+    async updatePassword(id: string, newPassword: string): Promise<void> {
         const newHashedPassword = await this.generateHash(newPassword);
         await this.database.users.collection.updateOne(
-            { username },
+            { _id: new ObjectId(id) },
             {
                 $set: { password: newHashedPassword },
             },
         );
+    }
+
+    async addUserEventHistory(username: string, userEvent: string, dateEvent: Date): Promise<void> {
+        const historyEvent = this.createHistoryEvent(userEvent, dateEvent);
+        if (historyEvent) {
+            await this.database.users.collection.updateOne({ username }, { $push: { historyEventList: historyEvent } });
+        }
+    }
+
+    async getUserEventHistory(id: string): Promise<HistoryEvent[]> {
+        const projection = { historyEventList: 1, _id: 0 };
+        const historyEventList = await this.database.users.collection.findOne({ _id: new ObjectId(id) }, { projection });
+        if (historyEventList) return historyEventList.historyEventList as HistoryEvent[];
+        return [];
     }
 
     private async generateHash(password: string): Promise<string> {
@@ -103,5 +139,15 @@ export class AccountStorageService {
 
     private async compareHash(password: string, hashed: string): Promise<boolean> {
         return await compare(password, hashed);
+    }
+
+    private createHistoryEvent(userEvent: string, dateEvent: Date, isWinner?: boolean): HistoryEvent | undefined {
+        if (!(userEvent in HistoryActions)) return;
+        const gameWon = userEvent === HistoryActions.Game ? isWinner : null;
+        return {
+            event: userEvent,
+            date: dateEvent,
+            gameWon,
+        } as HistoryEvent;
     }
 }

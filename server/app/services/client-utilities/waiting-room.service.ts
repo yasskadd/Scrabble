@@ -360,7 +360,7 @@ export class WaitingRoomService {
                         isDefaultPicture: true,
                     },
                     score: 0,
-                },
+                } as IUser,
                 socketId: '',
                 roomId,
                 type: PlayerType.Bot,

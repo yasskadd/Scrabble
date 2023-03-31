@@ -1,0 +1,18 @@
+export const defaultImagesMap = new Map([
+    ['default-spongebob', '9e96a2f6-c6f4-4221-bea8-a01f62ba2255default-spongebob.png'],
+    ['default-krabs', '3e912e69-ae07-478c-be6d-e17c361d82c8default-krabs.png'],
+    ['default-patrick', '4b19e0a9-e193-4bdd-b572-dc49d5e94043default-patrick.png'],
+    ['default-starwars1', '531f7533-15e4-4357-b33f-cd8df8406260default-starwars1.jpg'],
+    ['default-starwars2', 'f7ff2799-2c05-4e13-88c5-cedf6572319adefault-starwars2.jpg'],
+    ['default-starwars3', 'bd76aacd-bac8-4e16-81a9-f1506cb871a0default-starwars3.jpg'],
+    ['default-starwars4', '47285d63-4709-4e98-a908-53354ed0169bdefault-starwars4.jpg'],
+    ['default-starwars5', '21d33bbd-9113-4ea1-a7ed-dae351ad57e6default-starwars5.jpg'],
+    ['default-starwars6', '2e21acee-a6ee-4815-8948-8ca5d0552ea0default-starwars6.jpg'],
+    ['default-starwars7', 'a25e9a98-fffb-4da1-9e21-159965bdbe8ddefault-starwars7.jpg'],
+    ['default-starwars8', '04528004-0b4a-4fc5-8438-72f8d7e3ac1edefault-starwars8.jpg'],
+    ['default-starwars9', '8308a05b-e87a-4623-ae4d-d8d67d340aafdefault-starwars9.jpg'],
+    ['default-cat', 'b4d2df7c-dcf4-4888-918e-3ad976dabfa3default-cat.png'],
+    ['default-cat2', '7c0b564f-c1ec-4ca7-9661-315416e26d10default-cat2.jpg'],
+    ['default-cat3', '589732e4-f86d-45d7-a925-b143c7dc5f04default-cat3.jpg'],
+    ['default-cat4', '3a3b0f37-a232-4ce9-b9af-ade0336c3547default-cat4.jpg'],
+]);
