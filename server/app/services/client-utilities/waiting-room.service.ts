@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
 import {
-    ROOM_NOT_AVAILABLE_ERROR,
     ROOMID_LENGTH,
+    ROOM_NOT_AVAILABLE_ERROR,
     SAME_USER_IN_ROOM_ERROR,
     UNAVAILABLE_ELEMENT_INDEX,
     WRONG_ROOM_PASSWORD,
@@ -20,13 +20,13 @@ import { RoomPlayer } from '@common/interfaces/room-player';
 import { IUser } from '@common/interfaces/user';
 import { UserRoomQuery } from '@common/interfaces/user-room-query';
 import { GameDifficulty } from '@common/models/game-difficulty';
+import { GameMode } from '@common/models/game-mode';
+import { GameRoomState } from '@common/models/game-room-state';
 import { GameVisibility } from '@common/models/game-visibility';
 import { PlayerType } from '@common/models/player-type';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import * as uuid from 'uuid';
-import { GameMode } from '@common/models/game-mode';
-import { GameRoomState } from '@common/models/game-room-state';
 
 // const PLAYERS_REJECT_FROM_ROOM_ERROR = "L'adversaire à rejeter votre demande";
 
@@ -127,8 +127,7 @@ export class WaitingRoomService {
     }
 
     private exitWaitingRoom(server: Server, socket: SocketType, userQuery: UserRoomQuery): void {
-        // TODO : Replace player with observer if present
-        // TODO : Replace player with bot if no observers
+        // TODO : Replace player with bot
         const room: GameRoom | undefined = this.getRoom(userQuery.roomId);
         if (!room) return;
 
@@ -264,13 +263,14 @@ export class WaitingRoomService {
         return alreadyConnected;
     }
 
+    // TODO: Replace removed player by a bot ???
     private removePlayerFromGameRoom(socket: Socket, player: RoomPlayer): void {
         const room: GameRoom | undefined = this.getRoom(player.roomId);
         if (!room) return;
 
         const playerIndex: number = room.players.findIndex((playerElement: RoomPlayer) => this.areUsersTheSame(playerElement.user, player.user));
         if (playerIndex === UNAVAILABLE_ELEMENT_INDEX) return;
-        room.players.splice(playerIndex, 1);
+        room.players.splice(playerIndex, 1); // remove player from room;
 
         socket.leave(player.roomId);
         socket.join(GAME_LOBBY_ROOM_ID);
@@ -352,6 +352,7 @@ export class WaitingRoomService {
         botNames.forEach((name: string) => {
             virtualPlayers.push({
                 user: {
+                    _id: uuid.v4(),
                     username: name,
                     password: 'null',
                     profilePicture: {
