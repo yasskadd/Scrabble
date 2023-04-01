@@ -105,6 +105,7 @@ export class GamesActionsService {
         const placement: Word | ErrorType = this.gameValidationService.verifyPlaceWordCommand(gamePlayer, commandInfo);
 
         if (!(placement instanceof Word)) {
+            console.log('Wrong placement: ' + placement);
             socket.emit(SocketEvents.PlacementFailure, placement);
             return;
         }
@@ -112,8 +113,10 @@ export class GamesActionsService {
         const wordPlacementResult = game.letterPlacement.placeWord(placement, commandInfo, gamePlayer, game.gameboard);
 
         // Update rack
-        this.rackService.updatePlayerRack(commandInfo.letters, gamePlayer.rack);
-        game.giveNewLetterToRack(gamePlayer, commandInfo.letters.length, wordPlacementResult);
+        if (wordPlacementResult.hasPassed) {
+            this.rackService.updatePlayerRack(commandInfo.letters, gamePlayer.rack);
+            game.giveNewLetterToRack(gamePlayer, commandInfo.letters.length, wordPlacementResult);
+        }
 
         // Complete turn
         game.concludeGameVerification(gamePlayer);

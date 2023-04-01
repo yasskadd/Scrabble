@@ -25,6 +25,7 @@ export class GameValidationService {
 
         if (!game.turn.validating(player.player.user.username)) return ErrorType.WrongTurn;
 
+        console.log(player.rack);
         if (!this.rackService.areLettersInRack(commandInfo.letters, player)) return ErrorType.LettersNotInRack;
         const validationInfo = game.letterPlacement.verifyWordPlacement(commandInfo, game.gameboard);
 

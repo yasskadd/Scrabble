@@ -174,10 +174,7 @@ export class GameSessions {
         const room = this.getRoom(roomId);
 
         if (room) {
-            await this.gameStateService.createGame(server, room).then(() => {
-                console.log('sending to game page');
-                server.to(roomId).emit(SocketEvents.GameAboutToStart);
-            });
+            await this.gameStateService.createGame(server, room);
             // // TODO : Changed GameScrabbleInformation to simply using GameRoom
             // const users: IUser[] = [];
             // const socketIds: string[] = [];

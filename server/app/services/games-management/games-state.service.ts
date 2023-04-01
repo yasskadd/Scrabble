@@ -74,17 +74,22 @@ export class GamesStateService {
 
         await this.setupGameSubscriptions(room, game);
 
-        // start() that was in Game
         gamePlayers.forEach((player: GamePlayer) => {
             this.gamesHandler.players.push(player);
             game.letterReserve.generateLetters(MAX_QUANTITY, player.rack);
         });
-        // this.gamesHandler.updatePlayersInfo(room.id, game);
 
         game.turn.determineStartingPlayer(gamePlayers);
 
-        console.log('sending view update');
-        this.sendPublicViewUpdate(server, game, room);
+        const playersInfo: PlayerInformation[] = this.gamesHandler.players.map((player: GamePlayer) => {
+            return player.getInformation();
+        });
+
+        server.to(room.id).emit(SocketEvents.GameAboutToStart, {
+            gameboard: game.gameboard.toStringArray(),
+            players: playersInfo,
+            activePlayer: game.turn.activePlayer,
+        } as GameInfo);
         server.to(room.id).emit(SocketEvents.LetterReserveUpdated, game.letterReserve.lettersReserve);
         game.turn.start();
     }
@@ -165,6 +170,7 @@ export class GamesStateService {
             if (!game.turn.activePlayer) {
                 await this.broadcastHighScores(room.players, room.id);
             } else this.changeTurn(room.id);
+            this.sendPublicViewUpdate(game, room);
         });
 
         game.turn.countdown.subscribe((timer: number) => {
@@ -325,12 +331,14 @@ export class GamesStateService {
         });
     }
 
-    private sendPublicViewUpdate(server: Server, game: Game, room: GameRoom) {
+    private sendPublicViewUpdate(game: Game, room: GameRoom) {
         const playersInfo: PlayerInformation[] = this.gamesHandler.players.map((player: GamePlayer) => {
             return player.getInformation();
         });
 
-        server.to(room.id).emit(SocketEvents.PublicViewUpdate, {
+        console.log('Sending view update');
+
+        this.socketManager.emitRoom(room.id, SocketEvents.PublicViewUpdate, {
             gameboard: game.gameboard.toStringArray(),
             players: playersInfo,
             activePlayer: game.turn.activePlayer,
