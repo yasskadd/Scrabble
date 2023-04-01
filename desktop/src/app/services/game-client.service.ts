@@ -28,7 +28,11 @@ export class GameClientService {
     gameboardUpdated: Subject<boolean>;
     turnFinish: ReplaySubject<boolean>;
 
-    constructor(private clientSocketService: ClientSocketService, private userService: UserService) {
+    constructor(
+        private clientSocketService: ClientSocketService,
+        private gameConfigurationService: GameConfigurationService,
+        private userService: UserService,
+    ) {
         this.initGameInformation();
 
         this.gameboardUpdated = new Subject();
@@ -99,7 +103,8 @@ export class GameClientService {
     }
 
     quitGame() {
-        this.clientSocketService.send('quitGame');
+        this.clientSocketService.send(SocketEvents.QuitGame);
+        this.gameConfigurationService.exitWaitingRoom();
     }
 
     initGameInformation() {
@@ -167,11 +172,6 @@ export class GameClientService {
     private viewUpdateEvent(info: GameInfo) {
         this.activePlayer = info.activePlayer;
         this.players = info.players;
-        console.log(
-            this.players.map((player: PlayerInformation) => {
-                return player.player.user;
-            }),
-        );
         this.updateNewGameboard(info.gameboard);
     }
 
@@ -204,7 +204,6 @@ export class GameClientService {
             }
         });
 
-        console.log(resultingRack);
         return resultingRack;
     }
 

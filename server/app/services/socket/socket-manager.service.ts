@@ -1,4 +1,6 @@
 import { SECRET_KEY } from '@app/../very-secret-file';
+import { AccountStorageService } from '@app/services/database/account-storage.service';
+import { HistoryActions } from '@common/models/history-actions';
 import * as cookie from 'cookie';
 import * as http from 'http';
 import * as jwt from 'jsonwebtoken';
@@ -8,19 +10,20 @@ import { CallbackSignature, OnSioCallbackSignature } from '@app/types/sockets';
 
 @Service()
 export class SocketManager {
+    server: io.Server;
+
     private socketUsernameMap: Map<io.Socket, string>;
     private onEvents: Map<string, CallbackSignature[]>;
     private onAndSioEvents: Map<string, OnSioCallbackSignature[]>;
-    private sio: io.Server;
 
-    constructor() {
+    constructor(private accountStorageService: AccountStorageService) {
         this.onEvents = new Map<string, CallbackSignature[]>();
         this.onAndSioEvents = new Map<string, OnSioCallbackSignature[]>();
         this.socketUsernameMap = new Map<io.Socket, string>();
     }
 
     init(server: http.Server) {
-        this.sio = new io.Server(server, { cors: { origin: '*', methods: ['GET', 'POST'] } });
+        this.server = new io.Server(server, { cors: { origin: '*', methods: ['GET', 'POST'] } });
     }
 
     on(event: string, callback: CallbackSignature) {
@@ -50,7 +53,7 @@ export class SocketManager {
     }
 
     emitRoom(room: string, event: string, ...args: unknown[]) {
-        this.sio.to(room).emit(event, ...args);
+        this.server.to(room).emit(event, ...args);
     }
 
     modifyUsername(oldUsername: string, newUsername: string): void {
@@ -63,7 +66,7 @@ export class SocketManager {
     }
 
     handleSockets(): void {
-        this.sio.on('connection', (socket) => {
+        this.server.on('connection', (socket) => {
             if (socket.handshake.headers.cookie) {
                 const cookies = socket.handshake.headers.cookie;
                 // Verify jwt token
@@ -85,6 +88,8 @@ export class SocketManager {
 
                 this.socketUsernameMap.set(socket, username);
 
+                this.accountStorageService.addUserEventHistory(username, HistoryActions.Connection, new Date());
+
                 // eslint-disable-next-line no-console
                 console.log('Connection of authenticated client with id = ' + socket.id + ' from : ' + socket.handshake.headers.host);
             } else {
@@ -101,11 +106,12 @@ export class SocketManager {
 
             for (const [event, callbacks] of this.onAndSioEvents.entries()) {
                 for (const callback of callbacks) {
-                    socket.on(event, (...args: unknown[]) => callback(this.sio, socket, ...args));
+                    socket.on(event, (...args: unknown[]) => callback(this.server, socket, ...args));
                 }
             }
             socket.on('disconnect', () => {
                 if (this.socketUsernameMap.has(socket)) {
+                    this.accountStorageService.addUserEventHistory(this.socketUsernameMap.get(socket) as string, HistoryActions.Logout, new Date());
                     this.socketUsernameMap.delete(socket);
                 }
 

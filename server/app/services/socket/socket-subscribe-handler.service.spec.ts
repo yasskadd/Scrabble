@@ -1,5 +1,5 @@
 import { ChatboxHandlerService } from '@app/services/client-utilities/chatbox-handler.service';
-import { GameSessions } from '@app/services/client-utilities/game-sessions.service';
+import { WaitingRoomService } from '@app/services/client-utilities/waiting-room.service';
 import { GamesActionsService } from '@app/services/games-management/games-actions.service';
 import { GamesStateService } from '@app/services/games-management/games-state.service';
 import { assert } from 'console';
@@ -8,7 +8,7 @@ import { SocketSubscribeHandler } from './socket-subscribe-handler.service';
 
 describe('Socket subscribe handler tests', () => {
     let chatboxHandlerService: SinonStubbedInstance<ChatboxHandlerService>;
-    let gameSessionsHandlerService: SinonStubbedInstance<GameSessions>;
+    let gameSessionsHandlerService: SinonStubbedInstance<WaitingRoomService>;
     let socketSubscribeHandler: SocketSubscribeHandler;
     let gamesActionsService: SinonStubbedInstance<GamesActionsService>;
     let gamesStateService: SinonStubbedInstance<GamesStateService>;
@@ -16,7 +16,7 @@ describe('Socket subscribe handler tests', () => {
     beforeEach(async () => {
         chatboxHandlerService = createStubInstance(ChatboxHandlerService);
         chatboxHandlerService.initSocketsEvents.resolves();
-        gameSessionsHandlerService = createStubInstance(GameSessions);
+        gameSessionsHandlerService = createStubInstance(WaitingRoomService);
         gameSessionsHandlerService.initSocketEvents.resolves();
         gamesActionsService = createStubInstance(GamesActionsService);
         gamesActionsService.initSocketsEvents.resolves();
@@ -24,7 +24,7 @@ describe('Socket subscribe handler tests', () => {
         gamesStateService.initSocketsEvents.resolves();
         socketSubscribeHandler = new SocketSubscribeHandler(
             chatboxHandlerService as unknown as ChatboxHandlerService,
-            gameSessionsHandlerService as unknown as GameSessions,
+            gameSessionsHandlerService as unknown as WaitingRoomService,
             gamesActionsService as unknown as GamesActionsService,
             gamesStateService as unknown as GamesStateService,
         );

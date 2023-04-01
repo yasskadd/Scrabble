@@ -45,6 +45,8 @@ export enum SocketEvents {
     UserDisconnect = 'user disconnect',
     ImportDictionary = 'ImportDictionary',
     SendMessageHome = 'sendMessageHome',
+    JoinAsObserver = 'joinAsObserver',
+    CannotReplaceBot = 'cannotReplaceBot',
     // Client game calls
     PlaceWordCommand = 'placeWord',
     Exchange = 'ExchangeLetters',

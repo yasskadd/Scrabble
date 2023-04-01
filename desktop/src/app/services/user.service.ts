@@ -1,15 +1,15 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
+import { AppRoutes } from '@app/models/app-routes';
+import { AvatarData } from '@common/interfaces/avatar-data';
+import { ImageInfo } from '@common/interfaces/image-info';
 import { IUser } from '@common/interfaces/user';
+import { ImageType } from '@common/models/image-type';
+import { ClientSocketService } from '@services/communication/client-socket.service';
 import { Subject, Subscription } from 'rxjs';
 import { AppCookieService } from './communication/app-cookie.service';
 import { HttpHandlerService } from './communication/http-handler.service';
-import { AvatarData } from '@common/interfaces/avatar-data';
-import { ImageInfo } from '@common/interfaces/image-info';
-import { ImageType } from '@common/models/image-type';
-import { AppRoutes } from '@app/models/app-routes';
-import { Router } from '@angular/router';
-import { ClientSocketService } from '@services/communication/client-socket.service';
 
 @Injectable({
     providedIn: 'root',
@@ -34,9 +34,9 @@ export class UserService {
         const subject = new Subject<string>();
 
         this.httpHandlerService.login(user).subscribe({
-            next: (loginRes: { userData: IUser }) => {
+            next: (loginRes: { userData: IUser; sessionToken: string }) => {
                 this.updateUserWithImageUrl(loginRes.userData);
-                this.cookieService.updateUserSessionCookie();
+                this.cookieService.updateUserSessionCookie(loginRes.sessionToken);
                 subject.next('');
             },
             error: (error: HttpErrorResponse) => {
@@ -71,10 +71,14 @@ export class UserService {
 
     private initUser(): void {
         this.user = {
+            _id: '',
             email: '',
             username: '',
             password: '',
             profilePicture: undefined,
+            historyEventList: [],
+            language: 'fr', // TODO: To change if necessary
+            theme: null, // TODO: to change
         };
     }
 

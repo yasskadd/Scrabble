@@ -1,6 +1,8 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
+import { useTauri } from '@app/pages/app/app.component';
+import { ServerErrors } from '@common/constants/server-errors';
 import { SocketEvents } from '@common/constants/socket-events';
 import { GameRoom } from '@common/interfaces/game-room';
 import { RoomPlayer } from '@common/interfaces/room-player';
@@ -13,24 +15,28 @@ import { SnackBarService } from '@services/snack-bar.service';
 import { UserService } from '@services/user.service';
 import { window as tauriWindow } from '@tauri-apps/api';
 import { TauriEvent } from '@tauri-apps/api/event';
-import { Subject } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
+import { LanguageService } from './language.service';
 
 @Injectable({
     providedIn: 'root',
 })
-export class GameConfigurationService implements OnDestroy {
+export class GameConfigurationService {
     localGameRoom: GameRoom;
     // isGameStarted: Subject<boolean>;
     isRoomJoinable: Subject<boolean>;
     errorReason: string;
     availableRooms: GameRoom[];
 
+    private zone: NgZone;
+
     constructor(
         private snackBarService: SnackBarService,
         private userService: UserService,
         private clientSocket: ClientSocketService,
         private router: Router,
+        private languageService: LanguageService,
     ) {
         this.resetRoomInformations();
         this.availableRooms = [];
@@ -41,7 +47,7 @@ export class GameConfigurationService implements OnDestroy {
 
         // TODO : Move this somewhere more logic
         // eslint-disable-next-line no-underscore-dangle
-        if (window.__TAURI_IPC__) {
+        if (useTauri) {
             tauriWindow
                 .getCurrent()
                 .listen(TauriEvent.WINDOW_CLOSE_REQUESTED, () => {
@@ -68,7 +74,13 @@ export class GameConfigurationService implements OnDestroy {
         });
 
         this.clientSocket.on(SocketEvents.GameAboutToStart, () => {
-            this.router.navigate([AppRoutes.GamePage]).then();
+            if (useTauri) {
+                this.zone.run(() => {
+                    this.router.navigate([`${AppRoutes.GamePage}`]).then();
+                });
+            } else {
+                this.router.navigate([`${AppRoutes.GamePage}`]).then();
+            }
         });
 
         this.clientSocket.on(SocketEvents.PlayerJoinedWaitingRoom, (opponent: RoomPlayer) => {
@@ -83,21 +95,25 @@ export class GameConfigurationService implements OnDestroy {
             this.availableRooms = gamesToJoin;
         });
 
-        this.clientSocket.on(SocketEvents.ErrorJoining, (reason: string) => {
+        this.clientSocket.on(SocketEvents.ErrorJoining, (reason: ServerErrors) => {
             if (reason) {
-                this.snackBarService.openError(reason);
+                this.parseError(reason).subscribe((error: string) => this.snackBarService.openError(error));
             }
             this.exitWaitingRoom();
         });
     }
 
-    ngOnDestroy() {
-        // if (this.localGameRoom) {
-        //     this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
-        //         roomId: this.localGameRoom.id,
-        //         user: this.userService.user,
-        //     } as UserRoomQuery);
-        // }
+    parseError(error: ServerErrors): Observable<string> {
+        switch (error) {
+            case ServerErrors.RoomNotAvailable:
+                return this.languageService.getWord('error.rooms.not_available');
+            case ServerErrors.RoomSameUser:
+                return this.languageService.getWord('error.rooms.same_user');
+            case ServerErrors.RoomWrongPassword:
+                return this.languageService.getWord('error.rooms.wrong_password');
+            default:
+                return of('Error'); // Maybe change?
+        }
     }
 
     rejectOpponent(player: RoomPlayer): void {

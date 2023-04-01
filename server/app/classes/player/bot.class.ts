@@ -8,6 +8,7 @@ import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { RoomPlayer } from '@common/interfaces/room-player';
 import { Container } from 'typedi';
 import { GamePlayer } from './player.class';
+import { RealPlayer } from './real-player.class';
 
 export class Bot extends GamePlayer {
     protected countUp: number = 0;
@@ -49,9 +50,24 @@ export class Bot extends GamePlayer {
 
     skipTurn(): void {
         if (this.game === undefined || this.isNotTurn) return;
-        console.log('Bot ' + this.player.user.username + ' is skipping his turn');
         this.game.skip(this.player.user.username);
         this.isNotTurn = true;
+    }
+
+    convertToRealPlayer(observer: RoomPlayer): RealPlayer {
+        const player = new RealPlayer(observer);
+        player.game = this.game;
+        player.rack = this.rack;
+        player.score = this.score;
+        player.objectives = this.objectives;
+        player.fiveLettersPlacedCount = this.fiveLettersPlacedCount;
+        player.clueCommandUseCount = this.clueCommandUseCount;
+        return player;
+    }
+
+    unsubscribeObservables(): void {
+        this.game.turn.countdown.unsubscribe();
+        this.game.turn.endTurn.unsubscribe();
     }
 
     protected placeWord(commandInfo: PlaceWordCommandInfo): void {
@@ -59,7 +75,6 @@ export class Bot extends GamePlayer {
             this.skipTurn();
             return;
         }
-        console.log('Bot ' + this.player.user.username + ' is placing word ' + commandInfo.letters);
         this.emitPlaceCommand(commandInfo);
         this.isNotTurn = true;
     }

@@ -1,8 +1,10 @@
 import { Game } from '@app/classes/game.class';
+import { BotInformation } from '@app/interfaces/bot-information';
 import { Letter } from '@common/interfaces/letter';
 import { Objective } from '@common/interfaces/objective';
 import { PlayerInformation } from '@common/interfaces/player-information';
 import { RoomPlayer } from '@common/interfaces/room-player';
+import { BeginnerBot } from './beginner-bot.class';
 
 export class GamePlayer {
     rack: Letter[];
@@ -60,5 +62,20 @@ export class GamePlayer {
             pointsToAdd += letter.points;
         }
         this.score += pointsToAdd;
+    }
+
+    convertPlayerToBot(): BeginnerBot {
+        const botInfo: BotInformation = {
+            timer: this.game.turn.time,
+            roomId: this.player.roomId,
+            dictionaryValidation: this.game.dictionaryValidation,
+        };
+        const bot = new BeginnerBot(this.player, botInfo); // Where is isPlayerOne in GamePlayer class ?
+        bot.rack = this.rack;
+        bot.score = this.score;
+        bot.objectives = this.objectives;
+        bot.fiveLettersPlacedCount = this.fiveLettersPlacedCount;
+        bot.clueCommandUseCount = this.clueCommandUseCount;
+        return bot;
     }
 }
