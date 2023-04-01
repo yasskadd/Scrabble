@@ -10,23 +10,35 @@ import { Service } from 'typedi';
 import { DatabaseService } from './database.service';
 
 const DEFAULT_PLAYER_SCORE = 1000;
+const DEFAULT_PLAYER_STATS = 0;
 @Service()
 export class AccountStorageService {
     constructor(private database: DatabaseService) {}
 
     async addNewUser(user: Document): Promise<void> {
         const hashedPassword = await this.generateHash(user.password);
+        const id = new ObjectId();
         const newUser = {
+            _id: id,
             email: user.email,
             username: user.username,
             password: hashedPassword,
             profilePicture: user.profilePicture as ImageInfo,
-            score: DEFAULT_PLAYER_SCORE,
             historyEventList: [],
             language: user.language,
             theme: user.theme,
         };
+        const userStats = {
+            userIdRef: id,
+            score: DEFAULT_PLAYER_SCORE,
+            gamePlayed: DEFAULT_PLAYER_STATS,
+            win: DEFAULT_PLAYER_STATS,
+            loss: DEFAULT_PLAYER_STATS,
+            totalDuration: DEFAULT_PLAYER_STATS,
+            gameScore: DEFAULT_PLAYER_STATS,
+        };
         await this.database.users.addDocument(newUser);
+        await this.database.usersStats.addDocument(userStats);
     }
 
     async loginValidator(user: IUser): Promise<boolean> {
