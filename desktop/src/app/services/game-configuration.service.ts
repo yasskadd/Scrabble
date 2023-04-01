@@ -2,6 +2,7 @@ import { Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { useTauri } from '@app/pages/app/app.component';
+import { ServerErrors } from '@common/constants/server-errors';
 import { SocketEvents } from '@common/constants/socket-events';
 import { GameRoom } from '@common/interfaces/game-room';
 import { RoomPlayer } from '@common/interfaces/room-player';
@@ -14,8 +15,9 @@ import { SnackBarService } from '@services/snack-bar.service';
 import { UserService } from '@services/user.service';
 import { window as tauriWindow } from '@tauri-apps/api';
 import { TauriEvent } from '@tauri-apps/api/event';
-import { Subject } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
+import { LanguageService } from './language.service';
 
 @Injectable({
     providedIn: 'root',
@@ -34,6 +36,7 @@ export class GameConfigurationService {
         private userService: UserService,
         private clientSocket: ClientSocketService,
         private router: Router,
+        private languageService: LanguageService,
     ) {
         this.resetRoomInformations();
         this.availableRooms = [];
@@ -96,12 +99,25 @@ export class GameConfigurationService {
             this.availableRooms = gamesToJoin;
         });
 
-        this.clientSocket.on(SocketEvents.ErrorJoining, (reason: string) => {
+        this.clientSocket.on(SocketEvents.ErrorJoining, (reason: ServerErrors) => {
             if (reason) {
-                this.snackBarService.openError(reason);
+                this.parseError(reason).subscribe((error: string) => this.snackBarService.openError(error));
             }
             this.exitWaitingRoom();
         });
+    }
+
+    parseError(error: ServerErrors): Observable<string> {
+        switch (error) {
+            case ServerErrors.RoomNotAvailable:
+                return this.languageService.getWord('error.rooms.not_available');
+            case ServerErrors.RoomSameUser:
+                return this.languageService.getWord('error.rooms.same_user');
+            case ServerErrors.RoomWrongPassword:
+                return this.languageService.getWord('error.rooms.wrong_password');
+            default:
+                return of('Error'); // Maybe change?
+        }
     }
 
     rejectOpponent(player: RoomPlayer): void {
