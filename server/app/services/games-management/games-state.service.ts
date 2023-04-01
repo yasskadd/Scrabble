@@ -434,9 +434,7 @@ export class GamesStateService {
 
     private async savePlayersScore(roomId: string) {
         const playersInRoom = this.gamesHandler.getPlayersFromRoomId(roomId);
-        const winnerPlayer = playersInRoom.reduce((acc, cur) => {
-            return cur.score > acc.score ? cur : acc;
-        });
+        const winnerPlayer = this.getWinnerPlayer(playersInRoom);
         playersInRoom.forEach(async (player) => {
             if (player.player.type !== PlayerType.User) return;
             let newScore: number;
@@ -445,6 +443,13 @@ export class GamesStateService {
             } else newScore = this.playerScore.calculateScore(player.score as number, false);
             await this.accountStorage.updateScore(player.player.user._id, newScore);
         });
+    }
+
+    private getWinnerPlayer(players: GamePlayer[]): GamePlayer {
+        const winnerPlayer = players.reduce((acc, cur) => {
+            return cur.score > acc.score ? cur : acc;
+        });
+        return winnerPlayer;
     }
 
     private sendPublicViewUpdate(server: Server, game: Game, room: GameRoom) {
