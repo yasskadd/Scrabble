@@ -43,12 +43,9 @@ export class GameConfigurationService {
 
         this.isRoomJoinable = new Subject<boolean>();
         // this.isGameStarted = new Subject<boolean>();
-        this.clientSocket.connected.subscribe((connected: boolean) => {
-            if (connected) {
-                this.configureBaseSocketFeatures();
-            }
-        });
+        this.configureBaseSocketFeatures();
 
+        // TODO : Move this somewhere more logic
         // eslint-disable-next-line no-underscore-dangle
         if (useTauri) {
             tauriWindow
@@ -60,7 +57,6 @@ export class GameConfigurationService {
                             roomId: this.localGameRoom.id,
                             user: this.userService.user,
                         } as UserRoomQuery);
-                        this.clientSocket.disconnect();
                     }
                     tauriWindow.getCurrent().close().then();
                 })

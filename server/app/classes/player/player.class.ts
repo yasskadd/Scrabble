@@ -29,7 +29,6 @@ export class GamePlayer {
             player: this.player,
             score: this.score,
             rack: this.rack,
-            gameboard: this.game.gameboard.toStringArray(),
         };
     }
 
@@ -71,7 +70,7 @@ export class GamePlayer {
             roomId: this.player.roomId,
             dictionaryValidation: this.game.dictionaryValidation,
         };
-        const bot = new BeginnerBot(true, this.player, botInfo); // Where is isPlayerOne in GamePlayer class ?
+        const bot = new BeginnerBot(this.player, botInfo); // Where is isPlayerOne in GamePlayer class ?
         bot.rack = this.rack;
         bot.score = this.score;
         bot.objectives = this.objectives;

@@ -176,11 +176,7 @@ export class WaitingRoomService {
         const room: GameRoom | undefined = this.getRoom(roomId);
         if (!room) return;
 
-        await this.gameStateService.createGame(server, room).then(() => {
-            this.socketManager.emitRoom(roomId, SocketEvents.GameAboutToStart);
-            // server.to(roomId).emit(SocketEvents.GameAboutToStart);
-        });
-
+        await this.gameStateService.createGame(server, room);
         // // TODO : Changed GameScrabbleInformation to simply using GameRoom
         // const users: IUser[] = [];
         // const socketIds: string[] = [];
