@@ -12,6 +12,7 @@
     <mat-expansion-panel-header>
         <mat-panel-title>
             <div>[{{ gameHistory.endTime | date : "MM/dd/yyyy, h:mm a" }}]</div>
+            <!-- TODO: Change to new interface -->
             <!-- <div>{{ gameHistory.firstPlayerName }} vs. {{ gameHistory.secondPlayerName }}</div> -->
             <div>
                 <mat-panel-description *ngIf="gameHistory.abandoned"> {{ "game.state.abandoned" | translate }} </mat-panel-description>
@@ -30,6 +31,7 @@
     <p>
         <b> {{ "game.history.time" | translate }} :</b> {{ gameHistory.duration }}
     </p>
+    <!-- TODO: Change to new interface -->
     <!-- <p>
         <b> {{ "game.history.first_player" | translate }} :</b> {{ gameHistory.firstPlayerName }}
     </p>
