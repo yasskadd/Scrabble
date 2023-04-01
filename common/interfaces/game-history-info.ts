@@ -1,11 +1,11 @@
 export interface GameHistoryInfo {
+    roomId: string;
     mode: string;
+    playerWonGame: boolean;
     abandoned: boolean;
     beginningTime: Date;
     endTime: Date;
     duration: string;
-    firstPlayerName: string;
-    firstPlayerScore: number;
-    secondPlayerName: string;
-    secondPlayerScore: number;
+    playerId: string;
+    playerScore: number;
 }
