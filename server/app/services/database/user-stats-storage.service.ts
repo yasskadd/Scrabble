@@ -1,13 +1,19 @@
 /* eslint-disable quote-props */
 import { LOSS_SCORE, MAX_SCORE, MIN_SCORE, WIN_SCORE } from '@app/constants/score';
 import { GameHistoryInfo } from '@common/interfaces/game-history-info';
-import { ObjectId } from 'mongodb';
+import { UserStats } from '@common/interfaces/user-stats';
+import { Document, ObjectId } from 'mongodb';
 import { Service } from 'typedi';
 import { DatabaseService } from './database.service';
 
 @Service()
 export class UsersStatsStorageService {
     constructor(private database: DatabaseService) {}
+
+    async getUserStats(id: string): Promise<UserStats> {
+        const userStats = (await this.database.usersStats.fetchDocuments({ _id: new ObjectId(id) })) as Document;
+        return userStats as UserStats;
+    }
 
     async updatePlayerStats(gameHistoryInfo: GameHistoryInfo): Promise<void> {
         await this.updateScore(gameHistoryInfo);
