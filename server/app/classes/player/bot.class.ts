@@ -5,9 +5,10 @@ import { BotInformation } from '@app/interfaces/bot-information';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
 import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
+import { RoomPlayer } from '@common/interfaces/room-player';
 import { Container } from 'typedi';
 import { GamePlayer } from './player.class';
-import { RoomPlayer } from '@common/interfaces/room-player';
+import { RealPlayer } from './real-player.class';
 
 export class Bot extends GamePlayer {
     protected countUp: number = 0;
@@ -52,6 +53,22 @@ export class Bot extends GamePlayer {
         this.socketManager.emitRoom(this.botInfo.roomId, SocketEvents.GameMessage, '!passer');
         this.game.skip(this.player.user.username);
         this.isNotTurn = true;
+    }
+
+    convertToRealPlayer(observer: RoomPlayer): RealPlayer {
+        const player = new RealPlayer(observer);
+        player.game = this.game;
+        player.rack = this.rack;
+        player.score = this.score;
+        player.objectives = this.objectives;
+        player.fiveLettersPlacedCount = this.fiveLettersPlacedCount;
+        player.clueCommandUseCount = this.clueCommandUseCount;
+        return player;
+    }
+
+    unsubscribeObservables(): void {
+        this.game.turn.countdown.unsubscribe();
+        this.game.turn.endTurn.unsubscribe();
     }
 
     protected play(commandInfo: PlaceWordCommandInfo): void {

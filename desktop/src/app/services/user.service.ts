@@ -71,6 +71,7 @@ export class UserService {
 
     private initUser(): void {
         this.user = {
+            _id: '',
             email: '',
             username: '',
             password: '',
