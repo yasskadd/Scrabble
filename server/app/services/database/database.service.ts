@@ -8,6 +8,7 @@ export class DatabaseService {
     virtualNames: DatabaseCollection;
     dictionaries: DatabaseCollection;
     users: DatabaseCollection;
+    usersStats: DatabaseCollection;
 
     constructor() {
         this.histories = new DatabaseCollection('Histories');
@@ -15,6 +16,7 @@ export class DatabaseService {
         this.virtualNames = new DatabaseCollection('VirtualNames');
         this.dictionaries = new DatabaseCollection('Dictionary');
         this.users = new DatabaseCollection('Users');
+        this.usersStats = new DatabaseCollection('UsersStats');
     }
 
     async connect() {
@@ -23,5 +25,6 @@ export class DatabaseService {
         await this.virtualNames.connect();
         await this.histories.connect();
         await this.users.connect();
+        await this.usersStats.connect();
     }
 }
