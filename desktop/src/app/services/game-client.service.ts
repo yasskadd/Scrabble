@@ -8,6 +8,7 @@ import { IUser } from '@common/interfaces/user';
 import { UserService } from '@services/user.service';
 import { ReplaySubject, Subject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
+import { GameConfigurationService } from './game-configuration.service';
 
 // type CompletedObjective = { objective: Objective; name: string };
 // type InitObjective = { objectives1: Objective[]; objectives2: Objective[]; playerName: string };
