@@ -16,7 +16,7 @@ export class AccountStorageService {
 
     async addNewUser(user: Document): Promise<void> {
         const hashedPassword = await this.generateHash(user.password);
-        const newUser: IUser = {
+        const newUser = {
             email: user.email,
             username: user.username,
             password: hashedPassword,

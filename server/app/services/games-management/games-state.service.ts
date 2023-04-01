@@ -1,3 +1,5 @@
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable no-console */
 /* eslint-disable max-lines */
 import { DictionaryValidation } from '@app/classes/dictionary-validation.class';
 import { Game } from '@app/classes/game.class';
@@ -35,6 +37,7 @@ const SECOND = 1000;
 const SECOND_IN_MILLISECOND = 1000;
 const SECOND_AND_MINUTE_MAX_VALUE = 60;
 const MINIMUM_TWO_UNITS = 10;
+const ERROR_REPLACING_BOT = 'Error trying to replace the bot';
 
 @Service()
 export class GamesStateService {
@@ -67,6 +70,9 @@ export class GamesStateService {
         });
         this.socketManager.on(SocketEvents.QuitGame, (socket: Socket) => {
             this.disconnect(socket);
+        });
+        this.socketManager.on(SocketEvents.JoinAsObserver, (socket: Socket, botID: string) => {
+            this.joinAsObserver(socket, botID);
         });
     }
 
@@ -259,12 +265,22 @@ export class GamesStateService {
         this.gamesHandler.removePlayerFromSocketId(socket.id);
 
         socket.leave(gamePlayer.player.roomId);
-        if (!gamePlayer.game.isModeSolo) {
+        if (
+            !gamePlayer.game.isModeSolo &&
+            this.gamesHandler.getPlayersFromRoomId(gamePlayer.player.roomId).filter((player) => player.player.type === PlayerType.User).length > 0
+        ) {
             this.socketManager.emitRoom(room, SocketEvents.UserDisconnect);
             // TODO : Repair and make that better for 4 players and bots
             // this.switchToSolo(gamePlayer).then();
+            const player = this.gamesHandler.players.find((realPlayer) => realPlayer.player.socketId === socket.id);
+            if (player) {
+                const bot = this.replacePlayerWithBot(player as RealPlayer);
+                this.gamesHandler.players.push(bot);
+            }
+            // TODO: Update room
             return;
         }
+        // TODO: What to do if there are still observers in game ?
 
         gamePlayer.game.abandon();
         this.gameEnded.next(gamePlayer.player.roomId);
@@ -352,6 +368,13 @@ export class GamesStateService {
         if (!gamePlayer) return;
 
         if (this.gamesHandler.getPlayersFromRoomId(gamePlayer.player.roomId).length > 0 && !gamePlayer.game.isGameFinish) {
+            const player = this.gamesHandler.players.find((realPlayer) => realPlayer.player.socketId === socket.id);
+            if (player) {
+                const bot = this.replacePlayerWithBot(player as RealPlayer);
+                this.gamesHandler.removePlayerFromSocketId(socket.id);
+                this.gamesHandler.players.push(bot);
+                // TODO: Update room that a new bot has replaced the player
+            }
             this.waitBeforeDisconnect(socket);
             return;
         }
@@ -472,4 +495,43 @@ export class GamesStateService {
 
         return (minutes < MINIMUM_TWO_UNITS ? '0' + minutes : minutes) + ':' + (seconds < MINIMUM_TWO_UNITS ? '0' + seconds : seconds);
     }
+
+    private joinAsObserver(socket: Socket, botID: string): void {
+        const socketID = socket.id;
+        const observer = this.gamesHandler.getPlayerFromSocketId(socketID) as GamePlayer;
+        if (!observer) return;
+
+        // const roomID = observer?.player.roomId;
+        const bot = this.gamesHandler.players.find((player) => player.player.user._id === botID);
+        if (!bot) {
+            // TODO: Socket event to notify observer he cannot replace bot
+            socket.emit(SocketEvents.CannotReplaceBot, ERROR_REPLACING_BOT);
+            return;
+        }
+
+        const newPlayer = this.replaceBotWithObserver(observer.player, bot as Bot);
+        // Update gamesHandler player list
+        this.gamesHandler.players = this.gamesHandler.players.filter(
+            (player) => player.player.user._id !== observer.player.user._id || player.player.user._id !== bot?.player.user._id,
+        );
+        this.gamesHandler.players.push(newPlayer);
+
+        // TODO: Update room with roomID
+    }
+
+    private replaceBotWithObserver(observer: RoomPlayer, bot: Bot) {
+        bot.unsubscribeObservables();
+        const player = bot.convertToRealPlayer(observer);
+        return player;
+    }
+
+    private replacePlayerWithBot(player: RealPlayer): BeginnerBot {
+        const bot = player.convertPlayerToBot();
+        bot.setGame(player.game);
+        bot.start();
+        return bot;
+    }
+    // Replace observer and bot in list by observer
+    // Add Socket event to let observer join the room (need to verify if its possible to join or not)
+    // Need method to update all room clients that an observer has joined
 }
