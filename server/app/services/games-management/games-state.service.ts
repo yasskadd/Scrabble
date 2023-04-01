@@ -421,7 +421,7 @@ export class GamesStateService {
                 newScore = this.playerScore.calculateScore(player.score, true);
             } else newScore = this.playerScore.calculateScore(player.score as number, false);
             // TODO : Change layer.player.user.username to userId instead
-            await this.accountStorage.updateScore(player.player.user.username, newScore);
+            await this.accountStorage.updateScore(player.player.user., newScore);
         });
     }
 

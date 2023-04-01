@@ -90,8 +90,8 @@ export class AccountStorageService {
         await this.database.users.collection.updateOne({ _id: new ObjectId(id) }, { $set: { username: newUsername } });
     }
 
-    async updateScore(username: string, newScore: number): Promise<void> {
-        await this.database.users.collection.updateOne({ username }, { $set: { score: newScore } });
+    async updateScore(id: string, newScore: number): Promise<void> {
+        await this.database.users.collection.updateOne({ _id: new ObjectId(id) }, { $set: { score: newScore } });
     }
 
     async updateLanguage(id: string, newLanguage: 'en' | 'fr'): Promise<void> {
