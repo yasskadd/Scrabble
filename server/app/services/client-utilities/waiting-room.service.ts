@@ -122,8 +122,7 @@ export class WaitingRoomService {
     }
 
     private exitWaitingRoom(server: Server, socket: SocketType, userQuery: UserRoomQuery): void {
-        // TODO : Replace player with observer if present
-        // TODO : Replace player with bot if no observers
+        // TODO : Replace player with bot
         const room: GameRoom | undefined = this.getRoom(userQuery.roomId);
         if (!room) return;
 
@@ -259,13 +258,14 @@ export class WaitingRoomService {
         return alreadyConnected;
     }
 
+    // TODO: Replace removed player by a bot ???
     private removePlayerFromGameRoom(socket: Socket, player: RoomPlayer): void {
         const room: GameRoom | undefined = this.getRoom(player.roomId);
         if (!room) return;
 
         const playerIndex: number = room.players.findIndex((playerElement: RoomPlayer) => this.areUsersTheSame(playerElement.user, player.user));
         if (playerIndex === UNAVAILABLE_ELEMENT_INDEX) return;
-        room.players.splice(playerIndex, 1);
+        room.players.splice(playerIndex, 1); // remove player from room;
 
         socket.leave(player.roomId);
         socket.join(GAME_LOBBY_ROOM_ID);
@@ -347,13 +347,14 @@ export class WaitingRoomService {
         botNames.forEach((name: string) => {
             virtualPlayers.push({
                 user: {
+                    _id: uuid.v4(),
                     username: name,
                     password: 'null',
                     profilePicture: {
                         name: 'bot-image',
                         isDefaultPicture: true,
                     },
-                },
+                } as IUser,
                 socketId: '',
                 roomId,
                 type: PlayerType.Bot,

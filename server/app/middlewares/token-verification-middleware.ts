@@ -13,7 +13,7 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction) => 
     }
     jwt.verify(token, SECRET_KEY, (err: jwt.VerifyErrors, decoded: any) => {
         if (err) return res.sendStatus(FORBIDDEN);
-        res.locals.user = decoded;
+        res.locals.user = decoded; // TOKEN PAYLOAD : { userID: string }
         next();
         return;
     });
