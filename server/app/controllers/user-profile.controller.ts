@@ -1,5 +1,6 @@
 import { verifyToken } from '@app/middlewares/token-verification-middleware';
 import { AccountStorageService } from '@app/services/database/account-storage.service';
+import { UserStatsStorageService } from '@app/services/database/user-stats-storage.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { HistoryEvent } from '@common/interfaces/history-event';
 import { Theme } from '@common/interfaces/theme';
@@ -12,7 +13,11 @@ import { Service } from 'typedi';
 export class UserProfileController {
     router: Router;
 
-    constructor(private accountStorageService: AccountStorageService, private socketManager: SocketManager) {
+    constructor(
+        private accountStorageService: AccountStorageService,
+        private userStatsStorageService: UserStatsStorageService,
+        private socketManager: SocketManager,
+    ) {
         this.configureRouter();
     }
 
@@ -108,6 +113,12 @@ export class UserProfileController {
             const newTheme: Theme = req.body.theme;
             await this.accountStorageService.updateTheme(userID, newTheme);
             res.sendStatus(StatusCodes.OK);
+        });
+
+        this.router.get('/stats', async (req: Request, res: Response) => {
+            const userID: string = res.locals.user.userID;
+            const userStats = await this.userStatsStorageService.getUserStats(userID);
+            res.status(StatusCodes.OK).json(userStats);
         });
     }
 }

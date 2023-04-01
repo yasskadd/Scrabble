@@ -7,7 +7,7 @@ import { Service } from 'typedi';
 import { DatabaseService } from './database.service';
 
 @Service()
-export class UsersStatsStorageService {
+export class UserStatsStorageService {
     constructor(private database: DatabaseService) {}
 
     async getUserStats(id: string): Promise<UserStats> {
