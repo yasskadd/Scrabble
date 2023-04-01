@@ -161,6 +161,11 @@
             "connection_failed": "La connection au socket a échouée.",
             "disconnection_failed": "La déconnection du socket a échouée.",
             "send_failed": "L'envoi au socket a échoué."
+        },
+        "rooms": {
+            "not_available": "La salle n'est pas disponible",
+            "wrong_password": "Le mot de passe pour la salle est erronée",
+            "same_user": "L'adversaire a le même nom"
         }
     },
     "event": {
