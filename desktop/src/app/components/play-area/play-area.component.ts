@@ -22,6 +22,7 @@ export class PlayAreaComponent {
     keyboardParentSubject: Subject<KeyboardEvent>;
     mousePosition: Vec2;
     protected sliderForm: FormControl;
+    protected chatIsOpen: boolean;
 
     constructor(
         private readonly gridService: GridService,
@@ -31,6 +32,7 @@ export class PlayAreaComponent {
         this.sliderForm = new FormControl(this.gridService.letterSize);
         this.keyboardParentSubject = new Subject();
         this.mousePosition = { x: 0, y: 0 };
+        this.chatIsOpen = false;
 
         // this.sliderForm.valueChanges.subscribe(() => {
         //     this.updateFontSize();
@@ -67,6 +69,14 @@ export class PlayAreaComponent {
             }
         }
         this.keyboardParentSubject.next(event);
+    }
+
+    openChat() {
+        this.chatIsOpen = true;
+    }
+
+    closeChat() {
+        this.chatIsOpen = false;
     }
 
     updateFontSize(): void {
