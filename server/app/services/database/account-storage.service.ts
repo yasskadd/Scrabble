@@ -34,10 +34,10 @@ export class AccountStorageService {
             gamePlayed: DEFAULT_PLAYER_STATS,
             win: DEFAULT_PLAYER_STATS,
             loss: DEFAULT_PLAYER_STATS,
-            totalDuration: DEFAULT_PLAYER_STATS,
-            totalGamePoints: DEFAULT_PLAYER_STATS,
-            averageGameTime: DEFAULT_PLAYER_STATS,
-            averageGamePoints: DEFAULT_PLAYER_STATS,
+            totalGameTime: DEFAULT_PLAYER_STATS,
+            totalGameScore: DEFAULT_PLAYER_STATS,
+            averageGameTime: '',
+            averageGameScore: DEFAULT_PLAYER_STATS,
         };
         await this.database.users.addDocument(newUser);
         await this.database.usersStats.addDocument(userStats);

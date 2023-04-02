@@ -6,6 +6,6 @@ export interface UserStats {
     loss: number;
     totalGameTime: number;
     totalGameScore: number;
-    averageGameTime: number;
+    averageGameTime: string;
     averageGameScore: number;
 }
