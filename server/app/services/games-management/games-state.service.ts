@@ -13,6 +13,7 @@ import { ScoreRelatedBot } from '@app/classes/player/score-related-bot.class';
 import { Turn } from '@app/classes/turn.class';
 import { MAX_QUANTITY } from '@app/constants/letter-reserve';
 import { DictionaryContainer } from '@app/interfaces/dictionary-container';
+import { AccountStorageService } from '@app/services/database/account-storage.service';
 import { HistoryStorageService } from '@app/services/database/history-storage.service';
 import { ScoreStorageService } from '@app/services/database/score-storage.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
@@ -24,11 +25,11 @@ import { PlayerInformation } from '@common/interfaces/player-information';
 import { RoomPlayer } from '@common/interfaces/room-player';
 import { GameDifficulty } from '@common/models/game-difficulty';
 import { GameMode } from '@common/models/game-mode';
+import { HistoryActions } from '@common/models/history-actions';
 import { PlayerType } from '@common/models/player-type';
 import { Subject } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
-import { AccountStorageService } from '../database/account-storage.service';
 import { GamesHandlerService } from './games-handler.service';
 
 const MAX_SKIP = 6;
@@ -514,7 +515,11 @@ export class GamesStateService {
         return bot;
     }
 
-    private addGameEventHistory(player: RealPlayer, gameWon: boolean) {}
+    private addGameEventHistory(player: RealPlayer, gameWon: boolean) {
+        const username = player.player.user.username;
+        const gameDate = player.game.beginningTime;
+        this.accountStorage.addUserEventHistory(username, HistoryActions.Game, gameDate, gameWon);
+    }
     // Replace observer and bot in list by observer
     // Add Socket event to let observer join the room (need to verify if its possible to join or not)
     // Need method to update all room clients that an observer has joined
