@@ -4,10 +4,10 @@
     </b>
 
     <mat-drawer-container>
-        <div class="always-visible-content">
+        <div class="always-visible">
             <app-information-panel></app-information-panel>
 
-            <div cdkDropListGroup>
+            <div class="middle" cdkDropListGroup>
                 <app-game-board></app-game-board>
 
                 <app-player-rack [keyboardParentSubject]="keyboardParentSubject" class="player-rack"></app-player-rack>
