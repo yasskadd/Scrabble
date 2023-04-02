@@ -97,7 +97,7 @@ export class UserCreationPageComponent {
                     this.connectionError = '';
 
                     if (!isDefaultPicture) {
-                        this.httpHandlerService.sendProfilePicture(this.profilePicForm.value as AvatarData, res.imageKey).subscribe();
+                        this.httpHandlerService.sendProfilePicture(this.profilePicForm.value as AvatarData, res.imageKey);
                     }
 
                     this.router.navigate([AppRoutes.HomePage]).then();

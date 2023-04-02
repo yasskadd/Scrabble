@@ -7,7 +7,7 @@ import { ImageInfo } from '@common/interfaces/image-info';
 import { IUser } from '@common/interfaces/user';
 import { ImageType } from '@common/models/image-type';
 import { ClientSocketService } from '@services/communication/client-socket.service';
-import { Subject, Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
 import { AppCookieService } from './communication/app-cookie.service';
 import { HttpHandlerService } from './communication/http-handler.service';
 
@@ -35,6 +35,8 @@ export class UserService {
 
         this.httpHandlerService.login(user).then(
             (loginRes: { userData: IUser; sessionToken: string }) => {
+                console.log(loginRes.sessionToken);
+
                 this.updateUserWithImageUrl(loginRes.userData);
                 this.cookieService.updateUserSessionCookie(loginRes.sessionToken);
                 subject.next('');
@@ -51,7 +53,7 @@ export class UserService {
     }
 
     logout(): void {
-        this.httpHandlerService.logout().subscribe(() => {
+        this.httpHandlerService.logout().then(() => {
             this.initUser();
             this.cookieService.removeSessionCookie();
             this.clientSocketService.disconnect();
@@ -59,10 +61,10 @@ export class UserService {
         });
     }
 
-    submitNewProfilePic(avatarData: AvatarData): Subscription {
+    async submitNewProfilePic(avatarData: AvatarData): Promise<boolean> {
         return this.httpHandlerService
             .modifyProfilePicture(avatarData, this.avatarDataToImageInfo(avatarData).isDefaultPicture)
-            .subscribe((data: { userData: IUser }) => {
+            .then((data: { userData: IUser }) => {
                 if (data.userData) {
                     this.updateUserWithImageUrl(data.userData);
                     return true;
@@ -101,7 +103,7 @@ export class UserService {
 
     private updateUserWithImageUrl(user: IUser): void {
         if (user.profilePicture.isDefaultPicture) {
-            this.httpHandlerService.getDefaultImages().subscribe((map: Map<string, string[]>) => {
+            this.httpHandlerService.getDefaultImages().then((map: Map<string, string[]>) => {
                 // Set url in userData for local access to the default image
                 // (yes we download all of the keys, but it's easier like that)
                 Object.entries(map).forEach((entry: [string, string[]]) => {
@@ -111,7 +113,7 @@ export class UserService {
                 });
             });
         } else {
-            this.httpHandlerService.getProfilePicture().subscribe((res: { url: string }) => {
+            this.httpHandlerService.getProfilePicture().then((res: { url: string }) => {
                 // Set url in userData for local access to the image
                 user.profilePicture.key = res.url;
             });

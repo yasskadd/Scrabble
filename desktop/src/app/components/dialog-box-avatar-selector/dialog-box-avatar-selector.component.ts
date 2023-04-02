@@ -48,7 +48,7 @@ export class DialogBoxAvatarSelectorComponent {
     private initDefaultImages(): void {
         this.defaultImages = [];
 
-        this.httpHandlerService.getDefaultImages().subscribe((map: Map<string, string[]>) => {
+        this.httpHandlerService.getDefaultImages().then((map: Map<string, string[]>) => {
             Object.entries(map).forEach((entry: [string, string[]]) => {
                 this.defaultImages.push({ type: ImageType.Url, name: entry[0], url: entry[1][0] } as AvatarData);
             });

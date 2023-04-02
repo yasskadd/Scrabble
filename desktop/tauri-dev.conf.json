@@ -5,7 +5,6 @@
         "devPath": "http://localhost:1420",
         "distDir": "../dist",
         "withGlobalTauri": false
-
     },
     "package": {
         "productName": "PolyScrabble - dev",
@@ -30,7 +29,8 @@
                 "open": true
             },
             "fs": {
-                "scope": ["$RESOURCE/*"]
+                "all": true,
+                "scope": ["$RESOURCE/*", "$CACHE/*"]
             }
         },
         "bundle": {
@@ -51,10 +51,7 @@
                 "providerShortName": null,
                 "signingIdentity": null
             },
-            "resources": [
-                "../certs/server.pem",
-                "../certs/server.key"
-            ],
+            "resources": ["../certs/server.pem", "../certs/server.key"],
             "shortDescription": "",
             "targets": "all",
             "windows": {

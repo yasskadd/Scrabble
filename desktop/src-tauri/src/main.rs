@@ -5,6 +5,7 @@
 )]
 
 use std::fs;
+use std::path::Path;
 use std::sync::Mutex;
 
 use reqwest::{self, header::CONTENT_TYPE};
@@ -224,24 +225,124 @@ async fn httpGet(
 #[tauri::command]
 async fn httpPost(
     url: &str,
-    body: Option<&str>,
+    once_told_me: Option<&str>,
     httpState: tauri::State<'_, Http>,
 ) -> Result<HttpResponse, String> {
-    println!("{}{}", "POST request to : ", url);
+    println!("POST request to : {url}");
 
     let mut req = httpState.client.post(url);
 
-    req = match body {
-        Some(body) => req
+    if let Some(body) = once_told_me {
+        println!("{body}");
+        req = req
             .header(CONTENT_TYPE, "application/json")
-            .body(body.to_owned()),
-        None => req,
-    };
+            .body(body.to_owned());
+    }
 
     let res: Result<String, reqwest::Error> = req.send().await.unwrap().text().await;
 
     match res {
         Ok(response) => Ok(HttpResponse { body: response }),
+        Err(error) => Err(error.to_string()),
+    }
+}
+
+#[tauri::command]
+async fn httpPut(
+    url: &str,
+    once_told_me: Option<&str>,
+    path: Option<&str>,
+    httpState: tauri::State<'_, Http>,
+) -> Result<HttpResponse, String> {
+    println!("{}{}", "PUT request to : ", url);
+
+    let mut req = httpState.client.put(url);
+
+    if let Some(path) = path {
+        let mut cache_dir = tauri::api::path::cache_dir().unwrap();
+        cache_dir.push(path.to_owned());
+
+        let file = fs::read(cache_dir.as_path());
+        req = req.multipart(
+            reqwest::multipart::Form::new().part(
+                "image",
+                reqwest::multipart::Part::bytes(file.unwrap())
+                    .file_name(path.to_owned())
+                    .mime_str(&format!(
+                        "image/{}",
+                        Path::new(&path).extension().unwrap().to_str().unwrap(),
+                    ))
+                    .unwrap(),
+            ),
+        );
+    } else if let Some(body) = once_told_me {
+        req = req
+            .header(CONTENT_TYPE, "application/json")
+            .body(body.to_owned());
+    }
+
+    let res: Result<String, reqwest::Error> = req.send().await.unwrap().text().await;
+
+    match res {
+        Ok(response) => {
+            println!("{}", response);
+            Ok(HttpResponse { body: response })
+        }
+        Err(error) => Err(error.to_string()),
+    }
+}
+
+#[tauri::command]
+async fn httpPatch(
+    url: &str,
+    once_told_me: Option<&str>,
+    imageKey: Option<&str>,
+    path: Option<&str>,
+    httpState: tauri::State<'_, Http>,
+) -> Result<HttpResponse, String> {
+    println!("{}{}", "PATCH request to : ", url);
+
+    let mut req = httpState.client.patch(url);
+
+    if let Some(path) = path {
+        if let Some(imageKey) = imageKey {
+            let mut cache_dir = tauri::api::path::cache_dir().unwrap();
+            cache_dir.push(path.to_owned());
+
+            let file = fs::read(tauri::api::path::cache_dir().unwrap().as_path());
+            req = req.multipart(
+                reqwest::multipart::Form::new()
+                    .part(
+                        "data",
+                        reqwest::multipart::Part::bytes(file.unwrap())
+                            .file_name(path.to_owned())
+                            .mime_str(&format!(
+                                "image/{}",
+                                Path::new(&path).extension().unwrap().to_str().unwrap(),
+                            ))
+                            .unwrap(),
+                    )
+                    .part(
+                        "imageKey",
+                        reqwest::multipart::Part::text(imageKey.to_owned())
+                            .mime_str(&format!("text/html"))
+                            .unwrap(),
+                    ),
+            );
+        }
+    } else if let Some(body) = once_told_me {
+        req = req
+            .header(CONTENT_TYPE, "application/json")
+            .body(body.to_owned());
+    }
+
+    let res: Result<String, reqwest::Error> = req.send().await.unwrap().text().await;
+
+    match res {
+        Ok(response) => {
+            println!("{}", response);
+            Ok(HttpResponse { body: response })
+        }
         Err(error) => Err(error.to_string()),
     }
 }
@@ -283,7 +384,9 @@ fn main() {
             isSocketAlive,
             loginTest,
             httpGet,
-            httpPost
+            httpPost,
+            httpPut,
+            httpPatch,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
