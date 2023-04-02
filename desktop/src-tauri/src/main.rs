@@ -347,6 +347,31 @@ async fn httpPatch(
     }
 }
 
+#[tauri::command]
+async fn httpDelete(
+    url: &str,
+    once_told_me: Option<&str>,
+    httpState: tauri::State<'_, Http>,
+) -> Result<HttpResponse, String> {
+    println!("DELETE request to : {url}");
+
+    let mut req = httpState.client.delete(url);
+
+    if let Some(body) = once_told_me {
+        println!("{body}");
+        req = req
+            .header(CONTENT_TYPE, "application/json")
+            .body(body.to_owned());
+    }
+
+    let res: Result<String, reqwest::Error> = req.send().await.unwrap().text().await;
+
+    match res {
+        Ok(response) => Ok(HttpResponse { body: response }),
+        Err(error) => Err(error.to_string()),
+    }
+}
+
 fn main() {
     // std::env::set_var("RUST_BACKTRACE", "full");
     tauri::Builder::default()
@@ -387,6 +412,7 @@ fn main() {
             httpPost,
             httpPut,
             httpPatch,
+            httpDelete
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
