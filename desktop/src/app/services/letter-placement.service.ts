@@ -11,9 +11,9 @@ import { SelectionPosition } from '@app/interfaces/selection-position';
 import { PlacingState } from '@app/models/placing-state';
 import { PlayDirection } from '@app/models/play-direction';
 import { SocketEvents } from '@common/constants/socket-events';
-import { CommandInfo } from '@common/interfaces/command-info';
 import { Coordinate } from '@common/interfaces/coordinate';
 import { Letter } from '@common/interfaces/letter';
+import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
 import { ClientSocketService } from './communication/client-socket.service';
 import { GameClientService } from './game-client.service';
 import { GridService } from './grid.service';
@@ -104,11 +104,11 @@ export class LetterPlacementService {
         this.placedLetters.forEach((tile: BoardTileInfo) => {
             letters.push(tile.letter.value);
         });
-        this.clientSocketService.send(SocketEvents.Play, {
+        this.clientSocketService.send(SocketEvents.PlaceWordCommand, {
             firstCoordinate: this.computeCoordinatesFromCoord(),
             isHorizontal: this.selectionPositions[0].direction === PlayDirection.Right,
             letters,
-        } as CommandInfo);
+        } as PlaceWordCommandInfo);
 
         console.log(this.selectionPositions[0].direction === PlayDirection.Right);
 
