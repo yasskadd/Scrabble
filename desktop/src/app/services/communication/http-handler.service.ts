@@ -138,16 +138,14 @@ export class HttpHandlerService {
             .pipe(catchError(this.handleError<void>('resetBot')));
     }
 
-    deleteBot(bot: Bot): Observable<void> {
-        return this.http
-            .patch<void>(`${this.baseUrl}/virtualPlayer/remove`, bot, { withCredentials: true })
-            .pipe(catchError(this.handleError<void>('deleteBot')));
+    async deleteBot(bot: Bot): Promise<void> {
+        const res: HttpResponse = await invoke('httpPatch', { url: `${this.baseUrl}/virtualPlayer/remove`, once_told_me: JSON.stringify(bot) });
+        return JSON.parse(res.body);
     }
 
-    signUp(newUser: IUser): Observable<{ imageKey: string }> {
-        return this.http
-            .post<{ imageKey: string }>(`${this.baseUrl}/auth/signUp`, newUser)
-            .pipe(catchError(this.handleError<{ imageKey: string }>('sign-up')));
+    async signUp(newUser: IUser): Promise<{ imageKey: string }> {
+        const res: HttpResponse = await invoke('httpPost', { url: `${this.baseUrl}/auth/signUp`, onceToldMe: JSON.stringify(newUser) });
+        return JSON.parse(res.body);
     }
 
     async login(user: IUser): Promise<{ userData: IUser; sessionToken: string }> {

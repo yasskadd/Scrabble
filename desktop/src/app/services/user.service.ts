@@ -35,8 +35,6 @@ export class UserService {
 
         this.httpHandlerService.login(user).then(
             (loginRes: { userData: IUser; sessionToken: string }) => {
-                console.log(loginRes.sessionToken);
-
                 this.updateUserWithImageUrl(loginRes.userData);
                 this.cookieService.updateUserSessionCookie(loginRes.sessionToken);
                 subject.next('');
