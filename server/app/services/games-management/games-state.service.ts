@@ -204,6 +204,13 @@ export class GamesStateService {
             const winnerPlayer = players.find((player: GamePlayer) => player.rackIsEmpty());
             if (!winnerPlayer) return;
 
+            // TODO: Add GameEvent History to each player
+            const realPlayers = players.filter((player) => player.player.type === PlayerType.User);
+            realPlayers.forEach((player) => {
+                if (player.player.socketId === winnerPlayer.player.socketId) this.addGameEventHistory(player as RealPlayer, true);
+                else this.addGameEventHistory(player as RealPlayer, false);
+            })
+
             players.filter((player: GamePlayer) => {
                 if (player.player.user.username !== winnerPlayer.player.user.username) {
                     player.deductPoints();
@@ -283,6 +290,7 @@ export class GamesStateService {
 
         gamePlayer.game.abandon();
         this.gameEnded.next(gamePlayer.player.roomId);
+
         this.gamesHandler.removeRoomFromRoomId(gamePlayer.player.roomId);
     }
 
@@ -457,6 +465,9 @@ export class GamesStateService {
         const players = this.gamesHandler.getPlayersFromRoomId(roomId);
         if (!players) return;
 
+        players.forEach((player) => {
+            if player.
+        })
         const endTime = new Date();
         return {
             mode: players[0].game.gameMode,
