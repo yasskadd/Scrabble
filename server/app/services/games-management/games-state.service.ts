@@ -209,7 +209,7 @@ export class GamesStateService {
             realPlayers.forEach((player) => {
                 if (player.player.socketId === winnerPlayer.player.socketId) this.addGameEventHistory(player as RealPlayer, true);
                 else this.addGameEventHistory(player as RealPlayer, false);
-            })
+            });
 
             players.filter((player: GamePlayer) => {
                 if (player.player.user.username !== winnerPlayer.player.user.username) {
@@ -464,10 +464,6 @@ export class GamesStateService {
     private formatGameInfo(roomId: string): GameHistoryInfo | undefined {
         const players = this.gamesHandler.getPlayersFromRoomId(roomId);
         if (!players) return;
-
-        players.forEach((player) => {
-            if player.
-        })
         const endTime = new Date();
         return {
             mode: players[0].game.gameMode,
