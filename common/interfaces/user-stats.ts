@@ -5,7 +5,7 @@ export interface UserStats {
     win: number;
     loss: number;
     totalDuration: number;
-    totalGamePoints: number;
+    totalGameScore: number;
     averageGameTime: number;
     averageGamePoints: number;
 }
