@@ -5,7 +5,7 @@ import { ValidateWordReturn } from '@app/interfaces/validate-word-return';
 import { Gameboard } from '@common/classes/gameboard.class';
 import * as constants from '@common/constants/board-info';
 import { Coordinate } from '@common/interfaces/coordinate';
-import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
+import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
 import { DictionaryValidation } from './dictionary-validation.class';
 const ALPHABET_LETTERS = 'abcdefghijklmnopqrstuvwxyz';
 const MAX_LETTERS_LIMIT = 7;

@@ -2,7 +2,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { SocketEvents } from '@common/constants/socket-events';
 import { ChatboxMessage } from '@common/interfaces/chatbox-message';
-// import { CommandInfo } from '@common/interfaces/game-actions';
+// import { CommandInfo } from '@common/interfaces/place-word-command-info';
 // import { Letter } from '@common/interfaces/letter';
 import { CommandHandlerService } from '@app/services/command-handler.service';
 import { ClientSocketService } from '@app/services/communication/client-socket.service';

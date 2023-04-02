@@ -1,7 +1,7 @@
 /* eslint-disable dot-notation -- testing private methods or attributes */
 import { TestBed } from '@angular/core/testing';
 import { SocketEvents } from '@common/constants/socket-events';
-import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
+import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
 import { CommandHandlerService } from './command-handler.service';
 
 describe('CommandHandlerService', () => {

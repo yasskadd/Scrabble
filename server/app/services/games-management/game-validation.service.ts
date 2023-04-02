@@ -1,7 +1,7 @@
 import { RealPlayer } from '@app/classes/player/real-player.class';
 import { Word } from '@app/classes/word.class';
 import { RackService } from '@app/services/rack.service';
-import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
+import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
 import { Service } from 'typedi';
 
 export enum ErrorType {
