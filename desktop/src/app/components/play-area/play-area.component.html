@@ -1,26 +1,28 @@
-<b id="winning-message" *ngIf="gameClientService.isGameFinish">
-    {{ gameClientService.winningMessage | translate : { playerName: gameClientService.winner } }}
-</b>
+<div class="encapsulating-div">
+    <b id="winning-message" *ngIf="gameClientService.isGameFinish">
+        {{ gameClientService.winningMessage | translate : { playerName: gameClientService.winner } }}
+    </b>
 
-<mat-drawer-container class="always-visible-content">
-    <app-information-panel class="information-panel justified mat-app-background"></app-information-panel>
+    <mat-drawer-container>
+        <app-information-panel class="justified mat-app-background"></app-information-panel>
 
-    <div class="middle" cdkDropListGroup>
-        <app-game-board></app-game-board>
+        <div class="middle" cdkDropListGroup>
+            <app-game-board></app-game-board>
 
-        <app-player-rack [keyboardParentSubject]="keyboardParentSubject" class="player-rack"></app-player-rack>
+            <app-player-rack [keyboardParentSubject]="keyboardParentSubject" class="player-rack"></app-player-rack>
 
-        <button *ngIf="chatIsOpen" class="open-chat-button" mat-button color="primary" (click)="drawer.toggle()" (click)="closeChat()">
-            {{ "main_page.chat.close" | translate }}
-            <mat-icon>keyboard_arrow_right</mat-icon>
-        </button>
-        <button *ngIf="!chatIsOpen" class="open-chat-button" mat-button color="primary" (click)="drawer.toggle()" (click)="openChat()">
-            <mat-icon>chat_bubble_outline</mat-icon>
-            {{ "main_page.chat.open" | translate }}
-        </button>
-    </div>
+            <button *ngIf="chatIsOpen" class="open-chat-button" mat-button color="primary" (click)="drawer.toggle()" (click)="closeChat()">
+                {{ "main_page.chat.close" | translate }}
+                <mat-icon>keyboard_arrow_right</mat-icon>
+            </button>
+            <button *ngIf="!chatIsOpen" class="open-chat-button" mat-button color="primary" (click)="drawer.toggle()" (click)="openChat()">
+                <mat-icon>chat_bubble_outline</mat-icon>
+                {{ "main_page.chat.open" | translate }}
+            </button>
+        </div>
 
-    <mat-drawer #drawer class="chat-sidenav" mode="side" position="end">
-        <app-generic-chat></app-generic-chat>
-    </mat-drawer>
-</mat-drawer-container>
+        <mat-drawer #drawer class="chat-sidenav" mode="side" position="end">
+            <app-generic-chat></app-generic-chat>
+        </mat-drawer>
+    </mat-drawer-container>
+</div>

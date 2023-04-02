@@ -1,3 +1,7 @@
+.encapsulating-div {
+    width: inherit;
+}
+
 mat-drawer-container {
     height: inherit;
     width: inherit;
@@ -42,14 +46,6 @@ mat-drawer {
     }
 }
 
-.always-visible-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-}
-
 #winning-message {
     position: absolute;
     top: calc(50% - 2em);
@@ -60,6 +56,15 @@ mat-drawer {
     font-weight: 400;
     left: 50%;
     transform: translateX(-50%);
+}
+
+app-information-panel {
+    flex-grow: 1;
+    max-width: 300px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
 }
 
 app-game-board {
@@ -77,4 +82,8 @@ app-player-rack {
     bottom: 0px;
     transform: translate(-50%);
     margin-bottom: 32px;
+}
+
+::ng-deep .mat-drawer-content {
+    width: inherit;
 }
