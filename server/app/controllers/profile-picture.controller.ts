@@ -17,6 +17,7 @@ const BUCKET_NAME = 'scrabble-images';
 const BUCKET_REGION = 'ca-central-1';
 const ACCESS_KEY = 'AKIA5IBYO7WFXIYKAMR6';
 const SECRET_ACCESS_KEY = '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';
+const PRESIGNED_URL_EXPIRY = 604800; // 1 week
 
 @Service()
 export class ProfilePictureController {
@@ -46,7 +47,7 @@ export class ProfilePictureController {
             const imageUrlsMap: Map<string, string[]> = new Map();
             for (const image of this.defaultImagesMap.entries()) {
                 const getImageCommand = this.CreateGetCommand(image[1]);
-                const signedUrl = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 3600 });
+                const signedUrl = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: PRESIGNED_URL_EXPIRY });
                 imageUrlsMap.set(image[0], [signedUrl, image[1]]);
             }
             res.status(StatusCodes.OK).send(Object.fromEntries(imageUrlsMap));
@@ -88,7 +89,7 @@ export class ProfilePictureController {
 
             // Create new signed_url
             const getImageCommand = this.CreateGetCommand(profilePicInfo.key as string);
-            const signedURL = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 3600 });
+            const signedURL = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: PRESIGNED_URL_EXPIRY });
             res.status(StatusCodes.OK).send({ url: signedURL });
         });
 
