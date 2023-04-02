@@ -33,9 +33,6 @@ import { GamesHandlerService } from './games-handler.service';
 
 const MAX_SKIP = 6;
 const SECOND = 1000;
-const SECOND_IN_MILLISECOND = 1000;
-const SECOND_AND_MINUTE_MAX_VALUE = 60;
-const MINIMUM_TWO_UNITS = 10;
 const ERROR_REPLACING_BOT = 'Error trying to replace the bot';
 
 @Service()
@@ -438,6 +435,7 @@ export class GamesStateService {
             const playerWonGame = player.player.socketId === gameWinnerPlayer.player.socketId;
             const gameHistoryInfo = this.formatGameInfo(player, playerWonGame);
             await this.userStatsStorage.updatePlayerStats(gameHistoryInfo);
+            await this.historyStorageService.addToHistory(gameHistoryInfo);
         });
     }
 
@@ -486,14 +484,6 @@ export class GamesStateService {
             playerId: player.player.user._id,
             playerScore: player.score,
         } as GameHistoryInfo;
-    }
-
-    private computeDuration(date1: Date, date2: Date): string {
-        const milliseconds = Math.abs(date2.getTime() - date1.getTime());
-        const seconds = Math.floor((milliseconds / SECOND_IN_MILLISECOND) % SECOND_AND_MINUTE_MAX_VALUE);
-        const minutes = Math.floor(milliseconds / (SECOND_IN_MILLISECOND * SECOND_AND_MINUTE_MAX_VALUE));
-
-        return (minutes < MINIMUM_TWO_UNITS ? '0' + minutes : minutes) + ':' + (seconds < MINIMUM_TWO_UNITS ? '0' + seconds : seconds);
     }
 
     private joinAsObserver(socket: Socket, botID: string): void {
