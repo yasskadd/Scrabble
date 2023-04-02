@@ -313,7 +313,6 @@ export class WaitingRoomService {
             username: user.username,
             password: 'null',
             profilePicture: user.profilePicture,
-            score: user.score,
         } as IUser;
     }
 
@@ -360,7 +359,6 @@ export class WaitingRoomService {
                         name: 'bot-image',
                         isDefaultPicture: true,
                     },
-                    score: 0,
                 } as IUser,
                 socketId: '',
                 roomId,

@@ -8,3 +8,4 @@ export interface UserStats {
     totalGamePoints: number;
     averageGameTime: number;
     averageGamePoints: number;
+}
