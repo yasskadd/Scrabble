@@ -111,8 +111,8 @@ export class AccountStorageService {
         );
     }
 
-    async addUserEventHistory(username: string, userEvent: string, dateEvent: Date): Promise<void> {
-        const historyEvent = this.createHistoryEvent(userEvent, dateEvent);
+    async addUserEventHistory(username: string, userEvent: string, dateEvent: Date, isWinner?: boolean): Promise<void> {
+        const historyEvent = this.createHistoryEvent(userEvent, dateEvent, isWinner);
         if (historyEvent) {
             await this.database.users.collection.updateOne({ username }, { $push: { historyEventList: historyEvent } });
         }
