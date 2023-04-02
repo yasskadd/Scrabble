@@ -191,10 +191,7 @@ async fn httpGet(
     let res = req.send().await.unwrap().text().await;
 
     match res {
-        Ok(response) => {
-            println!("{}", response);
-            Ok(HttpResponse { body: response })
-        }
+        Ok(response) => Ok(HttpResponse { body: response }),
         Err(error) => Err(error.to_string()),
     }
 }
@@ -210,7 +207,6 @@ async fn httpPost(
     let mut req = httpState.client.post(url);
 
     if let Some(body) = once_told_me {
-        println!("{body}");
         req = req
             .header(CONTENT_TYPE, "application/json")
             .body(body.to_owned());
@@ -377,7 +373,6 @@ fn main() {
             socketDisconnect,
             socketSend,
             isSocketAlive,
-            loginTest,
             httpGet,
             httpPost,
             httpPut,
