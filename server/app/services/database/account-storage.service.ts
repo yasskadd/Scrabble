@@ -35,7 +35,9 @@ export class AccountStorageService {
             win: DEFAULT_PLAYER_STATS,
             loss: DEFAULT_PLAYER_STATS,
             totalDuration: DEFAULT_PLAYER_STATS,
-            gameScore: DEFAULT_PLAYER_STATS,
+            totalGamePoints: DEFAULT_PLAYER_STATS,
+            averageGameTime: DEFAULT_PLAYER_STATS,
+            averageGamePoints: DEFAULT_PLAYER_STATS,
         };
         await this.database.users.addDocument(newUser);
         await this.database.usersStats.addDocument(userStats);

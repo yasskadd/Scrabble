@@ -66,7 +66,11 @@ export class UserStatsStorageService {
                     },
                     gamePlayed: 1,
                     totalDuration: gameHistoryInfo.duration,
-                    gameScore: gameHistoryInfo.playerScore,
+                    totalGamePoints: gameHistoryInfo.playerScore,
+                },
+                $set: {
+                    averageGameTime: { $divide: ['$totalDuration', '$gamePlayed'] },
+                    averageGamePoints: { $divide: ['$totalGamePoints', '$gamePlayed'] },
                 },
             },
         );
