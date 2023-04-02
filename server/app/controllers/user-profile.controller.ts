@@ -1,5 +1,6 @@
 import { verifyToken } from '@app/middlewares/token-verification-middleware';
 import { AccountStorageService } from '@app/services/database/account-storage.service';
+import { HistoryStorageService } from '@app/services/database/history-storage.service';
 import { UserStatsStorageService } from '@app/services/database/user-stats-storage.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { HistoryEvent } from '@common/interfaces/history-event';
@@ -16,6 +17,7 @@ export class UserProfileController {
     constructor(
         private accountStorageService: AccountStorageService,
         private userStatsStorageService: UserStatsStorageService,
+        private historyStorage: HistoryStorageService,
         private socketManager: SocketManager,
     ) {
         this.configureRouter();
@@ -119,6 +121,12 @@ export class UserProfileController {
             const userID: string = res.locals.user.userID;
             const userStats = await this.userStatsStorageService.getUserStats(userID);
             res.status(StatusCodes.OK).json(userStats);
+        });
+
+        this.router.get('/games/history', async (req: Request, res: Response) => {
+            const userID: string = res.locals.user.userID;
+            const userGamesHistory = await this.historyStorage.getHistoryByUser(userID);
+            res.status(StatusCodes.OK).json(userGamesHistory);
         });
     }
 }
