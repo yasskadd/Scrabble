@@ -5,10 +5,10 @@ import { GameInfo } from '@common/interfaces/game-state';
 import { Letter } from '@common/interfaces/letter';
 import { PlayerInformation } from '@common/interfaces/player-information';
 import { IUser } from '@common/interfaces/user';
-import { GameConfigurationService } from '@services/game-configuration.service';
 import { UserService } from '@services/user.service';
 import { ReplaySubject, Subject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
+import { GameConfigurationService } from './game-configuration.service';
 
 // type CompletedObjective = { objective: Objective; name: string };
 // type InitObjective = { objectives1: Objective[]; objectives2: Objective[]; playerName: string };
@@ -179,7 +179,7 @@ export class GameClientService {
     private updatePlayersInformationEvent(players: PlayerInformation[]) {
         this.players = players;
         // this.getLocalPlayer().rack = this.updateRack(this.getLocalPlayer().rack);
-        this.updateNewGameboard(this.getLocalPlayer().gameboard);
+        // this.updateNewGameboard(this.getLocalPlayer().gameboard); // NO, why
     }
 
     private updateRack(newRack: Letter[]): Letter[] {

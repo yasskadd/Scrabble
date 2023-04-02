@@ -37,8 +37,8 @@ export class BeginnerBot extends Bot {
             return;
         }
         const randomCommandInfo = commandInfoList[Math.floor(Math.random() * commandInfoList.length)];
-        if (this.countUp >= 3 && this.countUp < Constant.TIME_SKIP) this.play(randomCommandInfo);
-        else if (this.countUp < 3) setTimeout(() => this.play(randomCommandInfo), Constant.SECOND_3 - this.countUp * Constant.SECOND_1);
+        if (this.countUp >= 3 && this.countUp < Constant.TIME_SKIP) this.placeWord(randomCommandInfo);
+        else if (this.countUp < 3) setTimeout(() => this.placeWord(randomCommandInfo), Constant.SECOND_3 - this.countUp * Constant.SECOND_1);
     }
 
     protected addCommandInfoToList(commandInfoMap: Map<PlaceWordCommandInfo, number>, randomNumber: number): PlaceWordCommandInfo[] {

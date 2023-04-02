@@ -12,13 +12,13 @@ export class ExpertBot extends Bot {
             [undefined as never, 0],
         )[0];
         if (this.countUp >= 3 && this.countUp < Constant.TIME_SKIP) {
-            this.play(bestCommandInfo);
+            this.placeWord(bestCommandInfo);
         } else if (this.countUp < 3) {
-            setTimeout(() => this.play(bestCommandInfo), Constant.SECOND_3 - this.countUp * Constant.SECOND_1);
+            setTimeout(() => this.placeWord(bestCommandInfo), Constant.SECOND_3 - this.countUp * Constant.SECOND_1);
         }
     }
 
-    play(commandInfo: PlaceWordCommandInfo): void {
+    placeWord(commandInfo: PlaceWordCommandInfo): void {
         if (commandInfo === undefined) {
             this.exchangeLetters();
             return;
