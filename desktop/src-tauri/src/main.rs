@@ -172,35 +172,12 @@ fn isSocketAlive(state: tauri::State<SocketClient>) -> String {
 }
 
 #[tauri::command]
-async fn loginTest(httpState: tauri::State<'_, Http>) -> Result<HttpResponse, String> {
-    let res = httpState
-        .client
-        // .post("https://ec2-35-183-107-112.ca-central-1.compute.amazonaws.com:3443/auth/login")
-        .post("https://localhost:3443/auth/login")
-        .header(CONTENT_TYPE, "application/json")
-        .body("{\"username\": \"test\", \"password\": \"test\"}")
-        .send()
-        .await
-        .unwrap()
-        .text()
-        .await;
-
-    match res {
-        Ok(response) => {
-            println!("{}", response);
-            Ok(HttpResponse { body: response })
-        }
-        Err(error) => Err(error.to_string()),
-    }
-}
-
-#[tauri::command]
 async fn httpGet(
     url: &str,
     body: Option<&str>,
     httpState: tauri::State<'_, Http>,
 ) -> Result<HttpResponse, String> {
-    println!("{}{}", "GET request to : ", url);
+    println!("GET request to : {url}");
 
     let mut req = httpState.client.get(url);
 
@@ -254,7 +231,7 @@ async fn httpPut(
     path: Option<&str>,
     httpState: tauri::State<'_, Http>,
 ) -> Result<HttpResponse, String> {
-    println!("{}{}", "PUT request to : ", url);
+    println!("PUT request to : {url}");
 
     let mut req = httpState.client.put(url);
 
@@ -284,10 +261,7 @@ async fn httpPut(
     let res: Result<String, reqwest::Error> = req.send().await.unwrap().text().await;
 
     match res {
-        Ok(response) => {
-            println!("{}", response);
-            Ok(HttpResponse { body: response })
-        }
+        Ok(response) => Ok(HttpResponse { body: response }),
         Err(error) => Err(error.to_string()),
     }
 }
@@ -300,7 +274,7 @@ async fn httpPatch(
     path: Option<&str>,
     httpState: tauri::State<'_, Http>,
 ) -> Result<HttpResponse, String> {
-    println!("{}{}", "PATCH request to : ", url);
+    println!("PATCH request to : {url}");
 
     let mut req = httpState.client.patch(url);
 
@@ -339,10 +313,7 @@ async fn httpPatch(
     let res: Result<String, reqwest::Error> = req.send().await.unwrap().text().await;
 
     match res {
-        Ok(response) => {
-            println!("{}", response);
-            Ok(HttpResponse { body: response })
-        }
+        Ok(response) => Ok(HttpResponse { body: response }),
         Err(error) => Err(error.to_string()),
     }
 }
@@ -358,7 +329,6 @@ async fn httpDelete(
     let mut req = httpState.client.delete(url);
 
     if let Some(body) = once_told_me {
-        println!("{body}");
         req = req
             .header(CONTENT_TYPE, "application/json")
             .body(body.to_owned());
