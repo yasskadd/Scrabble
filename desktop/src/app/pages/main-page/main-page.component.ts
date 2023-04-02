@@ -8,9 +8,9 @@ import { SocketResponse } from '@app/interfaces/server-responses';
 import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
 import { UserService } from '@app/services/user.service';
 import { SocketEvents } from '@common/constants/socket-events';
+import { ClientSocketService } from '@services/communication/client-socket.service';
 import { LanguageService } from '@services/language.service';
 import { Subject } from 'rxjs';
-import { ClientSocketService } from '@services/communication/client-socket.service';
 
 @Component({
     selector: 'app-main-page',

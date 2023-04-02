@@ -3,15 +3,6 @@
 
     <mat-drawer-container>
         <div class="always-visible-content">
-            <button *ngIf="chatIsOpen" class="open-chat-button" mat-button color="primary" (click)="drawer.toggle()" (click)="closeChat()">
-                <mat-icon>keyboard_arrow_left</mat-icon>
-                {{ "main_page.chat.close" | translate }}
-            </button>
-            <button *ngIf="!chatIsOpen" class="open-chat-button" mat-button color="primary" (click)="drawer.toggle()" (click)="openChat()">
-                <mat-icon>chat_bubble_outline</mat-icon>
-                {{ "main_page.chat.open" | translate }}
-            </button>
-
             <mat-card class="justified">
                 <mat-card-content class="justified">
                     <div
@@ -70,6 +61,15 @@
                 </mat-card-content>
             </mat-card>
         </div>
+
+        <button *ngIf="chatIsOpen" class="open-chat-button" mat-button color="primary" (click)="drawer.toggle()" (click)="closeChat()">
+            {{ "main_page.chat.close" | translate }}
+            <mat-icon>keyboard_arrow_right</mat-icon>
+        </button>
+        <button *ngIf="!chatIsOpen" class="open-chat-button" mat-button color="primary" (click)="drawer.toggle()" (click)="openChat()">
+            <mat-icon>chat_bubble_outline</mat-icon>
+            {{ "main_page.chat.open" | translate }}
+        </button>
 
         <mat-drawer #drawer class="chat-sidenav" mode="side" position="end">
             <div *ngIf="!loggedIn">{{ "chat.disconnected" | translate }}</div>
