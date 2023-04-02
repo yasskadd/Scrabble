@@ -28,6 +28,7 @@ import { PlayerType } from '@common/models/player-type';
 import { Subject } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
+import { AccountStorageService } from '../database/account-storage.service';
 import { GamesHandlerService } from './games-handler.service';
 
 const MAX_SKIP = 6;
@@ -42,6 +43,7 @@ export class GamesStateService {
     gameEnded: Subject<string>;
 
     constructor(
+        private accountStorage: AccountStorageService,
         private gamesHandler: GamesHandlerService,
         private socketManager: SocketManager,
         private scoreStorage: ScoreStorageService,
@@ -511,6 +513,8 @@ export class GamesStateService {
         bot.start();
         return bot;
     }
+
+    private addGameEventHistory(player: RealPlayer, gameWon: boolean) {}
     // Replace observer and bot in list by observer
     // Add Socket event to let observer join the room (need to verify if its possible to join or not)
     // Need method to update all room clients that an observer has joined
