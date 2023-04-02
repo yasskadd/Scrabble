@@ -5,5 +5,4 @@ export interface PlayerInformation {
     player: RoomPlayer;
     score: number;
     rack: Letter[];
-    gameboard: string[];
 }
