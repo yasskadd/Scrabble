@@ -4,8 +4,8 @@ export interface UserStats {
     gamePlayed: number;
     win: number;
     loss: number;
-    totalDuration: number;
+    totalGameTime: number;
     totalGameScore: number;
     averageGameTime: number;
-    averageGamePoints: number;
+    averageGameScore: number;
 }
