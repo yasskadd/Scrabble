@@ -353,6 +353,7 @@ export class WaitingRoomService {
                     profilePicture: {
                         name: 'bot-image',
                         isDefaultPicture: true,
+                        key: 'f553ba598dbcfc7e9e07f8366b6684b5.jpg',
                     },
                 } as IUser,
                 socketId: '',

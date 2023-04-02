@@ -77,6 +77,18 @@ export class ProfilePictureController {
         });
 
         /**
+         * HTTP GET request to request an image in the S3 bucket for bots
+         *
+         * @return {{ url: string }} data - URL of the image usable as a simple source link
+         * @return { number } HTTP Status - The return status of the request
+         */
+        this.router.get('/bot/profile-picture', async (req: Request, res: Response) => {
+            const getImageCommand = this.CreateGetCommand('f553ba598dbcfc7e9e07f8366b6684b5.jpg');
+            const signedURL = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: PRESIGNED_URL_EXPIRY });
+            res.status(StatusCodes.OK).send({ url: signedURL });
+        });
+
+        /**
          * HTTP GET request to request an image in the S3 bucket
          *
          * @param { string } session_token - String of the connected user token
