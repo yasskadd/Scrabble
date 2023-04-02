@@ -5,7 +5,7 @@ export interface GameHistoryInfo {
     abandoned: boolean;
     beginningTime: Date;
     endTime: Date;
-    duration: string;
+    duration: number;
     playerId: string;
     playerScore: number;
 }

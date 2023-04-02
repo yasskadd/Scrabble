@@ -30,6 +30,7 @@ import { PlayerType } from '@common/models/player-type';
 import { Subject } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
+import { UserStatsStorageService } from '../database/user-stats-storage.service';
 import { GamesHandlerService } from './games-handler.service';
 
 const MAX_SKIP = 6;
@@ -49,6 +50,7 @@ export class GamesStateService {
         private readonly playerScore: PlayerScoreService,
         private readonly accountStorage: AccountStorageService,
         private scoreStorage: ScoreStorageService,
+        private userStatsStorage: UserStatsStorageService,
         private historyStorageService: HistoryStorageService, // private virtualPlayerStorage: VirtualPlayersStorageService,
     ) {
         this.gameEnded = new Subject();
@@ -262,29 +264,30 @@ export class GamesStateService {
         if (!gamePlayer) return;
 
         const room = gamePlayer.player.roomId;
+        const gameHistoryInfo = this.formatGameInfo(gamePlayer);
+        this.userStatsStorage.updatePlayerStats(gameHistoryInfo);
         this.gamesHandler.removePlayerFromSocketId(socket.id);
 
         socket.leave(gamePlayer.player.roomId);
         if (
             !gamePlayer.game.isModeSolo &&
-            this.gamesHandler.getPlayersFromRoomId(gamePlayer.player.roomId).filter((player) => player.player.type === PlayerType.User).length > 0
+            this.gamesHandler.getPlayersFromRoomId(room).filter((player) => player.player.type === PlayerType.User).length > 0
         ) {
             this.socketManager.emitRoom(room, SocketEvents.UserDisconnect);
             // TODO : Repair and make that better for 4 players and bots
             // this.switchToSolo(gamePlayer).then();
-            const player = this.gamesHandler.players.find((realPlayer) => realPlayer.player.socketId === socket.id);
-            if (player) {
-                const bot = this.replacePlayerWithBot(player as RealPlayer);
-                this.gamesHandler.players.push(bot);
-            }
+
+            const bot = this.replacePlayerWithBot(gamePlayer as RealPlayer);
+            this.gamesHandler.players.push(bot);
+
             // TODO: Update room
             return;
         }
         // TODO: What to do if there are still observers in game ?
 
         gamePlayer.game.abandon();
-        this.gameEnded.next(gamePlayer.player.roomId);
-        this.gamesHandler.removeRoomFromRoomId(gamePlayer.player.roomId);
+        // this.gameEnded.next(room);
+        this.gamesHandler.removeRoomFromRoomId(room);
     }
 
     // private async switchToSolo(playerToReplace: GamePlayer): Promise<void> {
@@ -474,21 +477,21 @@ export class GamesStateService {
     //     }
     // }
 
-    private formatGameInfo(roomId: string): GameHistoryInfo | undefined {
-        const players = this.gamesHandler.getPlayersFromRoomId(roomId);
-        if (!players) return;
+    private formatGameInfo(player: GamePlayer, playerWonGame = false, abandoned = false): GameHistoryInfo {
+        // const players = this.gamesHandler.getPlayersFromRoomId(roomId);
+        // if (!players) return;
 
         const endTime = new Date();
         return {
-            mode: players[0].game.gameMode,
-            abandoned: players[0].game.isGameAbandoned,
-            beginningTime: players[0].game.beginningTime,
+            roomId: player.player.roomId,
+            mode: player.game.gameMode,
+            playerWonGame,
+            abandoned,
+            beginningTime: player.game.beginningTime,
             endTime,
-            duration: this.computeDuration(players[0].game.beginningTime, endTime),
-            firstPlayerName: players[0].player.user.username,
-            firstPlayerScore: players[0].score,
-            secondPlayerName: players[1].player.user.username,
-            secondPlayerScore: players[1].score,
+            duration: Math.abs(endTime.getTime() - player.game.beginningTime.getTime()),
+            playerId: player.player.user._id,
+            playerScore: player.score,
         } as GameHistoryInfo;
     }
 
