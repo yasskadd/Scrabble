@@ -16,13 +16,3 @@ app-play-area {
 .load > h1 {
     font-family: revert;
 }
-
-.information-panel {
-    flex-grow: 1;
-    max-width: 300px;
-    padding: 10px;
-    min-height: 760px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-}

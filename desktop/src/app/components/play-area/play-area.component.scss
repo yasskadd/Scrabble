@@ -10,6 +10,12 @@ mat-drawer-container {
     align-items: center;
 }
 
+.always-visible-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 100%;
+}
+
 mat-drawer {
     right: 0;
     height: 100%;
@@ -59,12 +65,12 @@ mat-drawer {
 }
 
 app-information-panel {
-    flex-grow: 1;
-    max-width: 300px;
+    width: 300px;
     padding: 10px;
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
+    grid-column: 1 / 2;
 }
 
 app-game-board {
@@ -74,6 +80,7 @@ app-game-board {
     transform: translate(-50%, -50%);
     height: 570px;
     width: 570px;
+    grid-column: 2 / 3;
 }
 
 app-player-rack {
@@ -82,6 +89,7 @@ app-player-rack {
     bottom: 0px;
     transform: translate(-50%);
     margin-bottom: 32px;
+    grid-column: 2 / 3;
 }
 
 ::ng-deep .mat-drawer-content {

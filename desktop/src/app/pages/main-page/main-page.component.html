@@ -42,21 +42,7 @@
                     >
                         Scrabble LOG2990
                     </button>
-                    <!-- TODO : DO NOT DELETE!!! -->
-                    <!-- <button
-                        mat-fab
-                        (click)="openHelpDialog()"
-                        class="help-button"
-                        matTooltip="{{ 'main_page.tooltip.game_instructions' | translate }}"
-                        matTooltipPosition="right"
-                        matTooltipClass="toolMainPage"
-                    >
-                        <mat-icon>help_outline</mat-icon>
-                    </button>
-                    <div *ngIf="loggedIn">Connecté en tant que : {{ userService.userName }}</div>
-                    <mat-form-field class="text-input">
-                        <mat-label>Nom d'utilisateur</mat-label>
-                    </button> -->
+
                     <div *ngIf="loggedIn">{{ "main_page.connected_w_username" | translate }} : {{ userService.user.username }}</div>
                 </mat-card-content>
             </mat-card>
