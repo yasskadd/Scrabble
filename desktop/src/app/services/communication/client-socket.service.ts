@@ -37,24 +37,29 @@ export class ClientSocketService implements OnDestroy {
 
     connect(cookie?: string) {
         if (cookie) {
-            this.socket = io(environment.serverUrl, {
+            this.socket = io(environment.socketUrl, {
                 transports: ['websocket'],
                 upgrade: false,
                 /* eslint-disable-next-line @typescript-eslint/naming-convention*/
                 extraHeaders: { Cookie: `session_token=${cookie}` },
             });
         } else {
-            this.socket = io(environment.serverUrl, { transports: ['websocket'], upgrade: false });
+            this.socket = io(environment.socketUrl, { transports: ['websocket'], upgrade: false });
         }
     }
 
     connectTauri(cookie?: string) {
         if (cookie) {
-            tauri.tauri.invoke(RustCommand.EstablishConnection, { address: environment.serverUrl, cookie: `session_token=${cookie}` }).then(() => {
-                this.listenToTauriEvents();
-            });
+            tauri.tauri
+                .invoke(RustCommand.EstablishConnection, {
+                    address: environment.socketUrl,
+                    cookie: `session_token=${cookie}`,
+                })
+                .then(() => {
+                    this.listenToTauriEvents();
+                });
         } else {
-            tauri.tauri.invoke(RustCommand.EstablishConnection, { address: environment.serverUrl }).then(() => {
+            tauri.tauri.invoke(RustCommand.EstablishConnection, { address: environment.socketUrl }).then(() => {
                 this.listenToTauriEvents();
             });
         }
