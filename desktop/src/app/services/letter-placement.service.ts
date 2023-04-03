@@ -17,6 +17,7 @@ import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info
 import { ClientSocketService } from './communication/client-socket.service';
 import { GameClientService } from './game-client.service';
 import { GridService } from './grid.service';
+import { first } from 'rxjs/operators';
 
 // const ASCII_ALPHABET_START = 96;
 
@@ -42,8 +43,12 @@ export class LetterPlacementService {
         this.boardTiles = [];
 
         this.setPropreties();
-        this.gameClientService.gameboardUpdated.subscribe(() => {
+        this.gameClientService.gameboardUpdated.pipe(first()).subscribe((gameBoard: string[]) => {
             this.resetView();
+            this.updateGameBoard(gameBoard);
+        });
+        this.gameClientService.gameboardUpdated.subscribe((gameBoard: string[]) => {
+            this.updateGameBoard(gameBoard);
         });
     }
 
@@ -109,8 +114,6 @@ export class LetterPlacementService {
             isHorizontal: this.selectionPositions[0].direction === PlayDirection.Right,
             letters,
         } as PlaceWordCommandInfo);
-
-        console.log(this.selectionPositions[0].direction === PlayDirection.Right);
 
         // this.chatboxService.submitMessage(
         //     `!placer ${verticalPlacement}${this.selectionPositions[0].coord}${this.selectionPositions[0].direction} ${lettersToSubmit}`,
@@ -407,7 +410,13 @@ export class LetterPlacementService {
             y: Math.floor(this.origin / TOTAL_ROWS) + 1,
         };
 
-        console.log(coord);
         return coord;
+    }
+
+    private updateGameBoard(gameBoard: string[]) {
+        gameBoard.forEach((tile: string, coord) => {
+            this.boardTiles[coord].letter.value = tile.toUpperCase() as AlphabetLetter;
+            this.boardTiles[coord].state = BoardTileState.Confirmed;
+        });
     }
 }

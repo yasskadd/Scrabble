@@ -36,6 +36,7 @@ export class UserService {
         this.httpHandlerService.login(user).subscribe({
             next: (loginRes: { userData: IUser; sessionToken: string }) => {
                 this.updateUserWithImageUrl(loginRes.userData);
+                this.user = loginRes.userData;
                 this.cookieService.updateUserSessionCookie(loginRes.sessionToken);
                 subject.next('');
             },
@@ -118,6 +119,5 @@ export class UserService {
                 user.profilePicture.key = res.url;
             });
         }
-        this.user = user;
     }
 }

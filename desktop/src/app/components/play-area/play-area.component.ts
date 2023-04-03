@@ -81,7 +81,7 @@ export class PlayAreaComponent {
 
     updateFontSize(): void {
         this.gridService.letterSize = this.sliderForm.value;
-        this.gameClientService.updateGameboard();
+        // this.gameClientService.updateGameboard();
         this.letterService.resetGameBoardView();
     }
 }

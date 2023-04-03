@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
+import { AppRoutes } from '@app/models/app-routes';
 import { Gameboard } from '@common/classes/gameboard.class';
 import { SocketEvents } from '@common/constants/socket-events';
 import { GameInfo } from '@common/interfaces/game-state';
@@ -8,7 +10,6 @@ import { IUser } from '@common/interfaces/user';
 import { UserService } from '@services/user.service';
 import { ReplaySubject, Subject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
-import { GameConfigurationService } from './game-configuration.service';
 
 // type CompletedObjective = { objective: Objective; name: string };
 // type InitObjective = { objectives1: Objective[]; objectives2: Objective[]; playerName: string };
@@ -26,17 +27,13 @@ export class GameClientService {
     isGameFinish: boolean;
     winner: string;
     winningMessage: string;
-    gameboardUpdated: Subject<boolean>;
+    gameboardUpdated: Subject<string[]>;
+    quitGameSubject: Subject<void>;
     turnFinish: ReplaySubject<boolean>;
 
-    constructor(
-        private clientSocketService: ClientSocketService,
-        private gameConfigurationService: GameConfigurationService,
-        private userService: UserService,
-    ) {
-        this.initGameInformation();
-
-        this.gameboardUpdated = new Subject();
+    constructor(private clientSocketService: ClientSocketService, private userService: UserService, private router: Router) {
+        this.gameboardUpdated = new Subject<string[]>();
+        this.quitGameSubject = new Subject<void>();
         this.turnFinish = new ReplaySubject<boolean>(1);
         this.gameboard = new Gameboard();
 
@@ -88,6 +85,14 @@ export class GameClientService {
             this.viewUpdateEvent(info);
         });
 
+        this.clientSocketService.on(SocketEvents.GameAboutToStart, (gameInfo: GameInfo) => {
+            this.players = gameInfo.players;
+            this.activePlayer = gameInfo.activePlayer;
+            this.updateGameboard(gameInfo.gameboard);
+
+            this.router.navigate([`${AppRoutes.GamePage}`]).then();
+        });
+
         // this.clientSocketService.on('CompletedObjective', (completedObjective: CompletedObjective) => {
         // this.completeObjective(completedObjective);
         // });
@@ -107,8 +112,8 @@ export class GameClientService {
         });
     }
 
-    updateGameboard() {
-        this.gameboardUpdated.next(true);
+    updateGameboard(newGameboard: string[]) {
+        this.gameboardUpdated.next(newGameboard);
     }
 
     abandonGame() {
@@ -117,7 +122,7 @@ export class GameClientService {
 
     quitGame() {
         this.clientSocketService.send(SocketEvents.QuitGame);
-        this.gameConfigurationService.exitWaitingRoom();
+        this.quitGameSubject.next();
     }
 
     getLocalPlayer(): PlayerInformation {
@@ -211,7 +216,7 @@ export class GameClientService {
 
     private updateNewGameboard(newGameboard: string[]) {
         this.gameboard.updateFromStringArray(newGameboard);
-        this.updateGameboard();
+        this.updateGameboard(newGameboard);
     }
 
     private gameEndEvent() {
@@ -227,9 +232,10 @@ export class GameClientService {
     }
 
     private skipEvent(gameInfo: GameInfo) {
-        this.gameboard.updateFromStringArray(gameInfo.gameboard);
+        // this.gameboard.updateFromStringArray(gameInfo.gameboard);
+        // this.updateNewGameboard(gameInfo.gameboard);
         this.getLocalPlayer().rack = this.updateRack(this.getLocalPlayer().rack);
-        this.updateGameboard();
+        this.updateGameboard(gameInfo.gameboard);
     }
 
     private findWinnerByScore(): void {

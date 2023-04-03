@@ -4,10 +4,14 @@ export interface PlayerGameResult {
 }
 
 export interface GameHistoryInfo {
+    roomId: string;
     mode: string;
+    playerWonGame: boolean;
     abandoned: boolean;
     beginningTime: Date;
     endTime: Date;
-    duration: string;
-    gameResult: PlayerGameResult[];
+    duration: number;
+    playerId: string;
+    playerScore: number;
+    // gameResult: PlayerGameResult[];
 }

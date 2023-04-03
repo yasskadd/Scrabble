@@ -114,6 +114,8 @@ export class WaitingRoomService {
         }
         room.players.push(newPlayer);
 
+        this.updateRoomReference(room);
+
         // server.to(joinGameQuery.roomId).emit(SocketEvents.PlayerJoinedWaitingRoom, this.stripPlayerPassword(newPlayer));
         server.to(joinGameQuery.roomId).emit(SocketEvents.UpdateWaitingRoom, room);
         socket.emit(SocketEvents.JoinedValidWaitingRoom, this.stripPlayersPassword(room));
@@ -300,11 +302,15 @@ export class WaitingRoomService {
 
     private stripUserPassword(user: IUser): IUser {
         return {
+            _id: user._id,
             email: user.email,
             username: user.username,
             password: 'null',
             profilePicture: user.profilePicture,
-        } as IUser;
+            historyEventList: user.historyEventList,
+            theme: user.theme,
+            language: user.language,
+        };
     }
 
     private stripPlayerPassword(player: RoomPlayer): RoomPlayer {
@@ -314,7 +320,7 @@ export class WaitingRoomService {
             socketId: player.socketId,
             type: player.type,
             isCreator: player.isCreator,
-        } as RoomPlayer;
+        };
     }
 
     private stripPlayersPassword(gameRoom: GameRoom): GameRoom {
@@ -350,7 +356,7 @@ export class WaitingRoomService {
                         name: 'bot-image',
                         isDefaultPicture: true,
                     },
-                } as IUser,
+                },
                 socketId: '',
                 roomId,
                 type: PlayerType.Bot,
@@ -359,5 +365,14 @@ export class WaitingRoomService {
         });
 
         return virtualPlayers;
+    }
+
+    private updateRoomReference(room: GameRoom) {
+        // const roomIndex = this.waitingRooms.findIndex((waitingRoom: GameRoom) => {
+        //     return room.id === waitingRoom.id;
+        // });
+        // this.waitingRooms.splice(roomIndex, 1);
+        // this.waitingRooms.push(room);
+        // console.log(this.waitingRooms.map((r: GameRoom) => r.players));
     }
 }
