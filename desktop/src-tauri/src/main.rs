@@ -8,7 +8,6 @@ use std::fs;
 use std::path::Path;
 use std::sync::Mutex;
 
-use native_tls::TlsConnector;
 use reqwest::{self, header::CONTENT_TYPE};
 use rust_socketio::{client::Client, ClientBuilder, Payload};
 use serde::Serialize;
@@ -57,7 +56,6 @@ fn socketEstablishConnection(
     cookie: Option<&str>,
     state: tauri::State<SocketClient>,
     window: tauri::Window,
-    app_handle: tauri::AppHandle,
 ) {
     let mut socket = state.socket.lock().expect("Error locking the socket");
 
