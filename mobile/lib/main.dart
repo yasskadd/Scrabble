@@ -29,8 +29,8 @@ Future<void> setup() async {
   await dotenv.load(fileName: envFile);
   var serverAddress = dotenv.env["SERVER_URL"];
 
-  getIt.registerLazySingleton<SecureSocket>(() => io(
-      serverAddress,
+  getIt.registerLazySingleton<Socket>(() => io(
+      "http://$serverAddress:3000",
       OptionBuilder()
           .setTransports(["websocket"])
           .disableAutoConnect()
@@ -42,8 +42,7 @@ Future<void> setup() async {
   socket.onConnect((_) => debugPrint('Socket connection established'));
   socket.onDisconnect((data) => debugPrint('Socket connection lost'));
 
-  getIt.registerLazySingleton<HttpHandlerService>(
-      () => HttpHandlerService(serverAddress!));
+  getIt.registerLazySingleton<HttpHandlerService>(() => HttpHandlerService("https://$serverAddress:3443"));
   getIt.registerLazySingleton<ChatService>(() => ChatService());
   getIt.registerLazySingleton<AuthService>(() => AuthService());
   getIt.registerLazySingleton<ThemeService>(() => ThemeService());
@@ -101,11 +100,9 @@ class _PolyScrabbleState extends State<PolyScrabble> {
       home: const LoginScreen(title: 'PolyScrabble 101 - Prototype'),
       localizationsDelegates: [
         FlutterI18nDelegate(
-          translationLoader: FileTranslationLoader(
-              forcedLocale: _languageService.currentLocale),
+          translationLoader: FileTranslationLoader(forcedLocale: _languageService.currentLocale),
           missingTranslationHandler: (key, locale) {
-            debugPrint(
-                "--- Missing Key: $key, languageCode: ${locale!.languageCode}");
+            debugPrint("--- Missing Key: $key, languageCode: ${locale!.languageCode}");
           },
         )
       ],
