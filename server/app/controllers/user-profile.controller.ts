@@ -1,11 +1,11 @@
-import { SECRET_KEY } from '@app/../very-secret-file';
 import { verifyToken } from '@app/middlewares/token-verification-middleware';
 import { AccountStorageService } from '@app/services/database/account-storage.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
+import { HistoryEvent } from '@common/interfaces/history-event';
+import { Theme } from '@common/interfaces/theme';
 import { IUser } from '@common/interfaces/user';
 import { Request, Response, Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import * as jwt from 'jsonwebtoken';
 import { Service } from 'typedi';
 
 @Service()
@@ -28,16 +28,15 @@ export class UserProfileController {
          * @return { number } HTTP Status - The return status of the request
          */
         this.router.patch('/username', verifyToken, async (req: Request, res: Response) => {
-            const oldUsername = res.locals.user.name;
+            const userID = res.locals.user.userID;
             const newUsername: string = req.body.newUsername;
             if (await this.accountStorageService.isUsernameRegistered(newUsername)) {
                 res.status(StatusCodes.CONFLICT).json({ message: 'The requested username is already taken. Please choose a different username.' });
                 return;
             }
-            await this.accountStorageService.updateUsername(oldUsername, newUsername);
-            const newToken: string = this.createJWToken(newUsername);
-            res.status(StatusCodes.OK).cookie('session_token', newToken).send(); // send new token, need to override the one existing in the client
-            this.socketManager.modifyUsername(oldUsername, newUsername);
+            await this.accountStorageService.updateUsername(userID, newUsername);
+            res.sendStatus(StatusCodes.OK);
+            this.socketManager.modifyUsername(userID, newUsername);
         });
 
         /**
@@ -48,15 +47,15 @@ export class UserProfileController {
          * @return { number } HTTP Status - The return status of the request
          */
         this.router.patch('/password', verifyToken, async (req: Request, res: Response) => {
-            const username: string = res.locals.user.name;
+            const userID: string = res.locals.user.userID;
             const password: string = req.body.newPassword as string;
-            if (await this.accountStorageService.isSamePassword(username, password)) {
+            if (await this.accountStorageService.isSamePassword(userID, password)) {
                 res.status(StatusCodes.CONFLICT).json({
                     message: 'The requested password is the same as the old one. Please choose a different password',
                 });
                 return;
             }
-            await this.accountStorageService.updatePassword(username, password);
+            await this.accountStorageService.updatePassword(userID, password);
             res.sendStatus(StatusCodes.OK);
         });
 
@@ -67,14 +66,48 @@ export class UserProfileController {
          * @return { number } HTTP Status - The return status of the request
          */
         this.router.get('/userData', verifyToken, async (req: Request, res: Response) => {
-            const username: string = res.locals.user.name;
-            const userInfos: IUser = await this.accountStorageService.getUserData(username);
+            const userID: string = res.locals.user.userID;
+            const userInfos: IUser = await this.accountStorageService.getUserDataFromID(userID);
             res.status(StatusCodes.OK).json(userInfos);
         });
-    }
 
-    private createJWToken(username: string): string {
-        const token = jwt.sign({ name: username }, SECRET_KEY, { algorithm: 'HS256', expiresIn: '1h' });
-        return token;
+        /**
+         * HTTP GET request to retrieve account history information
+         *
+         * @return { message: string } send - error message if invalid token
+         * @return { historyEventList: HistoryEvent[] } send - new token with the new username payload to override the old one
+         * @return { number } HTTP Status - The return status of the request
+         */
+        this.router.get('/history-event', verifyToken, async (req: Request, res: Response) => {
+            const userID: string = res.locals.user.userID;
+            const historyEventList: HistoryEvent[] = await this.accountStorageService.getUserEventHistory(userID);
+            res.status(StatusCodes.OK).send({ historyEventList });
+        });
+
+        /**
+         * HTTP PATCH request to change user language
+         *
+         * @param {{ language: 'en' | 'fr' }} body - new language
+         * @return { number } HTTP Status - The return status of the request
+         */
+        this.router.patch('/language', verifyToken, async (req: Request, res: Response) => {
+            const userID: string = res.locals.user.userID;
+            const newLanguage: 'en' | 'fr' = req.body.language;
+            await this.accountStorageService.updateLanguage(userID, newLanguage);
+            res.sendStatus(StatusCodes.OK);
+        });
+
+        /**
+         * HTTP PATCH request to change user theme
+         *
+         * @param {{ theme: Theme }} body - new theme
+         * @return { number } HTTP Status - The return status of the request
+         */
+        this.router.patch('/theme', verifyToken, async (req: Request, res: Response) => {
+            const userID: string = res.locals.user.userID;
+            const newTheme: Theme = req.body.theme;
+            await this.accountStorageService.updateTheme(userID, newTheme);
+            res.sendStatus(StatusCodes.OK);
+        });
     }
 }

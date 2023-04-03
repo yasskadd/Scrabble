@@ -1,13 +1,15 @@
+import 'package:flutter/material.dart';
 import 'package:mobile/domain/models/userimageinfo-model.dart';
 
 class IUser {
   final String? email;
-  final String username, password;
+  final String username;
+  final String? password;
   final UserImageInfo? profilePicture;
 
   IUser(
       {required this.username,
-        required this.password,
+        this.password,
         this.email,
         this.profilePicture});
 
@@ -20,9 +22,9 @@ class IUser {
             : null;
 
   Map toJson() => {
-    "email": email,
-    "username": username,
-    "password": password,
-    "profilePicture": profilePicture
-  };
+        "email": email,
+        "username": username,
+        "password": password,
+        "profilePicture": profilePicture
+      };
 }

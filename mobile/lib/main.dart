@@ -7,6 +7,7 @@ import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:flutter_i18n/flutter_i18n_delegate.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mobile/domain/services/auth-service.dart';
+import 'package:mobile/domain/services/avatar-service.dart';
 import 'package:mobile/domain/services/chat-service.dart';
 import 'package:mobile/domain/services/game-service.dart';
 import 'package:mobile/domain/services/http-handler-service.dart';
@@ -45,6 +46,7 @@ Future<void> setup() async {
   getIt.registerLazySingleton<ThemeService>(() => ThemeService());
   getIt.registerLazySingleton<LanguageService>(() => LanguageService());
   getIt.registerLazySingleton<RoomService>(() => RoomService());
+  getIt.registerLazySingleton<AvatarService>(() => AvatarService());
   getIt.registerLazySingleton<GameService>(() => GameService());
 
   getIt.registerSingleton<GlobalKey<NavigatorState>>(GlobalKey<NavigatorState>());
@@ -65,15 +67,26 @@ class PolyScrabble extends StatefulWidget {
 class _PolyScrabbleState extends State<PolyScrabble> {
   final _themeService = GetIt.I.get<ThemeService>();
   final _languageService = GetIt.I.get<LanguageService>();
-  StreamSubscription? themeSub;
+  late final StreamSubscription themeSub;
+
+  @override
+  void initState() {
+    super.initState();
+
+    themeSub = _themeService.notifyThemeChange.stream.listen((event) {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    themeSub.cancel();
+    super.dispose();
+  }
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    themeSub ??= _themeService.notifyThemeChange.stream.listen((event) {
-      setState(() {});
-    });
-
     return MaterialApp(
       title: 'PolyScrabble 110',
       theme: _themeService.getTheme(),

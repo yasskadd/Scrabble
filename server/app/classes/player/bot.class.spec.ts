@@ -163,7 +163,7 @@ describe('Bot Tests', () => {
             mockSocketManager.expects('emitRoom').exactly(1).calledWithExactly(bot.roomId, SocketEvents.GameMessage, '!passer');
             const commandInfoStub = undefined as never;
             const spySkipTurn = Sinon.spy(bot, 'skipTurn');
-            bot['play'](commandInfoStub);
+            bot['placeWord'](commandInfoStub);
             mockGame.verify();
             mockSocketManager.verify();
             expect(spySkipTurn.calledOnce).to.be.equal(true);
@@ -179,7 +179,7 @@ describe('Bot Tests', () => {
             mockGame.expects('play').exactly(1).withExactArgs(bot, commandInfoStub);
             mockSocketManager.expects('emitRoom').exactly(2);
             const spyEmitCommand = Sinon.spy(bot, 'emitPlaceCommand' as keyof Bot);
-            bot['play'](commandInfoStub);
+            bot['placeWord'](commandInfoStub);
             mockGame.verify();
             mockSocketManager.verify();
             expect(spyEmitCommand.calledOnceWithExactly(commandInfoStub)).to.be.equal(true);

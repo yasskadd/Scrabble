@@ -5,9 +5,10 @@ import { BotInformation } from '@app/interfaces/bot-information';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
 import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
+import { RoomPlayer } from '@common/interfaces/room-player';
 import { Container } from 'typedi';
 import { GamePlayer } from './player.class';
-import { RoomPlayer } from '@common/interfaces/room-player';
+import { RealPlayer } from './real-player.class';
 
 export class Bot extends GamePlayer {
     protected countUp: number = 0;
@@ -16,7 +17,7 @@ export class Bot extends GamePlayer {
     protected isNotTurn: boolean = false;
     private timer: number;
 
-    constructor(isPlayerOne: boolean, roomPlayer: RoomPlayer, protected botInfo: BotInformation) {
+    constructor(roomPlayer: RoomPlayer, protected botInfo: BotInformation) {
         super(roomPlayer);
         this.timer = botInfo.timer;
         this.wordSolver = new WordSolver(botInfo.dictionaryValidation);
@@ -49,12 +50,27 @@ export class Bot extends GamePlayer {
 
     skipTurn(): void {
         if (this.game === undefined || this.isNotTurn) return;
-        this.socketManager.emitRoom(this.botInfo.roomId, SocketEvents.GameMessage, '!passer');
         this.game.skip(this.player.user.username);
         this.isNotTurn = true;
     }
 
-    protected play(commandInfo: PlaceWordCommandInfo): void {
+    convertToRealPlayer(observer: RoomPlayer): RealPlayer {
+        const player = new RealPlayer(observer);
+        player.game = this.game;
+        player.rack = this.rack;
+        player.score = this.score;
+        player.objectives = this.objectives;
+        player.fiveLettersPlacedCount = this.fiveLettersPlacedCount;
+        player.clueCommandUseCount = this.clueCommandUseCount;
+        return player;
+    }
+
+    unsubscribeObservables(): void {
+        this.game.turn.countdown.unsubscribe();
+        this.game.turn.endTurn.unsubscribe();
+    }
+
+    protected placeWord(commandInfo: PlaceWordCommandInfo): void {
         if (commandInfo === undefined || this.isNotTurn) {
             this.skipTurn();
             return;
@@ -69,10 +85,7 @@ export class Bot extends GamePlayer {
     }
 
     protected emitPlaceCommand(randomCommandInfo: PlaceWordCommandInfo): void {
-        const coordString = `${String.fromCharCode(Constant.CHAR_ASCII + randomCommandInfo.firstCoordinate.y)}${randomCommandInfo.firstCoordinate.x}`;
-        const placeCommand = `!placer ${coordString}${randomCommandInfo.isHorizontal ? 'h' : 'v'} ${randomCommandInfo.letters.join('')}`;
-        this.socketManager.emitRoom(this.botInfo.roomId, SocketEvents.GameMessage, placeCommand);
-        this.game.play(this, randomCommandInfo);
+        this.game.placeWord(randomCommandInfo);
         this.socketManager.emitRoom(this.botInfo.roomId, SocketEvents.LetterReserveUpdated, this.game.letterReserve.lettersReserve);
     }
 

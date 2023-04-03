@@ -21,7 +21,7 @@ export class LetterTile {
     }
 
     set letter(newLetter: string) {
-        this._letter = newLetter.toLowerCase();
+        this._letter = newLetter.toUpperCase();
         this.setPoints();
     }
 

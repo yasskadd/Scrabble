@@ -73,10 +73,14 @@ export class UserService {
 
     private initUser(): void {
         this.user = {
+            _id: '',
             email: '',
             username: '',
             password: '',
             profilePicture: undefined,
+            historyEventList: [],
+            language: 'fr', // TODO: To change if necessary
+            theme: null, // TODO: to change
         };
     }
 
