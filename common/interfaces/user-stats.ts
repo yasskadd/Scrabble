@@ -1,7 +1,7 @@
 export interface UserStats {
     userIdRef: string;
-    score: number;
-    gamePlayed: number;
+    ranking: number;
+    gameCount: number;
     win: number;
     loss: number;
     totalGameTime: number;

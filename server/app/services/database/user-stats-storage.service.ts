@@ -20,20 +20,20 @@ export class UserStatsStorageService {
 
     async updatePlayerStats(gameHistoryInfo: GameHistoryInfo): Promise<void> {
         const userStats = await this.getUserStats(gameHistoryInfo.playerId);
-        const newScore = this.calculateScore(userStats.score, gameHistoryInfo.playerWonGame);
-        const newGamePlayed = userStats.gamePlayed + 1;
+        const newRanking = this.calculateScore(userStats.ranking, gameHistoryInfo.playerWonGame);
+        const newGameCount = userStats.gameCount + 1;
         const newWin = gameHistoryInfo.playerWonGame ? userStats.win + 1 : userStats.win;
         const newLoss = gameHistoryInfo.playerWonGame ? userStats.loss : userStats.loss + 1;
         const newTotalGameTime = userStats.totalGameTime + gameHistoryInfo.duration;
         const newTotalGameScore = userStats.totalGameScore + gameHistoryInfo.playerScore;
-        const newAverageGameTime = this.msToMinSec(newTotalGameTime / newGamePlayed);
-        const newAverageGameScore = newTotalGameScore / newGamePlayed;
+        const newAverageGameTime = this.msToMinSec(newTotalGameTime / newGameCount);
+        const newAverageGameScore = newTotalGameScore / newGameCount;
         await this.database.usersStats.collection.updateOne(
             { userIdRef: new ObjectId(gameHistoryInfo.playerId) },
             {
                 $set: {
-                    score: newScore,
-                    gamePlayed: newGamePlayed,
+                    ranking: newRanking,
+                    gameCount: newGameCount,
                     win: newWin,
                     loss: newLoss,
                     totalGameTime: newTotalGameTime,
@@ -45,15 +45,15 @@ export class UserStatsStorageService {
         );
     }
 
-    private calculateScore(originalScore: number, playerWonGame: boolean): number {
-        let newScore: number;
+    private calculateScore(originalRanking: number, playerWonGame: boolean): number {
+        let newRanking: number;
         if (playerWonGame) {
-            newScore = originalScore + WIN_SCORE;
-            return newScore < MAX_SCORE ? newScore : MAX_SCORE;
+            newRanking = originalRanking + WIN_SCORE;
+            return newRanking < MAX_SCORE ? newRanking : MAX_SCORE;
         }
 
-        newScore = originalScore + LOSS_SCORE;
-        return newScore > MIN_SCORE ? newScore : MIN_SCORE;
+        newRanking = originalRanking + LOSS_SCORE;
+        return newRanking > MIN_SCORE ? newRanking : MIN_SCORE;
     }
 
     private msToMinSec(milliseconds: number): string {

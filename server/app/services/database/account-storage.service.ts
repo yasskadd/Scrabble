@@ -30,8 +30,8 @@ export class AccountStorageService {
         };
         const userStats = {
             userIdRef: id,
-            score: DEFAULT_PLAYER_SCORE,
-            gamePlayed: DEFAULT_PLAYER_STATS,
+            ranking: DEFAULT_PLAYER_SCORE,
+            gameCount: DEFAULT_PLAYER_STATS,
             win: DEFAULT_PLAYER_STATS,
             loss: DEFAULT_PLAYER_STATS,
             totalGameTime: DEFAULT_PLAYER_STATS,
