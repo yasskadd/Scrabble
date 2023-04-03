@@ -45,8 +45,7 @@ export class GameConfigurationService {
         this.gameClientService.quitGameSubject.subscribe(() => {
             this.exitWaitingRoom();
         });
-        // this.isGameStarted = new Subject<boolean>();
-        // this.configureBaseSocketFeatures();
+
         this.clientSocket.connected.subscribe((connected: boolean) => {
             if (connected) {
                 this.configureBaseSocketFeatures();

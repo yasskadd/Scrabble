@@ -269,7 +269,6 @@ export class GamesStateService {
         ) {
             this.socketManager.emitRoom(room, SocketEvents.UserDisconnect);
             // TODO : Repair and make that better for 4 players and bots
-            // this.switchToSolo(gamePlayer).then();
 
             const bot = this.replacePlayerWithBot(gamePlayer as RealPlayer);
             this.gamesHandler.players.push(bot);

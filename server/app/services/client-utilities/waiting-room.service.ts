@@ -135,6 +135,7 @@ export class WaitingRoomService {
 
             this.rejectOpponent(server, socket, player);
 
+            console.log(room.players);
             if (room.players.filter((playerElement: RoomPlayer) => playerElement.type === PlayerType.User).length === 0) {
                 this.removeRoom(server, userQuery.roomId);
             }
@@ -270,9 +271,7 @@ export class WaitingRoomService {
     }
 
     private areUsersTheSame(player1: IUser, player2: IUser): boolean {
-        return (
-            player1.username === player2.username && player1.email === player2.email && player1.profilePicture?.name === player2.profilePicture?.name
-        );
+        return player1._id === player2._id;
     }
 
     private generateRoomId(): string {

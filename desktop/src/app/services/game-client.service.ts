@@ -117,7 +117,8 @@ export class GameClientService {
     }
 
     abandonGame() {
-        this.clientSocketService.send('AbandonGame');
+        this.clientSocketService.send(SocketEvents.AbandonGame);
+        this.quitGameSubject.next();
     }
 
     quitGame() {
