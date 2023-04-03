@@ -11,6 +11,10 @@ export class HistoryStorageService {
         return (await this.databaseService.histories.fetchDocuments({})).reverse();
     }
 
+    async getHistoryByUser(userId: string): Promise<Document[]> {
+        return (await this.databaseService.histories.fetchDocuments({ playerId: userId })).reverse();
+    }
+
     async clearHistory() {
         await this.databaseService.histories.resetCollection();
     }
