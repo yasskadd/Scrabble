@@ -12,7 +12,7 @@
     },
     "tauri": {
         "allowlist": {
-            "all": true,
+            "all": false,
             "window": {
                 "all": true
             },
@@ -29,6 +29,7 @@
                 "open": true
             },
             "fs": {
+                "all": true,
                 "scope": ["$RESOURCE/*", "$CACHE/*"]
             }
         },

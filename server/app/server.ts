@@ -47,7 +47,7 @@ export class Server {
             },
             this.application.app,
         );
-        this.socketManager.init(this.secureServer);
+        this.socketManager.init(this.server);
         this.socketManager.handleSockets();
         this.handler.initSocketsEvents();
 

@@ -61,28 +61,10 @@ fn socketEstablishConnection(
 ) {
     let mut socket = state.socket.lock().expect("Error locking the socket");
 
-    let certificate: native_tls::Certificate = native_tls::Certificate::from_pem(
-        &fs::read(
-            app_handle
-                .path_resolver()
-                .resolve_resource("../certs/server.pem")
-                .expect("Error retriving the certificate file path"),
-        )
-        .expect("Error reading the certificate file"),
-    )
-    .expect("Error generating the certificate");
-    let tls_connector = TlsConnector::builder()
-        .danger_accept_invalid_certs(true)
-        .add_root_certificate(certificate)
-        .build()
-        .unwrap();
-
     let clientBuilder = match cookie {
         Some(c) => {
             println!("Connecting to socket with cookie : {:?}", c);
-            ClientBuilder::new(address)
-                .opening_header("cookie", c)
-                .tls_config(tls_connector)
+            ClientBuilder::new(address).opening_header("cookie", c)
         }
         None => ClientBuilder::new(address),
     };
@@ -106,7 +88,7 @@ fn socketEstablishConnection(
             println!("Connected to socket");
         }
         Err(error) => {
-            println!("Error");
+            println!("Error {error}");
             window
                 .emit(
                     RustEvent::SocketConnectionFailed.to_string(),

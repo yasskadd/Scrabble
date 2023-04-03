@@ -6,7 +6,7 @@ import * as jwt from 'jsonwebtoken';
 import * as io from 'socket.io';
 import { Service } from 'typedi';
 import { CallbackSignature, OnSioCallbackSignature } from '@app/types/sockets';
-import * as https from 'https';
+import * as http from 'http';
 
 @Service()
 export class SocketManager {
@@ -22,7 +22,7 @@ export class SocketManager {
         this.socketUsernameMap = new Map<io.Socket, string>();
     }
 
-    init(server: https.Server) {
+    init(server: http.Server) {
         this.server = new io.Server(server, { cors: { origin: '*', methods: ['GET', 'POST'] } });
     }
 
