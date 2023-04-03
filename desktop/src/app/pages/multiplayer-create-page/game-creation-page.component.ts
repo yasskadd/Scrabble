@@ -135,7 +135,6 @@ export class GameCreationPageComponent implements OnInit {
         this.httpHandler.getDictionaries().subscribe((dictionaries: DictionaryInfo[]) => {
             this.dictionaryList = dictionaries;
             if (dictionaries.some((dictionary) => dictionary.title === dictionaryTitle)) {
-                console.log('hello 1');
                 this.initGame(dictionaryTitle);
                 this.gameConfiguration.beginScrabbleGame();
                 this.navigateToGamePage();
