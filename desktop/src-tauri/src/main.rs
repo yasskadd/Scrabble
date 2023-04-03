@@ -4,13 +4,12 @@
     windows_subsystem = "windows"
 )]
 
-use std::convert::identity;
 use std::fs;
 use std::path::Path;
 use std::sync::Mutex;
 
 use native_tls::TlsConnector;
-use reqwest::{self, header::CONTENT_TYPE, Identity};
+use reqwest::{self, header::CONTENT_TYPE};
 use rust_socketio::{client::Client, ClientBuilder, Payload};
 use serde::Serialize;
 use tauri::{self, Manager};
@@ -58,14 +57,13 @@ fn socketEstablishConnection(
     cookie: Option<&str>,
     state: tauri::State<SocketClient>,
     window: tauri::Window,
-    handle: tauri::AppHandle,
+    app_handle: tauri::AppHandle,
 ) {
     let mut socket = state.socket.lock().expect("Error locking the socket");
 
     let certificate: native_tls::Certificate = native_tls::Certificate::from_pem(
         &fs::read(
-            handle
-                .app_handle()
+            app_handle
                 .path_resolver()
                 .resolve_resource("../certs/server.pem")
                 .expect("Error retriving the certificate file path"),
@@ -100,26 +98,23 @@ fn socketEstablishConnection(
                     .expect("Couldn't emit the event to Angular");
             }
         })
-        .connect()
-        .expect("connection failed");
+        .connect();
 
-    *socket = Some(connection);
-
-    // match connection {
-    //     Ok(client) => {
-    //         *socket = Some(client);
-    //         println!("Connected to socket");
-    //     }
-    //     Err(error) => {
-    //         println!("Error");
-    //         window
-    //             .emit(
-    //                 RustEvent::SocketConnectionFailed.to_string(),
-    //                 error.to_string(),
-    //             )
-    //             .expect("oups");
-    //     }
-    // }
+    match connection {
+        Ok(client) => {
+            *socket = Some(client);
+            println!("Connected to socket");
+        }
+        Err(error) => {
+            println!("Error");
+            window
+                .emit(
+                    RustEvent::SocketConnectionFailed.to_string(),
+                    error.to_string(),
+                )
+                .expect("oups");
+        }
+    }
 }
 
 #[tauri::command]
@@ -346,7 +341,7 @@ async fn httpDelete(
 }
 
 fn main() {
-    // std::env::set_var("RUST_BACKTRACE", "full");
+    std::env::set_var("RUST_BACKTRACE", "full");
     tauri::Builder::default()
         .manage(SocketClient {
             socket: Mutex::new(None),
