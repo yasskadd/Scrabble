@@ -17,6 +17,7 @@ import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info
 import { ClientSocketService } from './communication/client-socket.service';
 import { GameClientService } from './game-client.service';
 import { GridService } from './grid.service';
+import { first } from 'rxjs/operators';
 
 // const ASCII_ALPHABET_START = 96;
 
@@ -42,8 +43,12 @@ export class LetterPlacementService {
         this.boardTiles = [];
 
         this.setPropreties();
-        this.gameClientService.gameboardUpdated.subscribe(() => {
+        this.gameClientService.gameboardUpdated.pipe(first()).subscribe((gameBoard: string[]) => {
             this.resetView();
+            this.updateGameBoard(gameBoard);
+        });
+        this.gameClientService.gameboardUpdated.subscribe((gameBoard: string[]) => {
+            this.updateGameBoard(gameBoard);
         });
     }
 
@@ -409,5 +414,13 @@ export class LetterPlacementService {
 
         console.log(coord);
         return coord;
+    }
+
+    private updateGameBoard(gameBoard: string[]) {
+        console.log(gameBoard);
+        gameBoard.forEach((tile: string, coord) => {
+            this.boardTiles[coord].letter.value = tile.toUpperCase() as AlphabetLetter;
+            this.boardTiles[coord].state = BoardTileState.Confirmed;
+        });
     }
 }
