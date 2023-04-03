@@ -29,7 +29,7 @@ export class DictionaryValidation {
 
     private checkWordInDictionary(wordList: Word[]): void {
         wordList.forEach((word) => {
-            if (!this.dictionary.has(word.stringFormat)) word.isValid = false;
+            if (!this.dictionary.has(word.stringFormat.toLowerCase())) word.isValid = false;
         });
     }
 

@@ -2,8 +2,7 @@ import { LetterReserve } from '@app/classes/letter-reserve.class';
 import { ObjectivesHandler } from '@app/classes/objectives-handler.class';
 import { GamePlayer } from '@app/classes/player/player.class';
 import { Turn } from '@app/classes/turn.class';
-import { Word } from '@app/classes/word.class';
-import { PlaceLettersReturn } from '@app/interfaces/place-letters-return';
+import { WordPlacementResult } from '@app/interfaces/word-placement-result';
 import { Gameboard } from '@common/classes/gameboard.class';
 import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { Letter } from '@common/interfaces/letter';
@@ -35,17 +34,12 @@ export class Game {
         letterPlacement: LetterPlacement,
         wordSolver: WordSolver,
     ) {
-        // TODO : Remove this
-        this.isMode2990 = false;
-
-        // this.start(players);
         this.gameMode = gameMode;
         this.isModeSolo = isSoloMode;
         this.beginningTime = new Date();
         this.gameboard = new Gameboard();
         this.isGameFinish = false;
         this.isModeSolo = false;
-        // if (isMode2990) this.objectivesHandler = new ObjectivesHandler(player1, player2);
         this.isGameAbandoned = false;
         this.gameMode = '';
         this.dictionaryValidation = dictionaryValidation;
@@ -53,16 +47,7 @@ export class Game {
         this.wordSolver = wordSolver;
     }
 
-    // start(players: GamePlayer[]): void {
-    //     players.forEach((player) => {
-    //         this.letterReserve.generateLetters(MAX_QUANTITY, player.rack);
-    //     });
-    //
-    //     this.turn.determineStartingPlayer(players);
-    //     this.turn.start();
-    // }
-
-    end(): void {
+    terminate(): void {
         this.turn.end(true);
     }
 
@@ -73,24 +58,16 @@ export class Game {
         return true;
     }
 
-    play(player: GamePlayer, commandInfo: PlaceWordCommandInfo): PlaceLettersReturn | string {
-        if (commandInfo.letters.length === 1) commandInfo.isHorizontal = undefined;
-        let placeLettersReturn: PlaceLettersReturn = { hasPassed: false, gameboard: this.gameboard, invalidWords: [] as Word[] };
-        const numberOfLetterPlaced = commandInfo.letters.length;
+    placeWord(commandInfo: PlaceWordCommandInfo) {
+        const currentCoords = commandInfo.firstCoordinate;
 
-        if (this.turn.validating(player.player.user.username)) {
-            const validationInfo = this.letterPlacement.globalCommandVerification(commandInfo, this.gameboard, player);
-            const newWord = validationInfo[0];
-            const errorType = validationInfo[1] as string;
-            if (errorType !== null) {
-                this.turn.resetSkipCounter();
-                return errorType;
+        commandInfo.letters.forEach((letter) => {
+            while (this.gameboard.getLetterTile(currentCoords).isOccupied) {
+                if (commandInfo.isHorizontal) currentCoords.x++;
+                else currentCoords.y++;
             }
-            placeLettersReturn = this.letterPlacement.placeLetters(newWord, commandInfo, player, this.gameboard);
-            this.giveNewLetterToRack(player, numberOfLetterPlaced, placeLettersReturn);
-            this.endOfGameVerification(player);
-        }
-        return placeLettersReturn;
+            this.gameboard.placeLetter(currentCoords, letter);
+        });
     }
 
     exchange(letters: string[], gamePlayer: GamePlayer): Letter[] {
@@ -104,11 +81,11 @@ export class Game {
     }
 
     abandon(): void {
-        this.end();
+        this.terminate();
         this.isGameAbandoned = true;
     }
 
-    private giveNewLetterToRack(player: GamePlayer, numberOfLetterPlaced: number, placeLettersReturn: PlaceLettersReturn) {
+    giveNewLetterToRack(player: GamePlayer, numberOfLetterPlaced: number, placeLettersReturn: WordPlacementResult) {
         if (!placeLettersReturn.hasPassed) return;
         if (!this.letterReserve.isEmpty() && this.letterReserve.totalQuantity() < numberOfLetterPlaced) {
             player.rack = this.letterReserve.generateLetters(this.letterReserve.totalQuantity(), player.rack);
@@ -117,9 +94,9 @@ export class Game {
         }
     }
 
-    private endOfGameVerification(player: GamePlayer) {
+    concludeGameVerification(player: GamePlayer) {
         if (player.rackIsEmpty() && this.letterReserve.isEmpty()) {
-            this.end();
+            this.terminate();
             return;
         }
         this.turn.resetSkipCounter();
