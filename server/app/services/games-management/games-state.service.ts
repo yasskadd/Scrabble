@@ -412,7 +412,7 @@ export class GamesStateService {
             return;
         });
 
-        if (playersInRoom.length !== 0) this.endGame(playersInRoom[0].socketId);
+        if (playersInRoom.length !== 0) await this.endGame(playersInRoom[0].socketId);
 
         for (const player of playersInRoom) {
             await this.sendHighScore(player);
@@ -441,10 +441,9 @@ export class GamesStateService {
     }
 
     private getWinnerPlayer(players: GamePlayer[]): GamePlayer {
-        const winnerPlayer = players.reduce((acc, cur) => {
+        return players.reduce((acc, cur) => {
             return cur.score > acc.score ? cur : acc;
         });
-        return winnerPlayer;
     }
 
     private sendPublicViewUpdate(game: Game, room: GameRoom) {
@@ -515,8 +514,7 @@ export class GamesStateService {
 
     private replaceBotWithObserver(observer: RoomPlayer, bot: Bot) {
         bot.unsubscribeObservables();
-        const player = bot.convertToRealPlayer(observer);
-        return player;
+        return bot.convertToRealPlayer(observer);
     }
 
     private replacePlayerWithBot(player: RealPlayer): BeginnerBot {
