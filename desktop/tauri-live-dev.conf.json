@@ -29,7 +29,7 @@
                 "open": true
             },
             "fs": {
-                "scope": ["$RESOURCE/*"]
+                "scope": ["$RESOURCE/*", "$CACHE/*"]
             }
         },
         "bundle": {
