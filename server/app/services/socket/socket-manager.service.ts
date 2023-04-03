@@ -77,7 +77,8 @@ export class SocketManager {
                     if (err) isTokenValid = false;
                     else {
                         isTokenValid = true;
-                        username = decoded.name;
+                        // eslint-disable-next-line no-underscore-dangle
+                        username = decoded.userID;
                     }
                 });
 
@@ -89,9 +90,6 @@ export class SocketManager {
                 this.socketUsernameMap.set(socket, username);
 
                 this.accountStorageService.addUserEventHistory(username, HistoryActions.Connection, new Date());
-
-                // eslint-disable-next-line no-console
-                console.log('Connection of authenticated client with id = ' + socket.id + ' from : ' + socket.handshake.headers.host);
             } else {
                 socket.disconnect();
                 // eslint-disable-next-line no-console

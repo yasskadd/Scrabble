@@ -74,7 +74,6 @@ export class GameClientService {
         });
 
         this.clientSocketService.on(SocketEvents.GameAboutToStart, (gameInfo: GameInfo) => {
-            console.log('received GameAboutToStart');
             this.players = gameInfo.players;
             this.activePlayer = gameInfo.activePlayer;
             this.updateGameboard(gameInfo.gameboard);
@@ -127,8 +126,6 @@ export class GameClientService {
     }
 
     getLocalPlayer(): PlayerInformation {
-        console.log(this.players);
-        console.log(this.players.find((info: PlayerInformation) => info.player.user._id === this.userService.user._id));
         return this.players.find((info: PlayerInformation) => info.player.user._id === this.userService.user._id);
     }
 

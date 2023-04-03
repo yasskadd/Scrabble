@@ -115,8 +115,6 @@ export class LetterPlacementService {
             letters,
         } as PlaceWordCommandInfo);
 
-        console.log(this.selectionPositions[0].direction === PlayDirection.Right);
-
         // this.chatboxService.submitMessage(
         //     `!placer ${verticalPlacement}${this.selectionPositions[0].coord}${this.selectionPositions[0].direction} ${lettersToSubmit}`,
         // );
@@ -412,12 +410,10 @@ export class LetterPlacementService {
             y: Math.floor(this.origin / TOTAL_ROWS) + 1,
         };
 
-        console.log(coord);
         return coord;
     }
 
     private updateGameBoard(gameBoard: string[]) {
-        console.log(gameBoard);
         gameBoard.forEach((tile: string, coord) => {
             this.boardTiles[coord].letter.value = tile.toUpperCase() as AlphabetLetter;
             this.boardTiles[coord].state = BoardTileState.Confirmed;
