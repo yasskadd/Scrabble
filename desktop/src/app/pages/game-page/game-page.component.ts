@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { GameClientService } from '@app/services/game-client.service';
 import { first } from 'rxjs/operators';
+import { useTauri } from '@app/pages/app/app.component';
+import { TauriEvent } from '@tauri-apps/api/event';
+import { WebviewWindow } from '@tauri-apps/api/window';
 
 @Component({
     selector: 'app-game-page',
@@ -15,7 +18,15 @@ export class GamePageComponent implements OnInit {
 
         // TODO : Remove this. For debugging only
         this.isLoading = false;
-        // this.gameClientService.updateGameboard();
+
+        if (useTauri) {
+            const tauriWindow = WebviewWindow.getByLabel('main');
+            tauriWindow
+                .listen(TauriEvent.WINDOW_CLOSE_REQUESTED, () => {
+                    alert('Cannot close while in game');
+                })
+                .then();
+        }
     }
 
     ngOnInit(): void {
