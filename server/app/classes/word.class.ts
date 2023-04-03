@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { Gameboard } from '@common/classes/gameboard.class';
 import { Coordinate } from '@common/interfaces/coordinate';
 import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';

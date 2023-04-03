@@ -99,13 +99,9 @@ export class GamesActionsService {
         const game = gamePlayer.game;
         if (!game) return;
 
-        console.log(gamePlayer.player.user.username + 'is placing word: ');
-        console.log(commandInfo);
-
         const placement: Word | ErrorType = this.gameValidationService.verifyPlaceWordCommand(gamePlayer, commandInfo);
 
         if (!(placement instanceof Word)) {
-            console.log('Wrong placement: ' + placement);
             socket.emit(SocketEvents.PlacementFailure, placement);
             return;
         }

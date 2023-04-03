@@ -40,8 +40,6 @@ export class UserService {
                 subject.next('');
             },
             (error: any) => {
-                console.log(error);
-
                 // TODO : Language
                 subject.next(error.error.message);
             },
