@@ -47,6 +47,18 @@ export class GameClientService {
         });
     }
 
+    initGameInformation() {
+        // TODO : Update that
+        this.timer = 0;
+        this.gameboard = new Gameboard();
+        this.activePlayer = undefined;
+        this.players = [];
+        this.letterReserveLength = 0;
+        this.isGameFinish = false;
+        this.winningMessage = '';
+        this.winner = '';
+    }
+
     configureBaseSocketFeatures() {
         this.clientSocketService.on(SocketEvents.UpdatePlayersInformation, (players: PlayerInformation[]) => {
             this.updatePlayersInformationEvent(players);
@@ -108,20 +120,9 @@ export class GameClientService {
         this.gameConfigurationService.exitWaitingRoom();
     }
 
-    initGameInformation() {
-        // TODO : Update that
-        this.timer = 0;
-        this.gameboard = new Gameboard();
-        this.activePlayer = undefined;
-        this.players = [];
-        this.letterReserveLength = 0;
-        this.isGameFinish = false;
-        this.winningMessage = '';
-        this.winner = '';
-    }
-
     getLocalPlayer(): PlayerInformation {
-        // console.log(this.players.find((info: PlayerInformation) => info.player.user.username === this.userService.user.username));
+        console.log(this.players);
+        console.log(this.players.find((info: PlayerInformation) => info.player.user._id === this.userService.user._id));
         return this.players.find((info: PlayerInformation) => info.player.user.username === this.userService.user.username);
     }
 
