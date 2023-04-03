@@ -1,10 +1,10 @@
 import { SECRET_KEY } from '@app/../very-secret-file';
 import * as cookie from 'cookie';
-import * as http from 'http';
 import * as jwt from 'jsonwebtoken';
 import * as io from 'socket.io';
 import { Service } from 'typedi';
 import { CallbackSignature, OnSioCallbackSignature } from '@app/types/sockets';
+import * as https from 'https';
 
 @Service()
 export class SocketManager {
@@ -20,7 +20,7 @@ export class SocketManager {
         this.socketUsernameMap = new Map<io.Socket, string>();
     }
 
-    init(server: http.Server) {
+    init(server: https.Server) {
         this.server = new io.Server(server, { cors: { origin: '*', methods: ['GET', 'POST'] } });
     }
 

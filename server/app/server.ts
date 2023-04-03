@@ -11,7 +11,7 @@ import * as fs from 'fs';
 @Service()
 export class Server {
     private static readonly appPort: string | number | boolean = Server.normalizePort(process.env.PORT || '3000');
-    // private static readonly secureAppPort: string | number | boolean = Server.normalizePort(process.env.PORT || '443');
+    private static readonly secureAppPort: string | number | boolean = Server.normalizePort(process.env.PORT || '3443');
     // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     private static readonly baseTen: number = 10;
     private server: http.Server;
@@ -36,7 +36,7 @@ export class Server {
     }
 
     async init(): Promise<void> {
-        this.application.app.set('port', Server.appPort);
+        this.application.app.set('port', Server.secureAppPort);
 
         this.server = http.createServer(this.application.app);
         this.secureServer = https.createServer(
@@ -47,12 +47,12 @@ export class Server {
             },
             this.application.app,
         );
-        this.socketManager.init(this.server);
+        this.socketManager.init(this.secureServer);
         this.socketManager.handleSockets();
         this.handler.initSocketsEvents();
 
         this.server.listen(Server.appPort);
-        this.secureServer.listen(3443);
+        this.secureServer.listen(Server.secureAppPort);
         this.server.on('error', (error: NodeJS.ErrnoException) => this.onError(error));
         this.server.on('listening', () => this.onListening(this.server));
         this.secureServer.on('error', (error: NodeJS.ErrnoException) => this.onError(error));

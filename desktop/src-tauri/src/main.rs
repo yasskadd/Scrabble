@@ -4,11 +4,13 @@
     windows_subsystem = "windows"
 )]
 
+use std::convert::identity;
 use std::fs;
 use std::path::Path;
 use std::sync::Mutex;
 
-use reqwest::{self, header::CONTENT_TYPE};
+use native_tls::TlsConnector;
+use reqwest::{self, header::CONTENT_TYPE, Identity};
 use rust_socketio::{client::Client, ClientBuilder, Payload};
 use serde::Serialize;
 use tauri::{self, Manager};
@@ -56,37 +58,38 @@ fn socketEstablishConnection(
     cookie: Option<&str>,
     state: tauri::State<SocketClient>,
     window: tauri::Window,
+    handle: tauri::AppHandle,
 ) {
     let mut socket = state.socket.lock().expect("Error locking the socket");
 
-    if socket.is_some() {
-        let disconnect = match socket.take() {
-            None => return,
-            Some(socket_client) => socket_client.disconnect(),
-        };
+    let certificate: native_tls::Certificate = native_tls::Certificate::from_pem(
+        &fs::read(
+            handle
+                .app_handle()
+                .path_resolver()
+                .resolve_resource("../certs/server.pem")
+                .expect("Error retriving the certificate file path"),
+        )
+        .expect("Error reading the certificate file"),
+    )
+    .expect("Error generating the certificate");
+    let tls_connector = TlsConnector::builder()
+        .danger_accept_invalid_certs(true)
+        .add_root_certificate(certificate)
+        .build()
+        .unwrap();
 
-        match disconnect {
-            Ok(()) => {
-                println!("Disconnected from socket");
-            }
-            Err(error) => {
-                window
-                    .emit(
-                        RustEvent::SocketDisconnectionFailed.to_string(),
-                        error.to_string(),
-                    )
-                    .expect("oups");
-            }
-        }
-        return;
-    }
-
-    let socketEventWindow = window.clone();
     let clientBuilder = match cookie {
-        Some(c) => ClientBuilder::new(address).opening_header("Cookie", c),
+        Some(c) => {
+            println!("Connecting to socket with cookie : {:?}", c);
+            ClientBuilder::new(address)
+                .opening_header("cookie", c)
+                .tls_config(tls_connector)
+        }
         None => ClientBuilder::new(address),
     };
 
+    let socketEventWindow = window.clone();
     let connection = clientBuilder
         .on_any(move |event, payload, _raw_client| {
             // println!("Got event: {:?} {:?}", event, payload);
@@ -97,22 +100,26 @@ fn socketEstablishConnection(
                     .expect("Couldn't emit the event to Angular");
             }
         })
-        .connect();
+        .connect()
+        .expect("connection failed");
 
-    match connection {
-        Ok(client) => {
-            *socket = Some(client);
-            println!("Connected to socket");
-        }
-        Err(error) => {
-            window
-                .emit(
-                    RustEvent::SocketConnectionFailed.to_string(),
-                    error.to_string(),
-                )
-                .expect("oups");
-        }
-    }
+    *socket = Some(connection);
+
+    // match connection {
+    //     Ok(client) => {
+    //         *socket = Some(client);
+    //         println!("Connected to socket");
+    //     }
+    //     Err(error) => {
+    //         println!("Error");
+    //         window
+    //             .emit(
+    //                 RustEvent::SocketConnectionFailed.to_string(),
+    //                 error.to_string(),
+    //             )
+    //             .expect("oups");
+    //     }
+    // }
 }
 
 #[tauri::command]
