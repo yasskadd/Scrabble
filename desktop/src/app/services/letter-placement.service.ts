@@ -4,6 +4,7 @@ import { BOARD_TILES } from '@app/constants/board-tiles';
 import { BoardTileInfo } from '@app/interfaces/board-tile-info';
 import { BoardTileState, BoardTileType } from '@app/models/board-tile';
 import * as constants from '@common/constants/board-info';
+import { TOTAL_TILES_IN_ROW } from '@common/constants/board-info';
 import { AlphabetLetter } from '@common/models/alphabet-letter';
 // import { Coordinate } from '@common/interfaces/coordinate';
 import { TOTAL_COLUMNS, TOTAL_ROWS } from '@app/constants/board-view';
@@ -414,9 +415,12 @@ export class LetterPlacementService {
     }
 
     private updateGameBoard(gameBoard: string[]) {
+        gameBoard.splice(0, TOTAL_TILES_IN_ROW);
         gameBoard.forEach((tile: string, coord) => {
-            this.boardTiles[coord].letter.value = tile.toUpperCase() as AlphabetLetter;
-            this.boardTiles[coord].state = BoardTileState.Confirmed;
+            if (Math.floor(coord / TOTAL_TILES_IN_ROW) !== coord % TOTAL_TILES_IN_ROW) {
+                this.boardTiles[coord - 1].letter.value = tile.toUpperCase() as AlphabetLetter;
+                this.boardTiles[coord - 1].state = BoardTileState.Confirmed;
+            }
         });
     }
 }
