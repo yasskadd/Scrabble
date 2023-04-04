@@ -17,7 +17,6 @@ import { Letter } from '@common/interfaces/letter';
 import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
 import { ClientSocketService } from './communication/client-socket.service';
 import { GameClientService } from './game-client.service';
-import { GridService } from './grid.service';
 import { first } from 'rxjs/operators';
 
 // const ASCII_ALPHABET_START = 96;
@@ -38,7 +37,6 @@ export class LetterPlacementService {
 
     constructor(
         private clientSocketService: ClientSocketService,
-        private gridService: GridService,
         private gameClientService: GameClientService, // private chatboxService: ChatboxHandlerService,
     ) {
         this.boardTiles = [];
@@ -216,10 +214,6 @@ export class LetterPlacementService {
         // this.resetGameBoardView();
         this.setPropreties();
         this.initTiles();
-    }
-
-    resetGameBoardView() {
-        this.gridService.drawGrid(this.gameClientService.gameboard.gameboardTiles);
     }
 
     noLettersPlaced() {

@@ -176,13 +176,10 @@ export class GameClientService {
     private viewUpdateEvent(info: GameInfo) {
         this.activePlayer = info.activePlayer;
         this.players = info.players;
-        this.updateNewGameboard(info.gameboard);
     }
 
     private updatePlayersInformationEvent(players: PlayerInformation[]) {
         this.players = players;
-        // this.getLocalPlayer().rack = this.updateRack(this.getLocalPlayer().rack);
-        // this.updateNewGameboard(this.getLocalPlayer().gameboard); // NO, why
     }
 
     private updateRack(newRack: Letter[]): Letter[] {
