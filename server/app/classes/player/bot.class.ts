@@ -86,6 +86,8 @@ export class Bot extends GamePlayer {
 
     protected emitPlaceCommand(randomCommandInfo: PlaceWordCommandInfo): void {
         this.game.placeWord(randomCommandInfo);
+        this.game.turn.resetSkipCounter();
+        this.game.turn.end();
         this.socketManager.emitRoom(this.botInfo.roomId, SocketEvents.LetterReserveUpdated, this.game.letterReserve.lettersReserve);
     }
 
