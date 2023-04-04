@@ -3,9 +3,6 @@ import { ClientSocketService } from '@app/services/communication/client-socket.s
 import { ThemeService } from '@services/theme.service';
 import { AppCookieService } from '@services/communication/app-cookie.service';
 
-// eslint-disable-next-line no-underscore-dangle
-export const useTauri = !!window.__TAURI_IPC__;
-
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
