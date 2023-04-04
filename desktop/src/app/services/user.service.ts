@@ -10,6 +10,8 @@ import { ClientSocketService } from '@services/communication/client-socket.servi
 import { Subject } from 'rxjs';
 import { AppCookieService } from './communication/app-cookie.service';
 import { HttpHandlerService } from './communication/http-handler.service';
+import { SocketEvents } from '@common/constants/socket-events';
+import { SnackBarService } from '@services/snack-bar.service';
 
 @Injectable({
     providedIn: 'root',
@@ -21,6 +23,7 @@ export class UserService {
         private httpHandlerService: HttpHandlerService,
         private clientSocketService: ClientSocketService,
         private cookieService: AppCookieService,
+        private snackBarService: SnackBarService,
         private router: Router,
     ) {
         this.initUser();
@@ -36,12 +39,18 @@ export class UserService {
         this.httpHandlerService.login(user).then(
             (loginRes: { userData: IUser; sessionToken: string }) => {
                 console.log(this.user._id);
-                this.cookieService.updateUserSessionCookie(loginRes.sessionToken).then((connected: boolean) => {
-                    if (connected) {
-                        this.user = loginRes.userData;
-                        this.updateUserWithImageUrl(loginRes.userData);
-                        subject.next('');
-                    }
+                this.clientSocketService.on(SocketEvents.UserAlreadyConnected, async () => {
+                    // TODO : Language
+                    this.snackBarService.openError('User already connected');
+                    await this.logout();
+                });
+
+                this.cookieService.updateUserSessionCookie(loginRes.sessionToken).then(() => {
+                    this.user = loginRes.userData;
+                    // TODO : Language
+                    this.snackBarService.openInfo('Connection successful');
+                    this.updateUserWithImageUrl(loginRes.userData);
+                    subject.next('');
                 });
             },
             (error: any) => {
