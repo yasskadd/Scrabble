@@ -19,6 +19,9 @@ export class GameValidationService {
 
     verifyPlaceWordCommand(player: RealPlayer, commandInfo: PlaceWordCommandInfo): Word | ErrorType {
         const game = player.game;
+
+        console.log('received letters:' + commandInfo.letters);
+
         if (game === undefined) return ErrorType.UndefinedGame;
 
         if (commandInfo.letters.length === 1) commandInfo.isHorizontal = undefined;

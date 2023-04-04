@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
-import { Gameboard } from '@common/classes/gameboard.class';
 import { SocketEvents } from '@common/constants/socket-events';
 import { GameInfo } from '@common/interfaces/game-state';
 import { Letter } from '@common/interfaces/letter';
@@ -20,7 +19,6 @@ const TIMEOUT_PASS = 30;
 })
 export class GameClientService {
     timer: number;
-    gameboard: Gameboard;
     activePlayer: IUser;
     players: PlayerInformation[];
     letterReserveLength: number;
@@ -29,13 +27,14 @@ export class GameClientService {
     winningMessage: string;
     gameboardUpdated: Subject<string[]>;
     quitGameSubject: Subject<void>;
+    nextTurnSubject: Subject<void>;
     turnFinish: ReplaySubject<boolean>;
 
     constructor(private clientSocketService: ClientSocketService, private userService: UserService, private router: Router) {
         this.gameboardUpdated = new Subject<string[]>();
         this.quitGameSubject = new Subject<void>();
+        this.nextTurnSubject = new Subject<void>();
         this.turnFinish = new ReplaySubject<boolean>(1);
-        this.gameboard = new Gameboard();
 
         this.clientSocketService.connected.subscribe((connected: boolean) => {
             if (connected) {
@@ -45,9 +44,7 @@ export class GameClientService {
     }
 
     initGameInformation() {
-        // TODO : Update that
         this.timer = 0;
-        this.gameboard = new Gameboard();
         this.activePlayer = undefined;
         this.players = [];
         this.letterReserveLength = 0;
@@ -83,6 +80,7 @@ export class GameClientService {
 
         this.clientSocketService.on(SocketEvents.NextTurn, (info: GameInfo) => {
             this.viewUpdateEvent(info);
+            this.nextTurnSubject.next();
         });
 
         this.clientSocketService.on(SocketEvents.GameAboutToStart, (gameInfo: GameInfo) => {
@@ -213,11 +211,6 @@ export class GameClientService {
         return resultingRack;
     }
 
-    private updateNewGameboard(newGameboard: string[]) {
-        this.gameboard.updateFromStringArray(newGameboard);
-        this.updateGameboard(newGameboard);
-    }
-
     private gameEndEvent() {
         if (this.winningMessage === '') {
             this.findWinnerByScore();
@@ -231,8 +224,6 @@ export class GameClientService {
     }
 
     private skipEvent(gameInfo: GameInfo) {
-        // this.gameboard.updateFromStringArray(gameInfo.gameboard);
-        // this.updateNewGameboard(gameInfo.gameboard);
         this.getLocalPlayer().rack = this.updateRack(this.getLocalPlayer().rack);
         this.updateGameboard(gameInfo.gameboard);
     }

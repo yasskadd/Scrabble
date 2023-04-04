@@ -51,6 +51,10 @@ export class LetterPlacementService {
         this.gameClientService.gameboardUpdated.subscribe((gameBoard: string[]) => {
             this.updateGameBoard(gameBoard);
         });
+        this.gameClientService.nextTurnSubject.subscribe(() => {
+            this.placedLetters = [];
+            this.selectionPositions = [{ coord: 112, direction: PlayDirection.Right }];
+        });
     }
 
     resetTile(coord: number): void {

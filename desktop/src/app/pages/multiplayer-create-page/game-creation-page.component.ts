@@ -136,7 +136,6 @@ export class GameCreationPageComponent implements OnInit {
             this.dictionaryList = dictionaries;
             if (dictionaries.some((dictionary) => dictionary.title === dictionaryTitle)) {
                 this.initGame(dictionaryTitle);
-                if (this.gameMode === GameMode.Solo) this.gameConfiguration.beginScrabbleGame();
                 this.navigateToGamePage();
             } else {
                 this.snackBarService.openError(DictionaryEvents.UNAVAILABLE);

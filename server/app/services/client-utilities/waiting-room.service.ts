@@ -132,14 +132,12 @@ export class WaitingRoomService {
             const player = this.getPlayerFromQuery(userQuery);
             // TODO : Tell client the rejection failed
             if (!player) return;
-
-            this.rejectOpponent(server, socket, player);
-
             console.log(room.players);
             if (room.players.filter((playerElement: RoomPlayer) => playerElement.type === PlayerType.User).length === 0) {
                 this.removeRoom(server, userQuery.roomId);
             }
 
+            this.rejectOpponent(server, socket, player);
             return;
         }
 
