@@ -98,6 +98,7 @@ export class GamesStateService {
         } as GameInfo);
         server.to(room.id).emit(SocketEvents.LetterReserveUpdated, game.letterReserve.lettersReserve);
         game.turn.start();
+        if (!game.turn.activePlayer?.email) game.turn.endTurn.next(game.turn.activePlayer?.username);
     }
 
     private initPlayers(game: Game, room: GameRoom): GamePlayer[] {
