@@ -102,7 +102,7 @@ export class GameBoardComponent {
     }
 
     protected showCenterTile(tile: BoardTileInfo): boolean {
-        let show: boolean = true;
+        let show = true;
 
         this.letterPlacementService.selectionPositions.forEach((selectedTile: SelectionPosition) => {
             if (selectedTile.coord === tile.coord) {
