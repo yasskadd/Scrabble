@@ -533,6 +533,8 @@ export class GamesStateService {
 
     private replacePlayerWithBot(player: RealPlayer): BeginnerBot {
         const bot = player.convertPlayerToBot();
+        bot.player.socketId = '';
+        bot.player.type = PlayerType.Bot;
         bot.setGame(player.game);
         bot.start();
         return bot;

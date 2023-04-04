@@ -65,10 +65,8 @@ export class ClientSocketService implements OnDestroy {
 
     async establishConnection(cookie: string): Promise<void> {
         if (await this.isSocketAlive()) {
-            console.log('socket not alive');
             await this.disconnect();
         } else {
-            console.log('socket alive');
         }
 
         if (this.tauriStateService.useTauri) {

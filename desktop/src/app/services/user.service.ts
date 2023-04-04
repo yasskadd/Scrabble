@@ -38,7 +38,6 @@ export class UserService {
 
         this.httpHandlerService.login(user).then(
             (loginRes: { userData: IUser; sessionToken: string }) => {
-                console.log(this.user._id);
                 this.clientSocketService.on(SocketEvents.UserAlreadyConnected, async () => {
                     // TODO : Language
                     this.snackBarService.openError('User already connected');
