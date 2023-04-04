@@ -30,7 +30,7 @@ export class WordSolver {
     }
 
     findAllOptions(rack: string[]): PlaceWordCommandInfo[] {
-        this.rack = rack;
+        this.rack = rack.map((letter: string) => letter.toLowerCase());
         this.commandInfoList.length = 0;
 
         for (const direction of [true, false]) {
