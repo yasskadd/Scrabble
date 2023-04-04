@@ -53,6 +53,9 @@ export class LetterPlacementService {
             this.placedLetters = [];
             this.selectionPositions = [{ coord: 112, direction: PlayDirection.Right }];
         });
+        this.gameClientService.quitGameSubject.subscribe(() => {
+            this.resetView();
+        });
     }
 
     resetTile(coord: number): void {

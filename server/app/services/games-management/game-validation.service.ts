@@ -3,6 +3,7 @@ import { Word } from '@app/classes/word.class';
 import { RackService } from '@app/services/rack.service';
 import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
 import { Service } from 'typedi';
+import { Letter } from '@common/interfaces/letter';
 
 export enum ErrorType {
     CommandCoordinateOutOfBounds = 'Placement invalide pour la premiere coordonnée',
@@ -20,6 +21,7 @@ export class GameValidationService {
     verifyPlaceWordCommand(player: RealPlayer, commandInfo: PlaceWordCommandInfo): Word | ErrorType {
         const game = player.game;
 
+        console.log('from player:' + player.rack.map((letter: Letter) => letter.value));
         console.log('received letters:' + commandInfo.letters);
 
         if (game === undefined) return ErrorType.UndefinedGame;
