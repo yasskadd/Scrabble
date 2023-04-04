@@ -88,6 +88,17 @@ export class GameClientService {
             this.activePlayer = gameInfo.activePlayer;
             this.updateGameboard(gameInfo.gameboard);
 
+            console.log('Received new game with :');
+            this.players.forEach((player: PlayerInformation) => {
+                console.log(player.player);
+                console.log(
+                    player.rack.map((letter: Letter) => {
+                        return letter.value;
+                    }),
+                );
+                console.log('');
+            });
+
             this.router.navigate([`${AppRoutes.GamePage}`]).then();
         });
 

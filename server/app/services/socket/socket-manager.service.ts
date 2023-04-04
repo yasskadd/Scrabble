@@ -87,9 +87,26 @@ export class SocketManager {
                     return;
                 }
 
+                let keepConnecting = true;
+                console.log('userid = ' + username);
+                this.socketUsernameMap.forEach((value: string, key: io.Socket) => {
+                    console.log('id from list = ' + value);
+                    if (value === username) {
+                        console.log('not connecting');
+                        keepConnecting = false;
+                    }
+                });
+                if (!keepConnecting) {
+                    socket.disconnect;
+                    return;
+                }
+
                 this.socketUsernameMap.set(socket, username);
+                console.log(this.socketUsernameMap.values());
 
                 this.accountStorageService.addUserEventHistory(username, HistoryActions.Connection, new Date());
+
+                console.log('Connection of client with socketid = ' + socket.id + ' from user = ' + username);
             } else {
                 socket.disconnect();
                 // eslint-disable-next-line no-console
@@ -115,6 +132,7 @@ export class SocketManager {
 
                 // eslint-disable-next-line no-console
                 console.log('Disconnection of client with id = ' + socket.id + ' from : ' + socket.handshake.headers.origin);
+                console.log(this.socketUsernameMap.values());
             });
         });
     }

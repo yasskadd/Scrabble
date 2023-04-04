@@ -30,6 +30,7 @@ import { Subject } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import { GamesHandlerService } from './games-handler.service';
+import { Letter } from '@common/interfaces/letter';
 
 const MAX_SKIP = 6;
 const SECOND = 1000;
@@ -88,6 +89,17 @@ export class GamesStateService {
 
         const playersInfo: PlayerInformation[] = this.gamesHandler.players.map((player: GamePlayer) => {
             return player.getInformation();
+        });
+
+        console.log('Start of game with : ');
+        playersInfo.forEach((playerInfo: PlayerInformation) => {
+            console.log(playerInfo.player.user.username);
+            console.log(
+                playerInfo.rack.map((letter: Letter) => {
+                    return letter.value;
+                }),
+            );
+            console.log('');
         });
 
         server.to(room.id).emit(SocketEvents.GameAboutToStart, {
@@ -254,8 +266,10 @@ export class GamesStateService {
     }
 
     private async abandonGame(socket: Socket): Promise<void> {
+        console.log(socket.id);
         const gamePlayer = this.gamesHandler.getPlayerFromSocketId(socket.id);
         if (!gamePlayer) return;
+        console.log(gamePlayer.player.user.username);
 
         const room = gamePlayer.player.roomId;
         const gameHistoryInfo = this.formatGameInfo(gamePlayer);

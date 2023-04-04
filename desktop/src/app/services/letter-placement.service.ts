@@ -258,13 +258,13 @@ export class LetterPlacementService {
             case PlayDirection.Down: {
                 if (this.isTileOutOfBoard(this.selectionPositions[0].coord + 1)) return;
 
-                this.selectionPositions[0] = this.computeNextDownPosition(playedCoord, revert);
+                this.selectionPositions = [this.computeNextDownPosition(playedCoord, revert)];
                 return;
             }
             case PlayDirection.Right: {
                 if (this.isTileOutOfRow(this.selectionPositions[0].coord + 1)) return;
 
-                this.selectionPositions[0] = this.computeNextRightPosition(playedCoord, revert);
+                this.selectionPositions = [this.computeNextRightPosition(playedCoord, revert)];
                 return;
             }
             default: {
