@@ -101,6 +101,7 @@ export class LetterPlacementService {
 
     // TODO
     submitPlacement() {
+        console.log('received submit word');
         if (this.noLettersPlaced()) return;
 
         // const verticalPlacement = String.fromCharCode(this.selectionPositions[0].coord + ASCII_ALPHABET_START);
@@ -110,6 +111,7 @@ export class LetterPlacementService {
         this.placedLetters.forEach((tile: BoardTileInfo) => {
             letters.push(tile.letter.value);
         });
+        console.log(letters);
         this.clientSocketService.send(SocketEvents.PlaceWordCommand, {
             firstCoordinate: this.computeCoordinatesFromCoord(),
             isHorizontal: this.selectionPositions[0].direction === PlayDirection.Right,
@@ -235,6 +237,47 @@ export class LetterPlacementService {
         }
     }
 
+    computeNewPosition(playedCoord: number, revert: boolean) {
+        if (!this.selectionPositions || this.placedLetters.length === 0) {
+            this.selectionPositions = [
+                {
+                    coord: playedCoord,
+                    direction: PlayDirection.Right,
+                },
+            ];
+            return;
+        }
+
+        if (this.placingMode === PlacingState.Drag) {
+            if (this.placedLetters.length === 1) {
+                this.selectionPositions = [this.computeNextRightPosition(playedCoord, revert), this.computeNextDownPosition(playedCoord, revert)];
+                console.log(this.selectionPositions);
+                return;
+            }
+        }
+
+        const factor = 1;
+        switch (this.selectionPositions[0].direction) {
+            case PlayDirection.Down: {
+                if (this.isTileOutOfBoard(this.selectionPositions[0].coord + factor)) return;
+
+                this.selectionPositions[0].coord = revert
+                    ? this.selectionPositions[0].coord - factor * TOTAL_COLUMNS
+                    : this.selectionPositions[0].coord + factor * TOTAL_COLUMNS;
+                return;
+            }
+            case PlayDirection.Right: {
+                if (this.isTileOutOfRow(this.selectionPositions[0].coord + factor)) return;
+
+                this.selectionPositions[0].coord = revert ? this.selectionPositions[0].coord - factor : this.selectionPositions[0].coord + factor;
+                return;
+            }
+            default: {
+                return;
+            }
+        }
+    }
+
     // private updateLettersView() {
     // let placementPosition = this.startTile;
     // this.placedLetters.forEach((letter) => {
@@ -321,55 +364,6 @@ export class LetterPlacementService {
     //     return coordinate.x - DISPLACEMENT + (coordinate.y - DISPLACEMENT) * constants.TOTAL_TILES_IN_ROW;
     // }
 
-    private computeNewPosition(playedCoord: number, revert: boolean) {
-        if (!this.selectionPositions || this.placedLetters.length === 0) {
-            this.selectionPositions = [
-                {
-                    coord: playedCoord,
-                    direction: PlayDirection.Right,
-                },
-            ];
-            return;
-        }
-
-        if (this.placingMode === PlacingState.Drag) {
-            if (this.placedLetters.length === 1) {
-                this.selectionPositions = [
-                    {
-                        coord: this.origin + 1,
-                        direction: PlayDirection.Right,
-                    },
-                    {
-                        coord: this.origin + TOTAL_COLUMNS,
-                        direction: PlayDirection.Down,
-                    },
-                ];
-                return;
-            }
-        }
-
-        const factor = 1;
-        switch (this.selectionPositions[0].direction) {
-            case PlayDirection.Down: {
-                if (this.isTileOutOfBoard(this.selectionPositions[0].coord + factor)) return;
-
-                this.selectionPositions[0].coord = revert
-                    ? this.selectionPositions[0].coord - factor * TOTAL_COLUMNS
-                    : this.selectionPositions[0].coord + factor * TOTAL_COLUMNS;
-                return;
-            }
-            case PlayDirection.Right: {
-                if (this.isTileOutOfRow(this.selectionPositions[0].coord + factor)) return;
-
-                this.selectionPositions[0].coord = revert ? this.selectionPositions[0].coord - factor : this.selectionPositions[0].coord + factor;
-                return;
-            }
-            default: {
-                return;
-            }
-        }
-    }
-
     private isValidPlacing(coord: number): boolean {
         let validity = false;
 
@@ -406,12 +400,10 @@ export class LetterPlacementService {
     }
 
     private computeCoordinatesFromCoord(): Coordinate {
-        const coord: Coordinate = {
+        return {
             x: (this.origin % TOTAL_COLUMNS) + 1,
             y: Math.floor(this.origin / TOTAL_ROWS) + 1,
         };
-
-        return coord;
     }
 
     private updateGameBoard(gameBoard: string[]) {
@@ -422,5 +414,56 @@ export class LetterPlacementService {
                 this.boardTiles[coord - 1].state = BoardTileState.Confirmed;
             }
         });
+    }
+
+    private computeNextRightPosition(coord: number, revert: boolean): SelectionPosition {
+        if (!revert) {
+            if (this.boardTiles[coord + 1].letter.value !== AlphabetLetter.None && this.boardTiles[coord + 1].state === BoardTileState.Confirmed) {
+                if (this.isTileOutOfBoard(coord + 1)) {
+                    return { coord: -1, direction: PlayDirection.Right };
+                } else {
+                    return this.computeNextRightPosition(coord + 1, revert);
+                }
+            }
+
+            return { coord: coord + 1, direction: PlayDirection.Right };
+        }
+
+        if (this.boardTiles[coord - 1].letter.value && this.boardTiles[coord - 1].state === BoardTileState.Confirmed) {
+            if (this.isTileOutOfBoard(coord - 1)) {
+                return { coord: -1, direction: PlayDirection.Right };
+            } else {
+                return this.computeNextRightPosition(coord - 1, revert);
+            }
+        }
+
+        return { coord: coord - 1, direction: PlayDirection.Right };
+    }
+
+    private computeNextDownPosition(coord: number, revert: boolean): SelectionPosition {
+        if (!revert) {
+            if (
+                this.boardTiles[coord + TOTAL_COLUMNS].letter.value !== AlphabetLetter.None &&
+                this.boardTiles[coord + TOTAL_COLUMNS].state === BoardTileState.Confirmed
+            ) {
+                if (this.isTileOutOfBoard(coord + TOTAL_COLUMNS)) {
+                    return { coord: -1, direction: PlayDirection.Down };
+                } else {
+                    return this.computeNextRightPosition(coord + TOTAL_COLUMNS, revert);
+                }
+            }
+
+            return { coord: coord + TOTAL_COLUMNS, direction: PlayDirection.Down };
+        }
+
+        if (this.boardTiles[coord - TOTAL_COLUMNS].letter.value && this.boardTiles[coord - TOTAL_COLUMNS].state === BoardTileState.Confirmed) {
+            if (this.isTileOutOfBoard(coord - TOTAL_COLUMNS)) {
+                return { coord: -1, direction: PlayDirection.Down };
+            } else {
+                return this.computeNextRightPosition(coord - TOTAL_COLUMNS, revert);
+            }
+        }
+
+        return { coord: coord - TOTAL_COLUMNS, direction: PlayDirection.Down };
     }
 }

@@ -159,7 +159,12 @@ export class WaitingRoomService {
             roomId: player.roomId,
         });
 
-        if (!player.isCreator && player.socketId !== socket.id) {
+        // TODO : Not if in game
+        if (
+            !player.isCreator &&
+            player.socketId !== socket.id &&
+            this.waitingRooms.find((room: GameRoom) => room.id === player.roomId)?.state === GameRoomState.Waiting
+        ) {
             playerSocket.emit(SocketEvents.KickedFromGameRoom, this.stripPlayerPassword(player));
         }
 
@@ -179,6 +184,7 @@ export class WaitingRoomService {
         const room: GameRoom | undefined = this.getRoom(roomId);
         if (!room) return;
 
+        room.state = GameRoomState.Playing;
         await this.gameStateService.createGame(server, room);
         // // TODO : Changed GameScrabbleInformation to simply using GameRoom
         // const users: IUser[] = [];
