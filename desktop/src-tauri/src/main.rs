@@ -62,9 +62,11 @@ fn socketEstablishConnection(
     let clientBuilder = match cookie {
         Some(c) => {
             println!("Connecting to socket with cookie : {:?}", c);
-            ClientBuilder::new(address).opening_header("cookie", c)
+            ClientBuilder::new(address)
+                .opening_header("cookie", c)
+                .reconnect(false)
         }
-        None => ClientBuilder::new(address),
+        None => ClientBuilder::new(address).reconnect(false),
     };
 
     let socketEventWindow = window.clone();
@@ -105,6 +107,8 @@ fn socketDisconnect(state: tauri::State<SocketClient>, window: tauri::Window) {
         None => return,
         Some(socket_client) => socket_client.disconnect(),
     };
+
+    *socket = None;
 
     match disconnect {
         Ok(()) => {
