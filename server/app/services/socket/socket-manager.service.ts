@@ -2,11 +2,11 @@ import { SECRET_KEY } from '@app/../very-secret-file';
 import { AccountStorageService } from '@app/services/database/account-storage.service';
 import { HistoryActions } from '@common/models/history-actions';
 import * as cookie from 'cookie';
-import * as http from 'http';
 import * as jwt from 'jsonwebtoken';
 import * as io from 'socket.io';
 import { Service } from 'typedi';
 import { CallbackSignature, OnSioCallbackSignature } from '@app/types/sockets';
+import * as http from 'http';
 
 @Service()
 export class SocketManager {

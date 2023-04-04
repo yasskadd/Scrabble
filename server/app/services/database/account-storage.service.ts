@@ -9,13 +9,17 @@ import { Document, ObjectId } from 'mongodb';
 import { Service } from 'typedi';
 import { DatabaseService } from './database.service';
 
+const DEFAULT_PLAYER_SCORE = 1000;
+const DEFAULT_PLAYER_STATS = 0;
 @Service()
 export class AccountStorageService {
     constructor(private database: DatabaseService) {}
 
     async addNewUser(user: Document): Promise<void> {
         const hashedPassword = await this.generateHash(user.password);
+        const id = new ObjectId();
         const newUser = {
+            _id: id,
             email: user.email,
             username: user.username,
             password: hashedPassword,
@@ -24,7 +28,19 @@ export class AccountStorageService {
             language: user.language,
             theme: user.theme,
         };
+        const userStats = {
+            userIdRef: id,
+            ranking: DEFAULT_PLAYER_SCORE,
+            gameCount: DEFAULT_PLAYER_STATS,
+            win: DEFAULT_PLAYER_STATS,
+            loss: DEFAULT_PLAYER_STATS,
+            totalGameTime: DEFAULT_PLAYER_STATS,
+            totalGameScore: DEFAULT_PLAYER_STATS,
+            averageGameTime: '',
+            averageGameScore: DEFAULT_PLAYER_STATS,
+        };
         await this.database.users.addDocument(newUser);
+        await this.database.usersStats.addDocument(userStats);
     }
 
     async loginValidator(user: IUser): Promise<boolean> {
@@ -86,6 +102,10 @@ export class AccountStorageService {
 
     async updateUsername(id: string, newUsername: string): Promise<void> {
         await this.database.users.collection.updateOne({ _id: new ObjectId(id) }, { $set: { username: newUsername } });
+    }
+
+    async updateScore(id: string, newScore: number): Promise<void> {
+        await this.database.users.collection.updateOne({ _id: new ObjectId(id) }, { $set: { score: newScore } });
     }
 
     async updateLanguage(id: string, newLanguage: 'en' | 'fr'): Promise<void> {

@@ -1,7 +1,6 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
-import { useTauri } from '@app/pages/app/app.component';
 import { ServerErrors } from '@common/constants/server-errors';
 import { SocketEvents } from '@common/constants/socket-events';
 import { GameRoom } from '@common/interfaces/game-room';
@@ -17,6 +16,7 @@ import { window as tauriWindow } from '@tauri-apps/api';
 import { TauriEvent } from '@tauri-apps/api/event';
 import { Observable, of, Subject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
+import { TauriStateService } from '@services/tauri-state.service';
 import { LanguageService } from './language.service';
 
 @Injectable({
@@ -36,6 +36,7 @@ export class GameConfigurationService {
         private userService: UserService,
         private clientSocket: ClientSocketService,
         private router: Router,
+        private tauriStateService: TauriStateService,
         private languageService: LanguageService,
     ) {
         this.resetRoomInformations();
@@ -47,7 +48,7 @@ export class GameConfigurationService {
 
         // TODO : Move this somewhere more logic
         // eslint-disable-next-line no-underscore-dangle
-        if (useTauri) {
+        if (this.tauriStateService.useTauri) {
             tauriWindow
                 .getCurrent()
                 .listen(TauriEvent.WINDOW_CLOSE_REQUESTED, () => {
@@ -74,7 +75,7 @@ export class GameConfigurationService {
         });
 
         this.clientSocket.on(SocketEvents.GameAboutToStart, () => {
-            if (useTauri) {
+            if (this.tauriStateService.useTauri) {
                 this.zone.run(() => {
                     this.router.navigate([`${AppRoutes.GamePage}`]).then();
                 });

@@ -9,6 +9,6 @@ export enum RustEvent {
     SocketConnectionFailed = 'socketConnectionFailed',
     SocketDisconnectionFailed = 'socketDisconnectionFailed',
     SocketSendFailed = 'socketSendFailed',
-    SocketAlive = 'socketIsAlive',
+    SocketAlive = 'socketAlive',
     SocketNotAlive = 'socketNotAlive',
 }
