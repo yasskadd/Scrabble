@@ -51,6 +51,7 @@ export class PlayAreaComponent {
     buttonDetect(event: KeyboardEvent) {
         switch (event.key) {
             case 'Backspace': {
+                event.preventDefault();
                 this.letterService.undoPlacement();
                 break;
             }

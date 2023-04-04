@@ -114,8 +114,6 @@ export class WaitingRoomService {
         }
         room.players.push(newPlayer);
 
-        this.updateRoomReference(room);
-
         // server.to(joinGameQuery.roomId).emit(SocketEvents.PlayerJoinedWaitingRoom, this.stripPlayerPassword(newPlayer));
         server.to(joinGameQuery.roomId).emit(SocketEvents.UpdateWaitingRoom, room);
         socket.emit(SocketEvents.JoinedValidWaitingRoom, this.stripPlayersPassword(room));
@@ -132,7 +130,6 @@ export class WaitingRoomService {
             const player = this.getPlayerFromQuery(userQuery);
             // TODO : Tell client the rejection failed
             if (!player) return;
-            console.log(room.players);
             if (room.players.filter((playerElement: RoomPlayer) => playerElement.type === PlayerType.User).length === 0) {
                 this.removeRoom(server, userQuery.roomId);
             }
@@ -368,14 +365,5 @@ export class WaitingRoomService {
         });
 
         return virtualPlayers;
-    }
-
-    private updateRoomReference(room: GameRoom) {
-        // const roomIndex = this.waitingRooms.findIndex((waitingRoom: GameRoom) => {
-        //     return room.id === waitingRoom.id;
-        // });
-        // this.waitingRooms.splice(roomIndex, 1);
-        // this.waitingRooms.push(room);
-        // console.log(this.waitingRooms.map((r: GameRoom) => r.players));
     }
 }
