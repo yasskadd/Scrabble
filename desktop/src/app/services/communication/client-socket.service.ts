@@ -2,12 +2,12 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { RustCommand, RustEvent } from '@app/models/rust-command';
 import { LanguageService } from '@services/language.service';
 import { SnackBarService } from '@services/snack-bar.service';
+import { TauriStateService } from '@services/tauri-state.service';
 import * as tauri from '@tauri-apps/api';
 import { Event } from '@tauri-apps/api/event';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
-import { TauriStateService } from '@services/tauri-state.service';
 
 @Injectable({
     providedIn: 'root',
@@ -42,9 +42,6 @@ export class ClientSocketService implements OnDestroy {
             /* eslint-disable-next-line @typescript-eslint/naming-convention*/
             extraHeaders: { Cookie: `session_token=${cookie}` },
         });
-        // else {
-        //     this.socket = io(environment.socketUrl, { transports: ['websocket'], upgrade: false });
-        // }
     }
 
     async connectTauri(cookie: string): Promise<void> {
@@ -56,17 +53,11 @@ export class ClientSocketService implements OnDestroy {
             .then(() => {
                 this.listenToTauriEvents();
             });
-        // else {
-        //     tauri.tauri.invoke(RustCommand.EstablishConnection, { address: environment.socketUrl }).then(() => {
-        //         this.listenToTauriEvents();
-        //     });
-        // }
     }
 
     async establishConnection(cookie: string): Promise<void> {
         if (await this.isSocketAlive()) {
             await this.disconnect();
-        } else {
         }
 
         if (this.tauriStateService.useTauri) {
@@ -111,7 +102,6 @@ export class ClientSocketService implements OnDestroy {
         if (this.tauriStateService.useTauri) {
             tauri.event
                 .listen(eventName, (event: Event<unknown>) => {
-                    console.log(event);
                     action(JSON.parse(event.payload as string));
                     this.updateSubject.next();
                 })

@@ -86,16 +86,16 @@ export class GameClientService {
         this.clientSocketService.on(SocketEvents.GameAboutToStart, (info: GameInfo) => {
             this.viewUpdateEvent(info);
 
-            console.log('Received new game with :');
-            this.players.forEach((player: PlayerInformation) => {
-                console.log(player.player);
-                console.log(
-                    player.rack.map((letter: Letter) => {
-                        return letter.value;
-                    }),
-                );
-                console.log('');
-            });
+            // console.log('Received new game with :');
+            // this.players.forEach((player: PlayerInformation) => {
+            // console.log(player.player);
+            // console.log(
+            // player.rack.map((letter: Letter) => {
+            // return letter.value;
+            // }),
+            // );
+            // console.log('');
+            // });
 
             this.router.navigate([`${AppRoutes.GamePage}`]).then();
         });
