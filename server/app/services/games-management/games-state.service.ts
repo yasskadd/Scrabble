@@ -203,23 +203,21 @@ export class GamesStateService {
         if (players.filter((player: GamePlayer) => player.rackIsEmpty()).length > 0) {
             const finishingPlayer = players.find((player: GamePlayer) => player.rackIsEmpty());
             if (!finishingPlayer) return;
-
-            // TODO: Add GameEvent History to each player
-            const realPlayers = players.filter((player) => player.player.type === PlayerType.User);
-            const winnerPlayer = players.reduce((prev, current) => {
-                return (prev.score > current.score) ? prev : current;
-            })
-            realPlayers.forEach((player: GamePlayer) => {
-                if (player.player.type === PlayerType.User) {
-                    if (player.player.user.username === winnerPlayer.player.user.username) this.addGameEventHistory(player as RealPlayer, true);
-                    else this.addGameEventHistory(player as RealPlayer, false);
-                }
-            })
-
             players.filter((player: GamePlayer) => {
                 if (player.player.user.username !== finishingPlayer.player.user.username) {
                     player.deductPoints();
                     finishingPlayer.addPoints(player.rack);
+                }
+            });
+            // TODO: Add GameEvent History to each player
+            const realPlayers = players.filter((player) => player.player.type === PlayerType.User);
+            const winnerPlayer = players.reduce((prev, current) => {
+                return prev.score > current.score ? prev : current;
+            });
+            realPlayers.forEach((player: GamePlayer) => {
+                if (player.player.type === PlayerType.User) {
+                    if (player.player.user.username === winnerPlayer.player.user.username) this.addGameEventHistory(player as RealPlayer, true);
+                    else this.addGameEventHistory(player as RealPlayer, false);
                 }
             });
         }
