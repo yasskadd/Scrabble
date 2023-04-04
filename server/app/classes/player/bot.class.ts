@@ -17,7 +17,7 @@ export class Bot extends GamePlayer {
     protected isNotTurn: boolean = false;
     private timer: number;
 
-    constructor(isPlayerOne: boolean, roomPlayer: RoomPlayer, protected botInfo: BotInformation) {
+    constructor(roomPlayer: RoomPlayer, protected botInfo: BotInformation) {
         super(roomPlayer);
         this.timer = botInfo.timer;
         this.wordSolver = new WordSolver(botInfo.dictionaryValidation);
@@ -50,7 +50,6 @@ export class Bot extends GamePlayer {
 
     skipTurn(): void {
         if (this.game === undefined || this.isNotTurn) return;
-        this.socketManager.emitRoom(this.botInfo.roomId, SocketEvents.GameMessage, '!passer');
         this.game.skip(this.player.user.username);
         this.isNotTurn = true;
     }
@@ -71,7 +70,7 @@ export class Bot extends GamePlayer {
         this.game.turn.endTurn.unsubscribe();
     }
 
-    protected play(commandInfo: PlaceWordCommandInfo): void {
+    protected placeWord(commandInfo: PlaceWordCommandInfo): void {
         if (commandInfo === undefined || this.isNotTurn) {
             this.skipTurn();
             return;
@@ -86,10 +85,9 @@ export class Bot extends GamePlayer {
     }
 
     protected emitPlaceCommand(randomCommandInfo: PlaceWordCommandInfo): void {
-        const coordString = `${String.fromCharCode(Constant.CHAR_ASCII + randomCommandInfo.firstCoordinate.y)}${randomCommandInfo.firstCoordinate.x}`;
-        const placeCommand = `!placer ${coordString}${randomCommandInfo.isHorizontal ? 'h' : 'v'} ${randomCommandInfo.letters.join('')}`;
-        this.socketManager.emitRoom(this.botInfo.roomId, SocketEvents.GameMessage, placeCommand);
-        this.game.play(this, randomCommandInfo);
+        this.game.placeWord(randomCommandInfo);
+        this.game.turn.resetSkipCounter();
+        this.game.turn.end();
         this.socketManager.emitRoom(this.botInfo.roomId, SocketEvents.LetterReserveUpdated, this.game.letterReserve.lettersReserve);
     }
 

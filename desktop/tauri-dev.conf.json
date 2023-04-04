@@ -27,6 +27,10 @@
             "shell": {
                 "all": false,
                 "open": true
+            },
+            "fs": {
+                "all": true,
+                "scope": ["$RESOURCE/*", "$CACHE/*"]
             }
         },
         "bundle": {
@@ -42,12 +46,12 @@
             "longDescription": "",
             "macOS": {
                 "entitlements": null,
-                "exceptionDomain": "",
+                "exceptionDomain": "ec2-35-183-107-112.ca-central-1.compute.amazonaws.com localhost",
                 "frameworks": [],
                 "providerShortName": null,
                 "signingIdentity": null
             },
-            "resources": [],
+            "resources": ["../certs/server.pem", "../certs/server.key"],
             "shortDescription": "",
             "targets": "all",
             "windows": {
@@ -57,7 +61,7 @@
             }
         },
         "security": {
-            "csp": "default-src blob: data: filesystem: ws: wss: http: http://localhost https: tauri: tauri://localhost 'unsafe-eval' 'unsafe-inline' 'self' img-src: 'self'; script-src 'self' https://www.google.com https://www.gstatic.com 'unsafe-eval'"
+            "csp": "default-src blob: data: filesystem: ws: wss: http: http://localhost https://localhost https: tauri: tauri://localhost 'unsafe-eval' 'unsafe-inline' 'self' img-src: 'self'; script-src 'self' https://www.google.com https://www.gstatic.com 'unsafe-eval'"
         },
         "updater": {
             "active": false

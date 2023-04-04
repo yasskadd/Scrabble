@@ -3,8 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
 import { UserService } from '@app/services/user.service';
-import { GameVisibility } from '@common/models/game-visibility';
 import { RoomPlayer } from '@common/interfaces/room-player';
+import { GameVisibility } from '@common/models/game-visibility';
 import { PlayerType } from '@common/models/player-type';
 
 @Component({

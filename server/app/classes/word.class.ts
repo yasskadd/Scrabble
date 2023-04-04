@@ -1,9 +1,39 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { Gameboard } from '@common/classes/gameboard.class';
 import { Coordinate } from '@common/interfaces/coordinate';
 import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 
 const SEVEN_LETTERS = 7;
 const SEVEN_LETTER_BONUS = 50;
+
+const LETTER_POINTS = new Map<string, number>([
+    ['A', 1],
+    ['B', 3],
+    ['C', 3],
+    ['D', 2],
+    ['E', 1],
+    ['F', 4],
+    ['G', 2],
+    ['H', 4],
+    ['I', 1],
+    ['J', 8],
+    ['K', 10],
+    ['L', 1],
+    ['M', 2],
+    ['N', 1],
+    ['O', 1],
+    ['P', 3],
+    ['Q', 8],
+    ['R', 1],
+    ['S', 1],
+    ['T', 1],
+    ['U', 1],
+    ['V', 4],
+    ['W', 10],
+    ['X', 10],
+    ['Y', 10],
+    ['Z', 10],
+]);
 
 export class Word {
     isValid: boolean;
@@ -112,7 +142,7 @@ export class Word {
     }
 
     private addNewLetter(position: Coordinate, commandLettersCopy: string[]) {
-        this.stringFormat += commandLettersCopy[0].toLowerCase();
+        this.stringFormat += commandLettersCopy[0];
         commandLettersCopy.shift();
         this.wordCoords.push({ ...position });
         this.newLetterCoords.push({ ...position });
@@ -157,11 +187,17 @@ export class Word {
     }
 
     private addLetterPointsWithMultiplier(gameboard: Gameboard, coord: Coordinate) {
-        this.points += gameboard.getLetterTile(coord).points * gameboard.getLetterTile(coord).multiplier.number;
+        const letter = gameboard.getLetterTile(coord).letter;
+        let point = LETTER_POINTS.get(letter);
+        if (point === undefined) point = 0;
+        this.points += point * gameboard.getLetterTile(coord).multiplier.number;
     }
 
     private addLetterPointsWithoutMultiplier(gameboard: Gameboard, coord: Coordinate) {
-        this.points += gameboard.getLetterTile(coord).points;
+        const letter = gameboard.getLetterTile(coord).letter;
+        let point = LETTER_POINTS.get(letter);
+        if (point === undefined) point = 0;
+        this.points += point;
     }
 
     private coordHasWordMultiplier(gameboard: Gameboard, coord: Coordinate): boolean {

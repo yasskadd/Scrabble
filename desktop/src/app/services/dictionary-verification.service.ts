@@ -22,7 +22,7 @@ export class DictionaryVerificationService {
         if (dictionary.title.split(' ').length > 1 && dictionary.title !== 'Mon Dictionnaire') {
             this.verificationStatus.next(DictionaryEvents.TITLE_INVALID);
         } else {
-            this.httpHandler.dictionaryIsInDb(dictionary.title).subscribe((res: any) => {
+            this.httpHandler.dictionaryIsInDb(dictionary.title).then((res: any) => {
                 if (res.status === HTTP_STATUS.FOUND) {
                     this.verificationStatus.next(DictionaryEvents.FOUND);
                 }

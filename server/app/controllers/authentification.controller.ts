@@ -1,4 +1,5 @@
 import { SECRET_KEY } from '@app/../very-secret-file';
+import { defaultImagesMap } from '@app/constants/profile-pictures';
 import { AccountStorageService } from '@app/services/database/account-storage.service';
 import { IUser } from '@common/interfaces/user';
 import { Request, Response, Router } from 'express';
@@ -51,6 +52,7 @@ export class AuthentificationController {
                 user.profilePicture.key = imageKey;
             }
 
+            if (user.profilePicture?.isDefaultPicture) user.profilePicture.key = defaultImagesMap.get(user.profilePicture.name as string);
             await this.accountStorage.addNewUser(user);
             // Sending back the user key to be used while uploading
             res.status(SUCCESS).send({ imageKey });

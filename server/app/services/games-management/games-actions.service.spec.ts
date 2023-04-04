@@ -7,7 +7,6 @@ import { RealPlayer } from '@app/classes/player/real-player.class';
 import { Turn } from '@app/classes/turn.class';
 import { WordSolver } from '@app/classes/word-solver.class';
 import { Word } from '@app/classes/word.class';
-import { PlaceLettersReturn } from '@app/interfaces/place-letters-return';
 import { GamesHandlerService } from '@app/services/games-management/games-handler.service';
 import { RackService } from '@app/services/rack.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
@@ -23,6 +22,7 @@ import * as sinon from 'sinon';
 import { Server as ioServer, Socket as ServerSocket } from 'socket.io';
 import { io as Client, Socket } from 'socket.io-client';
 import { GamesActionsService } from './games-actions.service';
+import { WordPlacementResult } from '@app/interfaces/word-placement-result';
 
 const ROOM = '0';
 
@@ -518,7 +518,7 @@ describe('GamesActions Service', () => {
             gamesHandlerStub['gamePlayers'].set(ROOM, [player]);
 
             gamesActionsService['sendValidCommand'](
-                player.placeLetter(commandInfo) as PlaceLettersReturn,
+                player.placeLetter(commandInfo) as WordPlacementResult,
                 serverSocket,
                 player.room,
                 EXPECTED_MESSAGE,
