@@ -111,7 +111,7 @@ export class GameCreationPageComponent implements OnInit {
     }
 
     downloadDictionaries() {
-        this.httpHandler.getDictionaries().subscribe((dictionaries) => (this.dictionaryList = dictionaries));
+        this.httpHandler.getDictionaries().then((dictionaries) => (this.dictionaryList = dictionaries));
     }
 
     giveNameToBot(): void {
@@ -132,7 +132,7 @@ export class GameCreationPageComponent implements OnInit {
 
         const dictionaryTitle = this.getDictionary((this.form.get('dictionary') as AbstractControl).value).title;
 
-        this.httpHandler.getDictionaries().subscribe((dictionaries: DictionaryInfo[]) => {
+        this.httpHandler.getDictionaries().then((dictionaries: DictionaryInfo[]) => {
             this.dictionaryList = dictionaries;
             if (dictionaries.some((dictionary) => dictionary.title === dictionaryTitle)) {
                 this.initGame(dictionaryTitle);

@@ -20,32 +20,30 @@ export class VirtualPlayersService {
                 username: newName,
                 difficulty,
             })
-            .subscribe(() => this.updateBotNames());
+            .then(() => this.updateBotNames());
     }
 
     deleteBotName(toRemove: string, difficulty: VirtualPlayerDifficulty) {
-        this.httpHandler.deleteBot({ username: toRemove, difficulty }).subscribe(() => this.updateBotNames());
+        this.httpHandler.deleteBot({ username: toRemove, difficulty }).then(() => this.updateBotNames());
     }
 
     resetBotNames() {
-        this.httpHandler.resetBot().subscribe(() => this.updateBotNames());
+        this.httpHandler.resetBot().then(() => this.updateBotNames());
     }
 
     replaceBotName(nameBotToReplace: BotNameSwitcher) {
-        this.httpHandler.replaceBot(nameBotToReplace).subscribe(() => this.updateBotNames());
+        this.httpHandler.replaceBot(nameBotToReplace).then(() => this.updateBotNames());
     }
 
     updateBotNames(): Subject<void> {
         const subject: Subject<void> = new Subject<void>();
-        const beginnerSub = this.httpHandler.getBeginnerBots().subscribe((beginnerBot) => {
+        this.httpHandler.getBeginnerBots().then((beginnerBot) => {
             this.beginnerBotNames = beginnerBot;
             subject.next();
-            beginnerSub.unsubscribe();
         });
-        const expertSub = this.httpHandler.getExpertBots().subscribe((expertBot) => {
+        this.httpHandler.getExpertBots().then((expertBot) => {
             this.expertBotNames = expertBot;
             subject.next();
-            expertSub.unsubscribe();
         });
 
         return subject;

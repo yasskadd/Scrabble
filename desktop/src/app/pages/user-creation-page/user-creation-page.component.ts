@@ -1,5 +1,4 @@
 /* eslint-disable no-underscore-dangle */
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -92,21 +91,14 @@ export class UserCreationPageComponent {
                 password: this.passwordForm.value,
                 profilePicture,
             } as IUser)
-            .subscribe({
-                next: (res: { imageKey: string }) => {
-                    this.connectionError = '';
+            .then((res: { imageKey: string }) => {
+                this.connectionError = '';
 
-                    if (!isDefaultPicture) {
-                        this.httpHandlerService.sendProfilePicture(this.profilePicForm.value as AvatarData, res.imageKey).subscribe();
-                    }
+                if (!isDefaultPicture) {
+                    this.httpHandlerService.sendProfilePicture(this.profilePicForm.value as AvatarData, res.imageKey);
+                }
 
-                    this.router.navigate([AppRoutes.HomePage]).then();
-                },
-                error: (error: HttpErrorResponse) => {
-                    // TODO : Language
-                    this.connectionError = error.error.message;
-                    this.usernameForm.reset();
-                },
+                this.router.navigate([AppRoutes.HomePage]).then();
             });
     }
 

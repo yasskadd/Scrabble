@@ -7,6 +7,7 @@ import { Event } from '@tauri-apps/api/event';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
+import { TauriStateService } from '@services/tauri-state.service';
 
 @Injectable({
     providedIn: 'root',
@@ -16,25 +17,19 @@ export class ClientSocketService implements OnDestroy {
     connected: BehaviorSubject<boolean>;
     private socket: Socket;
 
-    private readonly useTauriSocket: boolean;
-
-    constructor(private snackBarService: SnackBarService, private languageService: LanguageService) {
+    constructor(private snackBarService: SnackBarService, private languageService: LanguageService, private tauriStateService: TauriStateService) {
         this.connected = new BehaviorSubject<boolean>(false);
         this.updateSubject = new Subject<void>();
-
-        // eslint-disable-next-line no-underscore-dangle
-        this.useTauriSocket = !!window.__TAURI_IPC__;
     }
 
     ngOnDestroy() {
         this.disconnect().then();
     }
 
-    isSocketAlive() {
-        if (this.useTauriSocket) {
-            return tauri.tauri.invoke(RustCommand.IsSocketAlive).then((res) => {
-                return res === RustEvent.SocketAlive ? true : res === RustEvent.SocketNotAlive ? false : false;
-            });
+    async isSocketAlive() {
+        if (this.tauriStateService.useTauri) {
+            const res = await tauri.tauri.invoke(RustCommand.IsSocketAlive);
+            return res === RustEvent.SocketAlive ? true : res === RustEvent.SocketNotAlive ? false : false;
         } else {
             return this.socket && this.socket.connected;
         }
@@ -42,35 +37,40 @@ export class ClientSocketService implements OnDestroy {
 
     connect(cookie?: string) {
         if (cookie) {
-            this.socket = io(environment.serverUrl, {
+            this.socket = io(environment.socketUrl, {
                 transports: ['websocket'],
                 upgrade: false,
                 /* eslint-disable-next-line @typescript-eslint/naming-convention*/
                 extraHeaders: { Cookie: `session_token=${cookie}` },
             });
         } else {
-            this.socket = io(environment.serverUrl, { transports: ['websocket'], upgrade: false });
+            this.socket = io(environment.socketUrl, { transports: ['websocket'], upgrade: false });
         }
     }
 
     connectTauri(cookie?: string) {
         if (cookie) {
-            tauri.tauri.invoke(RustCommand.EstablishConnection, { address: environment.serverUrl, cookie: `session_token=${cookie}` }).then(() => {
-                this.listenToTauriEvents();
-            });
+            tauri.tauri
+                .invoke(RustCommand.EstablishConnection, {
+                    address: environment.socketUrl,
+                    cookie: `session_token=${cookie}`,
+                })
+                .then(() => {
+                    this.listenToTauriEvents();
+                });
         } else {
-            tauri.tauri.invoke(RustCommand.EstablishConnection, { address: environment.serverUrl }).then(() => {
+            tauri.tauri.invoke(RustCommand.EstablishConnection, { address: environment.socketUrl }).then(() => {
                 this.listenToTauriEvents();
             });
         }
     }
 
     async establishConnection(cookie?: string) {
-        if (this.isSocketAlive() || this.connected.getValue()) {
+        if (await this.isSocketAlive()) {
             await this.disconnect();
         }
 
-        if (this.useTauriSocket) {
+        if (this.tauriStateService.useTauri) {
             this.connectTauri(cookie);
         } else {
             this.connect(cookie);
@@ -83,19 +83,19 @@ export class ClientSocketService implements OnDestroy {
         tauri.event
             .listen(RustEvent.SocketConnectionFailed, (event: Event<unknown>) => {
                 this.languageService.getWord('error.socket.connection_failed').subscribe((word: string) => {
-                    this.snackBarService.openError((word + ' : ' + event.payload) as string);
+                    this.snackBarService.openError(('Connection error! ' + word + ' : ' + event.payload) as string);
                 });
             })
             .then();
     }
 
     async disconnect() {
-        if (this.useTauriSocket) {
+        if (this.tauriStateService.useTauri) {
             await tauri.tauri.invoke(RustCommand.Disconnect).then(() => {
                 tauri.event
                     .listen(RustEvent.SocketDisconnectionFailed, (error: Event<unknown>) => {
                         this.languageService.getWord('error.socket.disconnection_failed').subscribe((word: string) => {
-                            this.snackBarService.openError((word + ' : ' + error.payload) as string);
+                            this.snackBarService.openError(('Disconnection error! ' + word + ' : ' + error.payload) as string);
                         });
                     })
                     .then();
@@ -108,7 +108,7 @@ export class ClientSocketService implements OnDestroy {
     }
 
     on<T>(eventName: string, action: (data: T) => void): void {
-        if (this.useTauriSocket) {
+        if (this.tauriStateService.useTauri) {
             tauri.event
                 .listen(eventName, (event: Event<unknown>) => {
                     action(JSON.parse(event.payload as string));
@@ -123,7 +123,7 @@ export class ClientSocketService implements OnDestroy {
     send<T>(event: string, data?: T): void {
         if (!this.connected.value) return;
 
-        if (this.useTauriSocket) {
+        if (this.tauriStateService.useTauri) {
             if (data) {
                 tauri.tauri.invoke(RustCommand.Send, { eventName: event, data: JSON.stringify(data) }).then(() => {
                     tauri.event

@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
-import { useTauri } from '@app/pages/app/app.component';
 import { ServerErrors } from '@common/constants/server-errors';
 import { SocketEvents } from '@common/constants/socket-events';
 import { GameRoom } from '@common/interfaces/game-room';
@@ -11,14 +10,15 @@ import { GameDifficulty } from '@common/models/game-difficulty';
 import { GameMode } from '@common/models/game-mode';
 import { GameRoomState } from '@common/models/game-room-state';
 import { GameVisibility } from '@common/models/game-visibility';
+import { GameClientService } from '@services/game-client.service';
 import { SnackBarService } from '@services/snack-bar.service';
+import { TauriStateService } from '@services/tauri-state.service';
 import { UserService } from '@services/user.service';
 import { window as tauriWindow } from '@tauri-apps/api';
 import { TauriEvent } from '@tauri-apps/api/event';
 import { Observable, of, Subject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
 import { LanguageService } from './language.service';
-import { GameClientService } from '@services/game-client.service';
 
 @Injectable({
     providedIn: 'root',
@@ -36,6 +36,7 @@ export class GameConfigurationService {
         private clientSocket: ClientSocketService,
         private gameClientService: GameClientService,
         private router: Router,
+        private tauriStateService: TauriStateService,
         private languageService: LanguageService,
     ) {
         this.resetRoomInformations();
@@ -54,7 +55,7 @@ export class GameConfigurationService {
 
         // TODO : Move this somewhere more logic
         // eslint-disable-next-line no-underscore-dangle
-        if (useTauri) {
+        if (this.tauriStateService.useTauri) {
             tauriWindow
                 .getCurrent()
                 .listen(TauriEvent.WINDOW_CLOSE_REQUESTED, () => {
