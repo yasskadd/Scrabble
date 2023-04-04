@@ -201,7 +201,7 @@ export class WordSolver {
     }
 
     private addBoardLetterToPartialWord(nextPosition: Coordinate, partialWord: string, currentNode: LetterTreeNode) {
-        const existingLetter: string = this.gameboard.getLetterTile(nextPosition).letter;
+        const existingLetter: string = this.gameboard.getLetterTile(nextPosition).letter.toLowerCase();
         if (!currentNode.children.has(existingLetter)) return;
         const nextPos = this.isHorizontal ? { x: nextPosition.x + 1, y: nextPosition.y } : { x: nextPosition.x, y: nextPosition.y + 1 };
         this.extendWordAfterAnchor(partialWord + existingLetter, currentNode.children.get(existingLetter) as LetterTreeNode, nextPos, true);
