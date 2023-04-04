@@ -1,9 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { GameClientService } from '@app/services/game-client.service';
 import { first } from 'rxjs/operators';
-import { TauriEvent } from '@tauri-apps/api/event';
-import { WebviewWindow } from '@tauri-apps/api/window';
-import { TauriStateService } from '@services/tauri-state.service';
 
 @Component({
     selector: 'app-game-page',
@@ -13,20 +10,11 @@ import { TauriStateService } from '@services/tauri-state.service';
 export class GamePageComponent implements OnInit {
     isLoading: boolean;
 
-    constructor(private gameClientService: GameClientService, private tauriStateService: TauriStateService) {
+    constructor(private gameClientService: GameClientService) {
         this.isLoading = true;
 
         // TODO : Remove this. For debugging only
         this.isLoading = false;
-
-        if (this.tauriStateService.useTauri) {
-            const tauriWindow = WebviewWindow.getByLabel('main');
-            tauriWindow
-                .listen(TauriEvent.WINDOW_CLOSE_REQUESTED, () => {
-                    alert('Cannot close while in game');
-                })
-                .then();
-        }
     }
 
     ngOnInit(): void {

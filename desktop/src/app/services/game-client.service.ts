@@ -83,10 +83,8 @@ export class GameClientService {
             this.nextTurnSubject.next();
         });
 
-        this.clientSocketService.on(SocketEvents.GameAboutToStart, (gameInfo: GameInfo) => {
-            this.players = gameInfo.players;
-            this.activePlayer = gameInfo.activePlayer;
-            this.updateGameboard(gameInfo.gameboard);
+        this.clientSocketService.on(SocketEvents.GameAboutToStart, (info: GameInfo) => {
+            this.viewUpdateEvent(info);
 
             console.log('Received new game with :');
             this.players.forEach((player: PlayerInformation) => {
@@ -187,6 +185,7 @@ export class GameClientService {
     private viewUpdateEvent(info: GameInfo) {
         this.activePlayer = info.activePlayer;
         this.players = info.players;
+        this.updateGameboard(info.gameboard);
     }
 
     private updatePlayersInformationEvent(players: PlayerInformation[]) {

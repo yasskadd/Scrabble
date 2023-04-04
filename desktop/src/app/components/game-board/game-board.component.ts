@@ -8,6 +8,9 @@ import { PlayDirection } from '@app/models/play-direction';
 import { LetterPlacementService } from '@app/services/letter-placement.service';
 import { Letter } from '@common/interfaces/letter';
 import { AlphabetLetter } from '@common/models/alphabet-letter';
+import { WebviewWindow } from '@tauri-apps/api/window';
+import { TauriEvent } from '@tauri-apps/api/event';
+import { TauriStateService } from '@services/tauri-state.service';
 
 @Component({
     selector: 'app-game-board',
@@ -18,7 +21,16 @@ export class GameBoardComponent {
     protected boardTileStates: typeof BoardTileState = BoardTileState;
     protected playDirection: typeof PlayDirection = PlayDirection;
 
-    constructor(protected letterPlacementService: LetterPlacementService) {}
+    constructor(protected letterPlacementService: LetterPlacementService, private tauriStateService: TauriStateService) {
+        if (this.tauriStateService.useTauri) {
+            const tauriWindow = WebviewWindow.getByLabel('main');
+            tauriWindow
+                .listen(TauriEvent.WINDOW_CLOSE_REQUESTED, () => {
+                    alert('Cannot close while in game');
+                })
+                .then();
+        }
+    }
 
     protected drop(event: CdkDragDrop<Letter[]>, tile: BoardTileInfo): void {
         if (event.previousContainer.id === 'player-rack') {

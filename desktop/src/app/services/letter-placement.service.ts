@@ -407,6 +407,10 @@ export class LetterPlacementService {
             if (Math.floor(coord / TOTAL_TILES_IN_ROW) !== coord % TOTAL_TILES_IN_ROW) {
                 this.boardTiles[coord - 1].letter.value = tile.toUpperCase() as AlphabetLetter;
                 this.boardTiles[coord - 1].state = BoardTileState.Confirmed;
+
+                if (!this.boardTiles[coord - 1].letter.value && !tile) {
+                    this.boardTiles[coord - 1].letter.points = undefined;
+                }
             }
         });
     }
