@@ -15,8 +15,8 @@ export class HighScoresService {
     constructor(private readonly httpHandler: HttpHandlerService, private snackBar: MatSnackBar) {}
 
     getHighScores() {
-        this.httpHandler.getClassicHighScore().subscribe((highScore) => (this.highScoreClassic = highScore));
-        this.httpHandler.getLOG2990HighScore().subscribe((highScore) => (this.highScoreLOG29990 = highScore));
+        this.httpHandler.getClassicHighScore().then((highScore) => (this.highScoreClassic = highScore));
+        this.httpHandler.getLOG2990HighScore().then((highScore) => (this.highScoreLOG29990 = highScore));
         setTimeout(() => {
             if (this.highScoreClassic === undefined && this.highScoreLOG29990 === undefined)
                 this.openSnackBar("Impossible de reçevoir l'information du serveur");
@@ -30,7 +30,7 @@ export class HighScoresService {
     }
 
     resetHighScores() {
-        this.httpHandler.resetHighScores().subscribe(() => {
+        this.httpHandler.resetHighScores().then(() => {
             this.getHighScores();
         });
     }

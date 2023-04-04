@@ -25,22 +25,14 @@
         "target": "es2020",
         "useDefineForClassFields": false,
         "module": "es2020",
-        "lib": [
-            "es2020",
-            "dom"
-        ],
+        "lib": ["es2020", "dom"],
         "paths": {
-            "@app/*": [
-                "./src/app/*"
-            ],
-            "@common/*": [
-                "../common/*"
-            ],
-            "@services/*": [
-                "./src/app/services/*"
-            ]
+            "@app/*": ["./src/app/*"],
+            "@common/*": ["../common/*"],
+            "@services/*": ["./src/app/services/*"]
         }
     },
+    "exclude": ["node_modules", "target", "src-tauri/target"],
     "angularCompilerOptions": {
         "enableI18nLegacyMessageIdFormat": false,
         "strictInjectionParameters": true,

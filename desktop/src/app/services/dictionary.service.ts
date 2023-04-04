@@ -30,7 +30,7 @@ export class DictionaryService {
                 subject.next(error);
             } else {
                 subject.next('');
-                this.httpHandler.addDictionary(dictionary).subscribe(() => {
+                this.httpHandler.addDictionary(dictionary).then(() => {
                     this.languageService.getWord(DictionaryEvents.ADDED).subscribe((word: string) => {
                         this.snackBarService.openInfo(word);
                     });
@@ -43,21 +43,21 @@ export class DictionaryService {
         return subject;
     }
 
-    deleteDictionary(dictionarytoRemove: DictionaryInfo): Observable<void> {
-        return this.httpHandler.deleteDictionary(dictionarytoRemove.title);
+    async deleteDictionary(dictionarytoRemove: DictionaryInfo): Promise<void> {
+        return await this.httpHandler.deleteDictionary(dictionarytoRemove.title);
     }
 
-    modifyDictionary(dictionaryInfo: ModifiedDictionaryInfo): Observable<void> {
-        return this.httpHandler.modifyDictionary(dictionaryInfo);
+    async modifyDictionary(dictionaryInfo: ModifiedDictionaryInfo): Promise<void> {
+        return await this.httpHandler.modifyDictionary(dictionaryInfo);
     }
 
-    resetDictionaries(): Observable<Dictionary[]> {
-        return this.httpHandler.resetDictionaries();
+    async resetDictionaries(): Promise<Dictionary[]> {
+        return await this.httpHandler.resetDictionaries();
     }
 
     updateDictionariesInfos(): Subject<void> {
         const subject: Subject<void> = new Subject<void>();
-        this.httpHandler.getDictionaries().subscribe((dictionaryInfos: DictionaryInfo[]) => {
+        this.httpHandler.getDictionaries().then((dictionaryInfos: DictionaryInfo[]) => {
             this.dictionariesInfos = dictionaryInfos;
         });
 
@@ -66,7 +66,7 @@ export class DictionaryService {
 
     getDictionary(title: string): Observable<Dictionary> {
         const subject: Subject<Dictionary> = new Subject<Dictionary>();
-        this.httpHandler.getDictionary(title).subscribe((dictionary: Dictionary) => {
+        this.httpHandler.getDictionary(title).then((dictionary: Dictionary) => {
             this.dictionary = dictionary;
             subject.next(this.dictionary);
         });
