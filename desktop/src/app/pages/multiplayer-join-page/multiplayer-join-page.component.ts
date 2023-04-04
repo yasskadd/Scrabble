@@ -27,6 +27,7 @@ export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
         private dialog: MatDialog,
     ) {
         this.gameMode = this.activatedRoute.snapshot.params.id;
+        console.log(this.gameMode);
         this.roomIdForm = new FormControl('');
     }
 

@@ -11,6 +11,8 @@ import { SocketEvents } from '@common/constants/socket-events';
 import { LanguageService } from '@services/language.service';
 import { Subject } from 'rxjs';
 import { ClientSocketService } from '@services/communication/client-socket.service';
+import { AppRoutes } from '@app/models/app-routes';
+import { GameMode } from '@common/models/game-mode';
 
 @Component({
     selector: 'app-main-page',
@@ -22,6 +24,8 @@ export class MainPageComponent {
     protected homeConnectionResponse: SocketResponse;
     protected connectionSubject: Subject<SocketResponse>;
     protected disconnectionSubject: Subject<void>;
+    protected multiplayerCreateLink: string;
+    protected multiplayerjoinLink: string;
 
     protected chatIsOpen: boolean;
 
@@ -36,6 +40,8 @@ export class MainPageComponent {
         private dialog: MatDialog,
         private highScore: MatDialog,
     ) {
+        this.multiplayerCreateLink = `/${AppRoutes.MultiGameCreationPage}/${GameMode.Multi}`;
+        this.multiplayerjoinLink = `/${AppRoutes.MultiJoinPage}/classique`;
         this.homeConnectionResponse = { validity: false };
         this.userNameForm = new FormControl('', Validators.required);
         this.chatIsOpen = false;

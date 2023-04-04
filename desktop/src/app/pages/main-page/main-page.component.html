@@ -27,6 +27,29 @@
                         </button>
                     </div>
                     <button
+                        [routerLink]="[multiplayerCreateLink]"
+                        id="multiplayer-create"
+                        class="button multiplayer"
+                        mat-raised-button
+                        color="primary"
+                        mat-dialog-close=""
+                    >
+                        {{ "action.create" | translate }}
+                        <mat-icon class="button-icon">create</mat-icon>
+                    </button>
+
+                    <button
+                        [routerLink]="multiplayerjoinLink"
+                        id="multiplayer-join"
+                        class="button multiplayer"
+                        mat-raised-button
+                        color="primary"
+                        mat-dialog-close=""
+                    >
+                        {{ "action.join" | translate }}
+                        <mat-icon class="button-icon">leak_add</mat-icon>
+                    </button>
+                    <button
                         id="classique"
                         mat-raised-button
                         color="primary"
@@ -36,6 +59,7 @@
                         matTooltipPosition="right"
                         matTooltipClass="toolMainPage"
                         [disabled]="!userService.isConnected()"
+                        hidden
                     >
                         {{ "main_page.play" | translate }}
                     </button>
