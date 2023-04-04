@@ -63,7 +63,7 @@ export class ClientSocketService implements OnDestroy {
         // }
     }
 
-    async establishConnection(cookie: string): Promise<boolean> {
+    async establishConnection(cookie: string): Promise<void> {
         if (await this.isSocketAlive()) {
             console.log('socket not alive');
             await this.disconnect();
@@ -72,19 +72,12 @@ export class ClientSocketService implements OnDestroy {
         }
 
         if (this.tauriStateService.useTauri) {
-            return await this.connectTauri(cookie).then(async () => {
-                if (await this.isSocketAlive()) {
-                    this.connected.next(true);
-                    return true;
-                } else {
-                    this.connected.next(false);
-                    return false;
-                }
+            return await this.connectTauri(cookie).then(() => {
+                this.connected.next(true);
             });
         } else {
             this.connect(cookie);
             this.connected.next(true);
-            return true;
         }
     }
 
@@ -120,6 +113,7 @@ export class ClientSocketService implements OnDestroy {
         if (this.tauriStateService.useTauri) {
             tauri.event
                 .listen(eventName, (event: Event<unknown>) => {
+                    console.log(event);
                     action(JSON.parse(event.payload as string));
                     this.updateSubject.next();
                 })

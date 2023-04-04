@@ -28,7 +28,6 @@ export class UserStatsStorageService {
         const newTotalGameScore = userStats.totalGameScore + gameHistoryInfo.playerScore;
         const newAverageGameTime = this.msToMinSec(newTotalGameTime / newGameCount);
         const newAverageGameScore = newTotalGameScore / newGameCount;
-        console.log(newAverageGameScore);
         await this.database.usersStats.collection.updateOne(
             { userIdRef: new ObjectId(gameHistoryInfo.playerId) },
             {

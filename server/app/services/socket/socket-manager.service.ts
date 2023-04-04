@@ -1,12 +1,13 @@
 import { SECRET_KEY } from '@app/../very-secret-file';
 import { AccountStorageService } from '@app/services/database/account-storage.service';
+import { CallbackSignature, OnSioCallbackSignature } from '@app/types/sockets';
 import { HistoryActions } from '@common/models/history-actions';
 import * as cookie from 'cookie';
+import * as http from 'http';
 import * as jwt from 'jsonwebtoken';
 import * as io from 'socket.io';
 import { Service } from 'typedi';
-import { CallbackSignature, OnSioCallbackSignature } from '@app/types/sockets';
-import * as http from 'http';
+import { SocketEvents } from '@common/constants/socket-events';
 
 @Service()
 export class SocketManager {
@@ -88,8 +89,8 @@ export class SocketManager {
                 }
 
                 let keepConnecting = true;
-                console.log('userid = ' + username);
-                this.socketUsernameMap.forEach((value: string, key: io.Socket) => {
+                // console.log('userid = ' + username);
+                this.socketUsernameMap.forEach((value: string) => {
                     console.log('id from list = ' + value);
                     if (value === username) {
                         console.log('not connecting');
@@ -97,16 +98,20 @@ export class SocketManager {
                     }
                 });
                 if (!keepConnecting) {
-                    socket.disconnect;
+                    console.log('disconnecting');
+                    socket.emit(SocketEvents.UserAlreadyConnected);
+                    // socket.disconnect();
                     return;
                 }
 
                 this.socketUsernameMap.set(socket, username);
-                console.log(this.socketUsernameMap.values());
+                // console.log(this.socketUsernameMap.values());
 
                 this.accountStorageService.addUserEventHistory(username, HistoryActions.Connection, new Date());
 
+                // eslint-disable-next-line no-console
                 console.log('Connection of client with socketid = ' + socket.id + ' from user = ' + username);
+                socket.emit(SocketEvents.SuccessfulConnection);
             } else {
                 socket.disconnect();
                 // eslint-disable-next-line no-console
@@ -132,6 +137,7 @@ export class SocketManager {
 
                 // eslint-disable-next-line no-console
                 console.log('Disconnection of client with id = ' + socket.id + ' from : ' + socket.handshake.headers.origin);
+                // eslint-disable-next-line no-console
                 console.log(this.socketUsernameMap.values());
             });
         });

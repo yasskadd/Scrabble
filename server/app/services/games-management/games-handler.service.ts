@@ -54,10 +54,10 @@ export class GamesHandlerService {
     }
 
     removePlayerFromSocketId(socketId: string): void {
-        console.log(this.players.map((p: GamePlayer) => p.player.user.username));
+        // console.log(this.players.map((p: GamePlayer) => p.player.user.username));
         const player = this.players.find((gamePlayer: GamePlayer) => gamePlayer.player.socketId === socketId);
         if (!player) return;
-        console.log('removing player : ' + player.player.user.username);
+        // console.log('removing player : ' + player.player.user.username);
 
         const playerIndex = this.players.findIndex((gamePlayer: GamePlayer) => gamePlayer.player.socketId === socketId);
         if (playerIndex !== INVALID_INDEX) {
@@ -74,8 +74,8 @@ export class GamesHandlerService {
     }
 
     removeRoomFromRoomId(roomId: string): void {
-        console.log('removing the room');
-        console.log(this.players);
+        // console.log('removing the room');
+        // console.log(this.players);
         const playerIndexes: number[] = [];
         this.players.forEach((gamePlayer: GamePlayer, index: number) => {
             if (gamePlayer.player.roomId === roomId) {
@@ -86,7 +86,7 @@ export class GamesHandlerService {
         playerIndexes.forEach((index: number) => {
             this.players.slice(index, 1);
         });
-        console.log(this.players);
+        // console.log(this.players);
     }
 
     async setDictionaries() {

@@ -77,17 +77,6 @@
                 "minWidth": 1000,
                 "minHeight": 800,
                 "label": "main"
-            },
-             {
-                "fullscreen": false,
-                "height": 800,
-                "resizable": true,
-                "title": "PolyScrabble - dev - 2",
-                "width": 1000,
-                "focus": false,
-                "minWidth": 1000,
-                "minHeight": 800,
-                "label": "second"
             }
         ]
     }
