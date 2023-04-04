@@ -67,8 +67,6 @@ export class Game {
                 else currentCoords.y++;
             }
             this.gameboard.placeLetter(currentCoords, letter);
-            this.turn.resetSkipCounter();
-            this.turn.end();
         });
     }
 
