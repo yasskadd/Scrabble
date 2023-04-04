@@ -35,10 +35,14 @@ export class UserService {
 
         this.httpHandlerService.login(user).then(
             (loginRes: { userData: IUser; sessionToken: string }) => {
-                this.updateUserWithImageUrl(loginRes.userData);
-                this.user = loginRes.userData;
-                this.cookieService.updateUserSessionCookie(loginRes.sessionToken);
-                subject.next('');
+                console.log(this.user._id);
+                this.cookieService.updateUserSessionCookie(loginRes.sessionToken).then((connected: boolean) => {
+                    if (connected) {
+                        this.user = loginRes.userData;
+                        this.updateUserWithImageUrl(loginRes.userData);
+                        subject.next('');
+                    }
+                });
             },
             (error: any) => {
                 // TODO : Language
@@ -49,11 +53,11 @@ export class UserService {
         return subject;
     }
 
-    logout(): void {
-        this.httpHandlerService.logout().then(() => {
+    async logout(): Promise<void> {
+        this.httpHandlerService.logout(this.user).then(async () => {
             this.initUser();
             this.cookieService.removeSessionCookie();
-            this.clientSocketService.disconnect();
+            await this.clientSocketService.disconnect();
             this.router.navigate([AppRoutes.ConnectionPage]).then();
         });
     }

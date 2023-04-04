@@ -14,8 +14,8 @@ export class AppCookieService {
         this.cookieService.remove('session_token');
     }
 
-    updateUserSessionCookie(cookie?: string): void {
+    async updateUserSessionCookie(cookie?: string): Promise<boolean> {
         this.userSessionCookie = cookie ? cookie : this.cookieService.get('session_token');
-        this.clientSocketService.establishConnection(this.userSessionCookie).then();
+        return await this.clientSocketService.establishConnection(this.userSessionCookie);
     }
 }

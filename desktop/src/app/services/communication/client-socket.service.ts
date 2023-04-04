@@ -35,48 +35,57 @@ export class ClientSocketService implements OnDestroy {
         }
     }
 
-    connect(cookie?: string) {
-        if (cookie) {
-            this.socket = io(environment.socketUrl, {
-                transports: ['websocket'],
-                upgrade: false,
-                /* eslint-disable-next-line @typescript-eslint/naming-convention*/
-                extraHeaders: { Cookie: `session_token=${cookie}` },
-            });
-        } else {
-            this.socket = io(environment.socketUrl, { transports: ['websocket'], upgrade: false });
-        }
+    connect(cookie: string) {
+        this.socket = io(environment.socketUrl, {
+            transports: ['websocket'],
+            upgrade: false,
+            /* eslint-disable-next-line @typescript-eslint/naming-convention*/
+            extraHeaders: { Cookie: `session_token=${cookie}` },
+        });
+        // else {
+        //     this.socket = io(environment.socketUrl, { transports: ['websocket'], upgrade: false });
+        // }
     }
 
-    connectTauri(cookie?: string) {
-        if (cookie) {
-            tauri.tauri
-                .invoke(RustCommand.EstablishConnection, {
-                    address: environment.socketUrl,
-                    cookie: `session_token=${cookie}`,
-                })
-                .then(() => {
-                    this.listenToTauriEvents();
-                });
-        } else {
-            tauri.tauri.invoke(RustCommand.EstablishConnection, { address: environment.socketUrl }).then(() => {
+    async connectTauri(cookie: string): Promise<void> {
+        return await tauri.tauri
+            .invoke(RustCommand.EstablishConnection, {
+                address: environment.socketUrl,
+                cookie: `session_token=${cookie}`,
+            })
+            .then(() => {
                 this.listenToTauriEvents();
             });
-        }
+        // else {
+        //     tauri.tauri.invoke(RustCommand.EstablishConnection, { address: environment.socketUrl }).then(() => {
+        //         this.listenToTauriEvents();
+        //     });
+        // }
     }
 
-    async establishConnection(cookie?: string) {
+    async establishConnection(cookie: string): Promise<boolean> {
         if (await this.isSocketAlive()) {
+            console.log('socket not alive');
             await this.disconnect();
+        } else {
+            console.log('socket alive');
         }
 
         if (this.tauriStateService.useTauri) {
-            this.connectTauri(cookie);
+            return await this.connectTauri(cookie).then(async () => {
+                if (await this.isSocketAlive()) {
+                    this.connected.next(true);
+                    return true;
+                } else {
+                    this.connected.next(false);
+                    return false;
+                }
+            });
         } else {
             this.connect(cookie);
+            this.connected.next(true);
+            return true;
         }
-
-        this.connected.next(true);
     }
 
     listenToTauriEvents(): void {
