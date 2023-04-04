@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { useTauri } from '@app/pages/app/app.component';
 import { WebviewWindow } from '@tauri-apps/api/window';
+import { TauriStateService } from '@services/tauri-state.service';
 
 @Injectable({
     providedIn: 'root',
@@ -9,10 +9,10 @@ import { WebviewWindow } from '@tauri-apps/api/window';
 export class ThemeService {
     isDarkTheme: BehaviorSubject<boolean>;
 
-    constructor() {
+    constructor(private tauriStateService: TauriStateService) {
         this.isDarkTheme = new BehaviorSubject<boolean>(false);
 
-        if (useTauri) {
+        if (this.tauriStateService.useTauri) {
             const tauriWindow = WebviewWindow.getByLabel('main');
             tauriWindow.theme().then((theme: string) => {
                 this.isDarkTheme.next(theme === 'dark');
