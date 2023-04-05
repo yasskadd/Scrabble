@@ -132,10 +132,10 @@ export class AccountStorageService {
         );
     }
 
-    async addUserEventHistory(username: string, userEvent: string, dateEvent: Date, isWinner?: boolean): Promise<void> {
+    async addUserEventHistory(id: string, userEvent: string, dateEvent: Date, isWinner?: boolean): Promise<void> {
         const historyEvent = this.createHistoryEvent(userEvent, dateEvent, isWinner);
         if (historyEvent) {
-            await this.database.users.collection.updateOne({ username }, { $push: { historyEventList: historyEvent } });
+            await this.database.users.collection.updateOne({ _id: new ObjectId(id) }, { $push: { historyEventList: historyEvent } });
         }
     }
 
@@ -157,7 +157,6 @@ export class AccountStorageService {
     }
 
     private createHistoryEvent(userEvent: string, dateEvent: Date, isWinner?: boolean): HistoryEvent | undefined {
-        if (!(userEvent in HistoryActions)) return;
         const gameWon = userEvent === HistoryActions.Game ? isWinner : null;
         const momentDate = moment(dateEvent);
         const formattedDate: string = momentDate.format('HH:mm:ss YYYY-MM-DD');
