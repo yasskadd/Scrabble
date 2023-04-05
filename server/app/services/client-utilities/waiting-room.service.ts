@@ -130,13 +130,11 @@ export class WaitingRoomService {
             const player = this.getPlayerFromQuery(userQuery);
             // TODO : Tell client the rejection failed
             if (!player) return;
-
-            this.rejectOpponent(server, socket, player);
-
             if (room.players.filter((playerElement: RoomPlayer) => playerElement.type === PlayerType.User).length === 0) {
                 this.removeRoom(server, userQuery.roomId);
             }
 
+            this.rejectOpponent(server, socket, player);
             return;
         }
 
@@ -156,7 +154,12 @@ export class WaitingRoomService {
             roomId: player.roomId,
         });
 
-        if (!player.isCreator && player.socketId !== socket.id) {
+        // TODO : Not if in game
+        if (
+            !player.isCreator &&
+            player.socketId !== socket.id &&
+            this.waitingRooms.find((room: GameRoom) => room.id === player.roomId)?.state === GameRoomState.Waiting
+        ) {
             playerSocket.emit(SocketEvents.KickedFromGameRoom, this.stripPlayerPassword(player));
         }
 
@@ -176,6 +179,7 @@ export class WaitingRoomService {
         const room: GameRoom | undefined = this.getRoom(roomId);
         if (!room) return;
 
+        room.state = GameRoomState.Playing;
         await this.gameStateService.createGame(server, room);
         // // TODO : Changed GameScrabbleInformation to simply using GameRoom
         // const users: IUser[] = [];
@@ -268,9 +272,7 @@ export class WaitingRoomService {
     }
 
     private areUsersTheSame(player1: IUser, player2: IUser): boolean {
-        return (
-            player1.username === player2.username && player1.email === player2.email && player1.profilePicture?.name === player2.profilePicture?.name
-        );
+        return player1._id === player2._id;
     }
 
     private generateRoomId(): string {
@@ -300,11 +302,15 @@ export class WaitingRoomService {
 
     private stripUserPassword(user: IUser): IUser {
         return {
+            _id: user._id,
             email: user.email,
             username: user.username,
             password: 'null',
             profilePicture: user.profilePicture,
-        } as IUser;
+            historyEventList: user.historyEventList,
+            theme: user.theme,
+            language: user.language,
+        };
     }
 
     private stripPlayerPassword(player: RoomPlayer): RoomPlayer {
@@ -314,7 +320,7 @@ export class WaitingRoomService {
             socketId: player.socketId,
             type: player.type,
             isCreator: player.isCreator,
-        } as RoomPlayer;
+        };
     }
 
     private stripPlayersPassword(gameRoom: GameRoom): GameRoom {
@@ -347,7 +353,7 @@ export class WaitingRoomService {
                         isDefaultPicture: true,
                         key: 'f553ba598dbcfc7e9e07f8366b6684b5.jpg',
                     },
-                } as IUser,
+                },
                 socketId: '',
                 roomId,
                 type: PlayerType.Bot,

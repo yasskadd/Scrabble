@@ -1,12 +1,13 @@
 import { SECRET_KEY } from '@app/../very-secret-file';
 import { AccountStorageService } from '@app/services/database/account-storage.service';
+import { CallbackSignature, OnSioCallbackSignature } from '@app/types/sockets';
+import { SocketEvents } from '@common/constants/socket-events';
 import { HistoryActions } from '@common/models/history-actions';
 import * as cookie from 'cookie';
+import * as http from 'http';
 import * as jwt from 'jsonwebtoken';
 import * as io from 'socket.io';
 import { Service } from 'typedi';
-import { CallbackSignature, OnSioCallbackSignature } from '@app/types/sockets';
-import * as http from 'http';
 
 @Service()
 export class SocketManager {
@@ -77,7 +78,8 @@ export class SocketManager {
                     if (err) isTokenValid = false;
                     else {
                         isTokenValid = true;
-                        username = decoded.name;
+                        // eslint-disable-next-line no-underscore-dangle
+                        username = decoded.userID;
                     }
                 });
 
@@ -86,12 +88,24 @@ export class SocketManager {
                     return;
                 }
 
+                let keepConnecting = true;
+                this.socketUsernameMap.forEach((value: string) => {
+                    if (value === username) {
+                        keepConnecting = false;
+                    }
+                });
+                if (!keepConnecting) {
+                    socket.emit(SocketEvents.UserAlreadyConnected);
+                    return;
+                }
+
                 this.socketUsernameMap.set(socket, username);
 
                 this.accountStorageService.addUserEventHistory(username, HistoryActions.Connection, new Date());
 
                 // eslint-disable-next-line no-console
-                console.log('Connection of authenticated client with id = ' + socket.id + ' from : ' + socket.handshake.headers.host);
+                console.log('Connection of client with socketid = ' + socket.id + ' from user = ' + username);
+                socket.emit(SocketEvents.SuccessfulConnection);
             } else {
                 socket.disconnect();
                 // eslint-disable-next-line no-console
@@ -117,6 +131,8 @@ export class SocketManager {
 
                 // eslint-disable-next-line no-console
                 console.log('Disconnection of client with id = ' + socket.id + ' from : ' + socket.handshake.headers.origin);
+                // eslint-disable-next-line no-console
+                console.log(this.socketUsernameMap.values());
             });
         });
     }

@@ -5,7 +5,7 @@ import { ValidateWordReturn } from '@app/interfaces/validate-word-return';
 import { Gameboard } from '@common/classes/gameboard.class';
 import * as constants from '@common/constants/board-info';
 import { Coordinate } from '@common/interfaces/coordinate';
-import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
+import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
 import { DictionaryValidation } from './dictionary-validation.class';
 const ALPHABET_LETTERS = 'abcdefghijklmnopqrstuvwxyz';
 const MAX_LETTERS_LIMIT = 7;
@@ -30,7 +30,7 @@ export class WordSolver {
     }
 
     findAllOptions(rack: string[]): PlaceWordCommandInfo[] {
-        this.rack = rack;
+        this.rack = rack.map((letter: string) => letter.toLowerCase());
         this.commandInfoList.length = 0;
 
         for (const direction of [true, false]) {
@@ -201,7 +201,7 @@ export class WordSolver {
     }
 
     private addBoardLetterToPartialWord(nextPosition: Coordinate, partialWord: string, currentNode: LetterTreeNode) {
-        const existingLetter: string = this.gameboard.getLetterTile(nextPosition).letter;
+        const existingLetter: string = this.gameboard.getLetterTile(nextPosition).letter.toLowerCase();
         if (!currentNode.children.has(existingLetter)) return;
         const nextPos = this.isHorizontal ? { x: nextPosition.x + 1, y: nextPosition.y } : { x: nextPosition.x, y: nextPosition.y + 1 };
         this.extendWordAfterAnchor(partialWord + existingLetter, currentNode.children.get(existingLetter) as LetterTreeNode, nextPos, true);

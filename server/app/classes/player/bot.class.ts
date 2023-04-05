@@ -4,7 +4,7 @@ import * as Constant from '@app/constants/bot';
 import { BotInformation } from '@app/interfaces/bot-information';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
-import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
+import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
 import { RoomPlayer } from '@common/interfaces/room-player';
 import { Container } from 'typedi';
 import { GamePlayer } from './player.class';
@@ -86,6 +86,8 @@ export class Bot extends GamePlayer {
 
     protected emitPlaceCommand(randomCommandInfo: PlaceWordCommandInfo): void {
         this.game.placeWord(randomCommandInfo);
+        this.game.turn.resetSkipCounter();
+        this.game.turn.end();
         this.socketManager.emitRoom(this.botInfo.roomId, SocketEvents.LetterReserveUpdated, this.game.letterReserve.lettersReserve);
     }
 
