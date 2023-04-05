@@ -4,7 +4,7 @@ import * as Constant from '@app/constants/bot';
 import { BotInformation } from '@app/interfaces/bot-information';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
-import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
+import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
 import { RoomPlayer } from '@common/interfaces/room-player';
 import { Container } from 'typedi';
 import { GamePlayer } from './player.class';

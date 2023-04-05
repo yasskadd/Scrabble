@@ -62,4 +62,6 @@ export enum SocketEvents {
     PlacementFailure = 'placementFailure',
     ExchangeSuccess = 'ExchangeSuccess',
     ExchangeFailure = 'ExchangeFailure',
+    UserAlreadyConnected = 'UserAlreadyConnected',
+    SuccessfulConnection = 'SuccessfulConnection',
 }

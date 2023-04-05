@@ -57,6 +57,10 @@ export class HeaderComponent {
 
         return letters;
     }
+
+    isGamePage() {
+        return this.router.url.includes(AppRoutes.GamePage);
+    }
 }
 
 // TODO: removed commented code or implement home and admin button for authorised users

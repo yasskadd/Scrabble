@@ -30,6 +30,7 @@ import { Subject } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import { GamesHandlerService } from './games-handler.service';
+import { Letter } from '@common/interfaces/letter';
 
 const MAX_SKIP = 6;
 const SECOND = 1000;
@@ -88,6 +89,17 @@ export class GamesStateService {
 
         const playersInfo: PlayerInformation[] = this.gamesHandler.players.map((player: GamePlayer) => {
             return player.getInformation();
+        });
+
+        console.log('Start of game with : ');
+        playersInfo.forEach((playerInfo: PlayerInformation) => {
+            console.log(playerInfo.player.user.username);
+            console.log(
+                playerInfo.rack.map((letter: Letter) => {
+                    return letter.value;
+                }),
+            );
+            console.log('');
         });
 
         server.to(room.id).emit(SocketEvents.GameAboutToStart, {
@@ -255,8 +267,10 @@ export class GamesStateService {
     }
 
     private async abandonGame(socket: Socket): Promise<void> {
+        console.log(socket.id);
         const gamePlayer = this.gamesHandler.getPlayerFromSocketId(socket.id);
         if (!gamePlayer) return;
+        console.log(gamePlayer.player.user.username);
 
         const room = gamePlayer.player.roomId;
         const gameHistoryInfo = this.formatGameInfo(gamePlayer);
@@ -270,7 +284,6 @@ export class GamesStateService {
         ) {
             this.socketManager.emitRoom(room, SocketEvents.UserDisconnect);
             // TODO : Repair and make that better for 4 players and bots
-            // this.switchToSolo(gamePlayer).then();
 
             const bot = this.replacePlayerWithBot(gamePlayer as RealPlayer);
             this.gamesHandler.players.push(bot);
@@ -413,7 +426,7 @@ export class GamesStateService {
             return;
         });
 
-        if (playersInRoom.length !== 0) this.endGame(playersInRoom[0].socketId);
+        if (playersInRoom.length !== 0) await this.endGame(playersInRoom[0].socketId);
 
         for (const player of playersInRoom) {
             await this.sendHighScore(player);
@@ -443,10 +456,9 @@ export class GamesStateService {
     }
 
     private getWinnerPlayer(players: GamePlayer[]): GamePlayer {
-        const winnerPlayer = players.reduce((acc, cur) => {
+        return players.reduce((acc, cur) => {
             return cur.score > acc.score ? cur : acc;
         });
-        return winnerPlayer;
     }
 
     private sendPublicViewUpdate(game: Game, room: GameRoom) {
@@ -517,12 +529,13 @@ export class GamesStateService {
 
     private replaceBotWithObserver(observer: RoomPlayer, bot: Bot) {
         bot.unsubscribeObservables();
-        const player = bot.convertToRealPlayer(observer);
-        return player;
+        return bot.convertToRealPlayer(observer);
     }
 
     private replacePlayerWithBot(player: RealPlayer): BeginnerBot {
         const bot = player.convertPlayerToBot();
+        bot.player.socketId = '';
+        bot.player.type = PlayerType.Bot;
         bot.setGame(player.game);
         bot.start();
         return bot;

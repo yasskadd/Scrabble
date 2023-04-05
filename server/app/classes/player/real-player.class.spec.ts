@@ -1,8 +1,8 @@
 import { Game } from '@app/classes/game.class';
 import { Word } from '@app/classes/word.class';
 import { Gameboard } from '@common/classes/gameboard.class';
-import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { Letter } from '@common/interfaces/letter';
+import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { RealPlayer } from './real-player.class';

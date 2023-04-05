@@ -5,7 +5,8 @@
     "ignorePatterns": ["projects/**/*"],
     "extends": ["../.eslintrc.json"],
     "rules": {
-        "jsdoc/check-indentation": "off"
+        "jsdoc/check-indentation": "off",
+        "no-underscore-dangle": "off"
     },
     "globals": {
         "NodeJS": true,

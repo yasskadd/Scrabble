@@ -11,15 +11,15 @@ import { LanguageService } from '@app/services/language.service';
 import { TimeService } from '@app/services/time.service';
 import { UserService } from '@app/services/user.service';
 import { VirtualPlayersService } from '@app/services/virtual-players.service';
+import { SocketEvents } from '@common/constants/socket-events';
 import { GameCreationQuery } from '@common/interfaces/game-creation-query';
 import { DictionaryEvents } from '@common/models/dictionary-events';
 import { GameDifficulty } from '@common/models/game-difficulty';
+import { GameMode } from '@common/models/game-mode';
 import { GameTimeOptions } from '@common/models/game-time-options';
 import { GameVisibility } from '@common/models/game-visibility';
-import { SnackBarService } from '@services/snack-bar.service';
-import { SocketEvents } from '@common/constants/socket-events';
 import { ClientSocketService } from '@services/communication/client-socket.service';
-import { GameMode } from '@common/models/game-mode';
+import { SnackBarService } from '@services/snack-bar.service';
 
 @Component({
     selector: 'app-multiplayer-create-page',

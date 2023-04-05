@@ -6,7 +6,7 @@ mat-drawer-container {
 }
 
 mat-drawer {
-    left: 0;
+    right: 0;
     height: 100%;
     width: 20%;
     padding: 10px;
@@ -14,7 +14,7 @@ mat-drawer {
 
 .open-chat-button {
     position: absolute;
-    left: 5px;
+    right: 10px;
     top: 5px;
 }
 
@@ -36,7 +36,7 @@ mat-drawer {
 
         ::ng-deep label {
             overflow: unset;
-            left: auto;
+            right: auto;
         }
     }
 }
@@ -106,13 +106,6 @@ mat-drawer {
     max-height: 40px;
     padding-inline: 0px;
 }
-
-// TODO
-// .help-button {
-//     position: absolute;
-//     margin-right: -460px;
-//     margin-bottom: -190px !important;
-// }
 
 ::ng-deep .mat-fab {
     height: 40px !important;

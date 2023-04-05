@@ -2,12 +2,12 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { RustCommand, RustEvent } from '@app/models/rust-command';
 import { LanguageService } from '@services/language.service';
 import { SnackBarService } from '@services/snack-bar.service';
+import { TauriStateService } from '@services/tauri-state.service';
 import * as tauri from '@tauri-apps/api';
 import { Event } from '@tauri-apps/api/event';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
-import { TauriStateService } from '@services/tauri-state.service';
 
 @Injectable({
     providedIn: 'root',
@@ -35,48 +35,39 @@ export class ClientSocketService implements OnDestroy {
         }
     }
 
-    connect(cookie?: string) {
-        if (cookie) {
-            this.socket = io(environment.socketUrl, {
-                transports: ['websocket'],
-                upgrade: false,
-                /* eslint-disable-next-line @typescript-eslint/naming-convention*/
-                extraHeaders: { Cookie: `session_token=${cookie}` },
-            });
-        } else {
-            this.socket = io(environment.socketUrl, { transports: ['websocket'], upgrade: false });
-        }
+    connect(cookie: string) {
+        this.socket = io(environment.socketUrl, {
+            transports: ['websocket'],
+            upgrade: false,
+            /* eslint-disable-next-line @typescript-eslint/naming-convention*/
+            extraHeaders: { Cookie: `session_token=${cookie}` },
+        });
     }
 
-    connectTauri(cookie?: string) {
-        if (cookie) {
-            tauri.tauri
-                .invoke(RustCommand.EstablishConnection, {
-                    address: environment.socketUrl,
-                    cookie: `session_token=${cookie}`,
-                })
-                .then(() => {
-                    this.listenToTauriEvents();
-                });
-        } else {
-            tauri.tauri.invoke(RustCommand.EstablishConnection, { address: environment.socketUrl }).then(() => {
+    async connectTauri(cookie: string): Promise<void> {
+        return await tauri.tauri
+            .invoke(RustCommand.EstablishConnection, {
+                address: environment.socketUrl,
+                cookie: `session_token=${cookie}`,
+            })
+            .then(() => {
                 this.listenToTauriEvents();
             });
-        }
     }
 
-    async establishConnection(cookie?: string) {
+    async establishConnection(cookie: string): Promise<void> {
         if (await this.isSocketAlive()) {
             await this.disconnect();
         }
 
         if (this.tauriStateService.useTauri) {
-            this.connectTauri(cookie);
+            return await this.connectTauri(cookie).then(() => {
+                this.connected.next(true);
+            });
         } else {
             this.connect(cookie);
+            this.connected.next(true);
         }
-
-        this.connected.next(true);
     }
 
     listenToTauriEvents(): void {

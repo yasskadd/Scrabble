@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Gameboard } from '@common/classes/gameboard.class';
+import { Router } from '@angular/router';
+import { AppRoutes } from '@app/models/app-routes';
 import { SocketEvents } from '@common/constants/socket-events';
 import { GameInfo } from '@common/interfaces/game-state';
 import { Letter } from '@common/interfaces/letter';
@@ -8,7 +9,6 @@ import { IUser } from '@common/interfaces/user';
 import { UserService } from '@services/user.service';
 import { ReplaySubject, Subject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
-import { GameConfigurationService } from './game-configuration.service';
 
 // type CompletedObjective = { objective: Objective; name: string };
 // type InitObjective = { objectives1: Objective[]; objectives2: Objective[]; playerName: string };
@@ -19,32 +19,38 @@ const TIMEOUT_PASS = 30;
 })
 export class GameClientService {
     timer: number;
-    gameboard: Gameboard;
     activePlayer: IUser;
     players: PlayerInformation[];
     letterReserveLength: number;
     isGameFinish: boolean;
     winner: string;
     winningMessage: string;
-    gameboardUpdated: Subject<boolean>;
+    gameboardUpdated: Subject<string[]>;
+    quitGameSubject: Subject<void>;
+    nextTurnSubject: Subject<void>;
     turnFinish: ReplaySubject<boolean>;
 
-    constructor(
-        private clientSocketService: ClientSocketService,
-        private gameConfigurationService: GameConfigurationService,
-        private userService: UserService,
-    ) {
-        this.initGameInformation();
-
-        this.gameboardUpdated = new Subject();
+    constructor(private clientSocketService: ClientSocketService, private userService: UserService, private router: Router) {
+        this.gameboardUpdated = new Subject<string[]>();
+        this.quitGameSubject = new Subject<void>();
+        this.nextTurnSubject = new Subject<void>();
         this.turnFinish = new ReplaySubject<boolean>(1);
-        this.gameboard = new Gameboard();
 
         this.clientSocketService.connected.subscribe((connected: boolean) => {
             if (connected) {
                 this.configureBaseSocketFeatures();
             }
         });
+    }
+
+    initGameInformation() {
+        this.timer = 0;
+        this.activePlayer = undefined;
+        this.players = [];
+        this.letterReserveLength = 0;
+        this.isGameFinish = false;
+        this.winningMessage = '';
+        this.winner = '';
     }
 
     configureBaseSocketFeatures() {
@@ -74,6 +80,24 @@ export class GameClientService {
 
         this.clientSocketService.on(SocketEvents.NextTurn, (info: GameInfo) => {
             this.viewUpdateEvent(info);
+            this.nextTurnSubject.next();
+        });
+
+        this.clientSocketService.on(SocketEvents.GameAboutToStart, (info: GameInfo) => {
+            this.viewUpdateEvent(info);
+
+            // console.log('Received new game with :');
+            // this.players.forEach((player: PlayerInformation) => {
+            // console.log(player.player);
+            // console.log(
+            // player.rack.map((letter: Letter) => {
+            // return letter.value;
+            // }),
+            // );
+            // console.log('');
+            // });
+
+            this.router.navigate([`${AppRoutes.GamePage}`]).then();
         });
 
         // this.clientSocketService.on('CompletedObjective', (completedObjective: CompletedObjective) => {
@@ -95,33 +119,21 @@ export class GameClientService {
         });
     }
 
-    updateGameboard() {
-        this.gameboardUpdated.next(true);
+    updateGameboard(newGameboard: string[]) {
+        this.gameboardUpdated.next(newGameboard);
     }
 
     abandonGame() {
-        this.clientSocketService.send('AbandonGame');
+        this.clientSocketService.send(SocketEvents.AbandonGame);
+        this.quitGameSubject.next();
     }
 
     quitGame() {
         this.clientSocketService.send(SocketEvents.QuitGame);
-        this.gameConfigurationService.exitWaitingRoom();
-    }
-
-    initGameInformation() {
-        // TODO : Update that
-        this.timer = 0;
-        this.gameboard = new Gameboard();
-        this.activePlayer = undefined;
-        this.players = [];
-        this.letterReserveLength = 0;
-        this.isGameFinish = false;
-        this.winningMessage = '';
-        this.winner = '';
+        this.quitGameSubject.next();
     }
 
     getLocalPlayer(): PlayerInformation {
-        // console.log(this.players.find((info: PlayerInformation) => info.player.user.username === this.userService.user.username));
         return this.players.find((info: PlayerInformation) => info.player.user.username === this.userService.user.username);
     }
 
@@ -173,13 +185,11 @@ export class GameClientService {
     private viewUpdateEvent(info: GameInfo) {
         this.activePlayer = info.activePlayer;
         this.players = info.players;
-        this.updateNewGameboard(info.gameboard);
+        this.updateGameboard(info.gameboard);
     }
 
     private updatePlayersInformationEvent(players: PlayerInformation[]) {
         this.players = players;
-        // this.getLocalPlayer().rack = this.updateRack(this.getLocalPlayer().rack);
-        // this.updateNewGameboard(this.getLocalPlayer().gameboard); // NO, why
     }
 
     private updateRack(newRack: Letter[]): Letter[] {
@@ -208,11 +218,6 @@ export class GameClientService {
         return resultingRack;
     }
 
-    private updateNewGameboard(newGameboard: string[]) {
-        this.gameboard.updateFromStringArray(newGameboard);
-        this.updateGameboard();
-    }
-
     private gameEndEvent() {
         if (this.winningMessage === '') {
             this.findWinnerByScore();
@@ -226,9 +231,8 @@ export class GameClientService {
     }
 
     private skipEvent(gameInfo: GameInfo) {
-        this.gameboard.updateFromStringArray(gameInfo.gameboard);
         this.getLocalPlayer().rack = this.updateRack(this.getLocalPlayer().rack);
-        this.updateGameboard();
+        this.updateGameboard(gameInfo.gameboard);
     }
 
     private findWinnerByScore(): void {

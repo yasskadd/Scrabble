@@ -8,7 +8,7 @@ export interface IUser {
     username: string;
     password: string;
     profilePicture?: ImageInfo;
-    historyEventList: HistoryEvent[];
-    language: 'en' | 'fr';
-    theme: Theme;
+    historyEventList?: HistoryEvent[];
+    language?: 'en' | 'fr';
+    theme?: Theme;
 }
