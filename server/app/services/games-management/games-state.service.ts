@@ -434,6 +434,7 @@ export class GamesStateService {
     private updatePlayersStats(gamePlayers: GamePlayer[]) {
         const gameWinnerPlayer = this.getWinnerPlayer(gamePlayers);
         gamePlayers.forEach(async (player) => {
+            if (player.player.type === PlayerType.Bot || player.player.type === PlayerType.Observer) return;
             const playerWonGame = player.player.socketId === gameWinnerPlayer.player.socketId;
             const gameHistoryInfo = this.formatGameInfo(player, playerWonGame);
             await this.userStatsStorage.updatePlayerStats(gameHistoryInfo);
