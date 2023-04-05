@@ -93,7 +93,7 @@ export class PlayerRackComponent {
     exchangeLetters(): void {
         let letters = '';
         for (const i of this.lettersToExchange) {
-            letters += this.gameClient.playerOne.rack[i].value;
+            letters += this.gameClient.getLocalPlayer().rack[i].value;
         }
         this.cancelSelection();
         this.chatBoxHandler.submitMessage('!échanger ' + letters);
@@ -112,7 +112,7 @@ export class PlayerRackComponent {
             moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
         } else {
             this.letterPlacementService.resetTile(event.item.data.coord);
-            this.gameClient.playerOne.rack.push(event.item.data.letter);
+            this.gameClient.getLocalPlayer().rack.push(event.item.data.letter);
             this.letterPlacementService.resetSelectionPositions(event.item.data);
         }
 

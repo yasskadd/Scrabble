@@ -39,7 +39,6 @@ export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
     }
 
     ngAfterViewInit() {
-        this.gameConfiguration.resetRoomInformations();
         this.gameConfiguration.navigateJoinPage(
             this.gameMode === 'solo' ? GameMode.Solo : this.gameMode === 'multi' ? GameMode.Multi : GameMode.Null,
         );

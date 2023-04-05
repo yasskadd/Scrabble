@@ -15,11 +15,9 @@ export class GamePageComponent implements OnInit {
 
         // TODO : Remove this. For debugging only
         this.isLoading = false;
-        this.gameClientService.updateGameboard();
     }
 
     ngOnInit(): void {
-        this.gameClientService.resetGameInformation();
         this.gameClientService.gameboardUpdated.pipe(first()).subscribe(() => (this.isLoading = false));
     }
 }

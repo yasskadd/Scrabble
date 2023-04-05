@@ -1,15 +1,8 @@
-import { Letter } from './letter';
-import { Objective } from './objective';
-
-export interface Player {
-    name: string;
-    score: number;
-    rack: Letter[];
-    objective?: Objective[];
-}
+import { PlayerInformation } from './player-information';
+import { IUser } from './user';
 
 export interface GameInfo {
     gameboard: string[];
-    players: Player[];
-    activePlayer?: string;
+    players: PlayerInformation[];
+    activePlayer?: IUser;
 }

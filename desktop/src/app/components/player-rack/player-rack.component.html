@@ -1,13 +1,13 @@
 <div class="justified-rack">
     <div class="left-side">
-        <button id="skip-turn" mat-raised-button [disabled]="!gameClient.playerOneTurn" (click)="skipTurn()">
+        <button id="skip-turn" mat-raised-button [disabled]="!gameClient.currentlyPlaying()" (click)="skipTurn()">
             {{ "game_page.rack.skip_round" | translate }}
         </button>
         <button
             *ngIf="lettersToExchange.length !== 0"
             id="exchange"
             mat-raised-button
-            [disabled]="!gameClient.playerOneTurn || lettersToExchange.length === 0 || gameClient.letterReserveLength < 7"
+            [disabled]="!gameClient.currentlyPlaying() || lettersToExchange.length === 0 || gameClient.letterReserveLength < 7"
             (click)="exchangeLetters()"
         >
             {{ "game_page.rack.switch_letters" | translate }}
@@ -18,7 +18,7 @@
         class="rack-info justified-rack"
         id="player-rack"
         cdkDropList
-        [cdkDropListData]="gameClient.playerOne.rack"
+        [cdkDropListData]="gameClient.getLocalPlayer()?.rack"
         (cdkDropListDropped)="drop($event)"
         cdkDropListOrientation="horizontal"
     >
@@ -26,7 +26,7 @@
             cdkDrag
             [cdkDragData]="letter"
             (cdkDragStarted)="letterPlacementService.currentSelection = letter"
-            *ngFor="let letter of gameClient.playerOne.rack; index as i"
+            *ngFor="let letter of gameClient.getLocalPlayer()?.rack; index as i"
             (click)="onSelection($event, i)"
             class="rack"
         >
@@ -39,6 +39,7 @@
             </button>
         </div>
     </div>
+
     <div class="right-side">
         <button
             *ngIf="lettersToExchange.length !== 0"

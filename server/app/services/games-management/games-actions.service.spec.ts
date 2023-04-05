@@ -7,14 +7,13 @@ import { RealPlayer } from '@app/classes/player/real-player.class';
 import { Turn } from '@app/classes/turn.class';
 import { WordSolver } from '@app/classes/word-solver.class';
 import { Word } from '@app/classes/word.class';
-import { PlaceLettersReturn } from '@app/interfaces/place-letters-return';
-import { GamesHandler } from '@app/services/games-management/games-handler.service';
+import { GamesHandlerService } from '@app/services/games-management/games-handler.service';
 import { RackService } from '@app/services/rack.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { Gameboard } from '@common/classes/gameboard.class';
 import { SocketEvents } from '@common/constants/socket-events';
-import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { Letter } from '@common/interfaces/letter';
+import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
 import { expect } from 'chai';
 import { createServer, Server } from 'http';
 import { AddressInfo } from 'net';
@@ -23,12 +22,13 @@ import * as sinon from 'sinon';
 import { Server as ioServer, Socket as ServerSocket } from 'socket.io';
 import { io as Client, Socket } from 'socket.io-client';
 import { GamesActionsService } from './games-actions.service';
+import { WordPlacementResult } from '@app/interfaces/word-placement-result';
 
 const ROOM = '0';
 
 describe('GamesActions Service', () => {
     let gamesActionsService: GamesActionsService;
-    let gamesHandlerStub: sinon.SinonStubbedInstance<GamesHandler>;
+    let gamesHandlerStub: sinon.SinonStubbedInstance<GamesHandlerService>;
     let socketManagerStub: sinon.SinonStubbedInstance<SocketManager>;
     let rackServiceStub: sinon.SinonStubbedInstance<RackService>;
     let game: sinon.SinonStubbedInstance<Game> & Game;
@@ -63,7 +63,7 @@ describe('GamesActions Service', () => {
         player1.game = game;
 
         socketManagerStub = sinon.createStubInstance(SocketManager);
-        gamesHandlerStub = sinon.createStubInstance(GamesHandler);
+        gamesHandlerStub = sinon.createStubInstance(GamesHandlerService);
         rackServiceStub = sinon.createStubInstance(RackService);
         gamesActionsService = new GamesActionsService(socketManagerStub as never, gamesHandlerStub as never, rackServiceStub as never);
 
@@ -262,7 +262,7 @@ describe('GamesActions Service', () => {
         rackServiceStub.areLettersInRack.returns(true);
 
         gamesActionsService['exchange'](serverSocket, ['c']);
-        expect(gamesHandlerStub.updatePlayerInfo.called).to.be.equal(true);
+        expect(gamesHandlerStub.updatePlayersInfo.called).to.be.equal(true);
     });
 
     it("exchange() shouldn't do anything if the socket doesn't exist call updatePlayerInfo()", () => {
@@ -275,7 +275,7 @@ describe('GamesActions Service', () => {
         gamesHandlerStub['gamePlayers'].set(player1.room, [player1, player2]);
 
         gamesActionsService['exchange'](serverSocket, []);
-        expect(gamesHandlerStub.updatePlayerInfo.called).to.be.equal(false);
+        expect(gamesHandlerStub.updatePlayersInfo.called).to.be.equal(false);
         expect(socketManagerStub.emitRoom.called).to.not.be.equal(true);
     });
 
@@ -350,7 +350,7 @@ describe('GamesActions Service', () => {
         gamesHandlerStub['gamePlayers'].set(player1.room, [player1]);
 
         gamesActionsService['playGame'](serverSocket, commandInfo);
-        expect(gamesHandlerStub.updatePlayerInfo.called).to.be.equal(true);
+        expect(gamesHandlerStub.updatePlayersInfo.called).to.be.equal(true);
     });
 
     // it('sendValidCommand() should return an impossible command error if boolean is true', (done) => {
@@ -393,7 +393,7 @@ describe('GamesActions Service', () => {
         gamesHandlerStub['gamePlayers'].set(player1.room, [player1]);
 
         gamesActionsService['playGame'](serverSocket, commandInfo);
-        expect(gamesHandlerStub.updatePlayerInfo.called).to.not.be.equal(true);
+        expect(gamesHandlerStub.updatePlayersInfo.called).to.not.be.equal(true);
     });
 
     context('Two Clientsocket tests', () => {
@@ -518,7 +518,7 @@ describe('GamesActions Service', () => {
             gamesHandlerStub['gamePlayers'].set(ROOM, [player]);
 
             gamesActionsService['sendValidCommand'](
-                player.placeLetter(commandInfo) as PlaceLettersReturn,
+                player.placeLetter(commandInfo) as WordPlacementResult,
                 serverSocket,
                 player.room,
                 EXPECTED_MESSAGE,

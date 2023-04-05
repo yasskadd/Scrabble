@@ -45,7 +45,7 @@ class _ChatInputState extends State<ChatInput> {
           _submitMessage();
         },
         decoration: InputDecoration(
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
             hintText: "Write your message here",
             suffixIcon: IconButton(
               onPressed: () {
@@ -77,7 +77,7 @@ class _ChatboxState extends State<Chatbox> {
   Widget _buildMessage(ChatMessage message) {
     if (message.type == MessageType.CLIENT.value) {
       return Card(
-        color: _authService.username == message.username
+        color: _authService.user!.username == message.username
             ? Colors.white
             : Colors.lightGreen,
         child: ListTile(

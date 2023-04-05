@@ -1,37 +1,43 @@
 import { Game } from '@app/classes/game.class';
+import { BotInformation } from '@app/interfaces/bot-information';
 import { Letter } from '@common/interfaces/letter';
 import { Objective } from '@common/interfaces/objective';
+import { PlayerGameResult } from '@common/interfaces/player-game-result';
+import { PlayerInformation } from '@common/interfaces/player-information';
+import { RoomPlayer } from '@common/interfaces/room-player';
+import { BeginnerBot } from './beginner-bot.class';
 
-type PlayerInformation = { name: string; score: number; rack: Letter[]; room: string; gameboard: string[] };
-
-export class Player {
+export class GamePlayer {
     rack: Letter[];
     score: number;
-    name: string;
-    room: string;
+    player: RoomPlayer;
     game: Game;
-    isPlayerOne: boolean;
     objectives: Objective[];
     fiveLettersPlacedCount: number;
     clueCommandUseCount: number;
 
-    constructor(name: string) {
+    constructor(player: RoomPlayer) {
+        this.player = player;
         this.rack = [];
         this.score = 0;
-        this.name = name;
         this.objectives = [];
         this.fiveLettersPlacedCount = 0;
         this.clueCommandUseCount = 0;
     }
 
     getInformation(): PlayerInformation {
-        if (this.game === undefined) return {} as PlayerInformation;
         return {
-            name: this.name,
+            player: this.player,
             score: this.score,
             rack: this.rack,
-            room: this.room,
-            gameboard: this.game.gameboard.toStringArray(),
+        };
+    }
+
+    getGameResult(): PlayerGameResult {
+        return {
+            // eslint-disable-next-line no-underscore-dangle
+            playerId: this.player.user._id,
+            score: this.score,
         };
     }
 
@@ -65,5 +71,20 @@ export class Player {
             pointsToAdd += letter.points;
         }
         this.score += pointsToAdd;
+    }
+
+    convertPlayerToBot(): BeginnerBot {
+        const botInfo: BotInformation = {
+            timer: this.game.turn.time,
+            roomId: this.player.roomId,
+            dictionaryValidation: this.game.dictionaryValidation,
+        };
+        const bot = new BeginnerBot(this.player, botInfo); // Where is isPlayerOne in GamePlayer class ?
+        bot.rack = this.rack;
+        bot.score = this.score;
+        bot.objectives = this.objectives;
+        bot.fiveLettersPlacedCount = this.fiveLettersPlacedCount;
+        bot.clueCommandUseCount = this.clueCommandUseCount;
+        return bot;
     }
 }

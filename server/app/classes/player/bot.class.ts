@@ -4,29 +4,28 @@ import * as Constant from '@app/constants/bot';
 import { BotInformation } from '@app/interfaces/bot-information';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
-import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
+import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
+import { RoomPlayer } from '@common/interfaces/room-player';
 import { Container } from 'typedi';
-import { Player } from './player.class';
+import { GamePlayer } from './player.class';
+import { RealPlayer } from './real-player.class';
 
-export class Bot extends Player {
-    roomId: string;
+export class Bot extends GamePlayer {
     protected countUp: number = 0;
     protected socketManager: SocketManager = Container.get(SocketManager);
     protected wordSolver: WordSolver;
     protected isNotTurn: boolean = false;
     private timer: number;
 
-    constructor(isPlayerOne: boolean, name: string, protected botInfo: BotInformation) {
-        super(name);
-        this.isPlayerOne = isPlayerOne;
-        this.room = botInfo.roomId;
+    constructor(roomPlayer: RoomPlayer, protected botInfo: BotInformation) {
+        super(roomPlayer);
         this.timer = botInfo.timer;
         this.wordSolver = new WordSolver(botInfo.dictionaryValidation);
     }
 
     setGame(game: Game): void {
         this.game = game;
-        if (game.turn.activePlayer === this.name) this.playTurn();
+        if (game.turn.activePlayer?.username === this.player.user.username) this.playTurn();
     }
 
     // Reason : virtual method that is reimplemented in child classes
@@ -38,11 +37,11 @@ export class Bot extends Player {
     start(): void {
         this.game.turn.countdown.subscribe((countdown) => {
             this.countUp = this.timer - (countdown as number);
-            if (this.countUp === Constant.TIME_SKIP && this.name === this.game.turn.activePlayer) this.skipTurn();
+            if (this.countUp === Constant.TIME_SKIP && this.player.user === this.game.turn.activePlayer) this.skipTurn();
         });
         this.game.turn.endTurn.subscribe((activePlayer) => {
             this.isNotTurn = false;
-            if (activePlayer === this.name) {
+            if (activePlayer === this.player.user.username) {
                 this.countUp = 0;
                 this.playTurn();
             }
@@ -51,12 +50,27 @@ export class Bot extends Player {
 
     skipTurn(): void {
         if (this.game === undefined || this.isNotTurn) return;
-        this.socketManager.emitRoom(this.botInfo.roomId, SocketEvents.GameMessage, '!passer');
-        this.game.skip(this.name);
+        this.game.skip(this.player.user.username);
         this.isNotTurn = true;
     }
 
-    protected play(commandInfo: PlaceWordCommandInfo): void {
+    convertToRealPlayer(observer: RoomPlayer): RealPlayer {
+        const player = new RealPlayer(observer);
+        player.game = this.game;
+        player.rack = this.rack;
+        player.score = this.score;
+        player.objectives = this.objectives;
+        player.fiveLettersPlacedCount = this.fiveLettersPlacedCount;
+        player.clueCommandUseCount = this.clueCommandUseCount;
+        return player;
+    }
+
+    unsubscribeObservables(): void {
+        this.game.turn.countdown.unsubscribe();
+        this.game.turn.endTurn.unsubscribe();
+    }
+
+    protected placeWord(commandInfo: PlaceWordCommandInfo): void {
         if (commandInfo === undefined || this.isNotTurn) {
             this.skipTurn();
             return;
@@ -71,10 +85,9 @@ export class Bot extends Player {
     }
 
     protected emitPlaceCommand(randomCommandInfo: PlaceWordCommandInfo): void {
-        const coordString = `${String.fromCharCode(Constant.CHAR_ASCII + randomCommandInfo.firstCoordinate.y)}${randomCommandInfo.firstCoordinate.x}`;
-        const placeCommand = `!placer ${coordString}${randomCommandInfo.isHorizontal ? 'h' : 'v'} ${randomCommandInfo.letters.join('')}`;
-        this.socketManager.emitRoom(this.botInfo.roomId, SocketEvents.GameMessage, placeCommand);
-        this.game.play(this, randomCommandInfo);
+        this.game.placeWord(randomCommandInfo);
+        this.game.turn.resetSkipCounter();
+        this.game.turn.end();
         this.socketManager.emitRoom(this.botInfo.roomId, SocketEvents.LetterReserveUpdated, this.game.letterReserve.lettersReserve);
     }
 

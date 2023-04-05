@@ -1,4 +1,3 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
@@ -9,234 +8,199 @@ import { BotNameSwitcher } from '@common/interfaces/bot-name-switcher';
 import { GameHistoryInfo } from '@common/interfaces/game-history-info';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
 import { IUser } from '@common/interfaces/user';
-import { Observable, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { fs, invoke } from '@tauri-apps/api';
 import { environment } from 'src/environments/environment';
+
+export interface HttpResponse {
+    body: string;
+}
 
 @Injectable({
     providedIn: 'root',
 })
 export class HttpHandlerService {
     private readonly baseUrl: string = environment.serverUrl;
-    private header: HttpHeaders;
 
-    constructor(private readonly http: HttpClient) {}
+    async getClassicHighScore(): Promise<HighScores[]> {
+        const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/highScore/classique` });
 
-    getClassicHighScore(): Observable<HighScores[]> {
-        return this.http
-            .get<HighScores[]>(`${this.baseUrl}/highScore/classique`, { withCredentials: true })
-            .pipe(catchError(this.handleError<HighScores[]>('getClassicHighScore', [])));
+        return JSON.parse(res.body);
     }
 
-    getLOG2990HighScore(): Observable<HighScores[]> {
-        return this.http
-            .get<HighScores[]>(`${this.baseUrl}/highScore/log2990`, { withCredentials: true })
-            .pipe(catchError(this.handleError<HighScores[]>('getLOG2990cHighScore', [])));
+    async getLOG2990HighScore(): Promise<HighScores[]> {
+        const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/highScore/log2990` });
+
+        return JSON.parse(res.body);
     }
 
-    resetHighScores(): Observable<void> {
-        return this.http
-            .delete<void>(`${this.baseUrl}/highScore/reset`, { withCredentials: true })
-            .pipe(catchError(this.handleError<void>('resetHighScores')));
+    async resetHighScores(): Promise<void> {
+        const res: HttpResponse = await invoke('httpDelete', { url: `${this.baseUrl}/highScore/reset` });
+
+        return JSON.parse(res.body);
     }
 
-    getHistory(): Observable<GameHistoryInfo[]> {
-        return this.http
-            .get<GameHistoryInfo[]>(`${this.baseUrl}/history`, { withCredentials: true })
-            .pipe(catchError(this.handleError<GameHistoryInfo[]>('getHistory', [])));
+    async getHistory(): Promise<GameHistoryInfo[]> {
+        const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/history` });
+
+        return JSON.parse(res.body);
     }
 
-    deleteHistory(): Observable<GameHistoryInfo[]> {
-        return this.http
-            .delete<GameHistoryInfo[]>(`${this.baseUrl}/history`, { withCredentials: true })
-            .pipe(catchError(this.handleError<GameHistoryInfo[]>('getHistory', [])));
+    async deleteHistory(): Promise<GameHistoryInfo[]> {
+        const res: HttpResponse = await invoke('httpDelete', { url: `${this.baseUrl}/history` });
+
+        return JSON.parse(res.body);
     }
 
-    getDictionaries(): Observable<DictionaryInfo[]> {
-        return this.http
-            .get<DictionaryInfo[]>(`${this.baseUrl}/dictionary/info`, { withCredentials: true })
-            .pipe(catchError(this.handleError<DictionaryInfo[]>('getDictionaries', [])));
+    async getDictionaries(): Promise<DictionaryInfo[]> {
+        const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/dictionary/info` });
+
+        return JSON.parse(res.body);
     }
 
-    getDictionary(title: string): Observable<Dictionary> {
-        return this.http
-            .get<Dictionary>(`${this.baseUrl}/dictionary/all/` + title, { withCredentials: true })
-            .pipe(catchError(this.handleError<Dictionary>('getDictionaries')));
+    async getDictionary(title: string): Promise<Dictionary> {
+        const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/dictionary/all/${title}` });
+
+        return JSON.parse(res.body);
     }
 
-    resetDictionaries(): Observable<Dictionary[]> {
-        return this.http
-            .delete<Dictionary[]>(`${this.baseUrl}/dictionary`, { withCredentials: true })
-            .pipe(catchError(this.handleError<Dictionary[]>('getDictionaries', [])));
+    async resetDictionaries(): Promise<Dictionary[]> {
+        const res: HttpResponse = await invoke('httpDelete', { url: `${this.baseUrl}/dictionary` });
+
+        return JSON.parse(res.body);
     }
 
-    deleteDictionary(dictionaryTitle: string): Observable<void> {
-        return this.http
-            .patch<void>(`${this.baseUrl}/dictionary`, { title: dictionaryTitle }, { withCredentials: true })
-            .pipe(catchError(this.handleError<void>('deleteDictionary')));
+    async deleteDictionary(dictionaryTitle: string): Promise<void> {
+        const res: HttpResponse = await invoke('httpPatch', {
+            url: `${this.baseUrl}/dictionary`,
+            onceToldMe: JSON.stringify({ title: dictionaryTitle }),
+        });
+
+        return JSON.parse(res.body);
     }
 
-    addDictionary(dictionary: Dictionary): Observable<void> {
-        return this.http
-            .post<void>(
-                `${this.baseUrl}/dictionary`,
-                {
-                    title: dictionary.title,
-                    description: dictionary.description,
-                    words: dictionary.words,
-                },
-                { withCredentials: true },
-            )
-            .pipe(catchError(this.handleError<void>('addDictionary')));
+    async addDictionary(dictionary: Dictionary): Promise<void> {
+        const res: HttpResponse = await invoke('httpPost', {
+            url: `${this.baseUrl}/dictionary`,
+            onceToldMe: JSON.stringify({
+                title: dictionary.title,
+                description: dictionary.description,
+                words: dictionary.words,
+            }),
+        });
+
+        return JSON.parse(res.body);
     }
 
-    dictionaryIsInDb(title: string): Observable<void> {
-        return this.http
-            .get<void>(`${this.baseUrl}/dictionary/isindb/${title}`, { withCredentials: true })
-            .pipe(catchError(this.handleError<void>('dictionaryIsInDb')));
+    async dictionaryIsInDb(title: string): Promise<void> {
+        const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/dictionary/isindb/${title}` });
+
+        return JSON.parse(res.body);
     }
 
-    modifyDictionary(dictionary: ModifiedDictionaryInfo): Observable<void> {
-        return this.http
-            .put<void>(`${this.baseUrl}/dictionary`, dictionary, { withCredentials: true })
-            .pipe(catchError(this.handleError<void>('updateDictionary')));
+    async modifyDictionary(dictionary: ModifiedDictionaryInfo): Promise<void> {
+        const res: HttpResponse = await invoke('httpPut', { url: `${this.baseUrl}/dictionary`, onceToldMe: JSON.stringify(dictionary) });
+
+        return JSON.parse(res.body);
     }
 
-    getBeginnerBots(): Observable<Bot[]> {
-        return this.http
-            .get<Bot[]>(`${this.baseUrl}/virtualPlayer/beginner`, { withCredentials: true })
-            .pipe(catchError(this.handleError<Bot[]>('getBotsBeginner', [])));
+    async getBeginnerBots(): Promise<Bot[]> {
+        const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/virtualPlayer/beginner` });
+
+        return JSON.parse(res.body);
     }
 
-    getExpertBots(): Observable<Bot[]> {
-        return this.http
-            .get<Bot[]>(`${this.baseUrl}/virtualPlayer/expert`, { withCredentials: true })
-            .pipe(catchError(this.handleError<Bot[]>('getBotsExpert', [])));
+    async getExpertBots(): Promise<Bot[]> {
+        const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/virtualPlayer/expert` });
+
+        return JSON.parse(res.body);
     }
 
-    addBot(bot: Bot): Observable<void> {
-        return this.http
-            .post<void>(`${this.baseUrl}/virtualPlayer`, bot, { withCredentials: true })
-            .pipe(catchError(this.handleError<void>('addBot')));
+    async addBot(bot: Bot): Promise<void> {
+        const res: HttpResponse = await invoke('httpPost', { url: `${this.baseUrl}/virtualPlayer`, onceToldMe: JSON.stringify(bot) });
+
+        return JSON.parse(res.body);
     }
 
-    replaceBot(bot: BotNameSwitcher): Observable<void> {
-        return this.http
-            .put<void>(`${this.baseUrl}/virtualPlayer`, bot, { withCredentials: true })
-            .pipe(catchError(this.handleError<void>('replaceBot')));
+    async replaceBot(bot: BotNameSwitcher): Promise<void> {
+        const res: HttpResponse = await invoke('httpPut', { url: `${this.baseUrl}/virtualPlayer`, onceToldMe: JSON.stringify(bot) });
+
+        return JSON.parse(res.body);
     }
 
-    resetBot(): Observable<void> {
-        return this.http
-            .delete<void>(`${this.baseUrl}/virtualPlayer/reset`, { withCredentials: true })
-            .pipe(catchError(this.handleError<void>('resetBot')));
+    async resetBot(): Promise<void> {
+        const res: HttpResponse = await invoke('httpDelete', { url: `${this.baseUrl}/virtualPlayer/reset` });
+
+        return JSON.parse(res.body);
     }
 
-    deleteBot(bot: Bot): Observable<void> {
-        return this.http
-            .patch<void>(`${this.baseUrl}/virtualPlayer/remove`, bot, { withCredentials: true })
-            .pipe(catchError(this.handleError<void>('deleteBot')));
+    async deleteBot(bot: Bot): Promise<void> {
+        const res: HttpResponse = await invoke('httpPatch', { url: `${this.baseUrl}/virtualPlayer/remove`, onceToldMe: JSON.stringify(bot) });
+        return JSON.parse(res.body);
     }
 
-    signUp(newUser: IUser): Observable<{ imageKey: string }> {
-        return this.http
-            .post<{ imageKey: string }>(`${this.baseUrl}/auth/signUp`, newUser)
-            .pipe(catchError(this.handleError<{ imageKey: string }>('sign-up')));
+    async signUp(newUser: IUser): Promise<{ imageKey: string }> {
+        const res: HttpResponse = await invoke('httpPost', { url: `${this.baseUrl}/auth/signUp`, onceToldMe: JSON.stringify(newUser) });
+        return JSON.parse(res.body);
     }
 
-    login(user: IUser): Observable<{ userData: IUser }> {
-        const httpOptions = {
-            withCredentials: true,
-        };
-
-        return this.http
-            .post<{ userData: IUser }>(`${this.baseUrl}/auth/login`, user, httpOptions)
-            .pipe(catchError(this.handleError<{ userData: IUser }>('login')));
+    async login(user: IUser): Promise<{ userData: IUser; sessionToken: string }> {
+        const res: HttpResponse = await invoke('httpPost', { url: `${this.baseUrl}/auth/login`, onceToldMe: JSON.stringify(user) });
+        return JSON.parse(res.body);
     }
 
-    logout(): Observable<any> {
-        const header = new HttpHeaders();
-        header.append('Content-Type', 'application/json');
-
-        const httpOptions = {
-            headers: this.header,
-            withCredentials: true,
-            observe: 'response' as 'response',
-        };
-
-        return this.http.post<void>(`${this.baseUrl}/auth/logout`, null, httpOptions).pipe(catchError(this.handleError<void>('logout')));
+    async logout(user: IUser): Promise<any> {
+        const res: HttpResponse = await invoke('httpPost', { url: `${this.baseUrl}/auth/logout`, onceToldMe: JSON.stringify(user) });
+        return JSON.parse(res.body);
     }
 
-    getDefaultImages(): Observable<Map<string, string[]>> {
-        const httpOptions = {
-            withCredentials: true,
-        };
-
-        return this.http
-            .get<Map<string, string[]>>(`${this.baseUrl}/image/default-pictures`, httpOptions)
-            .pipe(catchError(this.handleError<Map<string, string[]>>('get-default-images')));
+    async getDefaultImages(): Promise<Map<string, string[]>> {
+        const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/image/default-pictures` });
+        return JSON.parse(res.body);
     }
 
-    sendProfilePicture(avatarData: AvatarData, imageKey: string): Observable<void> {
-        const header = new HttpHeaders();
-        header.append('Content-Type', 'multipart/form-data');
+    async sendProfilePicture(image: AvatarData, imageKey: string): Promise<void> {
+        return new Promise((resolve) => {
+            const fileReader = new FileReader();
+            fileReader.readAsArrayBuffer(image.file);
+            fileReader.onload = async () => {
+                await fs.writeBinaryFile(image.file.name, new Uint8Array(fileReader.result as ArrayBuffer), { dir: fs.BaseDirectory.Cache });
+                await invoke('httpPatch', { url: `${this.baseUrl}/image/profile-picture`, imageKey, path: image.file.name });
 
-        const httpOptions = {
-            headers: this.header,
-            withCredentials: true,
-        };
-
-        // Creation of 2 files because the request only accepts files
-        const imageKeyFile = new File([imageKey], 'imageKey', { type: 'text/html' });
-        const data = new FormData();
-        data.append('data', avatarData.file);
-        data.append('imageKey', imageKeyFile);
-
-        return this.http
-            .post<void>(`${this.baseUrl}/image/profile-picture`, data, httpOptions)
-            .pipe(catchError(this.handleError<void>('send-profile-picture')));
-    }
-
-    getProfilePicture(): Observable<{ url: string }> {
-        const httpOptions = {
-            withCredentials: true,
-        };
-
-        return this.http
-            .get<{ url: string }>(`${this.baseUrl}/image/profile-picture`, httpOptions)
-            .pipe(catchError(this.handleError<{ url: string }>('get-profile-picture')));
-    }
-
-    modifyProfilePicture(image: AvatarData, isDefault: boolean): Observable<{ userData: IUser }> {
-        if (isDefault) {
-            return this.http
-                .patch<{ userData: IUser }>(
-                    `${this.baseUrl}/image/profile-picture`,
-                    { fileName: image.name },
-                    {
-                        withCredentials: true,
-                    },
-                )
-                .pipe(catchError(this.handleError<{ userData: IUser }>('modify-image-to-default')));
-        }
-
-        const header = new HttpHeaders();
-        header.append('Content-Type', 'multipart/form-data');
-
-        const data = new FormData();
-        data.append('image', image.file);
-
-        return this.http.put<{ userData: IUser }>(`${this.baseUrl}/image/profile-picture`, data, {
-            headers: this.header,
-            withCredentials: true,
+                await fs.removeFile(image.file.name, { dir: fs.BaseDirectory.Cache });
+                resolve();
+            };
         });
     }
 
-    private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
-        return () => of(result as T);
+    async getProfilePicture(): Promise<{ url: string }> {
+        const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/image/profile-picture` });
+        return JSON.parse(res.body);
     }
 
-    // private throwError<T>(error: HttpErrorResponse): Observable<T> {
-    //     return throwError(() => new HttpErrorResponse(error));
+    async modifyProfilePicture(image: AvatarData, isDefault: boolean): Promise<{ userData: IUser }> {
+        if (isDefault) {
+            const res: HttpResponse = await invoke('httpPatch', {
+                url: `${this.baseUrl}/image/profile-picture`,
+                onceToldMe: JSON.stringify({ fileName: image.name }),
+            });
+            return JSON.parse(res.body);
+        }
+
+        return new Promise((resolve) => {
+            const fileReader = new FileReader();
+            fileReader.readAsArrayBuffer(image.file);
+            fileReader.onload = async () => {
+                await fs.writeBinaryFile(image.file.name, new Uint8Array(fileReader.result as ArrayBuffer), { dir: fs.BaseDirectory.Cache });
+
+                const res: HttpResponse = await invoke('httpPut', { url: `${this.baseUrl}/image/profile-picture`, path: image.file.name });
+
+                await fs.removeFile(image.file.name, { dir: fs.BaseDirectory.Cache });
+                resolve(JSON.parse(res.body));
+            };
+        });
+    }
+
+    // private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
+    //     return () => of(result as T);
     // }
 }

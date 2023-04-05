@@ -8,8 +8,8 @@ import { WordSolver } from '@app/classes/word-solver.class';
 import { BotInformation } from '@app/interfaces/bot-information';
 import { SocketEvents } from '@common/constants/socket-events';
 import { Coordinate } from '@common/interfaces/coordinate';
-import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { Letter } from '@common/interfaces/letter';
+import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
 import { expect } from 'chai';
 import { ReplaySubject } from 'rxjs';
 import * as Sinon from 'sinon';
@@ -54,7 +54,7 @@ describe('Expert Bot Tests', () => {
 
         it('should call exchangeLetters() and not EmitPlaceCommand() if there is no existing commandInfo', () => {
             const undefinedCommandInfo = undefined as never;
-            expertBot.play(undefinedCommandInfo);
+            expertBot.placeWord(undefinedCommandInfo);
             mockEmitPlaceCommand.never().verify();
             mockEmitRoom.exactly(1).verify();
             expect(spyExchangeLetters.calledOnce).to.be.equal(true);
@@ -62,7 +62,7 @@ describe('Expert Bot Tests', () => {
 
         it('should call EmitPlaceCommand() and not exchangeLetters() if CommandInfo is not undefined', () => {
             const commandInfoStub = {} as PlaceWordCommandInfo;
-            expertBot.play(commandInfoStub);
+            expertBot.placeWord(commandInfoStub);
             mockEmitPlaceCommand.exactly(1).withExactArgs(commandInfoStub).verify();
             expect(spyExchangeLetters.called).to.be.equal(false);
         });

@@ -1,8 +1,8 @@
 import { Game } from '@app/classes/game.class';
 import { Word } from '@app/classes/word.class';
 import { Gameboard } from '@common/classes/gameboard.class';
-import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
 import { Letter } from '@common/interfaces/letter';
+import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { RealPlayer } from './real-player.class';
@@ -23,17 +23,17 @@ describe('RealPlayer', () => {
     it('placeLetter() should call game.play() and return the result', () => {
         const gameStub = sinon.createStubInstance(Game);
         player.game = gameStub as unknown as Game;
-        gameStub.play.returns({ hasPassed: true, gameboard: {} as Gameboard, invalidWords: [] as Word[] });
+        gameStub.placeWord.returns({ hasPassed: true, gameboard: {} as Gameboard, invalidWords: [] as Word[] });
         expect(player.placeLetter({} as PlaceWordCommandInfo)).to.eql({ hasPassed: true, gameboard: {} as Gameboard, invalidWords: [] as Word[] });
-        expect(gameStub.play.called).to.equal(true);
+        expect(gameStub.placeWord.called).to.equal(true);
     });
 
     it("placeLetter() shouln't do anything if game is undefined", () => {
         const gameStub = sinon.createStubInstance(Game);
-        gameStub.play.returns({ hasPassed: true, gameboard: {} as Gameboard, invalidWords: {} as Word[] });
+        gameStub.placeWord.returns({ hasPassed: true, gameboard: {} as Gameboard, invalidWords: {} as Word[] });
         const command = {} as PlaceWordCommandInfo;
         player.placeLetter(command);
-        expect(gameStub.play.called).to.be.equal(false);
+        expect(gameStub.placeWord.called).to.be.equal(false);
     });
 
     it('exchangeLetter() should call game.exchange() and replace rack with the current rack', () => {

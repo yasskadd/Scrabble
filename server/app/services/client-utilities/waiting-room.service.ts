@@ -1,11 +1,5 @@
 /* eslint-disable max-lines */
-import {
-    ROOMID_LENGTH,
-    ROOM_NOT_AVAILABLE_ERROR,
-    SAME_USER_IN_ROOM_ERROR,
-    UNAVAILABLE_ELEMENT_INDEX,
-    WRONG_ROOM_PASSWORD,
-} from '@app/constants/rooms';
+import { ROOMID_LENGTH, UNAVAILABLE_ELEMENT_INDEX } from '@app/constants/rooms';
 import { VirtualPlayersStorageService } from '@app/services/database/virtual-players-storage.service';
 import { GamesStateService } from '@app/services/games-management/games-state.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
@@ -13,14 +7,15 @@ import { SocketType } from '@app/types/sockets';
 import { INVALID_INDEX } from '@common/constants/board-info';
 import { NUMBER_OF_PLAYERS } from '@common/constants/players';
 import { GAME_LOBBY_ROOM_ID } from '@common/constants/room';
+import { ServerErrors } from '@common/constants/server-errors';
 import { SocketEvents } from '@common/constants/socket-events';
 import { GameCreationQuery } from '@common/interfaces/game-creation-query';
 import { GameRoom } from '@common/interfaces/game-room';
-import { GameScrabbleInformation } from '@common/interfaces/game-scrabble-information';
 import { RoomPlayer } from '@common/interfaces/room-player';
 import { IUser } from '@common/interfaces/user';
 import { UserRoomQuery } from '@common/interfaces/user-room-query';
 import { GameDifficulty } from '@common/models/game-difficulty';
+import { GameMode } from '@common/models/game-mode';
 import { GameRoomState } from '@common/models/game-room-state';
 import { GameVisibility } from '@common/models/game-visibility';
 import { PlayerType } from '@common/models/player-type';
@@ -31,20 +26,20 @@ import * as uuid from 'uuid';
 // const PLAYERS_REJECT_FROM_ROOM_ERROR = "L'adversaire à rejeter votre demande";
 
 @Service()
-export class GameSessions {
-    private gameRooms: GameRoom[];
+export class WaitingRoomService {
+    private waitingRooms: GameRoom[];
 
     constructor(
         private gameStateService: GamesStateService,
         private virtualPlayerStorageService: VirtualPlayersStorageService,
         private socketManager: SocketManager,
     ) {
-        this.gameRooms = [];
+        this.waitingRooms = [];
     }
 
     initSocketEvents() {
-        this.socketManager.io(SocketEvents.CreateWaitingRoom, (server: Server, socket: SocketType, gameQuery: GameCreationQuery) => {
-            this.createGame(server, socket, gameQuery);
+        this.socketManager.io(SocketEvents.CreateWaitingRoom, async (server: Server, socket: SocketType, gameQuery: GameCreationQuery) => {
+            await this.createWaitingRoom(server, socket, gameQuery);
         });
 
         this.socketManager.io(SocketEvents.JoinWaitingRoom, (server: Server, socket: SocketType, userRoomQuery: UserRoomQuery) => {
@@ -59,9 +54,16 @@ export class GameSessions {
             this.exitWaitingRoom(server, socket, userQuery);
         });
 
-        this.socketManager.io(SocketEvents.StartScrabbleGame, (server: Server, socket: SocketType, roomId: string) => {
-            this.startScrabbleGame(server, roomId);
+        this.socketManager.io(SocketEvents.StartScrabbleGame, async (server: Server, socket: SocketType, roomId: string) => {
+            await this.startScrabbleGame(server, roomId);
         });
+    }
+
+    removeRoom(server: Server, roomId: string): void {
+        const roomIndex = this.waitingRooms.findIndex((room: GameRoom) => room.id === roomId);
+        this.waitingRooms.splice(roomIndex, 1);
+
+        server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
 
     private enterRoomLobby(server: Server, socket: Socket): void {
@@ -80,15 +82,15 @@ export class GameSessions {
     private joinGameRoom(server: Server, socket: SocketType, joinGameQuery: UserRoomQuery): void {
         const room: GameRoom | undefined = this.getRoom(joinGameQuery.roomId);
         if (this.userAlreadyConnected(joinGameQuery)) {
-            socket.emit(SocketEvents.ErrorJoining, SAME_USER_IN_ROOM_ERROR);
+            socket.emit(SocketEvents.ErrorJoining, ServerErrors.RoomSameUser);
             return;
         }
         if (!room) {
-            socket.emit(SocketEvents.ErrorJoining, ROOM_NOT_AVAILABLE_ERROR);
+            socket.emit(SocketEvents.ErrorJoining, ServerErrors.RoomNotAvailable);
             return;
         }
         if (room.visibility === GameVisibility.Locked && !this.passwordValid(joinGameQuery)) {
-            socket.emit(SocketEvents.ErrorJoining, WRONG_ROOM_PASSWORD);
+            socket.emit(SocketEvents.ErrorJoining, ServerErrors.RoomWrongPassword);
             return;
         }
 
@@ -120,8 +122,7 @@ export class GameSessions {
     }
 
     private exitWaitingRoom(server: Server, socket: SocketType, userQuery: UserRoomQuery): void {
-        // TODO : Replace player with observer if present
-        // TODO : Replace player with bot if no observers
+        // TODO : Replace player with bot
         const room: GameRoom | undefined = this.getRoom(userQuery.roomId);
         if (!room) return;
 
@@ -129,13 +130,15 @@ export class GameSessions {
             const player = this.getPlayerFromQuery(userQuery);
             // TODO : Tell client the rejection failed
             if (!player) return;
+            if (room.players.filter((playerElement: RoomPlayer) => playerElement.type === PlayerType.User).length === 0) {
+                this.removeRoom(server, userQuery.roomId);
+            }
 
             this.rejectOpponent(server, socket, player);
-
             return;
         }
 
-        for (const player of [...room.players]) {
+        for (const player of room.players) {
             this.rejectOpponent(server, socket, player);
         }
 
@@ -146,19 +149,24 @@ export class GameSessions {
         const playerSocket: Socket | undefined = this.socketManager.getSocketFromId(player.socketId);
         if (!playerSocket) return;
 
-        this.exitGameRoom(server, playerSocket, {
+        this.exitRoom(server, playerSocket, {
             user: player.user,
             roomId: player.roomId,
         });
 
-        if (!player.isCreator && player.socketId !== socket.id) {
+        // TODO : Not if in game
+        if (
+            !player.isCreator &&
+            player.socketId !== socket.id &&
+            this.waitingRooms.find((room: GameRoom) => room.id === player.roomId)?.state === GameRoomState.Waiting
+        ) {
             playerSocket.emit(SocketEvents.KickedFromGameRoom, this.stripPlayerPassword(player));
         }
 
         server.to(player.roomId).emit(SocketEvents.UpdateWaitingRoom, this.getRoom(player.roomId));
     }
 
-    private exitGameRoom(server: Server, socket: SocketType, userQuery: UserRoomQuery): void {
+    private exitRoom(server: Server, socket: SocketType, userQuery: UserRoomQuery): void {
         const player: RoomPlayer | undefined = this.getPlayerFromQuery(userQuery);
         if (!player) return;
 
@@ -167,37 +175,38 @@ export class GameSessions {
         server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
 
-    private startScrabbleGame(server: Server, roomId: string): void {
-        const room = this.getRoom(roomId);
+    private async startScrabbleGame(server: Server, roomId: string): Promise<void> {
+        const room: GameRoom | undefined = this.getRoom(roomId);
+        if (!room) return;
 
-        if (room) {
-            // TODO : Changed GameScrabbleInformation to simply using GameRoom
-            const users: IUser[] = [];
-            const socketIds: string[] = [];
-            room.players.forEach((player: RoomPlayer) => {
-                users.push(player.user);
-                socketIds.push(player.socketId);
-            });
-
-            this.gameStateService
-                .createGame(server, {
-                    players: users,
-                    roomId,
-                    timer: room.timer,
-                    socketId: socketIds,
-                    mode: room.mode,
-                    botDifficulty: 'easy',
-                    dictionary: room.dictionary,
-                } as GameScrabbleInformation)
-                .then(() => {
-                    server.to(roomId).emit(SocketEvents.GameAboutToStart);
-                });
-        }
+        room.state = GameRoomState.Playing;
+        await this.gameStateService.createGame(server, room);
+        // // TODO : Changed GameScrabbleInformation to simply using GameRoom
+        // const users: IUser[] = [];
+        // const socketIds: string[] = [];
+        // room.players.forEach((player: RoomPlayer) => {
+        //     users.push(player.user);
+        //     socketIds.push(player.socketId);
+        // });
+        //
+        // this.gameStateService
+        //     .createGame(server, {
+        //         players: users,
+        //         roomId,
+        //         timer: room.timer,
+        //         socketId: socketIds,
+        //         mode: room.mode,
+        //         botDifficulty: 'easy',
+        //         dictionary: room.dictionary,
+        //     } as GameScrabbleInformation)
+        //     .then(() => {
+        //         server.to(roomId).emit(SocketEvents.GameAboutToStart);
+        //     });
     }
 
-    private async createGame(server: Server, socket: SocketType, gameQuery: GameCreationQuery): Promise<void> {
+    private async createWaitingRoom(server: Server, socket: SocketType, gameQuery: GameCreationQuery): Promise<void> {
         const room: GameRoom = await this.setupNewGameRoom(gameQuery, socket.id);
-        this.gameRooms.push(room);
+        this.waitingRooms.push(room);
 
         server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
         socket.leave(GAME_LOBBY_ROOM_ID);
@@ -212,7 +221,7 @@ export class GameSessions {
 
     private async setupNewGameRoom(parameters: GameCreationQuery, socketId: string): Promise<GameRoom> {
         const roomId = this.generateRoomId();
-        const bots = await this.makeThreeBots(parameters.botDifficulty);
+        const bots = await this.makeThreeBots(parameters.botDifficulty, roomId);
 
         return {
             id: roomId,
@@ -231,10 +240,10 @@ export class GameSessions {
             dictionary: parameters.dictionary,
             timer: parameters.timer,
             mode: parameters.mode,
-            // TODO : Change that
-            state: GameRoomState.Waiting,
+            state: parameters.mode === GameMode.Solo ? GameRoomState.Playing : GameRoomState.Waiting,
             visibility: parameters.visibility,
-            password: parameters.password?.length ? parameters.password : '',
+            password: parameters.password,
+            difficulty: parameters.botDifficulty,
         };
     }
 
@@ -249,22 +258,21 @@ export class GameSessions {
         return alreadyConnected;
     }
 
+    // TODO: Replace removed player by a bot ???
     private removePlayerFromGameRoom(socket: Socket, player: RoomPlayer): void {
         const room: GameRoom | undefined = this.getRoom(player.roomId);
         if (!room) return;
 
         const playerIndex: number = room.players.findIndex((playerElement: RoomPlayer) => this.areUsersTheSame(playerElement.user, player.user));
         if (playerIndex === UNAVAILABLE_ELEMENT_INDEX) return;
-        room.players.splice(playerIndex, 1);
+        room.players.splice(playerIndex, 1); // remove player from room;
 
         socket.leave(player.roomId);
         socket.join(GAME_LOBBY_ROOM_ID);
     }
 
     private areUsersTheSame(player1: IUser, player2: IUser): boolean {
-        return (
-            player1.username === player2.username && player1.email === player2.email && player1.profilePicture?.name === player2.profilePicture?.name
-        );
+        return player1._id === player2._id;
     }
 
     private generateRoomId(): string {
@@ -272,12 +280,7 @@ export class GameSessions {
     }
 
     private getRoom(roomId: string): GameRoom | undefined {
-        return this.gameRooms.find((room: GameRoom) => room.id === roomId);
-    }
-
-    private removeRoom(server: Server, roomId: string): void {
-        this.gameRooms = this.gameRooms.filter((room: GameRoom) => room.id !== roomId);
-        server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
+        return this.waitingRooms.find((room: GameRoom) => room.id === roomId);
     }
 
     /**
@@ -288,8 +291,8 @@ export class GameSessions {
     private getClientSafeAvailableRooms(): GameRoom[] {
         const roomAvailableArray: GameRoom[] = [];
 
-        this.gameRooms.forEach((gameRoom) => {
-            if (gameRoom.visibility !== GameVisibility.Private) {
+        this.waitingRooms.forEach((gameRoom) => {
+            if (gameRoom.visibility !== GameVisibility.Private && gameRoom.mode === GameMode.Multi) {
                 roomAvailableArray.push(this.stripPlayersPassword(gameRoom));
             }
         });
@@ -299,11 +302,15 @@ export class GameSessions {
 
     private stripUserPassword(user: IUser): IUser {
         return {
+            _id: user._id,
             email: user.email,
             username: user.username,
             password: 'null',
             profilePicture: user.profilePicture,
             chatRooms: user.chatRooms,
+            historyEventList: user.historyEventList,
+            theme: user.theme,
+            language: user.language,
         } as IUser;
     }
 
@@ -314,7 +321,7 @@ export class GameSessions {
             socketId: player.socketId,
             type: player.type,
             isCreator: player.isCreator,
-        } as RoomPlayer;
+        };
     }
 
     private stripPlayersPassword(gameRoom: GameRoom): GameRoom {
@@ -332,7 +339,7 @@ export class GameSessions {
         return this.getRoom(userQuery.roomId)?.players.find((playerElement: RoomPlayer) => this.areUsersTheSame(playerElement.user, userQuery.user));
     }
 
-    private async makeThreeBots(difficulty: GameDifficulty): Promise<RoomPlayer[]> {
+    private async makeThreeBots(difficulty: GameDifficulty, roomId: string): Promise<RoomPlayer[]> {
         const virtualPlayers: RoomPlayer[] = [];
 
         // TODO : Add image getter - we should create a profile pic service from the methods in the controller
@@ -343,6 +350,7 @@ export class GameSessions {
         botNames.forEach((name: string) => {
             virtualPlayers.push({
                 user: {
+                    _id: uuid.v4(),
                     username: name,
                     password: 'null',
                     profilePicture: {
@@ -352,7 +360,7 @@ export class GameSessions {
                     chatRooms: [],
                 },
                 socketId: '',
-                roomId: '',
+                roomId,
                 type: PlayerType.Bot,
                 isCreator: false,
             });

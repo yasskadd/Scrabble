@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/naming-convention */
+import { defaultImagesMap } from '@app/constants/profile-pictures';
 import { FileRequest } from '@app/interfaces/file-request';
 import { uploadImage } from '@app/middlewares/multer-middleware';
 import { verifyToken } from '@app/middlewares/token-verification-middleware';
@@ -23,14 +24,10 @@ export class ProfilePictureController {
     private s3Client: S3Client;
     private defaultImagesMap: Map<string, string>; // Map (key, )
 
-    constructor(private readonly accountStorage: AccountStorageService) {
+    constructor(private accountStorage: AccountStorageService) {
         this.configureRouter();
         this.s3Client = this.configureS3Client();
-        this.defaultImagesMap = new Map([
-            ['default-spongebob', '9e96a2f6-c6f4-4221-bea8-a01f62ba2255default-spongebob.png'],
-            ['default-krabs', '3e912e69-ae07-478c-be6d-e17c361d82c8default-krabs.png'],
-            ['default-patrick', '4b19e0a9-e193-4bdd-b572-dc49d5e94043default-patrick.png'],
-        ]);
+        this.defaultImagesMap = defaultImagesMap;
     }
 
     private configureRouter(): void {
@@ -64,7 +61,7 @@ export class ProfilePictureController {
          * @return { number } HTTP Status - The return status of the request
          */
         this.router.post('/profile-picture', uploadImage.any(), async (req: FileRequest, res: Response) => {
-            if (!req.files || req.fileValidationError || req.files.length !== 2 || !req.files[0] || !req.files[1]) {
+            if (!req.files || req.fileValidationError || req.files.length !== 1 || !req.files[0] || req.body.ImageKey === undefined) {
                 res.status(StatusCodes.BAD_REQUEST).send({
                     message: 'No file received or invalid file type',
                     success: false,
@@ -72,7 +69,7 @@ export class ProfilePictureController {
                 return;
             }
 
-            const s3UploadCommand = this.createPutCommand(req.files[0], req.files[1].buffer.toString());
+            const s3UploadCommand = this.createPutCommand(req.files[0], req.body.ImageKey);
             await this.s3Client.send(s3UploadCommand);
 
             res.sendStatus(StatusCodes.CREATED);
@@ -86,8 +83,8 @@ export class ProfilePictureController {
          * @return { number } HTTP Status - The return status of the request
          */
         this.router.get('/profile-picture', verifyToken, async (req: Request, res: Response) => {
-            const username = res.locals.user.name;
-            const profilePicInfo: ImageInfo = await this.accountStorage.getProfilePicInfo(username);
+            const userID = res.locals.user.userID;
+            const profilePicInfo: ImageInfo = await this.accountStorage.getProfilePicInfoFromID(userID);
 
             // Create new signed_url
             const getImageCommand = this.CreateGetCommand(profilePicInfo.key as string);
@@ -112,8 +109,8 @@ export class ProfilePictureController {
                 return;
             }
 
-            const username = res.locals.user.name;
-            const oldProfilePicInfo = await this.accountStorage.getProfilePicInfo(username);
+            const userID = res.locals.user.userID;
+            const oldProfilePicInfo = await this.accountStorage.getProfilePicInfoFromID(userID);
             const newImageKey = uuid.v4() + req.file?.originalname;
             const putCommand = this.createPutCommand(req.file, newImageKey as string);
             this.s3Client
@@ -127,8 +124,8 @@ export class ProfilePictureController {
                         });
                     }
                     // Update image in DB
-                    await this.accountStorage.updateUploadedImage(username, newImageKey as string, req.file?.originalname as string);
-                    res.status(StatusCodes.OK).send({ userData: await this.accountStorage.getUserData(username) });
+                    await this.accountStorage.updateUploadedImage(userID, newImageKey as string, req.file?.originalname as string);
+                    res.status(StatusCodes.OK).send({ userData: await this.accountStorage.getUserDataFromID(userID) });
                 })
                 .catch((err) => {
                     res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
@@ -149,8 +146,8 @@ export class ProfilePictureController {
          */
         this.router.patch('/profile-picture', verifyToken, async (req: Request, res: Response) => {
             // We just need to put hasDefaultImage to true and modify the image name, and delete the image in the bucket if it exists
-            const username = res.locals.user.name;
-            const profilePicInfo = await this.accountStorage.getProfilePicInfo(username);
+            const userID = res.locals.user.userID;
+            const profilePicInfo = await this.accountStorage.getProfilePicInfoFromID(userID);
 
             if (!profilePicInfo.isDefaultPicture) {
                 if (profilePicInfo.key?.length) {
@@ -162,9 +159,9 @@ export class ProfilePictureController {
             }
             // Update DB (ImageKey to empty string and hasDefaultPicture to true and name to req.body.name)
             this.accountStorage
-                .updateDefaultImage(username, req.body.fileName, this.defaultImagesMap.get(req.body.fileName) as string)
+                .updateDefaultImage(userID, req.body.fileName, this.defaultImagesMap.get(req.body.fileName) as string)
                 .then(async () => {
-                    res.status(StatusCodes.OK).send({ userData: await this.accountStorage.getUserData(username) });
+                    res.status(StatusCodes.OK).send({ userData: await this.accountStorage.getUserDataFromID(userID) });
                 })
                 .catch((err) => {
                     res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({

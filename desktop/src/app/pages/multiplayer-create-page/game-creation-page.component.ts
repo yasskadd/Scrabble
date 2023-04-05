@@ -11,14 +11,15 @@ import { LanguageService } from '@app/services/language.service';
 import { TimeService } from '@app/services/time.service';
 import { UserService } from '@app/services/user.service';
 import { VirtualPlayersService } from '@app/services/virtual-players.service';
+import { SocketEvents } from '@common/constants/socket-events';
 import { GameCreationQuery } from '@common/interfaces/game-creation-query';
 import { DictionaryEvents } from '@common/models/dictionary-events';
 import { GameDifficulty } from '@common/models/game-difficulty';
+import { GameMode } from '@common/models/game-mode';
 import { GameTimeOptions } from '@common/models/game-time-options';
 import { GameVisibility } from '@common/models/game-visibility';
-import { SnackBarService } from '@services/snack-bar.service';
-import { SocketEvents } from '@common/constants/socket-events';
 import { ClientSocketService } from '@services/communication/client-socket.service';
+import { SnackBarService } from '@services/snack-bar.service';
 
 @Component({
     selector: 'app-multiplayer-create-page',
@@ -43,7 +44,7 @@ export class GameCreationPageComponent implements OnInit {
     protected isGameLocked: boolean;
     protected isGamePublic: boolean;
 
-    private readonly gameMode: string;
+    private readonly gameMode: GameMode;
 
     constructor(
         protected virtualPlayers: VirtualPlayersService,
@@ -58,7 +59,7 @@ export class GameCreationPageComponent implements OnInit {
         private readonly httpHandler: HttpHandlerService,
         private snackBarService: SnackBarService,
     ) {
-        this.gameMode = this.activatedRoute.snapshot.params.id;
+        this.gameMode = this.activatedRoute.snapshot.params.id as GameMode;
         this.selectedFile = null;
         this.difficultyList = [];
         this.timerList = [];
@@ -110,7 +111,7 @@ export class GameCreationPageComponent implements OnInit {
     }
 
     downloadDictionaries() {
-        this.httpHandler.getDictionaries().subscribe((dictionaries) => (this.dictionaryList = dictionaries));
+        this.httpHandler.getDictionaries().then((dictionaries) => (this.dictionaryList = dictionaries));
     }
 
     giveNameToBot(): void {
@@ -131,7 +132,7 @@ export class GameCreationPageComponent implements OnInit {
 
         const dictionaryTitle = this.getDictionary((this.form.get('dictionary') as AbstractControl).value).title;
 
-        this.httpHandler.getDictionaries().subscribe((dictionaries: DictionaryInfo[]) => {
+        this.httpHandler.getDictionaries().then((dictionaries: DictionaryInfo[]) => {
             this.dictionaryList = dictionaries;
             if (dictionaries.some((dictionary) => dictionary.title === dictionaryTitle)) {
                 this.initGame(dictionaryTitle);

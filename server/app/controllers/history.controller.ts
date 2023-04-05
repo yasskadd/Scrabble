@@ -6,7 +6,7 @@ import { Service } from 'typedi';
 export class HistoryController {
     router: Router;
 
-    constructor(private readonly historyStorage: HistoryStorageService) {
+    constructor(private historyStorage: HistoryStorageService) {
         this.configureRouter();
     }
 

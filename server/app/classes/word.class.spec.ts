@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
 /* eslint-disable dot-notation*/
 import { Gameboard } from '@common/classes/gameboard.class';
-import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
+import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
 import { expect } from 'chai';
 import { Word } from './word.class';
 

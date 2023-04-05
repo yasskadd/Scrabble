@@ -7,21 +7,30 @@
         "withGlobalTauri": false
     },
     "package": {
-        "productName": "PolyScrabble",
+        "productName": "PolyScrabble - Live dev",
         "version": "0.0.1"
     },
     "tauri": {
         "allowlist": {
-            "all": true,
+            "all": false,
             "window": {
                 "all": true
             },
             "dialog": {
                 "all": true
             },
+            "http": {
+                "scope": ["http://**", "https://**", "ws://**"],
+                "all": true,
+                "request": true
+            },
             "shell": {
                 "all": false,
                 "open": true
+            },
+            "fs": {
+                "all": true,
+                "scope": ["$RESOURCE/*", "$CACHE/*"]
             }
         },
         "bundle": {
@@ -37,12 +46,12 @@
             "longDescription": "",
             "macOS": {
                 "entitlements": null,
-                "exceptionDomain": "",
+                "exceptionDomain": "ec2-35-183-107-112.ca-central-1.compute.amazonaws.com",
                 "frameworks": [],
                 "providerShortName": null,
                 "signingIdentity": null
             },
-            "resources": [],
+            "resources": ["../certs/server.pem", "../certs/server.key"],
             "shortDescription": "",
             "targets": "all",
             "windows": {
@@ -52,7 +61,7 @@
             }
         },
         "security": {
-            "csp": "default-src blob: data: filesystem: ws: wss: http: https: tauri: 'unsafe-eval' 'unsafe-inline' 'self' img-src: 'self'; script-src https: 'unsafe-inline'"
+            "csp": "default-src blob: data: filesystem: ws: wss: http: http://localhost https: tauri: tauri://localhost http://ec2-35-183-107-112.ca-central-1.compute.amazonaws.com:3000 https://ec2-35-183-107-112.ca-central-1.compute.amazonaws.com:3443 'unsafe-eval' 'unsafe-inline' 'self' img-src: 'self'; script-src 'self' https://www.google.com https://www.gstatic.com 'unsafe-inline'"
         },
         "updater": {
             "active": false
@@ -64,7 +73,10 @@
                 "resizable": true,
                 "title": "PolyScrabble - live dev",
                 "width": 800,
-                "focus": false
+                "focus": false,
+                "minWidth": 1000,
+                "minHeight": 800,
+                "label": "main"
             }
         ]
     }

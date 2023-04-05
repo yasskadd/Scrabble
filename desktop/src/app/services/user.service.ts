@@ -1,15 +1,17 @@
-import { HttpErrorResponse } from '@angular/common/http';
+// import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { IUser } from '@common/interfaces/user';
-import { Subject, Subscription } from 'rxjs';
-import { AppCookieService } from './communication/app-cookie.service';
-import { HttpHandlerService } from './communication/http-handler.service';
+import { Router } from '@angular/router';
+import { AppRoutes } from '@app/models/app-routes';
 import { AvatarData } from '@common/interfaces/avatar-data';
 import { ImageInfo } from '@common/interfaces/image-info';
+import { IUser } from '@common/interfaces/user';
 import { ImageType } from '@common/models/image-type';
-import { AppRoutes } from '@app/models/app-routes';
-import { Router } from '@angular/router';
 import { ClientSocketService } from '@services/communication/client-socket.service';
+import { Subject } from 'rxjs';
+import { AppCookieService } from './communication/app-cookie.service';
+import { HttpHandlerService } from './communication/http-handler.service';
+import { SocketEvents } from '@common/constants/socket-events';
+import { SnackBarService } from '@services/snack-bar.service';
 
 @Injectable({
     providedIn: 'root',
@@ -21,6 +23,7 @@ export class UserService {
         private httpHandlerService: HttpHandlerService,
         private clientSocketService: ClientSocketService,
         private cookieService: AppCookieService,
+        private snackBarService: SnackBarService,
         private router: Router,
     ) {
         this.initUser();
@@ -33,34 +36,44 @@ export class UserService {
     login(user: IUser): Subject<string> {
         const subject = new Subject<string>();
 
-        this.httpHandlerService.login(user).subscribe({
-            next: (loginRes: { userData: IUser }) => {
-                this.updateUserWithImageUrl(loginRes.userData);
-                this.cookieService.updateUserSessionCookie();
-                subject.next('');
+        this.httpHandlerService.login(user).then(
+            (loginRes: { userData: IUser; sessionToken: string }) => {
+                this.clientSocketService.on(SocketEvents.UserAlreadyConnected, async () => {
+                    // TODO : Language
+                    this.snackBarService.openError('User already connected');
+                    await this.logout();
+                });
+
+                this.cookieService.updateUserSessionCookie(loginRes.sessionToken).then(() => {
+                    this.user = loginRes.userData;
+                    // TODO : Language
+                    this.snackBarService.openInfo('Connection successful');
+                    this.updateUserWithImageUrl(loginRes.userData);
+                    subject.next('');
+                });
             },
-            error: (error: HttpErrorResponse) => {
+            (error: any) => {
                 // TODO : Language
                 subject.next(error.error.message);
             },
-        });
+        );
 
         return subject;
     }
 
-    logout(): void {
-        this.httpHandlerService.logout().subscribe(() => {
+    async logout(): Promise<void> {
+        this.httpHandlerService.logout(this.user).then(async () => {
             this.initUser();
             this.cookieService.removeSessionCookie();
-            this.clientSocketService.disconnect();
+            await this.clientSocketService.disconnect();
             this.router.navigate([AppRoutes.ConnectionPage]).then();
         });
     }
 
-    submitNewProfilePic(avatarData: AvatarData): Subscription {
+    async submitNewProfilePic(avatarData: AvatarData): Promise<boolean> {
         return this.httpHandlerService
             .modifyProfilePicture(avatarData, this.avatarDataToImageInfo(avatarData).isDefaultPicture)
-            .subscribe((data: { userData: IUser }) => {
+            .then((data: { userData: IUser }) => {
                 if (data.userData) {
                     this.updateUserWithImageUrl(data.userData);
                     return true;
@@ -71,10 +84,14 @@ export class UserService {
 
     private initUser(): void {
         this.user = {
+            _id: '',
             email: '',
             username: '',
             password: '',
             profilePicture: undefined,
+            historyEventList: [],
+            language: 'fr', // TODO: To change if necessary
+            theme: null, // TODO: to change
         };
     }
 
@@ -99,7 +116,7 @@ export class UserService {
 
     private updateUserWithImageUrl(user: IUser): void {
         if (user.profilePicture.isDefaultPicture) {
-            this.httpHandlerService.getDefaultImages().subscribe((map: Map<string, string[]>) => {
+            this.httpHandlerService.getDefaultImages().then((map: Map<string, string[]>) => {
                 // Set url in userData for local access to the default image
                 // (yes we download all of the keys, but it's easier like that)
                 Object.entries(map).forEach((entry: [string, string[]]) => {
@@ -109,11 +126,10 @@ export class UserService {
                 });
             });
         } else {
-            this.httpHandlerService.getProfilePicture().subscribe((res: { url: string }) => {
+            this.httpHandlerService.getProfilePicture().then((res: { url: string }) => {
                 // Set url in userData for local access to the image
                 user.profilePicture.key = res.url;
             });
         }
-        this.user = user;
     }
 }

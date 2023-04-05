@@ -44,8 +44,8 @@ export class ScoreRelatedBot extends BeginnerBot {
         const randomIndex = Math.floor(Math.random() * (index + uncertainty - (index - uncertainty) + 1)) + (index - uncertainty);
         index = randomIndex < commandInfoList.length && randomIndex > 0 ? randomIndex : index;
         const randomCommandInfo = commandInfoList[index];
-        if (this.countUp >= 3 && this.countUp < Constant.TIME_SKIP) this.play(randomCommandInfo);
-        else if (this.countUp < 3) setTimeout(() => this.play(randomCommandInfo), Constant.SECOND_3 - this.countUp * Constant.SECOND_1);
+        if (this.countUp >= 3 && this.countUp < Constant.TIME_SKIP) this.placeWord(randomCommandInfo);
+        else if (this.countUp < 3) setTimeout(() => this.placeWord(randomCommandInfo), Constant.SECOND_3 - this.countUp * Constant.SECOND_1);
     }
 
     private chooseMove(): string {

@@ -1,11 +1,16 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component } from '@angular/core';
+import { CENTER_TILE } from '@app/constants/board-view';
 import { BoardTileInfo } from '@app/interfaces/board-tile-info';
+import { SelectionPosition } from '@app/interfaces/selection-position';
 import { BoardTileState, BoardTileType } from '@app/models/board-tile';
 import { PlayDirection } from '@app/models/play-direction';
 import { LetterPlacementService } from '@app/services/letter-placement.service';
 import { Letter } from '@common/interfaces/letter';
 import { AlphabetLetter } from '@common/models/alphabet-letter';
+import { WebviewWindow } from '@tauri-apps/api/window';
+import { TauriEvent } from '@tauri-apps/api/event';
+import { TauriStateService } from '@services/tauri-state.service';
 
 @Component({
     selector: 'app-game-board',
@@ -16,10 +21,15 @@ export class GameBoardComponent {
     protected boardTileStates: typeof BoardTileState = BoardTileState;
     protected playDirection: typeof PlayDirection = PlayDirection;
 
-    constructor(protected letterPlacementService: LetterPlacementService) {}
-
-    handleCenterClick(tile: BoardTileInfo): void {
-        this.letterPlacementService.rotateDirection(tile);
+    constructor(protected letterPlacementService: LetterPlacementService, private tauriStateService: TauriStateService) {
+        if (this.tauriStateService.useTauri) {
+            const tauriWindow = WebviewWindow.getByLabel('main');
+            tauriWindow
+                .listen(TauriEvent.WINDOW_CLOSE_REQUESTED, () => {
+                    alert('Cannot close while in game');
+                })
+                .then();
+        }
     }
 
     protected drop(event: CdkDragDrop<Letter[]>, tile: BoardTileInfo): void {
@@ -101,5 +111,17 @@ export class GameBoardComponent {
 
     protected tileEmpty(tile: BoardTileInfo): boolean {
         return tile.letter?.value === AlphabetLetter.None;
+    }
+
+    protected showCenterTile(tile: BoardTileInfo): boolean {
+        let show = true;
+
+        this.letterPlacementService.selectionPositions.forEach((selectedTile: SelectionPosition) => {
+            if (selectedTile.coord === tile.coord) {
+                show = false;
+            }
+        });
+
+        return tile.coord === CENTER_TILE && tile.state === BoardTileState.Empty && show;
     }
 }

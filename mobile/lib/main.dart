@@ -1,12 +1,14 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
-import 'package:flutter_i18n/flutter_i18n_delegate.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mobile/domain/services/auth-service.dart';
+import 'package:mobile/domain/services/avatar-service.dart';
 import 'package:mobile/domain/services/chat-service.dart';
 import 'package:mobile/domain/services/game-service.dart';
 import 'package:mobile/domain/services/http-handler-service.dart';
@@ -28,24 +30,28 @@ Future<void> setup() async {
   var serverAddress = dotenv.env["SERVER_URL"];
 
   getIt.registerLazySingleton<Socket>(() => io(
-      serverAddress,
+      "http://$serverAddress:3000",
       OptionBuilder()
           .setTransports(["websocket"])
           .disableAutoConnect()
           .build()));
 
+
   Socket socket = getIt<Socket>();
+
   socket.onConnect((_) => debugPrint('Socket connection established'));
   socket.onDisconnect((data) => debugPrint('Socket connection lost'));
 
-  getIt.registerLazySingleton<HttpHandlerService>(
-      () => HttpHandlerService(serverAddress!));
+  getIt.registerLazySingleton<HttpHandlerService>(() => HttpHandlerService("https://$serverAddress:3443"));
   getIt.registerLazySingleton<ChatService>(() => ChatService());
   getIt.registerLazySingleton<AuthService>(() => AuthService());
   getIt.registerLazySingleton<ThemeService>(() => ThemeService());
   getIt.registerLazySingleton<LanguageService>(() => LanguageService());
   getIt.registerLazySingleton<RoomService>(() => RoomService());
+  getIt.registerLazySingleton<AvatarService>(() => AvatarService());
   getIt.registerLazySingleton<GameService>(() => GameService());
+
+  getIt.registerSingleton<GlobalKey<NavigatorState>>(GlobalKey<NavigatorState>());
 }
 
 Future<void> main() async {
@@ -63,15 +69,26 @@ class PolyScrabble extends StatefulWidget {
 class _PolyScrabbleState extends State<PolyScrabble> {
   final _themeService = GetIt.I.get<ThemeService>();
   final _languageService = GetIt.I.get<LanguageService>();
-  StreamSubscription? themeSub;
+  late final StreamSubscription themeSub;
+
+  @override
+  void initState() {
+    super.initState();
+
+    themeSub = _themeService.notifyThemeChange.stream.listen((event) {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    themeSub.cancel();
+    super.dispose();
+  }
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    themeSub ??= _themeService.notifyThemeChange.stream.listen((event) {
-      setState(() {});
-    });
-
     return MaterialApp(
       title: 'PolyScrabble 110',
       theme: _themeService.getTheme(),
@@ -83,14 +100,13 @@ class _PolyScrabbleState extends State<PolyScrabble> {
       home: const LoginScreen(title: 'PolyScrabble 101 - Prototype'),
       localizationsDelegates: [
         FlutterI18nDelegate(
-          translationLoader: FileTranslationLoader(
-              forcedLocale: _languageService.currentLocale),
+          translationLoader: FileTranslationLoader(forcedLocale: _languageService.currentLocale),
           missingTranslationHandler: (key, locale) {
-            debugPrint(
-                "--- Missing Key: $key, languageCode: ${locale!.languageCode}");
+            debugPrint("--- Missing Key: $key, languageCode: ${locale!.languageCode}");
           },
         )
       ],
+      navigatorKey: GetIt.I.get<GlobalKey<NavigatorState>>(),
     );
   }
 }

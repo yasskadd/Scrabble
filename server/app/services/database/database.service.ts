@@ -9,6 +9,7 @@ export class DatabaseService {
     dictionaries: DatabaseCollection;
     users: DatabaseCollection;
     chatRooms: DatabaseCollection;
+    usersStats: DatabaseCollection;
 
     constructor() {
         this.histories = new DatabaseCollection('Histories');
@@ -17,6 +18,7 @@ export class DatabaseService {
         this.dictionaries = new DatabaseCollection('Dictionary');
         this.users = new DatabaseCollection('Users');
         this.chatRooms = new DatabaseCollection('ChatRooms');
+        this.usersStats = new DatabaseCollection('UsersStats');
     }
 
     async connect() {
@@ -26,5 +28,6 @@ export class DatabaseService {
         await this.histories.connect();
         await this.users.connect();
         await this.chatRooms.connect();
+        await this.usersStats.connect();
     }
 }

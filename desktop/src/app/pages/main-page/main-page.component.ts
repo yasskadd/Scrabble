@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogBoxGameTypeComponent } from '@app/components/dialog-box-game-type/dialog-box-game-type.component';
@@ -8,15 +8,18 @@ import { SocketResponse } from '@app/interfaces/server-responses';
 import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
 import { UserService } from '@app/services/user.service';
 import { SocketEvents } from '@common/constants/socket-events';
+import { ClientSocketService } from '@services/communication/client-socket.service';
 import { LanguageService } from '@services/language.service';
 import { Subject } from 'rxjs';
+import { Router } from '@angular/router';
+import { AppRoutes } from '@app/models/app-routes';
 
 @Component({
     selector: 'app-main-page',
     templateUrl: './main-page.component.html',
     styleUrls: ['./main-page.component.scss'],
 })
-export class MainPageComponent implements OnDestroy {
+export class MainPageComponent {
     protected userNameForm: FormControl;
     protected homeConnectionResponse: SocketResponse;
     protected connectionSubject: Subject<SocketResponse>;
@@ -31,23 +34,28 @@ export class MainPageComponent implements OnDestroy {
         protected chatBoxHandlerService: ChatboxHandlerService,
         protected userService: UserService,
         protected languageService: LanguageService,
+        private clientSocketService: ClientSocketService,
         private dialog: MatDialog,
         private highScore: MatDialog,
+        private router: Router,
     ) {
+        if (!this.userService.isConnected()) {
+            this.router.navigate([`${AppRoutes.ConnectionPage}`]);
+        }
+
         this.homeConnectionResponse = { validity: false };
         this.userNameForm = new FormControl('', Validators.required);
         this.chatIsOpen = false;
 
-        this.subscribeConnectionEvents();
+        this.clientSocketService.connected.subscribe((connected: boolean) => {
+            if (connected) {
+                this.subscribeConnectionEvents();
+            }
+        });
     }
 
     protected get loggedIn(): boolean {
         return this.chatBoxHandlerService.loggedIn;
-    }
-
-    ngOnDestroy() {
-        this.connectionSubject.unsubscribe();
-        this.disconnectionSubject.unsubscribe();
     }
 
     openGameTypeDialog(gameModeValue: string): void {

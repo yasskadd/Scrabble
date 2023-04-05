@@ -11,7 +11,6 @@ $angular-default-theme: mat.define-light-theme(
             accent: mat.define-palette(mat.$orange-palette, 200),
             warn: $angular-warn,
         ),
-        app-footer: mat.define-palette(mat.$green-palette, 700),
     )
 );
 
@@ -26,55 +25,6 @@ $angular-dark-theme: mat.define-dark-theme(
         ),
     )
 );
-
-.indigo-pink-theme {
-    $indigo-pink-theme: mat.define-light-theme(
-        (
-            color: (
-                primary: mat.define-palette(mat.$indigo-palette),
-                accent: mat.define-palette(mat.$pink-palette, A200, A100, A400),
-                warn: mat.define-palette(mat.$red-palette),
-            ),
-        )
-    );
-    @include mat.all-component-themes($indigo-pink-theme);
-}
-
-.deeppurple-amber-theme {
-    $deeppurple-amber-theme: mat.define-light-theme(
-        (
-            color: (
-                primary: mat.define-palette(mat.$deep-purple-palette),
-                accent: mat.define-palette(mat.$amber-palette, A200, A100, A400),
-            ),
-        )
-    );
-    @include mat.all-component-colors($deeppurple-amber-theme);
-}
-
-.pink-bluegrey-theme {
-    $pink-bluegrey-theme: mat.define-dark-theme(
-        (
-            color: (
-                primary: mat.define-palette(mat.$pink-palette, 700, 500, 900),
-                accent: mat.define-palette(mat.$blue-grey-palette, A200, A100, A400),
-            ),
-        )
-    );
-    @include mat.all-component-colors($pink-bluegrey-theme);
-}
-
-.purple-green-theme {
-    $purple-green-theme: mat.define-dark-theme(
-        (
-            color: (
-                primary: mat.define-palette(mat.$purple-palette, 700, 500, 800),
-                accent: mat.define-palette(mat.$green-palette, A200, A100, A400),
-            ),
-        )
-    );
-    @include mat.all-component-colors($purple-green-theme);
-}
 
 .darkMode {
     @include mat.all-component-colors($angular-dark-theme);

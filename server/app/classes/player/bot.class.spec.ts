@@ -8,7 +8,7 @@ import { WordSolver } from '@app/classes/word-solver.class';
 import { BotInformation } from '@app/interfaces/bot-information';
 import { SocketEvents } from '@common/constants/socket-events';
 import { Coordinate } from '@common/interfaces/coordinate';
-import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
+import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
 import { expect } from 'chai';
 import { ReplaySubject } from 'rxjs';
 import * as Sinon from 'sinon';
@@ -163,7 +163,7 @@ describe('Bot Tests', () => {
             mockSocketManager.expects('emitRoom').exactly(1).calledWithExactly(bot.roomId, SocketEvents.GameMessage, '!passer');
             const commandInfoStub = undefined as never;
             const spySkipTurn = Sinon.spy(bot, 'skipTurn');
-            bot['play'](commandInfoStub);
+            bot['placeWord'](commandInfoStub);
             mockGame.verify();
             mockSocketManager.verify();
             expect(spySkipTurn.calledOnce).to.be.equal(true);
@@ -179,7 +179,7 @@ describe('Bot Tests', () => {
             mockGame.expects('play').exactly(1).withExactArgs(bot, commandInfoStub);
             mockSocketManager.expects('emitRoom').exactly(2);
             const spyEmitCommand = Sinon.spy(bot, 'emitPlaceCommand' as keyof Bot);
-            bot['play'](commandInfoStub);
+            bot['placeWord'](commandInfoStub);
             mockGame.verify();
             mockSocketManager.verify();
             expect(spyEmitCommand.calledOnceWithExactly(commandInfoStub)).to.be.equal(true);

@@ -35,9 +35,8 @@ export enum SocketEvents {
     OpponentDisconnect = 'user disconnect',
     UpdateGameBoard = 'updateGameBoard',
     RackViewUpdate = 'updateRackClient',
-    UpdatePlayerInformation = 'UpdateMyPlayerInformation',
+    UpdatePlayersInformation = 'UpdateMyPlayerInformation',
     UpdateOpponentInformation = 'UpdateOpponentInformation',
-    CreateScrabbleGame = 'createScrabbleGame',
     TimerClientUpdate = 'timerUpdate',
     OpponentGameLeave = 'OpponentLeftTheGame',
     GameEnd = 'endGame',
@@ -46,6 +45,8 @@ export enum SocketEvents {
     UserDisconnect = 'user disconnect',
     ImportDictionary = 'ImportDictionary',
     SendMessageHome = 'sendMessageHome',
+    JoinAsObserver = 'joinAsObserver',
+    CannotReplaceBot = 'cannotReplaceBot',
     // Client game calls
     PlaceWordCommand = 'placeWord',
     Exchange = 'ExchangeLetters',
@@ -61,4 +62,6 @@ export enum SocketEvents {
     PlacementFailure = 'placementFailure',
     ExchangeSuccess = 'ExchangeSuccess',
     ExchangeFailure = 'ExchangeFailure',
+    UserAlreadyConnected = 'UserAlreadyConnected',
+    SuccessfulConnection = 'SuccessfulConnection',
 }

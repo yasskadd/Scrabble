@@ -29,7 +29,7 @@ export class AdminDictionariesComponent {
     }
 
     deleteDictionary(dictionaryToDelete: DictionaryInfo) {
-        this.dictionaryService.deleteDictionary(dictionaryToDelete).subscribe(() => this.updateDictionaryList());
+        this.dictionaryService.deleteDictionary(dictionaryToDelete).then(() => this.updateDictionaryList());
     }
 
     openModifyDictionaryDialog(dictionaryToModify: DictionaryInfo) {
@@ -60,7 +60,7 @@ export class AdminDictionariesComponent {
         if (modifiedDictionaryInfo.newTitle === '' || modifiedDictionaryInfo.newDescription === '') return;
         this.dictionaryService.updateDictionariesInfos();
         if (!(modifiedDictionaryInfo.title === modifiedDictionaryInfo.newTitle || !this.isUniqueTitle(modifiedDictionaryInfo.newTitle))) return;
-        this.dictionaryService.modifyDictionary(modifiedDictionaryInfo).subscribe(() => this.updateDictionaryList());
+        this.dictionaryService.modifyDictionary(modifiedDictionaryInfo).then(() => this.updateDictionaryList());
     }
 
     downloadJson(dictionary: DictionaryInfo) {
@@ -68,7 +68,7 @@ export class AdminDictionariesComponent {
     }
 
     resetDictionaries() {
-        this.dictionaryService.resetDictionaries().subscribe(() => this.updateDictionaryList());
+        this.dictionaryService.resetDictionaries().then(() => this.updateDictionaryList());
     }
 
     updateDictionaryList() {
