@@ -28,29 +28,30 @@ class AuthService {
 
   Future<void> connectUser(String username, String password) async {
     try {
-      var response = await _httpService.signInRequest({"username": username, "password": password});
+      var response = await _httpService
+          .signInRequest({"username": username, "password": password});
 
-      if (response.statusCode == HttpStatus.ok) {
-        // JWT token
-        String? rawCookie = response.headers['set-cookie'];
-        _cookie = Cookie.fromSetCookieValue(rawCookie!);
-        _httpService.updateCookie(_cookie!);
+        if (response.statusCode == HttpStatus.ok) {
+          // JWT token
+          String? rawCookie = response.headers['set-cookie'];
+          _cookie = Cookie.fromSetCookieValue(rawCookie!);
+          _httpService.updateCookie(_cookie!);
 
-        user = IUser.fromJson(jsonDecode(response.body)['userData']);
+          user = IUser.fromJson(jsonDecode(response.body)['userData']);
 
         final urlResponse = await _httpService.getProfilePicture();
         user!.profilePicture!.key = jsonDecode(urlResponse.body)['url'];
 
-        _socket.io.options['extraHeaders'] = {'cookie': _cookie};
-        _socket
-          ..disconnect()
-          ..connect();
+          _socket.io.options['extraHeaders'] = {'cookie': _cookie};
+          _socket
+            ..disconnect()
+            ..connect();
 
         notifyLogin.add(true);
         return;
       }
-    } catch (e) {
-      // If server not active
+    }catch(_){
+      // Server not responding...
     }
     notifyError.add("Failed Login");
   }
