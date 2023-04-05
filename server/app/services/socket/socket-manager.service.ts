@@ -13,14 +13,14 @@ import { Service } from 'typedi';
 export class SocketManager {
     server: io.Server;
 
-    private socketUsernameMap: Map<io.Socket, string>;
+    private socketIdMap: Map<io.Socket, string>;
     private onEvents: Map<string, CallbackSignature[]>;
     private onAndSioEvents: Map<string, OnSioCallbackSignature[]>;
 
     constructor(private accountStorageService: AccountStorageService) {
         this.onEvents = new Map<string, CallbackSignature[]>();
         this.onAndSioEvents = new Map<string, OnSioCallbackSignature[]>();
-        this.socketUsernameMap = new Map<io.Socket, string>();
+        this.socketIdMap = new Map<io.Socket, string>();
     }
 
     init(server: http.Server) {
@@ -44,7 +44,7 @@ export class SocketManager {
     }
 
     getSocketFromId(socketId: string): io.Socket | undefined {
-        for (const [socket] of this.socketUsernameMap) {
+        for (const [socket] of this.socketIdMap) {
             if (socket.id === socketId) {
                 return socket;
             }
@@ -58,9 +58,9 @@ export class SocketManager {
     }
 
     modifyUsername(oldUsername: string, newUsername: string): void {
-        this.socketUsernameMap.forEach((value: string, key: io.Socket) => {
+        this.socketIdMap.forEach((value: string, key: io.Socket) => {
             if (value === oldUsername) {
-                this.socketUsernameMap.set(key, newUsername);
+                this.socketIdMap.set(key, newUsername);
                 return;
             }
         });
@@ -83,13 +83,13 @@ export class SocketManager {
                     }
                 });
 
-                if (!isTokenValid || this.socketUsernameMap.has(socket)) {
+                if (!isTokenValid || this.socketIdMap.has(socket)) {
                     socket.disconnect();
                     return;
                 }
 
                 let keepConnecting = true;
-                this.socketUsernameMap.forEach((value: string) => {
+                this.socketIdMap.forEach((value: string) => {
                     if (value === username) {
                         keepConnecting = false;
                     }
@@ -99,7 +99,7 @@ export class SocketManager {
                     return;
                 }
 
-                this.socketUsernameMap.set(socket, username);
+                this.socketIdMap.set(socket, username);
 
                 this.accountStorageService.addUserEventHistory(username, HistoryActions.Connection, new Date());
 
@@ -124,15 +124,15 @@ export class SocketManager {
                 }
             }
             socket.on('disconnect', () => {
-                if (this.socketUsernameMap.has(socket)) {
-                    this.accountStorageService.addUserEventHistory(this.socketUsernameMap.get(socket) as string, HistoryActions.Logout, new Date());
-                    this.socketUsernameMap.delete(socket);
+                if (this.socketIdMap.has(socket)) {
+                    this.accountStorageService.addUserEventHistory(this.socketIdMap.get(socket) as string, HistoryActions.Logout, new Date());
+                    this.socketIdMap.delete(socket);
                 }
 
                 // eslint-disable-next-line no-console
                 console.log('Disconnection of client with id = ' + socket.id + ' from : ' + socket.handshake.headers.origin);
                 // eslint-disable-next-line no-console
-                console.log(this.socketUsernameMap.values());
+                console.log(this.socketIdMap.values());
             });
         });
     }
