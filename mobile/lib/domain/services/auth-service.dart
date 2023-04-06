@@ -1,23 +1,22 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:http/http.dart';
 import 'package:mobile/domain/enums/image-type-enum.dart';
 import 'package:mobile/domain/models/avatar-data-model.dart';
-import 'package:mobile/domain/services/avatar-service.dart';
 import 'package:mobile/domain/models/iuser-model.dart';
+import 'package:mobile/domain/services/avatar-service.dart';
 import 'package:mobile/domain/services/http-handler-service.dart';
+import 'package:mobile/domain/services/user-service.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
 class AuthService {
-  IUser? user;
   Cookie? _cookie;
 
   // Services
   final _httpService = GetIt.I.get<HttpHandlerService>();
+  final _userService = GetIt.I.get<UserService>();
   final _avatarService = GetIt.I.get<AvatarService>();
   final _socket = GetIt.I.get<Socket>();
 
@@ -31,43 +30,42 @@ class AuthService {
       var response = await _httpService
           .signInRequest({"username": username, "password": password});
 
-        if (response.statusCode == HttpStatus.ok) {
-          // JWT token
-          String? rawCookie = response.headers['set-cookie'];
-          _cookie = Cookie.fromSetCookieValue(rawCookie!);
-          _httpService.updateCookie(_cookie!);
+      if (response.statusCode == HttpStatus.ok) {
+        // JWT token
+        String? rawCookie = response.headers['set-cookie'];
+        _cookie = Cookie.fromSetCookieValue(rawCookie!);
+        _httpService.updateCookie(_cookie!);
 
-          user = IUser.fromJson(jsonDecode(response.body)['userData']);
+        IUser user = IUser.fromJson(jsonDecode(response.body)['userData']);
+        await _userService.updateUser(user);
 
-        final urlResponse = await _httpService.getProfilePicture();
-        user!.profilePicture!.key = jsonDecode(urlResponse.body)['url'];
-
-          _socket.io.options['extraHeaders'] = {'cookie': _cookie};
-          _socket
-            ..disconnect()
-            ..connect();
+        _socket.io.options['extraHeaders'] = {'cookie': _cookie};
+        _socket
+          ..disconnect()
+          ..connect();
 
         notifyLogin.add(true);
         return;
       }
-    }catch(_){
+    } catch (_) {
       // Server not responding...
     }
     notifyError.add("Failed Login");
   }
 
-  Future<void> createUser(String username, String email, String password, AvatarData data) async {
+  Future<void> createUser(
+      String username, String email, String password, AvatarData data) async {
     final avatarData = await _avatarService.formatAvatarData(data);
     final profileImageInfo = _avatarService.generateImageInfo(avatarData);
 
-    final msg = jsonEncode({
+    final signUpForm = jsonEncode({
       "username": username,
       "email": email,
       "password": password,
       "profilePicture": profileImageInfo
     }); // TODO: Make a model later maybe? (Will only be used here)
 
-    var response = await _httpService.signUpRequest(msg);
+    var response = await _httpService.signUpRequest(signUpForm);
 
     if (response.statusCode == HttpStatus.ok) {
       if (data.type == ImageType.DataImage) {
@@ -83,7 +81,7 @@ class AuthService {
   }
 
   void diconnect() {
-    user = null;
+    _userService.updateUser(null);
     _cookie = null;
     _socket.disconnect();
   }

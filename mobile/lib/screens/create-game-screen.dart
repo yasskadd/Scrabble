@@ -3,13 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:get_it/get_it.dart';
-import 'package:mobile/components/dropdown-menu.dart';
 import 'package:mobile/components/toggle-icon-button.dart';
+import 'package:mobile/components/dropdown-menu.dart' as menu;
 import 'package:mobile/domain/models/room-model.dart';
-import 'package:mobile/domain/services/auth-service.dart';
 import 'package:mobile/domain/services/dictionary-service.dart';
-import 'package:mobile/screens/waiting-room-screen.dart';
 import 'package:mobile/domain/services/room-service.dart';
+import 'package:mobile/domain/services/user-service.dart';
+import 'package:mobile/screens/waiting-room-screen.dart';
 
 class GameCreationScreen extends StatefulWidget {
   const GameCreationScreen({super.key, required this.title});
@@ -21,7 +21,7 @@ class GameCreationScreen extends StatefulWidget {
 }
 
 class _GameCreationScreenState extends State<GameCreationScreen> {
-  final _authService = GetIt.I.get<AuthService>();
+  final _userService = GetIt.I.get<UserService>();
   final _roomService = GetIt.I.get<RoomService>();
   final _dictionaryService = GetIt.I.get<DictionaryService>();
 
@@ -47,7 +47,7 @@ class _GameCreationScreenState extends State<GameCreationScreen> {
   void _createGame() {
     if (_formKey.currentState!.validate()) {
       GameCreationQuery query = GameCreationQuery(
-          user: _authService.user!,
+          user: _userService.user!,
           dictionary: _selectedDictionary!,
           timer: _selectedTimer,
           gameMode: GameMode.Multi,
@@ -57,14 +57,16 @@ class _GameCreationScreenState extends State<GameCreationScreen> {
           botDifficulty: _selectedDifficulty,
           password: _isProtected ? _roomPasswordController.text : null);
       _roomService.createRoom(query);
-      Navigator.push(context, MaterialPageRoute(builder: (context) => const WaitingRoomScreen()));
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const WaitingRoomScreen()));
     }
   }
 
   @override
   void initState() {
     super.initState();
-    _newDictionariesSub = _dictionaryService.notifyNewDictionaries.stream.listen((_) {
+    _newDictionariesSub =
+        _dictionaryService.notifyNewDictionaries.stream.listen((_) {
       setState(() {
         _selectedDictionary = _dictionaryService.dictionaries.isNotEmpty
             ? _dictionaryService.dictionaries[0].title
@@ -100,7 +102,9 @@ class _GameCreationScreenState extends State<GameCreationScreen> {
                         key: _formKey,
                         child: Column(
                           children: [
-                            Text(FlutterI18n.translate(context, "room_create.room_param_title"),
+                            Text(
+                                FlutterI18n.translate(
+                                    context, "room_create.room_param_title"),
                                 style: TextStyle(fontSize: 30)),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -111,8 +115,9 @@ class _GameCreationScreenState extends State<GameCreationScreen> {
                                   onChanged: (value) {
                                     setState(() {
                                       _isProtected = value;
-                                      _formValid =
-                                          !_isProtected || _roomPasswordController.text.isNotEmpty;
+                                      _formValid = !_isProtected ||
+                                          _roomPasswordController
+                                              .text.isNotEmpty;
                                     });
                                   },
                                 ),
@@ -132,15 +137,19 @@ class _GameCreationScreenState extends State<GameCreationScreen> {
                                   Visibility(
                                     visible: _isProtected,
                                     child: Padding(
-                                      padding: const EdgeInsets.only(bottom: 10),
+                                      padding:
+                                          const EdgeInsets.only(bottom: 10),
                                       child: TextFormField(
                                         controller: _roomPasswordController,
-                                        validator: (value) => value == null || value.isEmpty
-                                            ? FlutterI18n.translate(context, "form.password_empty")
+                                        validator: (value) => value == null ||
+                                                value.isEmpty
+                                            ? FlutterI18n.translate(
+                                                context, "form.password_empty")
                                             : null,
                                         decoration: InputDecoration(
                                           border: OutlineInputBorder(),
-                                          hintText: FlutterI18n.translate(context, "form.password"),
+                                          hintText: FlutterI18n.translate(
+                                              context, "form.password"),
                                           suffixIcon: const Icon(Icons.key),
                                         ),
                                         onChanged: (value) {
@@ -151,24 +160,24 @@ class _GameCreationScreenState extends State<GameCreationScreen> {
                                       ),
                                     ),
                                   ),
-                                  DropdownMenu(
+                                  menu.DropdownMenu(
                                     title:
-                                        "${FlutterI18n.translate(context, "room_create.difficulty_field_title")} *",
+                                    "${FlutterI18n.translate(context, "room_create.difficulty_field_title")} *",
                                     items: {
                                       FlutterI18n.translate(context, "room_create.difficulty.easy"):
-                                          GameDifficulty.Easy.value,
+                                      GameDifficulty.Easy.value,
                                       FlutterI18n.translate(context, "room_create.difficulty.hard"):
-                                          GameDifficulty.Hard.value,
+                                      GameDifficulty.Hard.value,
                                       FlutterI18n.translate(
-                                              context, "room_create.difficulty.score_based"):
-                                          GameDifficulty.ScoreBased.value,
+                                          context, "room_create.difficulty.score_based"):
+                                      GameDifficulty.ScoreBased.value,
                                     },
                                     onChanged: (value) {
                                       _selectedDifficulty = GameDifficulty.fromString(value!)!;
                                     },
                                     defaultValue: GameDifficulty.Easy.value,
                                   ),
-                                  DropdownMenu(
+                                  menu.DropdownMenu(
                                     title:
                                         "${FlutterI18n.translate(context, "room_create.timer_field_title")} *",
                                     items: const {
@@ -188,18 +197,21 @@ class _GameCreationScreenState extends State<GameCreationScreen> {
                                     },
                                     defaultValue: "60",
                                   ),
-                                  DropdownMenu(
+                                  menu.DropdownMenu(
                                     title:
                                         "${FlutterI18n.translate(context, "room_create.dictionary_field_title")} *",
                                     items: {
-                                      for (var item in _dictionaryService.dictionaries)
+                                      for (var item
+                                          in _dictionaryService.dictionaries)
                                         item.title: item.title
                                     },
                                     onChanged: (value) {
                                       _selectedDictionary = value;
                                     },
-                                    defaultValue: _dictionaryService.dictionaries.isNotEmpty
-                                        ? _dictionaryService.dictionaries[0].title
+                                    defaultValue: _dictionaryService
+                                            .dictionaries.isNotEmpty
+                                        ? _dictionaryService
+                                            .dictionaries[0].title
                                         : null,
                                   ),
                                 ],
