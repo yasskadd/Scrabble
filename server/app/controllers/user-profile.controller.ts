@@ -117,13 +117,13 @@ export class UserProfileController {
             res.sendStatus(StatusCodes.OK);
         });
 
-        this.router.get('/stats', async (req: Request, res: Response) => {
+        this.router.get('/stats', verifyToken, async (req: Request, res: Response) => {
             const userID: string = res.locals.user.userID;
             const userStats = await this.userStatsStorageService.getUserStats(userID);
             res.status(StatusCodes.OK).json(userStats);
         });
 
-        this.router.get('/games/history', async (req: Request, res: Response) => {
+        this.router.get('/games/history', verifyToken, async (req: Request, res: Response) => {
             const userID: string = res.locals.user.userID;
             const userGamesHistory = await this.historyStorage.getHistoryByUser(userID);
             res.status(StatusCodes.OK).json(userGamesHistory);
