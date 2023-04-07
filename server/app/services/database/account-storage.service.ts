@@ -7,7 +7,7 @@ import { IUser } from '@common/interfaces/user';
 import { HistoryActions } from '@common/models/history-actions';
 import { compare, genSalt, hash } from 'bcrypt';
 import * as moment from 'moment';
-import { Document, ObjectId } from 'mongodb';
+import { Document, FindOptions, ObjectId } from 'mongodb';
 import { Service } from 'typedi';
 import { DatabaseService } from './database.service';
 
@@ -65,6 +65,18 @@ export class AccountStorageService {
     async getUserData(username: string): Promise<IUser> {
         const userDocument = (await this.database.users.collection?.findOne({ username })) as Document;
         return userDocument as IUser;
+    }
+
+    async getAllUsersData(): Promise<{ [key: string]: string }> {
+        const options: FindOptions<Document> = {
+            projection: { _id: 1, username: 1 },
+        };
+        const userHashMap: { [key: string]: string } = {};
+        const userDocuments = await this.database.users.fetchDocuments({}, options);
+        for (const doc of userDocuments) {
+            userHashMap[doc._id.toString()] = doc.username;
+        }
+        return userHashMap;
     }
 
     async getUserDataFromID(id: string): Promise<IUser> {
