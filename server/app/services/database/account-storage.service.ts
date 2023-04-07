@@ -1,4 +1,5 @@
 /* eslint-disable quote-props */
+import { UserChatRoom } from '@app/interfaces/user-chat-room';
 import { HistoryEvent } from '@common/interfaces/history-event';
 import { ImageInfo } from '@common/interfaces/image-info';
 import { Theme } from '@common/interfaces/theme';
@@ -25,7 +26,7 @@ export class AccountStorageService {
             username: user.username,
             password: hashedPassword,
             profilePicture: user.profilePicture as ImageInfo,
-            chatRooms: user.chatRooms,
+            chatRooms: [{ name: 'main', messageCount: 0 }],
             historyEventList: [],
             language: user.language,
             theme: user.theme,
@@ -138,6 +139,10 @@ export class AccountStorageService {
         if (historyEvent) {
             await this.database.users.collection.updateOne({ _id: new ObjectId(id) }, { $push: { historyEventList: historyEvent } });
         }
+    }
+
+    async addChatRoom(id: string, chatRoom: UserChatRoom) {
+        await this.database.users.updateDocument({ _id: new ObjectId(id) }, { $push: { chatRooms: chatRoom } });
     }
 
     async getUserEventHistory(id: string): Promise<HistoryEvent[]> {
