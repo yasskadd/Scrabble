@@ -1,3 +1,4 @@
+import { Message } from '@common/interfaces/message';
 import { Document } from 'mongodb';
 import { Service } from 'typedi';
 import { DatabaseService } from './database.service';
@@ -5,12 +6,6 @@ import { DatabaseService } from './database.service';
 interface ChatRoom {
     name: string;
     messages: Message[];
-}
-
-interface Message {
-    dateInUTC: string;
-    message: string;
-    userId: string;
 }
 
 @Service()
