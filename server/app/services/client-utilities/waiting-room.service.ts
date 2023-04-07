@@ -342,10 +342,6 @@ export class WaitingRoomService {
     private async makeThreeBots(difficulty: GameDifficulty, roomId: string): Promise<RoomPlayer[]> {
         const virtualPlayers: RoomPlayer[] = [];
 
-        // TODO : Add image getter - we should create a profile pic service from the methods in the controller
-        // const getImageCommand = this.CreateGetCommand(image[1]);
-        // const signedUrl = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: 3600 });
-
         const botNames: string[] = await this.virtualPlayerStorageService.getBotName(3, difficulty);
         botNames.forEach((name: string) => {
             virtualPlayers.push({
@@ -356,6 +352,7 @@ export class WaitingRoomService {
                     profilePicture: {
                         name: 'bot-image',
                         isDefaultPicture: true,
+                        key: 'f553ba598dbcfc7e9e07f8366b6684b5.jpg',
                     },
                     chatRooms: [],
                 },

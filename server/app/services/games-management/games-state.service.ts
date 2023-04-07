@@ -13,6 +13,7 @@ import { ScoreRelatedBot } from '@app/classes/player/score-related-bot.class';
 import { Turn } from '@app/classes/turn.class';
 import { MAX_QUANTITY } from '@app/constants/letter-reserve';
 import { DictionaryContainer } from '@app/interfaces/dictionary-container';
+import { AccountStorageService } from '@app/services/database/account-storage.service';
 import { HistoryStorageService } from '@app/services/database/history-storage.service';
 import { ScoreStorageService } from '@app/services/database/score-storage.service';
 import { UserStatsStorageService } from '@app/services/database/user-stats-storage.service';
@@ -25,6 +26,7 @@ import { PlayerInformation } from '@common/interfaces/player-information';
 import { RoomPlayer } from '@common/interfaces/room-player';
 import { GameDifficulty } from '@common/models/game-difficulty';
 import { GameMode } from '@common/models/game-mode';
+import { HistoryActions } from '@common/models/history-actions';
 import { PlayerType } from '@common/models/player-type';
 import { Subject } from 'rxjs';
 import { Server, Socket } from 'socket.io';
@@ -41,6 +43,7 @@ export class GamesStateService {
     gameEnded: Subject<string>;
 
     constructor(
+        private accountStorage: AccountStorageService,
         private gamesHandler: GamesHandlerService,
         private socketManager: SocketManager,
         private scoreStorage: ScoreStorageService,
@@ -213,11 +216,21 @@ export class GamesStateService {
         if (players.filter((player: GamePlayer) => player.rackIsEmpty()).length > 0) {
             const finishingPlayer = players.find((player: GamePlayer) => player.rackIsEmpty());
             if (!finishingPlayer) return;
-
             players.filter((player: GamePlayer) => {
                 if (player.player.user.username !== finishingPlayer.player.user.username) {
                     player.deductPoints();
                     finishingPlayer.addPoints(player.rack);
+                }
+            });
+            // TODO: Add GameEvent History to each player
+            const realPlayers = players.filter((player) => player.player.type === PlayerType.User);
+            const winnerPlayer = players.reduce((prev, current) => {
+                return prev.score > current.score ? prev : current;
+            });
+            realPlayers.forEach((player: GamePlayer) => {
+                if (player.player.type === PlayerType.User) {
+                    if (player.player.user.username === winnerPlayer.player.user.username) this.addGameEventHistory(player as RealPlayer, true);
+                    else this.addGameEventHistory(player as RealPlayer, false);
                 }
             });
         }
@@ -539,6 +552,12 @@ export class GamesStateService {
         bot.setGame(player.game);
         bot.start();
         return bot;
+    }
+
+    private addGameEventHistory(player: RealPlayer, gameWon: boolean) {
+        const username = player.player.user.username;
+        const gameDate = player.game.beginningTime;
+        this.accountStorage.addUserEventHistory(username, HistoryActions.Game, gameDate, gameWon);
     }
     // Replace observer and bot in list by observer
     // Add Socket event to let observer join the room (need to verify if its possible to join or not)
