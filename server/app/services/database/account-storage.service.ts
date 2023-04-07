@@ -149,6 +149,13 @@ export class AccountStorageService {
         await this.database.users.updateDocument({ _id: new ObjectId(id) }, { $pull: { chatRooms: { name: chatRoomName } } });
     }
 
+    async updateChatRoomMessageCount(id: string, chatRoomName: string, messageCount: number) {
+        await this.database.users.updateDocument(
+            { _id: new ObjectId(id), chatRooms: { $elemMatch: { name: chatRoomName } } },
+            { $set: { 'chatRooms.$.messageCount': messageCount } },
+        );
+    }
+
     async getUserEventHistory(id: string): Promise<HistoryEvent[]> {
         const projection = { historyEventList: 1, _id: 0 };
         const historyEventList = await this.database.users.collection.findOne({ _id: new ObjectId(id) }, { projection });
