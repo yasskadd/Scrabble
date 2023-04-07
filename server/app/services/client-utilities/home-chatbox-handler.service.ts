@@ -190,14 +190,19 @@ export class HomeChatBoxHandlerService {
         const formattedDate: string = momentDate.format('HH:mm:ss YYYY-MM-DD');
         const newMessage: Message = { userId: message.userId, message: message.message, date: formattedDate };
         message.date = formattedDate;
+
+        if (chatRoomName.startsWith('game')) await this.chatSendMessage(socket, chatRoomName, newMessage);
+        this.socketManager.emitRoom(chatRoomName, SocketEvents.SendMessage, message);
+    }
+
+    private async chatSendMessage(socket: Socket, chatRoomName: string, message: Message) {
         const room = this.isChatRoomExist(chatRoomName);
         if (room === undefined) {
             socket.emit(SocketEvents.SendMessageError, '');
             return;
         }
         room.messageCount++;
-        await this.chatRoomsStorage.addMessageInRoom(chatRoomName, newMessage);
-        this.socketManager.emitRoom(chatRoomName, SocketEvents.SendMessage, message);
+        await this.chatRoomsStorage.addMessageInRoom(chatRoomName, message);
     }
 
     private isChatRoomExist(chatRoomName: string) {
