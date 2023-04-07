@@ -5,6 +5,7 @@ import { Theme } from '@common/interfaces/theme';
 import { IUser } from '@common/interfaces/user';
 import { HistoryActions } from '@common/models/history-actions';
 import { compare, genSalt, hash } from 'bcrypt';
+import * as moment from 'moment';
 import { Document, ObjectId } from 'mongodb';
 import { Service } from 'typedi';
 import { DatabaseService } from './database.service';
@@ -131,10 +132,10 @@ export class AccountStorageService {
         );
     }
 
-    async addUserEventHistory(username: string, userEvent: string, dateEvent: Date): Promise<void> {
-        const historyEvent = this.createHistoryEvent(userEvent, dateEvent);
+    async addUserEventHistory(id: string, userEvent: string, dateEvent: Date, isWinner?: boolean): Promise<void> {
+        const historyEvent = this.createHistoryEvent(userEvent, dateEvent, isWinner);
         if (historyEvent) {
-            await this.database.users.collection.updateOne({ username }, { $push: { historyEventList: historyEvent } });
+            await this.database.users.collection.updateOne({ _id: new ObjectId(id) }, { $push: { historyEventList: historyEvent } });
         }
     }
 
@@ -156,11 +157,12 @@ export class AccountStorageService {
     }
 
     private createHistoryEvent(userEvent: string, dateEvent: Date, isWinner?: boolean): HistoryEvent | undefined {
-        if (!(userEvent in HistoryActions)) return;
         const gameWon = userEvent === HistoryActions.Game ? isWinner : null;
+        const momentDate = moment(dateEvent);
+        const formattedDate: string = momentDate.format('HH:mm:ss YYYY-MM-DD');
         return {
             event: userEvent,
-            date: dateEvent,
+            date: formattedDate,
             gameWon,
         } as HistoryEvent;
     }
