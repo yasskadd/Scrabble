@@ -94,6 +94,12 @@ export class HomeChatBoxHandlerService {
         return hasNotification;
     }
 
+    getAllChatRooms() {
+        return this.chatRooms.map((chatRoom) => {
+            return chatRoom.name;
+        });
+    }
+
     private async loadMessages(chatRoomName: string): Promise<ChatRoom> {
         const allUsersData = await this.accountStorage.getAllUsersData();
         const room = await this.chatRoomsStorage.getRoom(chatRoomName);
