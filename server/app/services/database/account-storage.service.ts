@@ -145,6 +145,10 @@ export class AccountStorageService {
         await this.database.users.updateDocument({ _id: new ObjectId(id) }, { $push: { chatRooms: chatRoom } });
     }
 
+    async deleteChatRoom(id: string, chatRoom: UserChatRoom) {
+        await this.database.users.updateDocument({ _id: new ObjectId(id) }, { $pull: { chatRooms: chatRoom } });
+    }
+
     async getUserEventHistory(id: string): Promise<HistoryEvent[]> {
         const projection = { historyEventList: 1, _id: 0 };
         const historyEventList = await this.database.users.collection.findOne({ _id: new ObjectId(id) }, { projection });
