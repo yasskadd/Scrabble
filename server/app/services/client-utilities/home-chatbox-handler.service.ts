@@ -31,6 +31,7 @@ export class HomeChatBoxHandlerService {
     // private messageList: ChatboxMessage[];
 
     private chatRooms: ChatRoomInfo[];
+    private gameChatRooms: Set<string>;
 
     constructor(
         public socketManager: SocketManager,
@@ -193,12 +194,25 @@ export class HomeChatBoxHandlerService {
         const formattedDate: string = momentDate.format('HH:mm:ss YYYY-MM-DD');
         const newMessage: Message = { userId: message.userId, message: message.message, date: formattedDate };
         message.date = formattedDate;
+        const room = this.isChatRoomExist(chatRoomName);
+        if (room === undefined) {
+            socket.emit('sendMessageError', '');
+            return;
+        }
+        room.messageCount++;
         await this.chatRoomsStorage.addMessageInRoom(chatRoomName, newMessage);
         this.socketManager.emitRoom(chatRoomName, 'sendMessage', message);
     }
 
     private isChatRoomExist(chatRoomName: string) {
         return this.chatRooms.find((chatRoom) => chatRoom.name === chatRoomName);
+    }
+
+    private incrementCount(chatRoomName: string) {
+        const room = this.isChatRoomExist(chatRoomName);
+        if (room !== undefined) {
+            room.messageCount++;
+        }
     }
 
     // private initGameRoom(): void {
