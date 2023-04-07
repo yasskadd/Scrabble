@@ -1,12 +1,8 @@
+import { ChatRoom } from '@common/interfaces/chat-room';
 import { Message } from '@common/interfaces/message';
 import { Document } from 'mongodb';
 import { Service } from 'typedi';
 import { DatabaseService } from './database.service';
-
-interface ChatRoom {
-    name: string;
-    messages: Message[];
-}
 
 @Service()
 export class ChatRoomsStorageService {
@@ -15,6 +11,11 @@ export class ChatRoomsStorageService {
     async getRooms(rooms: string[]): Promise<Document[]> {
         const chatRooms = await this.databaseService.chatRooms.fetchDocuments({ name: { $in: rooms } });
         return chatRooms;
+    }
+
+    async getRoom(roomName: string): Promise<ChatRoom> {
+        const messages = await this.databaseService.chatRooms.collection.findOne({ name: roomName });
+        return messages as unknown as ChatRoom;
     }
 
     async createRoom(roomName: string) {
