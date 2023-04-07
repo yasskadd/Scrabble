@@ -145,8 +145,8 @@ export class AccountStorageService {
         await this.database.users.updateDocument({ _id: new ObjectId(id) }, { $push: { chatRooms: chatRoom } });
     }
 
-    async deleteChatRoom(id: string, chatRoom: UserChatRoom) {
-        await this.database.users.updateDocument({ _id: new ObjectId(id) }, { $pull: { chatRooms: chatRoom } });
+    async deleteChatRoom(id: string, chatRoomName: string) {
+        await this.database.users.updateDocument({ _id: new ObjectId(id) }, { $pull: { chatRooms: { name: chatRoomName } } });
     }
 
     async getUserEventHistory(id: string): Promise<HistoryEvent[]> {
