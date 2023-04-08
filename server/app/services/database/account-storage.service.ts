@@ -1,4 +1,5 @@
 /* eslint-disable quote-props */
+import { UserChatRoom } from '@app/interfaces/user-chat-room';
 import { HistoryEvent } from '@common/interfaces/history-event';
 import { ImageInfo } from '@common/interfaces/image-info';
 import { Theme } from '@common/interfaces/theme';
@@ -6,7 +7,7 @@ import { IUser } from '@common/interfaces/user';
 import { HistoryActions } from '@common/models/history-actions';
 import { compare, genSalt, hash } from 'bcrypt';
 import * as moment from 'moment';
-import { Document, ObjectId } from 'mongodb';
+import { Document, FindOptions, ObjectId } from 'mongodb';
 import { Service } from 'typedi';
 import { DatabaseService } from './database.service';
 
@@ -25,6 +26,7 @@ export class AccountStorageService {
             username: user.username,
             password: hashedPassword,
             profilePicture: user.profilePicture as ImageInfo,
+            chatRooms: [{ name: 'main', messageCount: 0 }],
             historyEventList: [],
             language: user.language,
             theme: user.theme,
@@ -63,6 +65,18 @@ export class AccountStorageService {
     async getUserData(username: string): Promise<IUser> {
         const userDocument = (await this.database.users.collection?.findOne({ username })) as Document;
         return userDocument as IUser;
+    }
+
+    async getAllUsersData(): Promise<{ [key: string]: string }> {
+        const options: FindOptions<Document> = {
+            projection: { _id: 1, username: 1 },
+        };
+        const userHashMap: { [key: string]: string } = {};
+        const userDocuments = await this.database.users.fetchDocuments({}, options);
+        for (const doc of userDocuments) {
+            userHashMap[doc._id.toString()] = doc.username;
+        }
+        return userHashMap;
     }
 
     async getUserDataFromID(id: string): Promise<IUser> {
@@ -137,6 +151,21 @@ export class AccountStorageService {
         if (historyEvent) {
             await this.database.users.collection.updateOne({ _id: new ObjectId(id) }, { $push: { historyEventList: historyEvent } });
         }
+    }
+
+    async addChatRoom(id: string, chatRoom: UserChatRoom) {
+        await this.database.users.updateDocument({ _id: new ObjectId(id) }, { $push: { chatRooms: chatRoom } });
+    }
+
+    async deleteChatRoom(id: string, chatRoomName: string) {
+        await this.database.users.updateDocument({ _id: new ObjectId(id) }, { $pull: { chatRooms: { name: chatRoomName } } });
+    }
+
+    async updateChatRoomMessageCount(id: string, chatRoomName: string, messageCount: number) {
+        await this.database.users.updateDocument(
+            { _id: new ObjectId(id), chatRooms: { $elemMatch: { name: chatRoomName } } },
+            { $set: { 'chatRooms.$.messageCount': messageCount } },
+        );
     }
 
     async getUserEventHistory(id: string): Promise<HistoryEvent[]> {

@@ -128,5 +128,9 @@ export class UserProfileController {
             const userGamesHistory = await this.historyStorage.getHistoryByUser(userID);
             res.status(StatusCodes.OK).json(userGamesHistory);
         });
+        this.router.get('/all', async (req: Request, res: Response) => {
+            const userGamesHistory = await this.accountStorageService.getAllUsersData();
+            res.status(StatusCodes.OK).json(userGamesHistory);
+        });
     }
 }

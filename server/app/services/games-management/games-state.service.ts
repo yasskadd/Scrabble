@@ -13,6 +13,7 @@ import { ScoreRelatedBot } from '@app/classes/player/score-related-bot.class';
 import { Turn } from '@app/classes/turn.class';
 import { MAX_QUANTITY } from '@app/constants/letter-reserve';
 import { DictionaryContainer } from '@app/interfaces/dictionary-container';
+import { HomeChatBoxHandlerService } from '@app/services/client-utilities/home-chatbox-handler.service';
 import { AccountStorageService } from '@app/services/database/account-storage.service';
 import { HistoryStorageService } from '@app/services/database/history-storage.service';
 import { ScoreStorageService } from '@app/services/database/score-storage.service';
@@ -22,6 +23,7 @@ import { SocketEvents } from '@common/constants/socket-events';
 import { GameHistoryInfo } from '@common/interfaces/game-history-info';
 import { GameRoom } from '@common/interfaces/game-room';
 import { GameInfo } from '@common/interfaces/game-state';
+import { Letter } from '@common/interfaces/letter';
 import { PlayerInformation } from '@common/interfaces/player-information';
 import { RoomPlayer } from '@common/interfaces/room-player';
 import { GameDifficulty } from '@common/models/game-difficulty';
@@ -32,8 +34,7 @@ import { Subject } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import { GamesHandlerService } from './games-handler.service';
-import { Letter } from '@common/interfaces/letter';
-
+m;
 const MAX_SKIP = 6;
 const SECOND = 1000;
 const ERROR_REPLACING_BOT = 'Error trying to replace the bot';
@@ -48,6 +49,7 @@ export class GamesStateService {
         private socketManager: SocketManager,
         private scoreStorage: ScoreStorageService,
         private userStatsStorage: UserStatsStorageService,
+        private homeChatBoxHandlerService: HomeChatBoxHandlerService,
         private historyStorageService: HistoryStorageService, // private virtualPlayerStorage: VirtualPlayersStorageService,
     ) {
         this.gameEnded = new Subject();
@@ -81,6 +83,7 @@ export class GamesStateService {
 
         const gamePlayers: GamePlayer[] = this.initPlayers(game, room);
 
+        this.createChatRoom(room);
         await this.setupGameSubscriptions(room, game);
 
         gamePlayers.forEach((player: GamePlayer) => {
@@ -289,7 +292,7 @@ export class GamesStateService {
         const gameHistoryInfo = this.formatGameInfo(gamePlayer);
         await this.userStatsStorage.updatePlayerStats(gameHistoryInfo);
         this.gamesHandler.removePlayerFromSocketId(socket.id);
-
+        socket.leave('game' + gamePlayer.player.roomId); // leave game chat room
         socket.leave(gamePlayer.player.roomId);
         if (
             !gamePlayer.game.isModeSolo &&
@@ -305,7 +308,7 @@ export class GamesStateService {
             return;
         }
         // TODO: What to do if there are still observers in game ?
-
+        this.homeChatBoxHandlerService.deleteGameChatRoom(gamePlayer.player.roomId);
         gamePlayer.game.abandon();
         // this.gameEnded.next(room);
         this.gamesHandler.removeRoomFromRoomId(room);
@@ -428,6 +431,7 @@ export class GamesStateService {
         this.updatePlayersStats(gamePlayers);
         this.socketManager.emitRoom(gamePlayer.player.roomId, SocketEvents.GameEnd);
         this.gamesHandler.removeRoomFromRoomId(gamePlayer.player.roomId);
+        this.homeChatBoxHandlerService.deleteGameChatRoom(gamePlayer.player.roomId);
     }
 
     private async broadcastHighScores(players: RoomPlayer[], roomId: string): Promise<void> {
@@ -562,4 +566,11 @@ export class GamesStateService {
     // Replace observer and bot in list by observer
     // Add Socket event to let observer join the room (need to verify if its possible to join or not)
     // Need method to update all room clients that an observer has joined
+
+    private createChatRoom(room: GameRoom) {
+        const socketIds = room.players.map((player) => {
+            return player.socketId;
+        });
+        this.homeChatBoxHandlerService.makeUsersJoinGameChatRoom(socketIds, room.id);
+    }
 }

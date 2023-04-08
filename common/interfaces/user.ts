@@ -8,6 +8,7 @@ export interface IUser {
     username: string;
     password: string;
     profilePicture?: ImageInfo;
+    chatRooms: string[];
     historyEventList?: HistoryEvent[];
     language?: 'en' | 'fr';
     theme?: Theme;

@@ -53,6 +53,10 @@ export class SocketManager {
         return undefined;
     }
 
+    deleteRoom(room: string) {
+        this.server.sockets.in(room).socketsLeave(room);
+    }
+
     emitRoom(room: string, event: string, ...args: unknown[]) {
         this.server.to(room).emit(event, ...args);
     }
