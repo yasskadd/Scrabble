@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { SocketEvents } from '@common/constants/socket-events';
 import { Coordinate } from '@common/interfaces/coordinate';
-import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
+import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
 import { ClientSocketService } from './communication/client-socket.service';
 
 @Injectable({

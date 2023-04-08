@@ -85,7 +85,7 @@ export class UserProfileController {
          * @return { historyEventList: HistoryEvent[] } send - new token with the new username payload to override the old one
          * @return { number } HTTP Status - The return status of the request
          */
-        this.router.get('/history-event', verifyToken, async (req: Request, res: Response) => {
+        this.router.get('/history-events', verifyToken, async (req: Request, res: Response) => {
             const userID: string = res.locals.user.userID;
             const historyEventList: HistoryEvent[] = await this.accountStorageService.getUserEventHistory(userID);
             res.status(StatusCodes.OK).send({ historyEventList });
@@ -117,13 +117,13 @@ export class UserProfileController {
             res.sendStatus(StatusCodes.OK);
         });
 
-        this.router.get('/stats', async (req: Request, res: Response) => {
+        this.router.get('/stats', verifyToken, async (req: Request, res: Response) => {
             const userID: string = res.locals.user.userID;
             const userStats = await this.userStatsStorageService.getUserStats(userID);
             res.status(StatusCodes.OK).json(userStats);
         });
 
-        this.router.get('/games/history', async (req: Request, res: Response) => {
+        this.router.get('/games/history', verifyToken, async (req: Request, res: Response) => {
             const userID: string = res.locals.user.userID;
             const userGamesHistory = await this.historyStorage.getHistoryByUser(userID);
             res.status(StatusCodes.OK).json(userGamesHistory);

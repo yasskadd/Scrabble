@@ -8,11 +8,12 @@ import { SocketResponse } from '@app/interfaces/server-responses';
 import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
 import { UserService } from '@app/services/user.service';
 import { SocketEvents } from '@common/constants/socket-events';
+import { ClientSocketService } from '@services/communication/client-socket.service';
 import { LanguageService } from '@services/language.service';
 import { Subject } from 'rxjs';
-import { ClientSocketService } from '@services/communication/client-socket.service';
-import { AppRoutes } from '@app/models/app-routes';
 import { GameMode } from '@common/models/game-mode';
+import { Router } from '@angular/router';
+import { AppRoutes } from '@app/models/app-routes';
 
 @Component({
     selector: 'app-main-page',
@@ -39,9 +40,14 @@ export class MainPageComponent {
         private clientSocketService: ClientSocketService,
         private dialog: MatDialog,
         private highScore: MatDialog,
+        private router: Router,
     ) {
         this.multiplayerCreateLink = `/${AppRoutes.MultiGameCreationPage}/${GameMode.Multi}`;
         this.multiplayerjoinLink = `/${AppRoutes.MultiJoinPage}/classique`;
+        if (!this.userService.isConnected()) {
+            this.router.navigate([`${AppRoutes.ConnectionPage}`]);
+        }
+
         this.homeConnectionResponse = { validity: false };
         this.userNameForm = new FormControl('', Validators.required);
         this.chatIsOpen = false;

@@ -1,25 +1,26 @@
 import { SECRET_KEY } from '@app/../very-secret-file';
 import { AccountStorageService } from '@app/services/database/account-storage.service';
+import { CallbackSignature, OnSioCallbackSignature } from '@app/types/sockets';
+import { SocketEvents } from '@common/constants/socket-events';
 import { HistoryActions } from '@common/models/history-actions';
 import * as cookie from 'cookie';
+import * as http from 'http';
 import * as jwt from 'jsonwebtoken';
 import * as io from 'socket.io';
 import { Service } from 'typedi';
-import { CallbackSignature, OnSioCallbackSignature } from '@app/types/sockets';
-import * as http from 'http';
 
 @Service()
 export class SocketManager {
     server: io.Server;
 
-    private socketUsernameMap: Map<io.Socket, string>;
+    private socketIdMap: Map<io.Socket, string>;
     private onEvents: Map<string, CallbackSignature[]>;
     private onAndSioEvents: Map<string, OnSioCallbackSignature[]>;
 
     constructor(private accountStorageService: AccountStorageService) {
         this.onEvents = new Map<string, CallbackSignature[]>();
         this.onAndSioEvents = new Map<string, OnSioCallbackSignature[]>();
-        this.socketUsernameMap = new Map<io.Socket, string>();
+        this.socketIdMap = new Map<io.Socket, string>();
     }
 
     init(server: http.Server) {
@@ -43,7 +44,7 @@ export class SocketManager {
     }
 
     getSocketFromId(socketId: string): io.Socket | undefined {
-        for (const [socket] of this.socketUsernameMap) {
+        for (const [socket] of this.socketIdMap) {
             if (socket.id === socketId) {
                 return socket;
             }
@@ -57,9 +58,9 @@ export class SocketManager {
     }
 
     modifyUsername(oldUsername: string, newUsername: string): void {
-        this.socketUsernameMap.forEach((value: string, key: io.Socket) => {
+        this.socketIdMap.forEach((value: string, key: io.Socket) => {
             if (value === oldUsername) {
-                this.socketUsernameMap.set(key, newUsername);
+                this.socketIdMap.set(key, newUsername);
                 return;
             }
         });
@@ -77,21 +78,34 @@ export class SocketManager {
                     if (err) isTokenValid = false;
                     else {
                         isTokenValid = true;
-                        username = decoded.name;
+                        // eslint-disable-next-line no-underscore-dangle
+                        username = decoded.userID;
                     }
                 });
 
-                if (!isTokenValid || this.socketUsernameMap.has(socket)) {
+                if (!isTokenValid || this.socketIdMap.has(socket)) {
                     socket.disconnect();
                     return;
                 }
 
-                this.socketUsernameMap.set(socket, username);
+                let keepConnecting = true;
+                this.socketIdMap.forEach((value: string) => {
+                    if (value === username) {
+                        keepConnecting = false;
+                    }
+                });
+                if (!keepConnecting) {
+                    socket.emit(SocketEvents.UserAlreadyConnected);
+                    return;
+                }
+
+                this.socketIdMap.set(socket, username);
 
                 this.accountStorageService.addUserEventHistory(username, HistoryActions.Connection, new Date());
 
                 // eslint-disable-next-line no-console
-                console.log('Connection of authenticated client with id = ' + socket.id + ' from : ' + socket.handshake.headers.host);
+                console.log('Connection of client with socketid = ' + socket.id + ' from user = ' + username);
+                socket.emit(SocketEvents.SuccessfulConnection);
             } else {
                 socket.disconnect();
                 // eslint-disable-next-line no-console
@@ -110,13 +124,15 @@ export class SocketManager {
                 }
             }
             socket.on('disconnect', () => {
-                if (this.socketUsernameMap.has(socket)) {
-                    this.accountStorageService.addUserEventHistory(this.socketUsernameMap.get(socket) as string, HistoryActions.Logout, new Date());
-                    this.socketUsernameMap.delete(socket);
+                if (this.socketIdMap.has(socket)) {
+                    this.accountStorageService.addUserEventHistory(this.socketIdMap.get(socket) as string, HistoryActions.Logout, new Date());
+                    this.socketIdMap.delete(socket);
                 }
 
                 // eslint-disable-next-line no-console
                 console.log('Disconnection of client with id = ' + socket.id + ' from : ' + socket.handshake.headers.origin);
+                // eslint-disable-next-line no-console
+                console.log(this.socketIdMap.values());
             });
         });
     }

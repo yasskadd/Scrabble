@@ -1,20 +1,19 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mobile/domain/services/auth-service.dart';
 import 'package:mobile/domain/services/avatar-service.dart';
 import 'package:mobile/domain/services/chat-service.dart';
+import 'package:mobile/domain/services/dictionary-service.dart';
 import 'package:mobile/domain/services/game-service.dart';
 import 'package:mobile/domain/services/http-handler-service.dart';
-import 'package:mobile/domain/services/language-service.dart';
 import 'package:mobile/domain/services/room-service.dart';
-import 'package:mobile/domain/services/theme-service.dart';
+import 'package:mobile/domain/services/settings-service.dart';
+import 'package:mobile/domain/services/user-service.dart';
 import 'package:mobile/screens/login-screen.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
@@ -24,7 +23,7 @@ Future<void> setup() async {
   String envFile = kDebugMode ? 'development.env' : 'production.env';
 
   // kDebugMode = APK, so hardcoding it for now
-  envFile = 'production.env';
+  // envFile = 'production.env';
 
   await dotenv.load(fileName: envFile);
   var serverAddress = dotenv.env["SERVER_URL"];
@@ -36,22 +35,24 @@ Future<void> setup() async {
           .disableAutoConnect()
           .build()));
 
-
   Socket socket = getIt<Socket>();
 
   socket.onConnect((_) => debugPrint('Socket connection established'));
   socket.onDisconnect((data) => debugPrint('Socket connection lost'));
 
-  getIt.registerLazySingleton<HttpHandlerService>(() => HttpHandlerService("https://$serverAddress:3443"));
+  getIt.registerLazySingleton<HttpHandlerService>(() => HttpHandlerService(
+      "https://$serverAddress:3443",
+      httpUrl: "http://$serverAddress:3000"));
   getIt.registerLazySingleton<ChatService>(() => ChatService());
   getIt.registerLazySingleton<AuthService>(() => AuthService());
-  getIt.registerLazySingleton<ThemeService>(() => ThemeService());
-  getIt.registerLazySingleton<LanguageService>(() => LanguageService());
+  getIt.registerLazySingleton<SettingsService>(() => SettingsService());
   getIt.registerLazySingleton<RoomService>(() => RoomService());
   getIt.registerLazySingleton<AvatarService>(() => AvatarService());
   getIt.registerLazySingleton<GameService>(() => GameService());
-
-  getIt.registerSingleton<GlobalKey<NavigatorState>>(GlobalKey<NavigatorState>());
+  getIt.registerLazySingleton<UserService>(() => UserService());
+  getIt.registerLazySingleton<DictionaryService>(() => DictionaryService());
+  getIt.registerSingleton<GlobalKey<NavigatorState>>(
+      GlobalKey<NavigatorState>());
 }
 
 Future<void> main() async {
@@ -67,22 +68,22 @@ class PolyScrabble extends StatefulWidget {
 }
 
 class _PolyScrabbleState extends State<PolyScrabble> {
-  final _themeService = GetIt.I.get<ThemeService>();
-  final _languageService = GetIt.I.get<LanguageService>();
-  late final StreamSubscription themeSub;
+  final _settingsService = GetIt.I.get<SettingsService>();
+  late final StreamSubscription _settingsChangeSub;
 
   @override
   void initState() {
     super.initState();
 
-    themeSub = _themeService.notifyThemeChange.stream.listen((event) {
+    _settingsChangeSub =
+        _settingsService.notifySettingsChange.stream.listen((event) {
       setState(() {});
     });
   }
 
   @override
   void dispose() {
-    themeSub.cancel();
+    _settingsChangeSub.cancel();
     super.dispose();
   }
 
@@ -91,18 +92,21 @@ class _PolyScrabbleState extends State<PolyScrabble> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'PolyScrabble 110',
-      theme: _themeService.getTheme(),
+      theme: _settingsService.getTheme(),
       // Static mode, will be light theme in dynamic
-      darkTheme: _themeService.getDarkMode(),
+      darkTheme: _settingsService.getDarkMode(),
       // Dark mode will be used only in dynamic mode
-      themeMode: _themeService.isDynamic ? ThemeMode.system : ThemeMode.light,
+      themeMode:
+          _settingsService.isDynamic ? ThemeMode.system : ThemeMode.light,
       debugShowCheckedModeBanner: false,
       home: const LoginScreen(title: 'PolyScrabble 101 - Prototype'),
       localizationsDelegates: [
         FlutterI18nDelegate(
-          translationLoader: FileTranslationLoader(forcedLocale: _languageService.currentLocale),
+          translationLoader: FileTranslationLoader(
+              forcedLocale: _settingsService.currentLocale),
           missingTranslationHandler: (key, locale) {
-            debugPrint("--- Missing Key: $key, languageCode: ${locale!.languageCode}");
+            debugPrint(
+                "--- Missing Key: $key, languageCode: ${locale!.languageCode}");
           },
         )
       ],

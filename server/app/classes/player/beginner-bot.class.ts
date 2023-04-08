@@ -1,6 +1,6 @@
 import * as Constant from '@app/constants/bot';
 import { SocketEvents } from '@common/constants/socket-events';
-import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
+import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
 import { Bot } from './bot.class';
 
 export class BeginnerBot extends Bot {

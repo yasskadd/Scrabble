@@ -4,18 +4,22 @@ import { BOARD_TILES } from '@app/constants/board-tiles';
 import { BoardTileInfo } from '@app/interfaces/board-tile-info';
 import { BoardTileState, BoardTileType } from '@app/models/board-tile';
 import * as constants from '@common/constants/board-info';
+import { TOTAL_TILES_IN_ROW } from '@common/constants/board-info';
 import { AlphabetLetter } from '@common/models/alphabet-letter';
 // import { Coordinate } from '@common/interfaces/coordinate';
-import { CENTER_TILE, TOTAL_COLUMNS, TOTAL_ROWS } from '@app/constants/board-view';
+import { TOTAL_COLUMNS, TOTAL_ROWS } from '@app/constants/board-view';
 import { SelectionPosition } from '@app/interfaces/selection-position';
 import { PlacingState } from '@app/models/placing-state';
 import { PlayDirection } from '@app/models/play-direction';
+import { SocketEvents } from '@common/constants/socket-events';
+import { Coordinate } from '@common/interfaces/coordinate';
 import { Letter } from '@common/interfaces/letter';
-import { ChatboxHandlerService } from './chat/chatbox-handler.service';
+import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
+import { ClientSocketService } from './communication/client-socket.service';
 import { GameClientService } from './game-client.service';
-import { GridService } from './grid.service';
+import { first } from 'rxjs/operators';
 
-const ASCII_ALPHABET_START = 96;
+// const ASCII_ALPHABET_START = 96;
 
 @Injectable({
     providedIn: 'root',
@@ -23,23 +27,33 @@ const ASCII_ALPHABET_START = 96;
 export class LetterPlacementService {
     boardTiles: BoardTileInfo[];
     defaultBoardTiles: BoardTileInfo[];
-
-    // TODO : Fill when placing confirmed by server
-    // placedBoardTiles: BoardTileInfo[];
-
     currentSelection: Letter;
     selectionPositions: SelectionPosition[];
+    origin: number;
 
     private placedLetters: BoardTileInfo[];
     private placingMode: PlacingState;
-    private origin: number;
     private hasPlacingEnded: boolean;
 
-    constructor(private gridService: GridService, private gameClientService: GameClientService, private chatboxService: ChatboxHandlerService) {
+    constructor(
+        private clientSocketService: ClientSocketService,
+        private gameClientService: GameClientService, // private chatboxService: ChatboxHandlerService,
+    ) {
         this.boardTiles = [];
 
         this.setPropreties();
-        this.gameClientService.gameboardUpdated.subscribe(() => {
+        this.gameClientService.gameboardUpdated.pipe(first()).subscribe((gameBoard: string[]) => {
+            this.resetView();
+            this.updateGameBoard(gameBoard);
+        });
+        this.gameClientService.gameboardUpdated.subscribe((gameBoard: string[]) => {
+            this.updateGameBoard(gameBoard);
+        });
+        this.gameClientService.nextTurnSubject.subscribe(() => {
+            this.placedLetters = [];
+            this.selectionPositions = [];
+        });
+        this.gameClientService.quitGameSubject.subscribe(() => {
             this.resetView();
         });
     }
@@ -56,6 +70,7 @@ export class LetterPlacementService {
     handleDragPlacement(index: number, letter: Letter, tile: BoardTileInfo): void {
         if (this.placedLetters.length === 0) {
             this.placingMode = PlacingState.Drag;
+            this.origin = tile.coord;
         }
 
         if (this.placingMode !== PlacingState.Drag || this.hasPlacingEnded || !this.gameClientService.currentlyPlaying()) {
@@ -89,14 +104,26 @@ export class LetterPlacementService {
         this.placeLetter(placedLetter, this.boardTiles[this.selectionPositions[0].coord]);
     }
 
+    // TODO
     submitPlacement() {
         if (this.noLettersPlaced()) return;
 
-        const verticalPlacement = String.fromCharCode(this.selectionPositions[0].coord + ASCII_ALPHABET_START);
-        const lettersToSubmit = this.placedLetters.map((letter) => letter.letter.value).join('');
-        this.chatboxService.submitMessage(
-            `!placer ${verticalPlacement}${this.selectionPositions[0].coord}${this.selectionPositions[0].direction} ${lettersToSubmit}`,
-        );
+        // const verticalPlacement = String.fromCharCode(this.selectionPositions[0].coord + ASCII_ALPHABET_START);
+        // const lettersToSubmit = this.placedLetters.map((letter) => letter.letter.value).join('');
+
+        const letters: string[] = [];
+        this.placedLetters.forEach((tile: BoardTileInfo) => {
+            letters.push(tile.letter.value);
+        });
+        this.clientSocketService.send(SocketEvents.PlaceWordCommand, {
+            firstCoordinate: this.computeCoordinatesFromCoord(),
+            isHorizontal: this.selectionPositions[0].direction === PlayDirection.Right,
+            letters,
+        } as PlaceWordCommandInfo);
+
+        // this.chatboxService.submitMessage(
+        //     `!placer ${verticalPlacement}${this.selectionPositions[0].coord}${this.selectionPositions[0].direction} ${lettersToSubmit}`,
+        // );
     }
 
     undoPlacement() {
@@ -129,6 +156,7 @@ export class LetterPlacementService {
     }
 
     isRemoveValid(boardTile: BoardTileInfo): boolean {
+        if (this.placedLetters.length === 0) return true;
         return boardTile.coord === this.placedLetters[this.placedLetters.length - 1].coord;
     }
 
@@ -156,6 +184,9 @@ export class LetterPlacementService {
         if (!this.isValidPlacing(boardTile.coord)) {
             return;
         }
+        if (this.isPositionOutOfBound()) {
+            return;
+        }
 
         const playedTile: BoardTileInfo = {
             type: boardTile.type,
@@ -173,9 +204,6 @@ export class LetterPlacementService {
         );
         this.placedLetters.push(playedTile);
 
-        if (this.isPositionOutOfBound()) {
-            this.hasPlacingEnded = true;
-        }
         if (this.placedLetters.length === 2 && this.placingMode === PlacingState.Drag) {
             this.computeDirection(playedTile.coord);
         }
@@ -189,18 +217,59 @@ export class LetterPlacementService {
         this.initTiles();
     }
 
-    resetGameBoardView() {
-        this.gridService.drawGrid(this.gameClientService.gameboard.gameboardTiles);
-    }
-
     noLettersPlaced() {
         return this.placedLetters.length === 0;
     }
 
-    rotateDirection(tile: BoardTileInfo) {
-        if (tile.coord === this.origin && this.placedLetters.length === 0) {
+    handleTileClick(tile: BoardTileInfo) {
+        if (this.placedLetters.length !== 0) return;
+
+        if (tile.coord !== this.origin) {
+            this.origin = tile.coord;
+            this.computeNewPosition(tile.coord, false);
+            return;
+        }
+
+        if (this.placedLetters.length === 0) {
             this.selectionPositions[0].direction += 1;
-            this.selectionPositions[0].direction %= 4;
+            this.selectionPositions[0].direction %= 2;
+        }
+    }
+
+    computeNewPosition(playedCoord: number, revert: boolean) {
+        if (!this.selectionPositions || this.placedLetters.length === 0) {
+            this.selectionPositions = [
+                {
+                    coord: playedCoord,
+                    direction: PlayDirection.Right,
+                },
+            ];
+            return;
+        }
+
+        if (this.placingMode === PlacingState.Drag) {
+            if (this.placedLetters.length === 1) {
+                this.selectionPositions = [this.computeNextRightPosition(playedCoord, revert), this.computeNextDownPosition(playedCoord, revert)];
+                return;
+            }
+        }
+
+        switch (this.selectionPositions[0].direction) {
+            case PlayDirection.Down: {
+                if (this.isTileOutOfBoard(this.selectionPositions[0].coord + 1)) return;
+
+                this.selectionPositions = [this.computeNextDownPosition(playedCoord, revert)];
+                return;
+            }
+            case PlayDirection.Right: {
+                if (this.isTileOutOfRow(this.selectionPositions[0].coord + 1)) return;
+
+                this.selectionPositions = [this.computeNextRightPosition(playedCoord, revert)];
+                return;
+            }
+            default: {
+                return;
+            }
         }
     }
 
@@ -245,11 +314,9 @@ export class LetterPlacementService {
     // }
 
     private setPropreties() {
-        this.origin = CENTER_TILE;
-        this.selectionPositions = [{ coord: CENTER_TILE, direction: PlayDirection.Right }];
+        this.origin = undefined;
+        this.selectionPositions = [];
         this.placedLetters = [];
-        // this.isHorizontal = true;
-        // this.placingMode = PlacingState.Drag;
         this.hasPlacingEnded = false;
         this.initTiles();
     }
@@ -279,31 +346,8 @@ export class LetterPlacementService {
         let outOfBound = false;
 
         this.selectionPositions.forEach((selection: SelectionPosition) => {
-            if (selection.coord < 0 || selection.coord > TOTAL_ROWS * TOTAL_COLUMNS - 1) {
+            if (this.isTileOutOfBoard(selection.coord) || (this.isTileOutOfRow(selection.coord) && selection.direction === PlayDirection.Right)) {
                 outOfBound = true;
-            }
-            switch (selection.direction) {
-                case PlayDirection.Right: {
-                    if (
-                        Math.floor(this.selectionPositions[0].coord / TOTAL_COLUMNS) !==
-                        Math.floor((this.selectionPositions[0].coord - 1) / TOTAL_COLUMNS)
-                    ) {
-                        outOfBound = true;
-                    }
-                    break;
-                }
-                case PlayDirection.Left: {
-                    if (
-                        Math.floor((this.selectionPositions[0].coord - 1) / TOTAL_COLUMNS) !==
-                        Math.floor(this.selectionPositions[0].coord / TOTAL_COLUMNS)
-                    ) {
-                        outOfBound = true;
-                    }
-                    break;
-                }
-                default: {
-                    break;
-                }
             }
         });
 
@@ -315,65 +359,13 @@ export class LetterPlacementService {
     //     return coordinate.x - DISPLACEMENT + (coordinate.y - DISPLACEMENT) * constants.TOTAL_TILES_IN_ROW;
     // }
 
-    private computeNewPosition(playedCoord: number, revert: boolean) {
-        const factor = 1;
-
-        if (this.placingMode === PlacingState.Drag) {
-            if (this.placedLetters.length === 0) {
-                this.selectionPositions = [
-                    {
-                        coord: this.origin,
-                        direction: PlayDirection.Right,
-                    },
-                ];
-                return;
-            }
-            if (this.placedLetters.length === 1) {
-                this.selectionPositions = [
-                    {
-                        coord: this.origin + 1,
-                        direction: PlayDirection.Right,
-                    },
-                    {
-                        coord: this.origin + TOTAL_COLUMNS,
-                        direction: PlayDirection.Down,
-                    },
-                    { coord: this.origin - 1, direction: PlayDirection.Left },
-                    { coord: this.origin - TOTAL_COLUMNS, direction: PlayDirection.Up },
-                ];
-                return;
-            }
-        }
-
-        switch (this.selectionPositions[0].direction) {
-            case PlayDirection.Up: {
-                this.selectionPositions[0].coord = revert
-                    ? this.selectionPositions[0].coord + factor * TOTAL_COLUMNS
-                    : this.selectionPositions[0].coord - factor * TOTAL_COLUMNS;
-                break;
-            }
-            case PlayDirection.Down: {
-                this.selectionPositions[0].coord = revert
-                    ? this.selectionPositions[0].coord - factor * TOTAL_COLUMNS
-                    : this.selectionPositions[0].coord + factor * TOTAL_COLUMNS;
-                break;
-            }
-            case PlayDirection.Right: {
-                this.selectionPositions[0].coord = revert ? this.selectionPositions[0].coord - factor : this.selectionPositions[0].coord + factor;
-                break;
-            }
-            case PlayDirection.Left: {
-                this.selectionPositions[0].coord = revert ? this.selectionPositions[0].coord + factor : this.selectionPositions[0].coord - factor;
-                break;
-            }
-            default: {
-                return;
-            }
-        }
-    }
-
     private isValidPlacing(coord: number): boolean {
         let validity = false;
+
+        if (this.placingMode === PlacingState.Drag && this.placedLetters.length === 0) {
+            return true;
+        }
+
         this.selectionPositions.forEach((selection: SelectionPosition) => {
             if (selection.coord === coord) {
                 validity = true;
@@ -392,7 +384,85 @@ export class LetterPlacementService {
 
         this.selectionPositions[0].coord = playedCoord;
         this.selectionPositions.pop();
-        this.selectionPositions.pop();
-        this.selectionPositions.pop();
+    }
+
+    private isTileOutOfRow(coord: number): boolean {
+        return Math.floor(coord / TOTAL_COLUMNS) !== Math.floor((coord - 1) / TOTAL_COLUMNS);
+    }
+
+    private isTileOutOfBoard(coord: number): boolean {
+        return coord > TOTAL_ROWS * TOTAL_COLUMNS - 1 || coord < 0;
+    }
+
+    private computeCoordinatesFromCoord(): Coordinate {
+        return {
+            x: (this.origin % TOTAL_COLUMNS) + 1,
+            y: Math.floor(this.origin / TOTAL_ROWS) + 1,
+        };
+    }
+
+    private updateGameBoard(gameBoard: string[]) {
+        gameBoard.splice(0, TOTAL_TILES_IN_ROW);
+        gameBoard.forEach((tile: string, coord) => {
+            if (Math.floor(coord / TOTAL_TILES_IN_ROW) !== coord % TOTAL_TILES_IN_ROW) {
+                this.boardTiles[coord - 1].letter.value = tile.toUpperCase() as AlphabetLetter;
+                this.boardTiles[coord - 1].state = BoardTileState.Confirmed;
+
+                if (!this.boardTiles[coord - 1].letter.value && !tile) {
+                    this.boardTiles[coord - 1].letter.points = undefined;
+                }
+            }
+        });
+    }
+
+    private computeNextRightPosition(coord: number, revert: boolean): SelectionPosition {
+        if (!revert) {
+            if (this.boardTiles[coord + 1].letter.value !== AlphabetLetter.None && this.boardTiles[coord + 1].state === BoardTileState.Confirmed) {
+                if (this.isTileOutOfBoard(coord + 1)) {
+                    return { coord: -1, direction: PlayDirection.Right };
+                } else {
+                    return this.computeNextRightPosition(coord + 1, revert);
+                }
+            }
+
+            return { coord: coord + 1, direction: PlayDirection.Right };
+        }
+
+        if (this.boardTiles[coord].letter.value && this.boardTiles[coord].state === BoardTileState.Confirmed) {
+            if (this.isTileOutOfBoard(coord - 1)) {
+                return { coord: -1, direction: PlayDirection.Right };
+            } else {
+                return this.computeNextRightPosition(coord - 1, revert);
+            }
+        }
+
+        return { coord, direction: PlayDirection.Right };
+    }
+
+    private computeNextDownPosition(coord: number, revert: boolean): SelectionPosition {
+        if (!revert) {
+            if (
+                this.boardTiles[coord + TOTAL_COLUMNS].letter.value !== AlphabetLetter.None &&
+                this.boardTiles[coord + TOTAL_COLUMNS].state === BoardTileState.Confirmed
+            ) {
+                if (this.isTileOutOfBoard(coord + TOTAL_COLUMNS)) {
+                    return { coord: -1, direction: PlayDirection.Down };
+                } else {
+                    return this.computeNextDownPosition(coord + TOTAL_COLUMNS, revert);
+                }
+            }
+
+            return { coord: coord + TOTAL_COLUMNS, direction: PlayDirection.Down };
+        }
+
+        if (this.boardTiles[coord].letter.value && this.boardTiles[coord].state === BoardTileState.Confirmed) {
+            if (this.isTileOutOfBoard(coord)) {
+                return { coord: -1, direction: PlayDirection.Down };
+            } else {
+                return this.computeNextDownPosition(coord - TOTAL_COLUMNS, revert);
+            }
+        }
+
+        return { coord, direction: PlayDirection.Down };
     }
 }

@@ -10,7 +10,7 @@
             cdkDropListOrientation="horizontal"
             cdkdrop
             (cdkDropListDropped)="drop($event, tile)"
-            (click)="handleCenterClick(tile)"
+            (click)="letterPlacementService.handleTileClick(tile)"
             class="empty-tile tile-content"
             [style.background-color]="getBackgroundColor(tile.type)"
             [cdkDropListSortingDisabled]="true"
@@ -32,13 +32,14 @@
                 <div class="tile-text" *ngIf="tileEmpty(tile)">
                     {{ getTileText(tile.type) }}
                 </div>
-                <div class="current-position" *ngFor="let selection of letterPlacementService.selectionPositions">
+                <div class="icon-tile" *ngFor="let selection of letterPlacementService.selectionPositions">
                     <div *ngIf="selection.coord === tile.coord" [ngSwitch]="selection.direction">
-                        <mat-icon class="direction" *ngSwitchCase="playDirection.Left">chevron_left</mat-icon>
                         <mat-icon class="direction" *ngSwitchCase="playDirection.Right">chevron_right</mat-icon>
-                        <mat-icon class="direction" *ngSwitchCase="playDirection.Up">expand_less</mat-icon>
                         <mat-icon class="direction" *ngSwitchCase="playDirection.Down">expand_more</mat-icon>
                     </div>
+                </div>
+                <div class="icon-tile outlined" *ngIf="showCenterTile(tile)">
+                    <mat-icon>star</mat-icon>
                 </div>
             </div>
         </div>

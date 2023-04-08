@@ -148,8 +148,8 @@ export class HttpHandlerService {
         return JSON.parse(res.body);
     }
 
-    async logout(): Promise<any> {
-        const res: HttpResponse = await invoke('httpPost', { url: `${this.baseUrl}/auth/logout` });
+    async logout(user: IUser): Promise<any> {
+        const res: HttpResponse = await invoke('httpPost', { url: `${this.baseUrl}/auth/logout`, onceToldMe: JSON.stringify(user) });
         return JSON.parse(res.body);
     }
 

@@ -10,6 +10,8 @@ import { ClientSocketService } from '@services/communication/client-socket.servi
 import { Subject } from 'rxjs';
 import { AppCookieService } from './communication/app-cookie.service';
 import { HttpHandlerService } from './communication/http-handler.service';
+import { SocketEvents } from '@common/constants/socket-events';
+import { SnackBarService } from '@services/snack-bar.service';
 
 @Injectable({
     providedIn: 'root',
@@ -21,6 +23,7 @@ export class UserService {
         private httpHandlerService: HttpHandlerService,
         private clientSocketService: ClientSocketService,
         private cookieService: AppCookieService,
+        private snackBarService: SnackBarService,
         private router: Router,
     ) {
         this.initUser();
@@ -35,9 +38,19 @@ export class UserService {
 
         this.httpHandlerService.login(user).then(
             (loginRes: { userData: IUser; sessionToken: string }) => {
-                this.updateUserWithImageUrl(loginRes.userData);
-                this.cookieService.updateUserSessionCookie(loginRes.sessionToken);
-                subject.next('');
+                this.clientSocketService.on(SocketEvents.UserAlreadyConnected, async () => {
+                    // TODO : Language
+                    this.snackBarService.openError('User already connected');
+                    await this.logout();
+                });
+
+                this.cookieService.updateUserSessionCookie(loginRes.sessionToken).then(() => {
+                    this.user = loginRes.userData;
+                    // TODO : Language
+                    this.snackBarService.openInfo('Connection successful');
+                    this.updateUserWithImageUrl(loginRes.userData);
+                    subject.next('');
+                });
             },
             (error: any) => {
                 // TODO : Language
@@ -48,11 +61,11 @@ export class UserService {
         return subject;
     }
 
-    logout(): void {
-        this.httpHandlerService.logout().then(() => {
+    async logout(): Promise<void> {
+        this.httpHandlerService.logout(this.user).then(async () => {
             this.initUser();
             this.cookieService.removeSessionCookie();
-            this.clientSocketService.disconnect();
+            await this.clientSocketService.disconnect();
             this.router.navigate([AppRoutes.ConnectionPage]).then();
         });
     }
@@ -118,6 +131,5 @@ export class UserService {
                 user.profilePicture.key = res.url;
             });
         }
-        this.user = user;
     }
 }

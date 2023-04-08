@@ -6,9 +6,11 @@ import 'package:mobile/components/high-scores-widget.dart';
 import 'package:mobile/components/language-dropdown-widget.dart';
 import 'package:mobile/components/settings-widget.dart';
 import 'package:mobile/domain/services/auth-service.dart';
+import 'package:mobile/domain/services/user-service.dart';
 import 'package:mobile/screens/create-game-screen.dart';
 import 'package:mobile/screens/login-screen.dart';
 import 'package:mobile/screens/room-selection-screen.dart';
+import 'package:mobile/screens/user-profile-screen.dart';
 
 enum DropDownOption {
   UserSettings("userSettings"),
@@ -34,6 +36,7 @@ class _MenuScreenState extends State<MenuScreen> {
   var loggedIn = false;
 
   final _authService = GetIt.I.get<AuthService>();
+  final _userService = GetIt.I.get<UserService>();
 
   _handleOption(DropDownOption option) {
     switch (option) {
@@ -48,6 +51,10 @@ class _MenuScreenState extends State<MenuScreen> {
       case DropDownOption.UserSettings:
         {
           // TODO: Add user settings
+          Navigator.of(context)
+              .push(MaterialPageRoute(
+                  builder: (context) => const UserProfileScreen()))
+              .then((value) { setState(() {}); print("RETURNED");});
         }
         break;
       case DropDownOption.Disconnect:
@@ -70,7 +77,7 @@ class _MenuScreenState extends State<MenuScreen> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     final theme = Theme.of(context);
-    final imageUrl = _authService.user?.profilePicture?.key;
+    final imageUrl = _userService.user?.profilePicture?.key;
 
     return Scaffold(
       key: _scaffoldKey,
@@ -224,14 +231,9 @@ class _FooterState extends State<Footer> {
           Positioned(
               right: 0,
               child: Row(
-                children: [
-                  const Icon(Icons.language),
-                  LanguageDropdown(notifyParent: () {
-                    setState(() => {});
-                    widget.notifyParent();
-                    debugPrint(
-                        FlutterI18n.currentLocale(context)!.languageCode);
-                  }),
+                children: const [
+                  Icon(Icons.language),
+                  LanguageDropdown(),
                 ],
               )),
           Row(

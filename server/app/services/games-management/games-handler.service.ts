@@ -80,7 +80,7 @@ export class GamesHandlerService {
         });
         playerIndexes.reverse();
         playerIndexes.forEach((index: number) => {
-            this.players.slice(index, 1);
+            this.players.splice(index, 1);
         });
     }
 

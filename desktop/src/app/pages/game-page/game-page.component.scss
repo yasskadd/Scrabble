@@ -1,5 +1,6 @@
-body {
+app-play-area {
     height: 100%;
+    width: 100%;
     display: flex;
 }
 
@@ -14,35 +15,4 @@ body {
 
 .load > h1 {
     font-family: revert;
-}
-
-.information-panel {
-    flex-grow: 1;
-    max-width: 300px;
-    padding: 10px;
-    min-height: 760px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-}
-
-.play-area {
-    overflow: auto;
-    flex-grow: 7;
-    align-items: center;
-    justify-content: center;
-    min-width: 620px;
-    min-height: 780px;
-    display: flex;
-    flex-direction: column;
-}
-
-.chatbox {
-    flex-grow: 1;
-    max-width: 300px;
-    padding: 7px 10px 0px 11px;
-    min-height: 773px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
 }

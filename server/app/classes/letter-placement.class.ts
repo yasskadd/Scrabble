@@ -4,7 +4,7 @@ import { WordPlacementResult } from '@app/interfaces/word-placement-result';
 import { ErrorType } from '@app/services/games-management/game-validation.service';
 import { Gameboard } from '@common/classes/gameboard.class';
 import { Coordinate } from '@common/interfaces/coordinate';
-import { PlaceWordCommandInfo } from '@common/interfaces/game-actions';
+import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
 import { DictionaryValidation } from './dictionary-validation.class';
 
 const MIDDLE_X = 8;

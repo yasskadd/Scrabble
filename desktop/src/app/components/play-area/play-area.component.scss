@@ -1,42 +1,60 @@
-#canvas {
-    // background-color: #fff;
-    border-radius: 4px;
-    box-shadow: 1px 3px 2px -2px rgba(0, 0, 0, 0.2), 1px 2px 2px 1px rgba(0, 0, 0, 0.14), 1px 2px 4px 1px rgba(0, 0, 0, 0.12);
+.encapsulating-div {
+    width: inherit;
 }
 
-// .container {
-//     display: flex;
-//     flex-direction: column;
-// }
-
-#police {
+mat-drawer-container {
+    height: inherit;
+    width: inherit;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    height: 20px;
-    padding-bottom: 5px;
-    // background-color: #7fa99b;
-    border-radius: 4px;
-    margin: 5px 0;
-    padding: 5px 10px;
 }
 
-#font-size {
-    font-size: 14px;
-    font-weight: 500;
-    // color: #23501f;
-    margin-bottom: 0px;
+.always-visible {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    height: 100%;
 }
 
-.mat-slider {
-    width: 78%;
+mat-drawer {
+    right: 0;
+    height: 100%;
+    width: 20%;
+    padding: 10px;
+}
+
+.open-chat-button {
+    position: absolute;
+    right: 10px;
+    top: 5px;
+}
+
+.chat-sidenav {
+    display: flex;
+    max-width: 25%;
+    min-width: min-content;
+
+    ::ng-deep + div {
+        overflow-x: hidden !important;
+        width: -webkit-fill-available;
+    }
+
+    app-generic-chat {
+        display: grid;
+        height: 100%;
+        grid-template-rows: 1fr max-content;
+        align-content: space-between;
+
+        ::ng-deep label {
+            overflow: unset;
+            right: auto;
+        }
+    }
 }
 
 #winning-message {
     position: absolute;
     top: calc(50% - 2em);
-    // background-color: #23501f;
-    // color: #fff;
     padding: 10px;
     font-family: system-ui;
     font-size: 20px;
@@ -46,25 +64,33 @@
     transform: translateX(-50%);
 }
 
-::ng-deep .mat-accent .mat-slider-track-fill,
-::ng-deep .mat-accent .mat-slider-thumb,
-::ng-deep .mat-accent .mat-slider-thumb-label {
-    // background-color: #23501f;
+app-information-panel {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    grid-column: 1;
+}
+
+.middle {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    flex-direction: column;
+    grid-column: 2;
 }
 
 app-game-board {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    height: 570px;
-    width: 570px;
+    height: 600px;
+    width: 600px;
 }
 
 app-player-rack {
-    position: absolute;
-    left: 50%;
     bottom: 0px;
-    transform: translate(-50%);
     margin-bottom: 32px;
+    width: 600px;
+}
+
+::ng-deep .mat-drawer-content {
+    width: 100%;
 }

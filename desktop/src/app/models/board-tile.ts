@@ -1,5 +1,6 @@
 export enum BoardTileType {
     Empty = 'empty',
+    Origin = 'origin',
     Center = 'center',
     DoubleLetter = 'double_letter',
     DoubleWord = 'double_word',
