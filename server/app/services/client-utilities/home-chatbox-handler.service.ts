@@ -97,6 +97,20 @@ export class HomeChatBoxHandlerService {
         });
     }
 
+    makeUsersJoinGameChatRoom(socketIds: string[], gameId: string) {
+        const newGameChatRoomName = this.createGameChatRoom(gameId);
+        socketIds.forEach((socketId) => {
+            const socket: Socket = this.socketManager.getSocketFromId(socketId) as Socket;
+            socket.join(newGameChatRoomName);
+        });
+    }
+
+    deleteGameChatRoom(gameId: string) {
+        const gameChatRoomName = 'game' + gameId;
+        this.socketManager.deleteRoom(gameChatRoomName);
+        this.gameChatRooms.delete(gameChatRoomName);
+    }
+
     private async loadMessages(chatRoomName: string): Promise<ChatRoom> {
         const allUsersData = await this.accountStorage.getAllUsersData();
         const room = await this.chatRoomsStorage.getRoom(chatRoomName);
@@ -191,7 +205,7 @@ export class HomeChatBoxHandlerService {
         const newMessage: Message = { userId: message.userId, message: message.message, date: formattedDate };
         message.date = formattedDate;
 
-        if (chatRoomName.startsWith('game')) await this.chatSendMessage(socket, chatRoomName, newMessage);
+        if (!chatRoomName.startsWith('game')) await this.chatSendMessage(socket, chatRoomName, newMessage);
         this.socketManager.emitRoom(chatRoomName, SocketEvents.SendMessage, message);
     }
 
@@ -207,6 +221,12 @@ export class HomeChatBoxHandlerService {
 
     private isChatRoomExist(chatRoomName: string) {
         return this.chatRooms.find((chatRoom) => chatRoom.name === chatRoomName);
+    }
+
+    private createGameChatRoom(gameId: string) {
+        const gameChatRoomName = 'game' + gameId;
+        this.gameChatRooms.add(gameChatRoomName);
+        return gameChatRoomName;
     }
 
     // private initGameRoom(): void {
