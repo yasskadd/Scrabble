@@ -15,17 +15,17 @@
         id="user-icon"
         mat-fab
         color="primary"
-        *ngIf="!userService.isConnected() || !userService.user.profilePicture && !isGamePage()"
-        [matMenuTriggerFor]="accountMenu"
+        *ngIf="!userService.isConnected() || !userService.user.profilePicture"
+        (click)="openMenu()"
     >
         <mat-icon>person</mat-icon>
     </button>
 
     <img
         mat-fab-button
-        *ngIf="userService.isConnected() && userService.user.profilePicture && !isGamePage()"
+        *ngIf="userService.isConnected() && userService.user.profilePicture"
         [src]="userService.user.profilePicture.key"
-        [matMenuTriggerFor]="accountMenu"
+        (click)="openMenu()"
         class="selector-avatar mat-elevation-z5"
     />
 
