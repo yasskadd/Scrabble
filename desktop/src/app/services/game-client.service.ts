@@ -9,6 +9,8 @@ import { IUser } from '@common/interfaces/user';
 import { UserService } from '@services/user.service';
 import { ReplaySubject, Subject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
+import { AlphabetLetter } from '@common/models/alphabet-letter';
+import { PlayerType } from '@common/models/player-type';
 
 // type CompletedObjective = { objective: Objective; name: string };
 // type InitObjective = { objectives1: Objective[]; objectives2: Objective[]; playerName: string };
@@ -41,6 +43,63 @@ export class GameClientService {
                 this.configureBaseSocketFeatures();
             }
         });
+
+        // TODO : FOR TESTING
+        this.players = [
+            {
+                player: {
+                    user: {
+                        _id: '',
+                        username: 'test',
+                        password: 'test',
+                        profilePicture: {
+                            name: 'test',
+                            isDefaultPicture: false,
+                            key: 'http://http.cat/100',
+                        },
+                    },
+                    socketId: '',
+                    roomId: '',
+                    isCreator: false,
+                    type: PlayerType.Observer,
+                },
+                score: 0,
+                rack: [
+                    {
+                        value: AlphabetLetter.A,
+                        quantity: 1,
+                        points: 7,
+                    },
+                ],
+            },
+            {
+                player: {
+                    user: {
+                        _id: '',
+                        username: 'test2',
+                        password: 'test',
+                        profilePicture: {
+                            name: 'test',
+                            isDefaultPicture: false,
+                            key: 'http://http.cat/100',
+                        },
+                    },
+                    socketId: '',
+                    roomId: '',
+                    isCreator: false,
+                    type: PlayerType.Bot,
+                },
+                score: 0,
+                rack: [
+                    {
+                        value: AlphabetLetter.B,
+                        quantity: 1,
+                        points: 7,
+                    },
+                ],
+            },
+        ];
+        this.activePlayer = this.players[0].player.user;
     }
 
     initGameInformation() {
@@ -134,7 +193,9 @@ export class GameClientService {
     }
 
     getLocalPlayer(): PlayerInformation {
-        return this.players.find((info: PlayerInformation) => info.player.user.username === this.userService.user.username);
+        // TODO : FOR TESTING
+        //  return this.players.find((info: PlayerInformation) => info.player.user.username === this.userService.user.username);
+        return this.players[0];
     }
 
     currentlyPlaying(): boolean {

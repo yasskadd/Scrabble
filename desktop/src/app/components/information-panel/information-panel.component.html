@@ -13,10 +13,10 @@
         >
             <mat-card-title-group class="playerInfo">
                 <mat-card-title>
-                <img [src]="playerInfos.player.user.profilePicture.key" class="selector-avatar mat-elevation-z5" />
-                   <b>
-                       {{ playerInfos.player.user.username }}
-                   </b>
+                    <img [src]="playerInfos.player.user.profilePicture.key" class="selector-avatar mat-elevation-z5" />
+                    <b>
+                        {{ playerInfos.player.user.username }}
+                    </b>
                 </mat-card-title>
                 <mat-card-subtitle class="score">{{ playerInfos.score }} {{ "game_page.informations.points" | translate }}</mat-card-subtitle>
                 <mat-card-subtitle class="rack-letters" *ngIf="playerInfos.rack.length < 7">

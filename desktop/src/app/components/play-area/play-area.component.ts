@@ -2,10 +2,13 @@ import { Component, HostListener } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import * as constants from '@app/constants/board-view';
 import { Vec2 } from '@app/interfaces/vec2';
+import { RackPosition } from '@app/models/rack-position';
 import { GameClientService } from '@app/services/game-client.service';
 import { GridService } from '@app/services/grid.service';
 import { LetterPlacementService } from '@app/services/letter-placement.service';
+import { PlayerInformation } from '@common/interfaces/player-information';
 import { Subject } from 'rxjs';
+import { PlayerType } from '@common/models/player-type';
 
 export enum MouseButton {
     Left = 0,
@@ -23,6 +26,9 @@ export class PlayAreaComponent {
     mousePosition: Vec2;
     protected sliderForm: FormControl;
     protected chatIsOpen: boolean;
+    protected selectedPlayer: PlayerInformation;
+
+    protected playerType: typeof PlayerType = PlayerType;
 
     constructor(
         private readonly gridService: GridService,
@@ -82,5 +88,17 @@ export class PlayAreaComponent {
 
     updateFontSize(): void {
         this.gridService.letterSize = this.sliderForm.value;
+    }
+
+    selectPlayer(player: PlayerInformation): void {
+        this.selectedPlayer = player;
+    }
+
+    getPosition(index: number): RackPosition {
+        return Object.values(RackPosition)[index];
+    }
+
+    getClass(index: number): string {
+        return Object.values(RackPosition)[index] + '-player-rack';
     }
 }

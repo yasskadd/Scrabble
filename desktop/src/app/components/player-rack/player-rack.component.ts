@@ -8,6 +8,7 @@ import { Letter } from '@common/interfaces/letter';
 import { Subject } from 'rxjs';
 import { RackPosition } from '@app/models/rack-position';
 import { PlayerType } from '@common/models/player-type';
+import { PlayerInformation } from '@common/interfaces/player-information';
 
 @Component({
     selector: 'app-player-rack',
@@ -19,7 +20,7 @@ export class PlayerRackComponent {
     keyboardParentSubject: Subject<KeyboardEvent>;
 
     @Input()
-    position: RackPosition = RackPosition.Bottom;
+    player: PlayerInformation;
 
     buttonPressed: string;
     currentSelection: number;
@@ -69,8 +70,8 @@ export class PlayerRackComponent {
         this.chatBoxHandler.submitMessage('!passer');
     }
 
-    isPlayerAUser(): boolean {
-        return this.gameClient.getLocalPlayer().player.type === PlayerType.User;
+    isCurrentPlayerPlaying(): boolean {
+        return this.gameClient.getLocalPlayer().player.type === PlayerType.User && this.player.player.type === PlayerType.User;
     }
 
     // findDuplicates() {
