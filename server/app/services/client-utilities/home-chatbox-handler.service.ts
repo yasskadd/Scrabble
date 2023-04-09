@@ -97,7 +97,7 @@ export class HomeChatBoxHandlerService {
 
     getAllChatRooms(socket: Socket) {
         const chatRooms = this.chatRooms.map((chatRoom) => {
-            return { name: chatRoom.name, creatorId: chatRoom.creatorId };
+            return { name: chatRoom.name, creatorId: chatRoom.creatorId, isDeletable: chatRoom.isDeletable };
         });
         socket.emit(SocketEvents.GetAllChatRooms, chatRooms);
     }
@@ -218,7 +218,7 @@ export class HomeChatBoxHandlerService {
         message.date = formattedDate;
 
         if (!chatRoomName.startsWith('game')) await this.saveMessage(socket, chatRoomName, newMessage);
-        this.socketManager.emitRoom(chatRoomName, SocketEvents.SendMessage, message);
+        this.socketManager.emitRoom(chatRoomName, SocketEvents.SendMessage, { message, room: chatRoomName });
     }
 
     private async saveMessage(socket: Socket, chatRoomName: string, message: Message) {
