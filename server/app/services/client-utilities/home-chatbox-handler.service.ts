@@ -112,11 +112,11 @@ export class HomeChatBoxHandlerService {
     }
 
     private async loadMessages(chatRoomName: string): Promise<ChatRoom> {
-        const allUsersData = await this.accountStorage.getAllUsersData();
+        // const allUsersData = await this.accountStorage.getAllUsersData();
         const room = await this.chatRoomsStorage.getRoom(chatRoomName);
-        room.messages.map((message) => {
-            message.username = allUsersData[message.userId];
-        });
+        // room.messages.map((message) => {
+        //     message.username = allUsersData[message.userId];
+        // });
         return room;
     }
     private async createChatRoom(sio: Server, socket: Socket, chatRoomName: string, userId: string) {
@@ -205,11 +205,11 @@ export class HomeChatBoxHandlerService {
         const newMessage: Message = { userId: message.userId, message: message.message, date: formattedDate };
         message.date = formattedDate;
 
-        if (!chatRoomName.startsWith('game')) await this.chatSendMessage(socket, chatRoomName, newMessage);
+        if (!chatRoomName.startsWith('game')) await this.saveMessage(socket, chatRoomName, newMessage);
         this.socketManager.emitRoom(chatRoomName, SocketEvents.SendMessage, message);
     }
 
-    private async chatSendMessage(socket: Socket, chatRoomName: string, message: Message) {
+    private async saveMessage(socket: Socket, chatRoomName: string, message: Message) {
         const room = this.isChatRoomExist(chatRoomName);
         if (room === undefined) {
             socket.emit(SocketEvents.SendMessageError, '');
