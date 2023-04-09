@@ -68,8 +68,8 @@ export class HomeChatBoxHandlerService {
             await this.leaveChatRoomSession(socket, chatRoomName);
         });
 
-        this.socketManager.on(SocketEvents.SendMessage, async (socket: Socket, chatRoomName: string, message: Message) => {
-            await this.sendMessage(socket, chatRoomName, message);
+        this.socketManager.on(SocketEvents.SendMessage, async (socket: Socket, chatRoomName: string, msg: string) => {
+            await this.sendMessage(socket, chatRoomName, msg);
         });
 
         this.socketManager.on(SocketEvents.GetAllChatRooms, (socket: Socket) => {
@@ -211,14 +211,14 @@ export class HomeChatBoxHandlerService {
         }
     }
 
-    private async sendMessage(socket: Socket, chatRoomName: string, message: Message) {
+    private async sendMessage(socket: Socket, chatRoomName: string, msg: string) {
+        const userId = this.socketManager.getUserIdFromSocket(socket) as string;
         const momentDate = moment(new Date());
         const formattedDate: string = momentDate.format('HH:mm:ss YYYY-MM-DD');
-        const newMessage: Message = { userId: message.userId, message: message.message, date: formattedDate };
-        message.date = formattedDate;
+        const newMessage: Message = { userId, message: msg, date: formattedDate };
 
         if (!chatRoomName.startsWith('game')) await this.saveMessage(socket, chatRoomName, newMessage);
-        this.socketManager.emitRoom(chatRoomName, SocketEvents.SendMessage, { message, room: chatRoomName });
+        this.socketManager.emitRoom(chatRoomName, SocketEvents.SendMessage, { newMessage, room: chatRoomName });
     }
 
     private async saveMessage(socket: Socket, chatRoomName: string, message: Message) {
