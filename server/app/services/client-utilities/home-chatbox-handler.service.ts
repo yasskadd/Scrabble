@@ -43,28 +43,28 @@ export class HomeChatBoxHandlerService {
     }
 
     initSocketEvents(): void {
-        this.socketManager.io(SocketEvents.CreateChatRoom, async (sio: Server, socket: Socket, chatRoomName: string, userId: string) => {
-            await this.createChatRoom(sio, socket, chatRoomName, userId);
+        this.socketManager.io(SocketEvents.CreateChatRoom, async (sio: Server, socket: Socket, chatRoomName: string) => {
+            await this.createChatRoom(sio, socket, chatRoomName);
         });
 
-        this.socketManager.io(SocketEvents.DeleteChatRoom, async (sio: Server, socket: Socket, chatRoomName: string, userId: string) => {
-            await this.deleteChatRoom(sio, socket, chatRoomName, userId);
+        this.socketManager.io(SocketEvents.DeleteChatRoom, async (sio: Server, socket: Socket, chatRoomName: string) => {
+            await this.deleteChatRoom(sio, socket, chatRoomName);
         });
 
-        this.socketManager.on(SocketEvents.JoinChatRoom, async (socket: Socket, chatRoomName: string, userId: string) => {
-            await this.joinChatRoom(socket, chatRoomName, userId);
+        this.socketManager.on(SocketEvents.JoinChatRoom, async (socket: Socket, chatRoomName: string) => {
+            await this.joinChatRoom(socket, chatRoomName);
         });
 
-        this.socketManager.on(SocketEvents.LeaveChatRoom, async (socket: Socket, chatRoomName: string, userId: string) => {
-            await this.leaveChatRoom(socket, chatRoomName, userId);
+        this.socketManager.on(SocketEvents.LeaveChatRoom, async (socket: Socket, chatRoomName: string) => {
+            await this.leaveChatRoom(socket, chatRoomName);
         });
 
-        this.socketManager.on(SocketEvents.JoinChatRoomSession, async (socket: Socket, chatRoomName: string, userId: string) => {
-            await this.joinChatRoomSession(socket, chatRoomName, userId);
+        this.socketManager.on(SocketEvents.JoinChatRoomSession, async (socket: Socket, chatRoomName: string) => {
+            await this.joinChatRoomSession(socket, chatRoomName);
         });
 
-        this.socketManager.on(SocketEvents.LeaveChatRoomSession, async (socket: Socket, chatRoomName: string, userId: string) => {
-            await this.leaveChatRoomSession(socket, chatRoomName, userId);
+        this.socketManager.on(SocketEvents.LeaveChatRoomSession, async (socket: Socket, chatRoomName: string) => {
+            await this.leaveChatRoomSession(socket, chatRoomName);
         });
 
         this.socketManager.on(SocketEvents.SendMessage, async (socket: Socket, chatRoomName: string, message: Message) => {
@@ -119,23 +119,25 @@ export class HomeChatBoxHandlerService {
         // });
         return room;
     }
-    private async createChatRoom(sio: Server, socket: Socket, chatRoomName: string, userId: string) {
+    private async createChatRoom(sio: Server, socket: Socket, chatRoomName: string) {
         const room = this.isChatRoomExist(chatRoomName);
         if (room !== undefined) {
             socket.emit(SocketEvents.CreateChatRoomError, '');
             return;
         }
+        const userId = this.socketManager.getUserIdFromSocket(socket);
         const newChatRoom = { name: chatRoomName, messageCount: 0, creatorId: userId, readingUsers: [] };
         this.chatRooms.push(newChatRoom);
         await this.chatRoomsStorage.createRoom(chatRoomName);
         sio.emit(SocketEvents.CreateChatRoom, newChatRoom);
     }
 
-    private async deleteChatRoom(sio: Server, socket: Socket, chatRoomName: string, userId: string) {
+    private async deleteChatRoom(sio: Server, socket: Socket, chatRoomName: string) {
         if (this.isChatRoomExist(chatRoomName) === undefined) {
             socket.emit(SocketEvents.DeleteChatRoomNotFoundError, '');
             return;
         }
+        const userId = this.socketManager.getUserIdFromSocket(socket);
         const index = this.chatRooms.findIndex((chatRoom) => chatRoom.name === 'main' && chatRoom.creatorId === userId);
         if (index === NOT_FOUND) {
             socket.emit(SocketEvents.DeleteChatNotCreatorError, '');
@@ -146,53 +148,56 @@ export class HomeChatBoxHandlerService {
         sio.emit(SocketEvents.DeleteChatRoom, deletedChatRoom);
     }
 
-    private async joinChatRoom(socket: Socket, chatRoomName: string, userId: string) {
+    private async joinChatRoom(socket: Socket, chatRoomName: string) {
         const room = this.isChatRoomExist(chatRoomName);
         if (room === undefined) {
             socket.emit(SocketEvents.JoinChatRoomNotFoundError, '');
             return;
         }
-
+        const userId = this.socketManager.getUserIdFromSocket(socket) as string;
         await this.accountStorage.addChatRoom(userId, { name: room.name, messageCount: room.messageCount });
         socket.join(room.name);
         socket.emit(SocketEvents.JoinChatRoom, room);
     }
 
-    private async leaveChatRoom(socket: Socket, chatRoomName: string, userId: string) {
+    private async leaveChatRoom(socket: Socket, chatRoomName: string) {
         const room = this.isChatRoomExist(chatRoomName);
         if (room === undefined) {
             socket.emit(SocketEvents.LeaveChatRoomNotFoundError, '');
             return;
         }
+        const userId = this.socketManager.getUserIdFromSocket(socket) as string;
         await this.accountStorage.deleteChatRoom(userId, room.name);
         socket.leave(room.name);
         socket.emit(SocketEvents.LeaveChatRoom, room);
     }
 
-    private async joinChatRoomSession(socket: Socket, chatRoomName: string, userId: string) {
+    private async joinChatRoomSession(socket: Socket, chatRoomName: string) {
         const room = this.isChatRoomExist(chatRoomName);
         if (room === undefined) {
             socket.emit(SocketEvents.JoinChatRoomSessionNotFoundError, '');
             return;
         }
+        const userId = this.socketManager.getUserIdFromSocket(socket) as string;
         room.readingUsers.push(userId);
         const chatRoomSession = await this.loadMessages(chatRoomName);
         socket.emit(SocketEvents.JoinChatRoomSession, chatRoomSession);
     }
 
-    private async leaveChatRoomSession(socket: Socket, chatRoomName: string, userId: string) {
+    private async leaveChatRoomSession(socket: Socket, chatRoomName: string) {
         const room = this.isChatRoomExist(chatRoomName);
         if (room === undefined) {
             socket.emit(SocketEvents.LeaveChatRoomSessionNotFoundError, '');
             return;
         }
 
+        const userId = this.socketManager.getUserIdFromSocket(socket);
         const userIdIndex = room.readingUsers.findIndex((id) => {
             return id === userId;
         });
         if (userIdIndex !== NOT_FOUND) {
             room.readingUsers.splice(userIdIndex, 1);
-            await this.accountStorage.updateChatRoomMessageCount(userId, chatRoomName, room.messageCount);
+            await this.accountStorage.updateChatRoomMessageCount(userId as string, chatRoomName, room.messageCount);
             socket.emit(SocketEvents.LeaveChatRoomSession, '');
         } else {
             socket.emit(SocketEvents.LeaveChatRoomSessionNotFoundError, '');
