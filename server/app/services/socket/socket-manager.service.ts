@@ -53,6 +53,10 @@ export class SocketManager {
         return undefined;
     }
 
+    getUserIdFromSocket(socket: io.Socket): string | undefined {
+        return this.socketIdMap.get(socket);
+    }
+
     deleteRoom(room: string) {
         this.server.sockets.in(room).socketsLeave(room);
     }

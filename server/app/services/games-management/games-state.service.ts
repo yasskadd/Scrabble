@@ -34,7 +34,7 @@ import { Subject } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import { GamesHandlerService } from './games-handler.service';
-m;
+
 const MAX_SKIP = 6;
 const SECOND = 1000;
 const ERROR_REPLACING_BOT = 'Error trying to replace the bot';
