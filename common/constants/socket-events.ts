@@ -7,6 +7,7 @@ export enum SocketEvents {
     LeaveChatRoom = 'leaveChatRoom',
     JoinChatRoomSession = 'joinChatRoomSession',
     LeaveChatRoomSession = 'leaveChatRoomSession',
+    GetAllChatRooms = 'getAllChatRooms',
 
     // Chat error
     CreateChatRoomError = 'createChatRoomError',
