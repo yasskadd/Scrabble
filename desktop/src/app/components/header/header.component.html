@@ -16,7 +16,7 @@
         mat-fab
         color="primary"
         *ngIf="!userService.isConnected() || !userService.user.profilePicture"
-        (click)="openMenu()"
+        [mat-menu-trigger-for]="isGamePage() ? null : accountMenu"
     >
         <mat-icon>person</mat-icon>
     </button>
@@ -25,7 +25,7 @@
         mat-fab-button
         *ngIf="userService.isConnected() && userService.user.profilePicture"
         [src]="userService.user.profilePicture.key"
-        (click)="openMenu()"
+        [mat-menu-trigger-for]="isGamePage() ? null : accountMenu"
         class="selector-avatar mat-elevation-z5"
     />
 

@@ -1,8 +1,7 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { LanguageService } from '@app/services/language.service';
-import { MatMenuTrigger } from '@angular/material/menu';
 import { ThemeService } from '@app/services/theme.service';
 import { UserService } from '@app/services/user.service';
 
@@ -12,8 +11,6 @@ import { UserService } from '@app/services/user.service';
     styleUrls: ['./header.component.scss'],
 })
 export class HeaderComponent {
-    @ViewChild('accountMenu') trigger: MatMenuTrigger;
-
     isHomePage: boolean;
     constructor(
         protected userService: UserService,
@@ -29,8 +26,9 @@ export class HeaderComponent {
     }
 
     redirectHome() {
-        // this.isHomePage = true;
-        this.router.navigate([`${AppRoutes.HomePage}`]).then();
+        if (!this.isGamePage()) {
+            this.router.navigate([`${AppRoutes.HomePage}`]).then();
+        }
     }
 
     redirectSettingsPage() {
@@ -48,11 +46,6 @@ export class HeaderComponent {
     redirectAdmin() {
         this.isHomePage = false;
         this.router.navigate([`${AppRoutes.AdminPage}`]).then();
-    }
-
-    openMenu() {
-        if (this.isGamePage) return;
-        this.trigger.toggleMenu();
     }
 
     getLetters(translation: string): string[] {
