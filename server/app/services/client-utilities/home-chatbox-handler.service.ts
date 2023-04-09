@@ -83,16 +83,15 @@ export class HomeChatBoxHandlerService {
         // });
     }
 
-    checkForChatNotification(chatRooms: UserChatRoom[]): boolean {
-        let hasNotification = false;
+    checkForChatNotification(chatRooms: UserChatRoom[]): string[] {
+        const notificationRooms: string[] = [];
         chatRooms.forEach((chatRoom) => {
             const room = this.isChatRoomExist(chatRoom.name) as ChatRoomInfo;
             if (chatRoom.messageCount < room.messageCount) {
-                hasNotification = true;
-                return;
+                notificationRooms.push(room.name);
             }
         });
-        return hasNotification;
+        return notificationRooms;
     }
 
     getAllChatRooms(socket: Socket) {
