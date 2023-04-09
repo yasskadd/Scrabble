@@ -117,7 +117,10 @@ export class Bot extends GamePlayer {
             return letter.toUpperCase();
         });
         const placement: Word = this.gameValidationService.verifyPlaceWordCommand(gamePlayer, randomCommandInfo) as Word;
-
+        // TODO: Remove this if when lettre blanche is fixed
+        if (!(placement instanceof Word)) {
+            return;
+        }
         const wordPlacementResult = game.letterPlacement.placeWord(placement, randomCommandInfo, gamePlayer, game.gameboard);
 
         // Update rack
