@@ -6,6 +6,8 @@ import { LetterPlacementService } from '@app/services/letter-placement.service';
 import * as board from '@common/constants/board-info';
 import { Letter } from '@common/interfaces/letter';
 import { Subject } from 'rxjs';
+import { RackPosition } from '@app/models/rack-position';
+import { PlayerType } from '@common/models/player-type';
 
 @Component({
     selector: 'app-player-rack',
@@ -16,11 +18,16 @@ export class PlayerRackComponent {
     @Input()
     keyboardParentSubject: Subject<KeyboardEvent>;
 
+    @Input()
+    position: RackPosition = RackPosition.Bottom;
+
     buttonPressed: string;
     currentSelection: number;
     previousSelection: number;
     lettersToExchange: number[];
     duplicates: number[];
+
+    protected rackPosition: typeof RackPosition = RackPosition;
 
     constructor(
         private chatBoxHandler: ChatboxHandlerService,
@@ -60,6 +67,10 @@ export class PlayerRackComponent {
 
     skipTurn() {
         this.chatBoxHandler.submitMessage('!passer');
+    }
+
+    isPlayerAUser(): boolean {
+        return this.gameClient.getLocalPlayer().player.type === PlayerType.User;
     }
 
     // findDuplicates() {
