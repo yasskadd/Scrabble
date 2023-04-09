@@ -1,5 +1,6 @@
 import { Game } from '@app/classes/game.class';
 import { WordSolver } from '@app/classes/word-solver.class';
+import { Word } from '@app/classes/word.class';
 import * as Constant from '@app/constants/bot';
 import { BotInformation } from '@app/interfaces/bot-information';
 import { GameValidationService } from '@app/services/games-management/game-validation.service';
@@ -12,7 +13,6 @@ import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info
 import { PlayerInformation } from '@common/interfaces/player-information';
 import { RoomPlayer } from '@common/interfaces/room-player';
 import { Container } from 'typedi';
-import { Word } from '../word.class';
 import { GamePlayer } from './player.class';
 import { RealPlayer } from './real-player.class';
 
@@ -106,7 +106,6 @@ export class Bot extends GamePlayer {
     }
 
     private play(randomCommandInfo: PlaceWordCommandInfo) {
-        console.log('place');
         const gamePlayer = this as GamePlayer;
         if (!gamePlayer) return;
 
