@@ -22,6 +22,7 @@ interface ChatRoomInfo {
     messageCount: number;
     creatorId?: string;
     readingUsers: string[];
+    isDeletable: boolean;
 }
 
 // const ROOM_LIMIT = 1000;
@@ -39,7 +40,7 @@ export class HomeChatBoxHandlerService {
         private accountStorage: AccountStorageService,
         private chatRoomsStorage: ChatRoomsStorageService,
     ) {
-        this.chatRooms = [{ name: 'main', messageCount: 0, readingUsers: [] }];
+        this.chatRooms = [{ name: 'main', messageCount: 0, readingUsers: [], isDeletable: false }];
     }
 
     initSocketEvents(): void {
@@ -130,7 +131,7 @@ export class HomeChatBoxHandlerService {
             return;
         }
         const userId = this.socketManager.getUserIdFromSocket(socket);
-        const newChatRoom = { name: chatRoomName, messageCount: 0, creatorId: userId, readingUsers: [] };
+        const newChatRoom = { name: chatRoomName, messageCount: 0, creatorId: userId, readingUsers: [], isDeletable: true };
         this.chatRooms.push(newChatRoom);
         await this.chatRoomsStorage.createRoom(chatRoomName);
         sio.emit(SocketEvents.CreateChatRoom, newChatRoom);
@@ -142,7 +143,9 @@ export class HomeChatBoxHandlerService {
             return;
         }
         const userId = this.socketManager.getUserIdFromSocket(socket);
-        const index = this.chatRooms.findIndex((chatRoom) => chatRoom.name === 'main' && chatRoom.creatorId === userId);
+        const index = this.chatRooms.findIndex(
+            (chatRoom) => chatRoom.name === 'main' && chatRoom.creatorId === userId && chatRoom.isDeletable === true,
+        );
         if (index === NOT_FOUND) {
             socket.emit(SocketEvents.DeleteChatNotCreatorError, '');
             return;
