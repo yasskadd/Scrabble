@@ -71,6 +71,10 @@ export class HomeChatBoxHandlerService {
             await this.sendMessage(socket, chatRoomName, message);
         });
 
+        this.socketManager.on(SocketEvents.GetAllChatRooms, (socket: Socket) => {
+            this.getAllChatRooms(socket);
+        });
+
         // this.socketManager.io(SocketEvents.UserLeftRoom, (sio: Server, socket: Socket) => {
         //     this.leaveRoom(sio, socket);
         // });
@@ -91,10 +95,11 @@ export class HomeChatBoxHandlerService {
         return hasNotification;
     }
 
-    getAllChatRooms() {
-        return this.chatRooms.map((chatRoom) => {
-            return chatRoom.name;
+    getAllChatRooms(socket: Socket) {
+        const chatRooms = this.chatRooms.map((chatRoom) => {
+            return { name: chatRoom.name, creatorId: chatRoom.creatorId };
         });
+        socket.emit(SocketEvents.GetAllChatRooms, chatRooms);
     }
 
     makeUsersJoinGameChatRoom(socketIds: string[], gameId: string) {
