@@ -89,6 +89,14 @@ mat-card {
     // background-color: mat-color($primary, 200); // TODO
 }
 
+.selector-avatar {
+    align-self: center;
+    height: 32px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
 td {
     padding-left: 5px;
     // color: #23501f;
@@ -239,6 +247,10 @@ tr > td > div > mat-icon {
 
 .playerInfo {
     text-align: left;
+}
+
+.playerInfo b{
+        font-size: 18px;
 }
 
 ::ng-deep .mat-body p,
