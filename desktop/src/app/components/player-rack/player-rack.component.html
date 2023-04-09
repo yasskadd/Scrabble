@@ -22,7 +22,7 @@
         (cdkDropListDropped)="drop($event)"
         cdkDropListOrientation="horizontal"
     >
-        <div *ngIf="isCurrentPlayerPlaying()">
+        <div *ngIf="isCurrentPlayerPlaying()" class="rack">
             <div
                 cdkDrag
                 [cdkDragData]="letter"
@@ -38,7 +38,7 @@
                 </button>
             </div>
         </div>
-        <div *ngIf="!isCurrentPlayerPlaying()">
+        <div *ngIf="!isCurrentPlayerPlaying()" class="rack">
             <div *ngFor="let letter of player?.rack; index as i" class="rack">
                 <button mat-raised-button color="accent" class="rack-letter">
                     <div class="letter-value">
