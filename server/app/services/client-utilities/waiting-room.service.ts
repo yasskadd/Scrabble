@@ -108,6 +108,9 @@ export class WaitingRoomService {
         if (room.players.filter((player: RoomPlayer) => player.type === PlayerType.User).length === NUMBER_OF_PLAYERS) {
             newPlayer.type = PlayerType.Observer;
         }
+        if (room.state === GameRoomState.Playing) {
+            newPlayer.type = PlayerType.Observer;
+        }
         const botIndex = room.players.findIndex((player: RoomPlayer) => player.type === PlayerType.Bot);
         if (botIndex !== INVALID_INDEX) {
             room.players.splice(botIndex, 1);
@@ -117,8 +120,11 @@ export class WaitingRoomService {
         // server.to(joinGameQuery.roomId).emit(SocketEvents.PlayerJoinedWaitingRoom, this.stripPlayerPassword(newPlayer));
         server.to(joinGameQuery.roomId).emit(SocketEvents.UpdateWaitingRoom, room);
         socket.emit(SocketEvents.JoinedValidWaitingRoom, this.stripPlayersPassword(room));
-
         server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
+
+        if (room.state === GameRoomState.Playing) {
+            this.gameStateService.addObserver(server, joinGameQuery.roomId, newPlayer);
+        }
     }
 
     private exitWaitingRoom(server: Server, socket: SocketType, userQuery: UserRoomQuery): void {

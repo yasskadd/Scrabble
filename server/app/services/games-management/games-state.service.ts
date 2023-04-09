@@ -115,6 +115,32 @@ export class GamesStateService {
         if (!game.turn.activePlayer?.email) game.turn.endTurn.next(game.turn.activePlayer?.username);
     }
 
+    addObserver(server: Server, roomId: string, player: RoomPlayer): void {
+        const gamePlayers: GamePlayer[] = this.gamesHandler.getPlayersFromRoomId(roomId);
+        const socket: Socket | undefined = this.socketManager.getSocketFromId(player.socketId);
+        console.log(socket);
+        if (!socket) return;
+
+        const newGamePlayer = new GamePlayer(player);
+        newGamePlayer.game = gamePlayers[0].game;
+
+        this.gamesHandler.players.push(newGamePlayer);
+        socket.emit(SocketEvents.GameAboutToStart, {
+            gameboard: newGamePlayer.game.gameboard.toStringArray(),
+            players: this.gamesHandler.players.map((p: GamePlayer) => {
+                return p.getInformation();
+            }),
+            activePlayer: newGamePlayer.game.turn.activePlayer,
+        });
+        server.to(roomId).emit(SocketEvents.PublicViewUpdate, {
+            gameboard: newGamePlayer.game.gameboard.toStringArray(),
+            players: this.gamesHandler.players.map((p: GamePlayer) => {
+                return p.getInformation();
+            }),
+            activePlayer: newGamePlayer.game.turn.activePlayer,
+        });
+    }
+
     private initPlayers(game: Game, room: GameRoom): GamePlayer[] {
         const gamePlayers: GamePlayer[] = [];
 
