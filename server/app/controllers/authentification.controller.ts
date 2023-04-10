@@ -37,6 +37,7 @@ export class AuthentificationController {
                 res.status(StatusCodes.UNAUTHORIZED).json({
                     message: 'Email already exists',
                 });
+                return;
             }
 
             if (await this.accountStorage.isUsernameRegistered(user.username)) {
@@ -44,6 +45,7 @@ export class AuthentificationController {
                 res.status(ERROR).json({
                     message: 'Username already exists',
                 });
+                return;
             }
             // Generating an image key if the profile pic is not a default one
             let imageKey = '';
