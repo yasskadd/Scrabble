@@ -63,10 +63,13 @@ export class ChatboxHandlerService implements OnDestroy {
 
     subscribeToUserConnection(): Subject<SocketResponse> {
         const roomJoinedSubject: Subject<SocketResponse> = new Subject<SocketResponse>();
+        console.log('helloo');
         this.clientSocket.on(SocketEvents.UserConnected, (userName: string) => {
+            console.log('do we get here? NOPE');
             if (userName === this.userService.user.username) {
                 roomJoinedSubject.next({ validity: true });
                 this.loggedIn = true;
+                console.log('hellooooo ' + this.loggedIn);
             }
         });
         this.clientSocket.on(SocketEvents.UserJoinedRoom, (userName: string) => {

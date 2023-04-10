@@ -1,19 +1,19 @@
 import { Component } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { DialogBoxGameTypeComponent } from '@app/components/dialog-box-game-type/dialog-box-game-type.component';
 import { DialogBoxHighScoresComponent } from '@app/components/dialog-box-high-scores/dialog-box-high-scores.component';
 import { DialogGameHelpComponent } from '@app/components/dialog-game-help/dialog-game-help.component';
 import { SocketResponse } from '@app/interfaces/server-responses';
+import { AppRoutes } from '@app/models/app-routes';
 import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
 import { UserService } from '@app/services/user.service';
 import { SocketEvents } from '@common/constants/socket-events';
+import { GameMode } from '@common/models/game-mode';
 import { ClientSocketService } from '@services/communication/client-socket.service';
 import { LanguageService } from '@services/language.service';
 import { Subject } from 'rxjs';
-import { GameMode } from '@common/models/game-mode';
-import { Router } from '@angular/router';
-import { AppRoutes } from '@app/models/app-routes';
 
 @Component({
     selector: 'app-main-page',
@@ -53,7 +53,6 @@ export class MainPageComponent {
         this.homeConnectionResponse = { validity: false };
         this.userNameForm = new FormControl('', Validators.required);
         this.chatIsOpen = false;
-
         this.clientSocketService.connected.subscribe((connected: boolean) => {
             if (connected) {
                 this.subscribeConnectionEvents();

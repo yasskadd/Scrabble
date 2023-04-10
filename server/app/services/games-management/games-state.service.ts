@@ -32,7 +32,7 @@ import { Subject } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import { GamesHandlerService } from './games-handler.service';
-import { Letter } from '@common/interfaces/letter';
+import { IUser } from '@common/interfaces/user';
 
 const MAX_SKIP = 6;
 const SECOND = 1000;
@@ -92,17 +92,6 @@ export class GamesStateService {
 
         const playersInfo: PlayerInformation[] = this.gamesHandler.players.map((player: GamePlayer) => {
             return player.getInformation();
-        });
-
-        console.log('Start of game with : ');
-        playersInfo.forEach((playerInfo: PlayerInformation) => {
-            console.log(playerInfo.player.user.username);
-            console.log(
-                playerInfo.rack.map((letter: Letter) => {
-                    return letter.value;
-                }),
-            );
-            console.log('');
         });
 
         server.to(room.id).emit(SocketEvents.GameAboutToStart, {
@@ -320,10 +309,8 @@ export class GamesStateService {
     }
 
     private async abandonGame(socket: Socket): Promise<void> {
-        console.log(socket.id);
         const gamePlayer = this.gamesHandler.getPlayerFromSocketId(socket.id);
         if (!gamePlayer) return;
-        console.log(gamePlayer.player.user.username);
 
         const room = gamePlayer.player.roomId;
         const gameHistoryInfo = this.formatGameInfo(gamePlayer);
@@ -576,6 +563,12 @@ export class GamesStateService {
         this.gamesHandler.players.splice(botIndex, 1);
         const obsIndex = this.gamesHandler.players.findIndex((player: GamePlayer) => player.player.user._id === observer.player.user._id);
         this.gamesHandler.players.splice(obsIndex, 1);
+        const botTurnIndex: number | undefined = this.gamesHandler.players[0].game.turn.inactivePlayers?.findIndex(
+            (p: IUser) => p._id === bot.player.user._id,
+        );
+        if (!botTurnIndex) return;
+        this.gamesHandler.players[0].game.turn.inactivePlayers?.splice(botTurnIndex, 1);
+        this.gamesHandler.players[0].game.turn.inactivePlayers?.push(observer.player.user);
         this.gamesHandler.players.push(newPlayer);
 
         // TODO: Update room with roomID
@@ -609,7 +602,4 @@ export class GamesStateService {
         const gameDate = player.game.beginningTime;
         this.accountStorage.addUserEventHistory(username, HistoryActions.Game, gameDate, gameWon);
     }
-    // Replace observer and bot in list by observer
-    // Add Socket event to let observer join the room (need to verify if its possible to join or not)
-    // Need method to update all room clients that an observer has joined
 }

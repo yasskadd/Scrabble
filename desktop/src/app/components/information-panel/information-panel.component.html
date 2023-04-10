@@ -26,7 +26,7 @@
                 <div
                     [ngClass]="[gameClientService.timer < 10 ? 'countdown' : 'time']"
                     id="playerOneTimer"
-                    *ngIf="gameClientService.activePlayer.username === playerInfos.player.user.username"
+                    *ngIf="gameClientService.activePlayer._id === playerInfos.player.user._id"
                 >
                     <mat-icon>timer</mat-icon>
                     {{ timer.secondsToMinute(gameClientService.timer) }}:{{ timer.timerToSecond(gameClientService.timer) }}
