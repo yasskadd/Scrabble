@@ -58,16 +58,12 @@ export class HomeChatBoxHandlerService {
             await this.createChatRoom(sio, socket, chatRoomName);
         });
 
-        this.socketManager.io(SocketEvents.DeleteChatRoom, async (sio: Server, socket: Socket, chatRoomName: string) => {
-            await this.deleteChatRoom(sio, socket, chatRoomName);
+        this.socketManager.io(SocketEvents.LeaveChatRoom, async (sio: Server, socket: Socket, chatRoomName: string) => {
+            await this.leaveChatRoom(sio, socket, chatRoomName);
         });
 
         this.socketManager.on(SocketEvents.JoinChatRoom, async (socket: Socket, chatRoomName: string) => {
             await this.joinChatRoom(socket, chatRoomName);
-        });
-
-        this.socketManager.on(SocketEvents.LeaveChatRoom, async (socket: Socket, chatRoomName: string) => {
-            await this.leaveChatRoom(socket, chatRoomName);
         });
 
         this.socketManager.on(SocketEvents.JoinChatRoomSession, async (socket: Socket, chatRoomName: string) => {
@@ -140,6 +136,10 @@ export class HomeChatBoxHandlerService {
         });
     }
 
+    private async unsubscribeAllUsersFromRoom(sio: Server, roomName: string) {
+        sio.in(roomName).socketsLeave(roomName);
+    }
+
     private async loadMessages(chatRoomName: string): Promise<ChatRoom> {
         // const allUsersData = await this.accountStorage.getAllUsersData();
         const room = await this.chatRoomsStorage.getRoom(chatRoomName);
@@ -176,6 +176,7 @@ export class HomeChatBoxHandlerService {
         const indexToDelete = this.chatRooms.findIndex((room) => room.name === chatRoomName);
         const deletedChatRoom = this.chatRooms.splice(indexToDelete, 1)[0];
         await this.chatRoomsStorage.deleteRoom(deletedChatRoom.name);
+        this.unsubscribeAllUsersFromRoom(sio, chatRoomName);
         sio.emit(SocketEvents.DeleteChatRoom, deletedChatRoom);
     }
 
@@ -191,7 +192,7 @@ export class HomeChatBoxHandlerService {
         socket.emit(SocketEvents.JoinChatRoom, room);
     }
 
-    private async leaveChatRoom(socket: Socket, chatRoomName: string) {
+    private async leaveChatRoom(sio: Server, socket: Socket, chatRoomName: string) {
         const room = this.isChatRoomExist(chatRoomName);
         if (room === undefined) {
             socket.emit(SocketEvents.LeaveChatRoomNotFoundError, '');
@@ -199,6 +200,9 @@ export class HomeChatBoxHandlerService {
         }
         const userId = this.socketManager.getUserIdFromSocket(socket) as string;
         await this.accountStorage.deleteChatRoom(userId, room.name);
+        if (room.creatorId === userId) {
+            this.deleteChatRoom(sio, socket, chatRoomName);
+        }
         socket.leave(room.name);
         socket.emit(SocketEvents.LeaveChatRoom, room);
     }
