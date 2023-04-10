@@ -127,7 +127,7 @@ export class HomeChatBoxHandlerService {
     private async createChatRoom(sio: Server, socket: Socket, chatRoomName: string) {
         const room = this.isChatRoomExist(chatRoomName);
         if (room !== undefined) {
-            socket.emit(SocketEvents.CreateChatRoomError, '');
+            socket.emit(SocketEvents.CreateChatRoomError, chatRoomName);
             return;
         }
         const userId = this.socketManager.getUserIdFromSocket(socket);
