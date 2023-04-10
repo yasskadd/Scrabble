@@ -134,6 +134,7 @@ export class HomeChatBoxHandlerService {
         const newChatRoom = { name: chatRoomName, messageCount: 0, creatorId: userId, readingUsers: [], isDeletable: true };
         this.chatRooms.push(newChatRoom);
         await this.chatRoomsStorage.createRoom(chatRoomName);
+        await this.joinChatRoom(socket, chatRoomName);
         sio.emit(SocketEvents.CreateChatRoom, newChatRoom);
     }
 
