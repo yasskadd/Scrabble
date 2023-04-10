@@ -83,13 +83,14 @@ export class GamesActionsService {
             socket.emit(SocketEvents.ExchangeFailure);
             return;
         }
+
         gamePlayer.exchangeLetter(letters);
         const exchangePublicInfo: ExchangePublicInfo = {
             letterAmount: lettersToExchange,
             player: gamePlayer.player.user.username,
         };
 
-        socket.broadcast.to(gamePlayer.player.roomId).emit(SocketEvents.ExchangeSuccess, exchangePublicInfo);
+        this.socketManager.emitRoom(gamePlayer.player.roomId, SocketEvents.ExchangeSuccess, exchangePublicInfo);
         this.gamesHandler.updatePlayersInfo(gamePlayer.player.roomId, gamePlayer.game);
     }
 

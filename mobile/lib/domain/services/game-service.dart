@@ -31,6 +31,7 @@ class GameService {
   GameRoom? _gameRoom;
   Letter? draggedLetter;
   List<LetterPlacement> pendingLetters = [];
+  List<int> starPlacements = [];
 
   Game? game;
 
@@ -46,7 +47,7 @@ class GameService {
 
     while (game != null) {
       game!.turnTimer += 1;
-      notifyGameInfoChange.add(true);
+      notifyGameInfoChange.add(false);
       await Future.delayed(const Duration(seconds: 1));
     }
   }
@@ -67,7 +68,6 @@ class GameService {
   void _publicViewUpdate(GameInfo gameInfo) {
     if (game == null) return;
 
-
     game!.update(gameInfo);
     notifyGameInfoChange.add(true);
   }
@@ -84,7 +84,7 @@ class GameService {
     game = null;
   }
 
-  void placeLetterOnBoard(int x, int y, Letter letter) {
+  void placeLetterOnBoard(int x, int y, Letter letter, bool isStarLetter) {
     if(!game!.isCurrentPlayersTurn()) return;
 
     debugPrint("[GAME SERVICE] Place letter to the board: board[$x][$y] = $letter");
@@ -95,6 +95,7 @@ class GameService {
 
     game!.gameboard.placeLetter(x, y, letter);
     pendingLetters.add(LetterPlacement(x, y, letter));
+    if(isStarLetter) starPlacements.add(pendingLetters.length - 1);
     pendingLetters.sort((a, b) => a.x.compareTo(b.x) + a.y.compareTo(b.y));
 
     //TODO: CALL SERVER IMPLEMENTATION FOR SYNC
@@ -153,12 +154,19 @@ class GameService {
     //TODO: CALL SERVER IMPLEMENTATION FOR SYNC
 
     if (isPlacedLetterRemovalValid(x, y)) {
-      pendingLetters.removeWhere((placement) => placement.x == x && placement.y == y);
+      int index = pendingLetters.indexWhere((placement) => placement.x == x && placement.y == y);
+      pendingLetters.removeAt(index);
 
       debugPrint(
           "[GAME SERVICE] Remove letter from the board: board[$x][$y] = ${game!.gameboard.getSlot(x, y)}");
 
-      return game!.gameboard.removeLetter(x, y);
+      Letter? removedLetter = game!.gameboard.removeLetter(x, y);
+      if(starPlacements.contains(index)) {
+        removedLetter = Letter.STAR;
+        starPlacements.remove(index);
+      }
+
+      return removedLetter;
     } else {
       return null;
     }
@@ -267,7 +275,7 @@ class GameService {
     pendingLetters = [];
     game!.gameboard.notifyBoardChanged.add(true);
 
-    if (error['stringFormat'] != null){
+    if (error is! String){
       error = error['stringFormat'];
     }
 
@@ -275,15 +283,20 @@ class GameService {
   }
 
   void skipTurn() {
-    _socket.emit("skip");
+    _socket.emit(GameSocketEvent.Skip.event);
   }
 
   void abandonGame() {
-    _socket.emit("AbandonGame");
+    _socket.emit(GameSocketEvent.AbandonGame.event);
     game = null;
   }
 
   void quitGame() {
-    _socket.emit("quitGame");
+    _socket.emit(GameSocketEvent.QuitGame.event);
+  }
+
+  void exchangeLetters(List<Letter> lettersToExchange) {
+    List<String> sLetters = lettersToExchange.map((letter) => letter.character).toList();
+    _socket.emit(GameSocketEvent.Exchange.event, [sLetters]);
   }
 }

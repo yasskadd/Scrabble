@@ -6,7 +6,7 @@ import { TauriStateService } from '@services/tauri-state.service';
 import * as tauri from '@tauri-apps/api';
 import { Event } from '@tauri-apps/api/event';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { io, Socket } from 'socket.io-client';
+import { Socket, io } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -99,6 +99,7 @@ export class ClientSocketService implements OnDestroy {
     }
 
     on<T>(eventName: string, action: (data: T) => void): void {
+        console.log('do we make it here 2?' + eventName + 'YESSS');
         if (this.tauriStateService.useTauri) {
             tauri.event
                 .listen(eventName, (event: Event<unknown>) => {
