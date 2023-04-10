@@ -32,11 +32,11 @@
     <mat-menu #accountMenu="matMenu">
         <!-- Language -->
         <button *ngIf="themeService.isDarkTheme.value" mat-menu-item color="accent" (click)="themeService.toggleDarkMode()">
-            <mat-icon>bedtime</mat-icon> Dark Mode
+            <mat-icon>wb_sunny</mat-icon> Light Mode
         </button>
         <!-- Language -->
         <button *ngIf="!themeService.isDarkTheme.value" mat-menu-item color="accent" (click)="themeService.toggleDarkMode()">
-            <mat-icon>wb_sunny</mat-icon> Light Mode
+            <mat-icon>bedtime</mat-icon> Dark Mode
         </button>
 
         <!-- Language -->
