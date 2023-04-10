@@ -76,6 +76,10 @@ export class HomeChatBoxHandlerService {
             this.getAllChatRooms(socket);
         });
 
+        this.socketManager.onConnect((socket: Socket) => {
+            this.subscribeUserToRooms(socket);
+        });
+
         // this.socketManager.io(SocketEvents.UserLeftRoom, (sio: Server, socket: Socket) => {
         //     this.leaveRoom(sio, socket);
         // });
@@ -114,6 +118,16 @@ export class HomeChatBoxHandlerService {
         const gameChatRoomName = 'game' + gameId;
         this.socketManager.deleteRoom(gameChatRoomName);
         this.gameChatRooms.delete(gameChatRoomName);
+    }
+
+    private async subscribeUserToRooms(socket: Socket) {
+        const userId = this.socketManager.getUserIdFromSocket(socket) as string;
+        const userData = await this.accountStorage.getUserDataFromID(userId);
+        userData.chatRooms.forEach((room) => {
+            if (this.isChatRoomExist(room.name) !== undefined) {
+                socket.join(room.name);
+            }
+        });
     }
 
     private async loadMessages(chatRoomName: string): Promise<ChatRoom> {
