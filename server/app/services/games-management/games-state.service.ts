@@ -70,8 +70,8 @@ export class GamesStateService {
         this.socketManager.on(SocketEvents.QuitGame, (socket: Socket) => {
             this.disconnect(socket);
         });
-        this.socketManager.on(SocketEvents.JoinAsObserver, (socket: Socket, botID: string) => {
-            this.joinAsObserver(socket, botID);
+        this.socketManager.io(SocketEvents.JoinAsObserver, (server: Server, socket: Socket, botID: string) => {
+            this.joinAsObserver(server, socket, botID);
         });
     }
 
@@ -118,7 +118,6 @@ export class GamesStateService {
     addObserver(server: Server, roomId: string, player: RoomPlayer): void {
         const gamePlayers: GamePlayer[] = this.gamesHandler.getPlayersFromRoomId(roomId);
         const socket: Socket | undefined = this.socketManager.getSocketFromId(player.socketId);
-        console.log(socket);
         if (!socket) return;
 
         const newGamePlayer = new GamePlayer(player);
@@ -509,7 +508,7 @@ export class GamesStateService {
             gameboard: game.gameboard.toStringArray(),
             players: playersInfo,
             activePlayer: game.turn.activePlayer,
-        } as GameInfo);
+        });
     }
 
     // private findAndDeleteElementFromArray(array: any[] | undefined, element: any) {
@@ -543,12 +542,11 @@ export class GamesStateService {
         } as GameHistoryInfo;
     }
 
-    private joinAsObserver(socket: Socket, botID: string): void {
+    private joinAsObserver(server: Server, socket: Socket, botID: string): void {
         const socketID = socket.id;
         const observer = this.gamesHandler.getPlayerFromSocketId(socketID) as GamePlayer;
         if (!observer) return;
 
-        // const roomID = observer?.player.roomId;
         const bot = this.gamesHandler.players.find((player) => player.player.user._id === botID);
         if (!bot) {
             // TODO: Socket event to notify observer he cannot replace bot
@@ -556,7 +554,7 @@ export class GamesStateService {
             return;
         }
 
-        const newPlayer = this.replaceBotWithObserver(observer.player, bot as Bot);
+        const newPlayer: RealPlayer = this.replaceBotWithObserver(observer.player, bot as Bot);
         // Update gamesHandler player list
         this.gamesHandler.players = this.gamesHandler.players.filter(
             (player) => player.player.user._id !== observer.player.user._id || player.player.user._id !== bot?.player.user._id,
@@ -564,9 +562,14 @@ export class GamesStateService {
         this.gamesHandler.players.push(newPlayer);
 
         // TODO: Update room with roomID
+        server.to(newPlayer.player.roomId).emit(SocketEvents.PublicViewUpdate, {
+            gameboard: newPlayer.game.gameboard.toStringArray(),
+            players: this.gamesHandler.getPlayersFromRoomId(newPlayer.player.roomId),
+            activePlayer: newPlayer.game.turn.activePlayer,
+        });
     }
 
-    private replaceBotWithObserver(observer: RoomPlayer, bot: Bot) {
+    private replaceBotWithObserver(observer: RoomPlayer, bot: Bot): RealPlayer {
         bot.unsubscribeObservables();
         return bot.convertToRealPlayer(observer);
     }

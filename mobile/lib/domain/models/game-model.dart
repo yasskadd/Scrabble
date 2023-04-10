@@ -10,6 +10,7 @@ class Game {
   late GamePlayer currentPlayer;
   GamePlayer? activePlayer;
   int turnTimer = 0;
+  int reserveLetterCount = 0;
 
   Game(GameRoom room, IUser currentUser)
       : players = room.players
@@ -62,6 +63,10 @@ class Game {
     if (activePlayerIndex >= 0) {
       activePlayer = players[activePlayerIndex];
     }
+  }
+
+  bool isCurrentPlayersTurn(){
+    return activePlayer != null && currentPlayer.player.user.id == activePlayer!.player.user.id;
   }
 }
 

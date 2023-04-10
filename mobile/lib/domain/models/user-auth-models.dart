@@ -22,22 +22,27 @@ class ThemeInfo {
       : mainTheme = MobileTheme.fromString(json['mainTheme']),
         lightTheme = MobileTheme.fromString(json['lightTheme']),
         darkTheme = MobileTheme.fromString(json['darkTheme']),
-        isDynamic = json['isDynamic']
-  ;
+        isDynamic = json['isDynamic'];
 }
 
 class IUser {
   final String? email;
   final String username;
+  final String? id;
   final String? password;
   final UserImageInfo? profilePicture;
 
   IUser(
-      {required this.username, this.password, this.email, this.profilePicture});
+      {required this.username,
+      this.password,
+      this.email,
+      this.profilePicture,
+      this.id});
 
   IUser.fromJson(json)
       : email = json['email'],
         username = json['username'],
+        id = json['_id'],
         password = json['password'],
         profilePicture = json['profilePicture'] != null
             ? UserImageInfo.fromJson(json['profilePicture'])
@@ -47,6 +52,7 @@ class IUser {
         "email": email,
         "username": username,
         "password": password,
-        "profilePicture": profilePicture
+        "profilePicture": profilePicture,
+        "_id": id
       };
 }

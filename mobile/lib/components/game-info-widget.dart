@@ -81,10 +81,10 @@ class _GameInfoState extends State<GameInfo> {
                               child: Padding(
                                 padding: const EdgeInsets.all(16.0),
                                 child: Column(
-                                  children: const [
+                                  children: [
                                     Text("Réserve"),
                                     SizedBox(height: 5),
-                                    Text("100")
+                                    Text(_gameService.game!.reserveLetterCount.toString())
                                   ],
                                 ),
                               )),
@@ -113,7 +113,7 @@ class _GameInfoState extends State<GameInfo> {
             const SizedBox(width: 50),
             ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                onPressed: () => {_gameService.skipTurn()},
+                onPressed: _gameService.game!.isCurrentPlayersTurn() ? () => {_gameService.skipTurn()} : null,
                 child: const Padding(
                   padding: EdgeInsets.all(17.0),
                   child: Icon(Icons.skip_next_rounded),

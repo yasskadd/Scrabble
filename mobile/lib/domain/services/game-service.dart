@@ -58,6 +58,9 @@ class GameService {
 
     _socket.on(GameSocketEvent.NextTurn.event, (data) => _nextTurn(GameInfo.fromJson(data)));
     _socket.on(GameSocketEvent.GameEnded.event, (_) => _endGame());
+    _socket.on(GameSocketEvent.LetterReserveUpdated.event, (letters) {
+      game!.reserveLetterCount = letters.toList().length;
+    });
   }
 
   void _publicViewUpdate(GameInfo gameInfo) {
@@ -81,6 +84,8 @@ class GameService {
   }
 
   void placeLetterOnBoard(int x, int y, Letter letter) {
+    if(!game!.isCurrentPlayersTurn()) return;
+
     debugPrint("[GAME SERVICE] Place letter to the board: board[$x][$y] = $letter");
     if (!_isLetterPlacementValid(x, y, letter)) {
       if (draggedLetter != null) cancelDragLetter(); // Wrong move

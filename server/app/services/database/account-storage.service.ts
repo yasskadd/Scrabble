@@ -10,7 +10,7 @@ import { Document, ObjectId } from 'mongodb';
 import { Service } from 'typedi';
 import { DatabaseService } from './database.service';
 
-const DEFAULT_PLAYER_SCORE = 1000;
+const DEFAULT_PLAYER_SCORE = 200;
 const DEFAULT_PLAYER_STATS = 0;
 @Service()
 export class AccountStorageService {
@@ -37,7 +37,7 @@ export class AccountStorageService {
             loss: DEFAULT_PLAYER_STATS,
             totalGameTime: DEFAULT_PLAYER_STATS,
             totalGameScore: DEFAULT_PLAYER_STATS,
-            averageGameTime: '',
+            averageGameTime: '0:0',
             averageGameScore: DEFAULT_PLAYER_STATS,
         };
         await this.database.users.addDocument(newUser);
@@ -134,9 +134,8 @@ export class AccountStorageService {
 
     async addUserEventHistory(id: string, userEvent: string, dateEvent: Date, isWinner?: boolean): Promise<void> {
         const historyEvent = this.createHistoryEvent(userEvent, dateEvent, isWinner);
-        if (historyEvent) {
-            await this.database.users.collection.updateOne({ _id: new ObjectId(id) }, { $push: { historyEventList: historyEvent } });
-        }
+        if (!historyEvent) return;
+        await this.database.users.collection.updateOne({ _id: new ObjectId(id) }, { $push: { historyEventList: historyEvent } });
     }
 
     async getUserEventHistory(id: string): Promise<HistoryEvent[]> {
