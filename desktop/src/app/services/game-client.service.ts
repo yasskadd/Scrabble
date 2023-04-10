@@ -195,7 +195,7 @@ export class GameClientService {
 
     getLocalPlayer(): PlayerInformation {
         // TODO : FOR TESTING
-        return this.players.find((info: PlayerInformation) => info.player.user.username === this.userService.user.username);
+        return this.players.find((info: PlayerInformation) => info.player.user._id === this.userService.user._id);
         // return this.players[0];
     }
 

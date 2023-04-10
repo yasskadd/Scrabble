@@ -12,6 +12,7 @@ import { GameInfo } from '@common/interfaces/game-state';
 import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
 import { PlayerInformation } from '@common/interfaces/player-information';
 import { RoomPlayer } from '@common/interfaces/room-player';
+import { Subscription } from 'rxjs';
 import { Container } from 'typedi';
 import { GamePlayer } from './player.class';
 import { RealPlayer } from './real-player.class';
@@ -25,6 +26,9 @@ export class Bot extends GamePlayer {
     protected wordSolver: WordSolver;
     protected isNotTurn: boolean = false;
     private timer: number;
+
+    private countDownSubscription: Subscription;
+    private endTurnSubscription: Subscription;
 
     constructor(roomPlayer: RoomPlayer, protected botInfo: BotInformation) {
         super(roomPlayer);
@@ -44,11 +48,11 @@ export class Bot extends GamePlayer {
     }
 
     start(): void {
-        this.game.turn.countdown.subscribe((countdown) => {
+        this.countDownSubscription = this.game.turn.countdown.subscribe((countdown) => {
             this.countUp = this.timer - (countdown as number);
             if (this.countUp === Constant.TIME_SKIP && this.player.user === this.game.turn.activePlayer) this.skipTurn();
         });
-        this.game.turn.endTurn.subscribe((activePlayer) => {
+        this.endTurnSubscription = this.game.turn.endTurn.subscribe((activePlayer) => {
             this.isNotTurn = false;
             if (activePlayer === this.player.user.username) {
                 this.countUp = 0;
@@ -75,8 +79,8 @@ export class Bot extends GamePlayer {
     }
 
     unsubscribeObservables(): void {
-        this.game.turn.countdown.unsubscribe();
-        this.game.turn.endTurn.unsubscribe();
+        this.countDownSubscription.unsubscribe();
+        this.endTurnSubscription.unsubscribe();
     }
 
     protected placeWord(commandInfo: PlaceWordCommandInfo): void {
