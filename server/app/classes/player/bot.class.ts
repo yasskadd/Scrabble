@@ -1,10 +1,16 @@
 import { Game } from '@app/classes/game.class';
 import { WordSolver } from '@app/classes/word-solver.class';
+import { Word } from '@app/classes/word.class';
 import * as Constant from '@app/constants/bot';
 import { BotInformation } from '@app/interfaces/bot-information';
+import { GameValidationService } from '@app/services/games-management/game-validation.service';
+import { GamesHandlerService } from '@app/services/games-management/games-handler.service';
+import { RackService } from '@app/services/rack.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
+import { GameInfo } from '@common/interfaces/game-state';
 import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
+import { PlayerInformation } from '@common/interfaces/player-information';
 import { RoomPlayer } from '@common/interfaces/room-player';
 import { Container } from 'typedi';
 import { GamePlayer } from './player.class';
@@ -13,6 +19,9 @@ import { RealPlayer } from './real-player.class';
 export class Bot extends GamePlayer {
     protected countUp: number = 0;
     protected socketManager: SocketManager = Container.get(SocketManager);
+    protected gameValidationService = Container.get(GameValidationService);
+    protected gamesHandler = Container.get(GamesHandlerService);
+    protected rackService = Container.get(RackService);
     protected wordSolver: WordSolver;
     protected isNotTurn: boolean = false;
     private timer: number;
@@ -85,13 +94,56 @@ export class Bot extends GamePlayer {
     }
 
     protected emitPlaceCommand(randomCommandInfo: PlaceWordCommandInfo): void {
-        this.game.placeWord(randomCommandInfo);
-        this.game.turn.resetSkipCounter();
-        this.game.turn.end();
+        // this.game.placeWord(randomCommandInfo, this.getInformation());
+        this.play(randomCommandInfo);
+        // this.game.turn.resetSkipCounter();
+        // this.game.turn.end();
         this.socketManager.emitRoom(this.botInfo.roomId, SocketEvents.LetterReserveUpdated, this.game.letterReserve.lettersReserve);
     }
 
     protected getRandomNumber(maxNumber: number): number {
         return Math.floor(Math.random() * maxNumber + 1);
+    }
+
+    private play(randomCommandInfo: PlaceWordCommandInfo) {
+        const gamePlayer = this as GamePlayer;
+        if (!gamePlayer) return;
+
+        const game = gamePlayer.game;
+        if (!game) return;
+
+        randomCommandInfo.letters = randomCommandInfo.letters.map((letter) => {
+            return letter.toUpperCase();
+        });
+        const placement: Word = this.gameValidationService.verifyPlaceWordCommand(gamePlayer, randomCommandInfo) as Word;
+        // TODO: Remove this if when lettre blanche is fixed
+        if (!(placement instanceof Word)) {
+            return;
+        }
+        const wordPlacementResult = game.letterPlacement.placeWord(placement, randomCommandInfo, gamePlayer, game.gameboard);
+
+        // Update rack
+        if (wordPlacementResult.hasPassed) {
+            this.rackService.updatePlayerRack(randomCommandInfo.letters, gamePlayer.rack);
+            game.giveNewLetterToRack(gamePlayer, randomCommandInfo.letters.length, wordPlacementResult);
+        }
+
+        // Complete turn
+        game.concludeGameVerification(gamePlayer);
+
+        const playersInfo: PlayerInformation[] = this.gamesHandler.players.map((player: GamePlayer) => {
+            return player.getInformation();
+        });
+
+        const viewUpdateInfo: GameInfo = {
+            gameboard: wordPlacementResult.gameboard.toStringArray(),
+            players: playersInfo,
+            activePlayer: gamePlayer.game.turn.activePlayer,
+        };
+
+        this.socketManager.emitRoom(gamePlayer.player.roomId, SocketEvents.PublicViewUpdate, viewUpdateInfo);
+        this.gamesHandler.updatePlayersInfo(gamePlayer.player.roomId, gamePlayer.game);
+
+        if (wordPlacementResult.hasPassed) this.socketManager.emitRoom(gamePlayer.player.roomId, SocketEvents.PlacementSuccess);
     }
 }
