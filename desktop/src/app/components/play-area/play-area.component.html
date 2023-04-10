@@ -39,6 +39,7 @@
                             </div>
                         </div>
                     </div>
+
                     <div *ngIf="gameClientService.getLocalPlayer().player.type === playerType.User">
                         <app-player-rack
                             [keyboardParentSubject]="keyboardParentSubject"
@@ -46,6 +47,7 @@
                             class="player-rack"
                         ></app-player-rack>
                     </div>
+
                     <button *ngIf="chatIsOpen" class="open-chat-button" mat-button color="primary" (click)="drawer.toggle()" (click)="closeChat()">
                         {{ "main_page.chat.close" | translate }}
                         <mat-icon>keyboard_arrow_right</mat-icon>
