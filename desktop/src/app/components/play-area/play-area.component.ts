@@ -9,6 +9,8 @@ import { LetterPlacementService } from '@app/services/letter-placement.service';
 import { PlayerInformation } from '@common/interfaces/player-information';
 import { Subject } from 'rxjs';
 import { PlayerType } from '@common/models/player-type';
+import { ClientSocketService } from '@app/services/communication/client-socket.service';
+import { SocketEvents } from '@common/constants/socket-events';
 
 export enum MouseButton {
     Left = 0,
@@ -33,6 +35,7 @@ export class PlayAreaComponent {
     constructor(
         private readonly gridService: GridService,
         private letterService: LetterPlacementService,
+        private clientSocketService: ClientSocketService,
         public gameClientService: GameClientService,
     ) {
         this.sliderForm = new FormControl(this.gridService.letterSize);
@@ -98,7 +101,7 @@ export class PlayAreaComponent {
         return Object.values(RackPosition)[index];
     }
 
-    getClass(index: number): string {
-        return Object.values(RackPosition)[index] + '-player-rack';
+    replaceBot(player: PlayerInformation) {
+        this.clientSocketService.send(SocketEvents.JoinAsObserver, player.player.user._id);
     }
 }
