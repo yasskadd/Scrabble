@@ -8,6 +8,11 @@ import { DatabaseService } from './database.service';
 export class ChatRoomsStorageService {
     constructor(private databaseService: DatabaseService) {}
 
+    async getAllRooms(): Promise<ChatRoom[]> {
+        const chatRooms = await this.databaseService.chatRooms.fetchDocuments({});
+        return chatRooms as ChatRoom[];
+    }
+
     async getRooms(rooms: string[]): Promise<Document[]> {
         const chatRooms = await this.databaseService.chatRooms.fetchDocuments({ name: { $in: rooms } });
         return chatRooms;

@@ -41,6 +41,16 @@ export class HomeChatBoxHandlerService {
         private chatRoomsStorage: ChatRoomsStorageService,
     ) {
         this.chatRooms = [{ name: 'main', messageCount: 0, readingUsers: [], isDeletable: false }];
+        // TODO: refactor or do it in another way, works for now
+        this.chatRoomsStorage.getAllRooms().then((rooms) => {
+            rooms.forEach((room) => {
+                if (this.isChatRoomExist(room.name)) return;
+                const messageCount = room.messages.length;
+                this.chatRooms.push({ name: room.name, messageCount, readingUsers: [], isDeletable: true });
+            });
+
+            console.log('ChatRooms loaded');
+        });
     }
 
     initSocketEvents(): void {
