@@ -18,19 +18,19 @@
                             class="player-rack"
                         ></app-player-rack>
                         <div class="player-selector">
-                            <div *ngFor="let player of gameClientService.players">
+                            <div *ngFor="let player of gameClientService.players; index as i">
                                 <img
                                     [mat-menu-trigger-for]="player_menu"
                                     [src]="player.player.user.profilePicture.key"
                                     class="player-choice mat-elevation-z5"
                                 />
                                 <mat-menu #player_menu="matMenu">
-                                    <button (click)="selectPlayer(player)" mat-menu-item>
+                                    <button (click)="selectPlayer(i)" mat-menu-item>
                                         <mat-icon>visibility</mat-icon>
                                         <!-- TODO : Language -->
                                         <span>Voir</span>
                                     </button>
-                                    <button (click)='replaceBot(player)' *ngIf="player.player.type === playerType.Bot" mat-menu-item>
+                                    <button (click)="replaceBot(player)" *ngIf="player.player.type === playerType.Bot" mat-menu-item>
                                         <mat-icon>sync</mat-icon>
                                         <!-- TODO : Language-->
                                         <span>Remplacer</span>
