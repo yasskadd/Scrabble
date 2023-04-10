@@ -238,8 +238,19 @@ export class GamesStateService {
             return;
         }
 
-        if (players.filter((player: GamePlayer) => player.rackIsEmpty()).length > 0) {
-            const finishingPlayer = players.find((player: GamePlayer) => player.rackIsEmpty());
+        if (
+            players.filter((player: GamePlayer) => {
+                if (player.player.type === PlayerType.User) {
+                    return player.rackIsEmpty();
+                }
+                return false;
+            }).length > 0
+        ) {
+            const finishingPlayer = players.find((player: GamePlayer) => {
+                if (player.player.type === PlayerType.User) {
+                    player.rackIsEmpty();
+                }
+            });
             if (!finishingPlayer) return;
             players.filter((player: GamePlayer) => {
                 if (player.player.user.username !== finishingPlayer.player.user.username) {

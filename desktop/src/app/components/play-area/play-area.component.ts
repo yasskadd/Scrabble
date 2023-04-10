@@ -102,6 +102,7 @@ export class PlayAreaComponent {
     }
 
     replaceBot(player: PlayerInformation) {
+        console.log(player.player.user);
         this.clientSocketService.send(SocketEvents.JoinAsObserver, player.player.user._id);
     }
 }
