@@ -32,7 +32,6 @@ import { Subject } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import { GamesHandlerService } from './games-handler.service';
-import { Letter } from '@common/interfaces/letter';
 import { IUser } from '@common/interfaces/user';
 
 const MAX_SKIP = 6;
