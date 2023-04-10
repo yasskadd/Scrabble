@@ -43,8 +43,10 @@
                             <td>{{ timer.getTimeStamp(gameRoom.timer) }}</td>
                             <td>{{ gameRoom.dictionary }}</td>
                             <button class="join-game" (click)="joinRoom(gameRoom)" mat-raised-button>
-                                <mat-icon *ngIf='isGameRoomLocked(gameRoom)'> lock </mat-icon>
+                                <mat-icon *ngIf="isGameRoomLocked(gameRoom)"> lock </mat-icon>
                                 {{ "action.join" | translate }}
+                                <!-- Outlined -->
+                                <mat-icon *ngIf="getPlayers(gameRoom).length >= 4"> person_outline </mat-icon>
                             </button>
                         </tr>
                     </tbody>
@@ -55,7 +57,7 @@
                 <button class="return-button" mat-icon-button routerLink="/home">
                     <mat-icon>navigate_before</mat-icon>
                 </button>
-                <mat-form-field (keydown.enter)='joinSecretRoom()' appearance="outline">
+                <mat-form-field (keydown.enter)="joinSecretRoom()" appearance="outline">
                     <mat-label>
                         <!-- TODO : Language -->
                         Code de connexion

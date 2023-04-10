@@ -138,7 +138,7 @@ export class HttpHandlerService {
         return JSON.parse(res.body);
     }
 
-    async signUp(newUser: IUser): Promise<{ imageKey: string }> {
+    async signUp(newUser: IUser): Promise<any> {
         const res: HttpResponse = await invoke('httpPost', { url: `${this.baseUrl}/auth/signUp`, onceToldMe: JSON.stringify(newUser) });
         return JSON.parse(res.body);
     }

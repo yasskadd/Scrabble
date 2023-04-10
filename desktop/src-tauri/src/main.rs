@@ -22,6 +22,7 @@ struct Http {
 #[derive(Serialize)]
 struct HttpResponse {
     body: String,
+    err: String,
 }
 
 enum RustEvent {
@@ -177,8 +178,14 @@ async fn httpGet(
     let res = req.send().await.unwrap().text().await;
 
     match res {
-        Ok(response) => Ok(HttpResponse { body: response }),
-        Err(error) => Err(error.to_string()),
+        Ok(response) => Ok(HttpResponse {
+            body: response,
+            err: "".to_string(),
+        }),
+        Err(error) => Ok(HttpResponse {
+            body: "".to_string(),
+            err: error.to_string(),
+        }),
     }
 }
 
@@ -201,8 +208,14 @@ async fn httpPost(
     let res: Result<String, reqwest::Error> = req.send().await.unwrap().text().await;
 
     match res {
-        Ok(response) => Ok(HttpResponse { body: response }),
-        Err(error) => Err(error.to_string()),
+        Ok(response) => Ok(HttpResponse {
+            body: response,
+            err: "".to_string(),
+        }),
+        Err(error) => Ok(HttpResponse {
+            body: "".to_string(),
+            err: error.to_string(),
+        }),
     }
 }
 
@@ -243,8 +256,14 @@ async fn httpPut(
     let res: Result<String, reqwest::Error> = req.send().await.unwrap().text().await;
 
     match res {
-        Ok(response) => Ok(HttpResponse { body: response }),
-        Err(error) => Err(error.to_string()),
+        Ok(response) => Ok(HttpResponse {
+            body: response,
+            err: "".to_string(),
+        }),
+        Err(error) => Ok(HttpResponse {
+            body: "".to_string(),
+            err: error.to_string(),
+        }),
     }
 }
 
@@ -295,8 +314,14 @@ async fn httpPatch(
     let res: Result<String, reqwest::Error> = req.send().await.unwrap().text().await;
 
     match res {
-        Ok(response) => Ok(HttpResponse { body: response }),
-        Err(error) => Err(error.to_string()),
+        Ok(response) => Ok(HttpResponse {
+            body: response,
+            err: "".to_string(),
+        }),
+        Err(error) => Ok(HttpResponse {
+            body: "".to_string(),
+            err: error.to_string(),
+        }),
     }
 }
 
@@ -319,8 +344,14 @@ async fn httpDelete(
     let res: Result<String, reqwest::Error> = req.send().await.unwrap().text().await;
 
     match res {
-        Ok(response) => Ok(HttpResponse { body: response }),
-        Err(error) => Err(error.to_string()),
+        Ok(response) => Ok(HttpResponse {
+            body: response,
+            err: "".to_string(),
+        }),
+        Err(error) => Ok(HttpResponse {
+            body: "".to_string(),
+            err: error.to_string(),
+        }),
     }
 }
 

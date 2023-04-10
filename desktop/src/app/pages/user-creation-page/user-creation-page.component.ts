@@ -8,6 +8,7 @@ import { MAX_EMAIL_LENGTH, MAX_TEXT_LENGTH } from '@app/constants/user';
 import { equalStringValidator } from '@app/directives/custom-validators';
 import { AppRoutes } from '@app/models/app-routes';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
+import { SnackBarService } from '@app/services/snack-bar.service';
 import { AvatarData } from '@common/interfaces/avatar-data';
 import { ImageInfo } from '@common/interfaces/image-info';
 import { IUser } from '@common/interfaces/user';
@@ -33,7 +34,13 @@ export class UserCreationPageComponent {
 
     protected imageTypes: typeof ImageType = ImageType;
 
-    constructor(private httpHandlerService: HttpHandlerService, private router: Router, private formBuilder: FormBuilder, private dialog: MatDialog) {
+    constructor(
+        private httpHandlerService: HttpHandlerService,
+        private snackBarService: SnackBarService,
+        private router: Router,
+        private formBuilder: FormBuilder,
+        private dialog: MatDialog,
+    ) {
         this.profilePicForm = new FormControl(undefined, [Validators.required]);
         this.usernameForm = new FormControl('', [Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]);
         this.emailForm = new FormControl('', [Validators.required, Validators.email, Validators.maxLength(MAX_EMAIL_LENGTH)]);
@@ -91,7 +98,11 @@ export class UserCreationPageComponent {
                 password: this.passwordForm.value,
                 profilePicture,
             } as IUser)
-            .then((res: { imageKey: string }) => {
+            .then((res) => {
+                if (res.message) {
+                    this.snackBarService.openError(res.message);
+                    return;
+                }
                 this.connectionError = '';
 
                 if (!isDefaultPicture) {
