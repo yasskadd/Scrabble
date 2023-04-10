@@ -40,12 +40,12 @@
         </button>
 
         <!-- Language -->
-        <button mat-menu-item (click)="redirectSettingsPage()" *ngIf="userService.isConnected()">Settings</button>
+        <button mat-menu-item *ngIf="userService.isConnected()" (click)="redirectSettingsPage()">Settings</button>
         <!-- Language -->
-        <button mat-menu-item (click)="redirectUserPage()">Sign Up</button>
+        <button mat-menu-item *ngIf="!userService.isConnected()" (click)="redirectUserPage()">Sign Up</button>
         <!-- Language -->
-        <button mat-menu-item (click)="redirectLoginPage()" *ngIf="!userService.isConnected()">Sign In</button>
+        <button mat-menu-item *ngIf="!userService.isConnected()" (click)="redirectLoginPage()">Sign In</button>
         <!-- Language -->
-        <button mat-menu-item (click)="userService.logout()" *ngIf="userService.isConnected()">Sign Out</button>
+        <button mat-menu-item *ngIf="userService.isConnected()" (click)="userService.logout()">Sign Out</button>
     </mat-menu>
 </mat-toolbar>

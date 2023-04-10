@@ -46,4 +46,8 @@ export class ConnectionPageComponent {
             connectionSubject.unsubscribe();
         });
     }
+
+    redirectUserPage() {
+        this.router.navigate(['/user']).then();
+    }
 }
