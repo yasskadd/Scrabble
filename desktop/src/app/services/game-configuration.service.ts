@@ -91,7 +91,8 @@ export class GameConfigurationService {
 
         this.clientSocket.on(SocketEvents.UpdateGameRooms, (gamesToJoin: GameRoom[]) => {
             this.availableRooms = gamesToJoin;
-            if (!gamesToJoin.map((room: GameRoom) => room.id).includes(this.localGameRoom.id)) {
+            console.log(this.availableRooms);
+            if (this.router.url.includes(AppRoutes.GamePage) && !gamesToJoin.map((room: GameRoom) => room.id).includes(this.localGameRoom.id)) {
                 this.exitWaitingRoom();
                 this.router.navigate([`${AppRoutes.HomePage}`]);
             }
