@@ -126,16 +126,20 @@ export class GamesStateService {
         this.gamesHandler.players.push(newGamePlayer);
         socket.emit(SocketEvents.GameAboutToStart, {
             gameboard: newGamePlayer.game.gameboard.toStringArray(),
-            players: this.gamesHandler.players.map((p: GamePlayer) => {
-                return p.getInformation();
-            }),
+            players: this.gamesHandler.players
+                .filter((p: GamePlayer) => p.player.roomId === roomId)
+                .map((p: GamePlayer) => {
+                    return p.getInformation();
+                }),
             activePlayer: newGamePlayer.game.turn.activePlayer,
         });
         server.to(roomId).emit(SocketEvents.PublicViewUpdate, {
             gameboard: newGamePlayer.game.gameboard.toStringArray(),
-            players: this.gamesHandler.players.map((p: GamePlayer) => {
-                return p.getInformation();
-            }),
+            players: this.gamesHandler.players
+                .filter((p: GamePlayer) => p.player.roomId === roomId)
+                .map((p: GamePlayer) => {
+                    return p.getInformation();
+                }),
             activePlayer: newGamePlayer.game.turn.activePlayer,
         });
     }
@@ -565,17 +569,23 @@ export class GamesStateService {
             return;
         }
 
+        observer.player.type = PlayerType.User;
         const newPlayer: RealPlayer = this.replaceBotWithObserver(observer.player, bot as Bot);
         // Update gamesHandler player list
-        this.gamesHandler.players = this.gamesHandler.players.filter(
-            (player) => player.player.user._id !== observer.player.user._id || player.player.user._id !== bot?.player.user._id,
-        );
+        const botIndex = this.gamesHandler.players.findIndex((player: GamePlayer) => player.player.user._id === bot.player.user._id);
+        this.gamesHandler.players.splice(botIndex, 1);
+        const obsIndex = this.gamesHandler.players.findIndex((player: GamePlayer) => player.player.user._id === observer.player.user._id);
+        this.gamesHandler.players.splice(obsIndex, 1);
         this.gamesHandler.players.push(newPlayer);
 
         // TODO: Update room with roomID
         server.to(newPlayer.player.roomId).emit(SocketEvents.PublicViewUpdate, {
             gameboard: newPlayer.game.gameboard.toStringArray(),
-            players: this.gamesHandler.getPlayersFromRoomId(newPlayer.player.roomId),
+            players: this.gamesHandler.players
+                .filter((p: GamePlayer) => p.player.roomId === newPlayer.player.roomId)
+                .map((p: GamePlayer) => {
+                    return p.getInformation();
+                }),
             activePlayer: newPlayer.game.turn.activePlayer,
         });
     }
