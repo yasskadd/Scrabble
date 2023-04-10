@@ -16,11 +16,15 @@ export class SocketManager {
     private socketIdMap: Map<io.Socket, string>;
     private onEvents: Map<string, CallbackSignature[]>;
     private onAndSioEvents: Map<string, OnSioCallbackSignature[]>;
+    private onConnectEvents: CallbackSignature[];
+    private onDisconnectEvents: CallbackSignature[];
 
     constructor(private accountStorageService: AccountStorageService) {
         this.onEvents = new Map<string, CallbackSignature[]>();
         this.onAndSioEvents = new Map<string, OnSioCallbackSignature[]>();
         this.socketIdMap = new Map<io.Socket, string>();
+        this.onConnectEvents = [];
+        this.onDisconnectEvents = [];
     }
 
     init(server: http.Server) {
@@ -33,6 +37,14 @@ export class SocketManager {
         }
         const onElement = this.onEvents.get(event) as CallbackSignature[];
         onElement.push(callback);
+    }
+
+    onConnect(callback: CallbackSignature) {
+        this.onConnectEvents.push(callback);
+    }
+
+    onDisconnect(callback: CallbackSignature) {
+        this.onDisconnectEvents.push(callback);
     }
 
     io(event: string, callback: OnSioCallbackSignature) {
@@ -109,6 +121,10 @@ export class SocketManager {
 
                 this.socketIdMap.set(socket, username);
 
+                for (const callback of this.onConnectEvents) {
+                    callback(socket);
+                }
+
                 this.accountStorageService.addUserEventHistory(username, HistoryActions.Connection, new Date());
 
                 // eslint-disable-next-line no-console
@@ -132,6 +148,10 @@ export class SocketManager {
                 }
             }
             socket.on('disconnect', () => {
+                for (const callback of this.onDisconnectEvents) {
+                    callback(socket);
+                }
+
                 if (this.socketIdMap.has(socket)) {
                     this.accountStorageService.addUserEventHistory(this.socketIdMap.get(socket) as string, HistoryActions.Logout, new Date());
                     this.socketIdMap.delete(socket);
