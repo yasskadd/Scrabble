@@ -11,8 +11,8 @@ import { INVALID_INDEX } from '@common/constants/board-info';
 import { SocketEvents } from '@common/constants/socket-events';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
 import { PlayerInformation } from '@common/interfaces/player-information';
-import { PlayerType } from '@common/models/player-type';
 import { Service } from 'typedi';
+import { PlayerType } from '@common/models/player-type';
 
 @Service()
 export class GamesHandlerService {
@@ -28,18 +28,7 @@ export class GamesHandlerService {
     }
 
     updatePlayersInfo(roomId: string, game: Game) {
-        // const gameRoom = this.gamePlayers.get(roomId);
-        // const players = gameRoom?.players;
-        // if (!players) return;
-        // if ((gameRoom?.players as GamePlayer[]) === undefined) return;
-
         const infos: PlayerInformation[] = this.players.map((player: GamePlayer) => player.getInformation());
-        // this.players.forEach((gamePlayer: GamePlayer) => {
-        //     const socket: Socket | undefined = this.socketManager.getSocketFromId(gamePlayer.player.socketId);
-        //     if (!socket) return;
-        //
-        //     socket.emit(SocketEvents.UpdatePlayersInformation, infos);
-        // });
 
         this.socketManager.emitRoom(roomId, SocketEvents.UpdatePlayersInformation, infos);
         this.socketManager.emitRoom(roomId, SocketEvents.LetterReserveUpdated, game.letterReserve.lettersReserve);
@@ -53,31 +42,29 @@ export class GamesHandlerService {
         return this.players.filter((gamePlayer: GamePlayer) => gamePlayer.player.roomId === roomId);
     }
 
+    usersRemaining(roomId: string): boolean {
+        return this.getPlayersFromRoomId(roomId).filter((p: GamePlayer) => p.player.type === PlayerType.User).length > 0;
+    }
+
     removePlayerFromSocketId(socketId: string): void {
         const player = this.players.find((gamePlayer: GamePlayer) => gamePlayer.player.socketId === socketId);
         if (!player) return;
 
         const playerIndex = this.players.findIndex((gamePlayer: GamePlayer) => gamePlayer.player.socketId === socketId);
         if (playerIndex !== INVALID_INDEX) {
+            console.log('removing player ' + player.player.user.username + ' from his game room');
             this.players.splice(playerIndex, 1);
-        }
-
-        if (
-            this.players.filter(
-                (gamePlayer: GamePlayer) => gamePlayer.player.roomId === player.player.roomId && gamePlayer.player.type === PlayerType.User,
-            ).length === 0
-        ) {
-            this.removeRoomFromRoomId(player.player.roomId);
         }
     }
 
     removeRoomFromRoomId(roomId: string): void {
-        const playerIndexes: number[] = [];
+        let playerIndexes: number[] = [];
         this.players.forEach((gamePlayer: GamePlayer, index: number) => {
             if (gamePlayer.player.roomId === roomId) {
                 playerIndexes.push(index);
             }
         });
+        playerIndexes = playerIndexes.sort();
         playerIndexes.reverse();
         playerIndexes.forEach((index: number) => {
             this.players.splice(index, 1);

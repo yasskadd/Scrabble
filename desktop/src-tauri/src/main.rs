@@ -75,7 +75,8 @@ fn socketEstablishConnection(
         .on_any(move |event, payload, _raw_client| {
             // println!("Got event: {:?} {:?}", event, payload);
             if let Payload::String(payload) = payload {
-                println!("Got payload: {}", payload);
+                // println!("Got payload: {}", payload);
+                println!("Got event: {}", String::from(event.clone()));
                 socketEventWindow
                     .emit(&String::from(event), payload)
                     .expect("Couldn't emit the event to Angular");

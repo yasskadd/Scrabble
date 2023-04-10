@@ -60,6 +60,7 @@ export class WaitingRoomService {
     }
 
     removeRoom(server: Server, roomId: string): void {
+        console.log('removing waiting room');
         const roomIndex = this.waitingRooms.findIndex((room: GameRoom) => room.id === roomId);
         this.waitingRooms.splice(roomIndex, 1);
 
@@ -96,7 +97,7 @@ export class WaitingRoomService {
 
         // TODO : Add user as an observer if room full
         socket.leave(GAME_LOBBY_ROOM_ID);
-        socket.join(joinGameQuery.roomId);
+        socket.join(room.id);
 
         const newPlayer: RoomPlayer = {
             user: joinGameQuery.user,
@@ -118,7 +119,7 @@ export class WaitingRoomService {
         room.players.push(newPlayer);
 
         // server.to(joinGameQuery.roomId).emit(SocketEvents.PlayerJoinedWaitingRoom, this.stripPlayerPassword(newPlayer));
-        server.to(joinGameQuery.roomId).emit(SocketEvents.UpdateWaitingRoom, room);
+        server.to(room.id).emit(SocketEvents.UpdateWaitingRoom, room);
         socket.emit(SocketEvents.JoinedValidWaitingRoom, this.stripPlayersPassword(room));
         server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
 
@@ -132,23 +133,24 @@ export class WaitingRoomService {
         const room: GameRoom | undefined = this.getRoom(userQuery.roomId);
         if (!room) return;
 
-        if (!this.getPlayerFromQuery(userQuery)?.isCreator) {
-            const player = this.getPlayerFromQuery(userQuery);
-            // TODO : Tell client the rejection failed
-            if (!player) return;
-            if (room.players.filter((playerElement: RoomPlayer) => playerElement.type === PlayerType.User).length === 0) {
-                this.removeRoom(server, userQuery.roomId);
+        if (
+            (room.state === GameRoomState.Waiting && this.getPlayerFromQuery(userQuery)?.isCreator) ||
+            (room.state === GameRoomState.Playing &&
+                room.players.filter((playerElement: RoomPlayer) => playerElement.type === PlayerType.User).length === 0)
+        ) {
+            for (const p of room.players) {
+                this.rejectOpponent(server, socket, p);
             }
+            this.removeRoom(server, userQuery.roomId);
 
-            this.rejectOpponent(server, socket, player);
             return;
         }
 
-        for (const player of room.players) {
-            this.rejectOpponent(server, socket, player);
-        }
+        const player = this.getPlayerFromQuery(userQuery);
+        // TODO : Tell client the rejection failed
+        if (!player) return;
 
-        this.removeRoom(server, userQuery.roomId);
+        this.rejectOpponent(server, socket, player);
     }
 
     private rejectOpponent(server: Server, socket: Socket, player: RoomPlayer): void {

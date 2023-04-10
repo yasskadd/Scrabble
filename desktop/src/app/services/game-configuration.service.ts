@@ -91,6 +91,10 @@ export class GameConfigurationService {
 
         this.clientSocket.on(SocketEvents.UpdateGameRooms, (gamesToJoin: GameRoom[]) => {
             this.availableRooms = gamesToJoin;
+            if (!gamesToJoin.map((room: GameRoom) => room.id).includes(this.localGameRoom.id)) {
+                this.exitWaitingRoom();
+                this.router.navigate([`${AppRoutes.HomePage}`]);
+            }
         });
 
         this.clientSocket.on(SocketEvents.ErrorJoining, (reason: ServerErrors) => {
@@ -166,7 +170,7 @@ export class GameConfigurationService {
         this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
             roomId: this.localGameRoom.id,
             user: this.userService.user,
-        } as RoomPlayer);
+        });
 
         this.resetRoomInformations();
     }

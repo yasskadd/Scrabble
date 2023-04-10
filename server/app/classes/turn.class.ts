@@ -1,4 +1,5 @@
 import { IUser } from '@common/interfaces/user';
+import { PlayerType } from '@common/models/player-type';
 import { ReplaySubject } from 'rxjs';
 import { GamePlayer } from './player/player.class';
 
@@ -7,7 +8,7 @@ const SECOND = 1000;
 export class Turn {
     activePlayer: IUser | undefined;
     inactivePlayers: IUser[] | undefined;
-    endTurn: ReplaySubject<string | undefined>;
+    endTurn: ReplaySubject<IUser | undefined>;
     countdown: ReplaySubject<number | undefined>;
     skipCounter: number;
     time: number;
@@ -33,11 +34,12 @@ export class Turn {
     }
 
     determineStartingPlayer(players: GamePlayer[]): void {
-        const randomNumber: number = Math.floor(Math.random() * players.length);
-        this.activePlayer = players[randomNumber].player.user;
-        this.inactivePlayers = players
+        const playingPlayers = players.filter((p: GamePlayer) => p.player.type !== PlayerType.Observer);
+        const randomNumber: number = Math.floor(Math.random() * playingPlayers.length);
+        this.activePlayer = playingPlayers[randomNumber].player.user;
+        this.inactivePlayers = playingPlayers
             .filter((player) => {
-                return player.player.user !== this.activePlayer;
+                return player.player.user._id !== this.activePlayer?._id;
             })
             .map((player) => {
                 return player.player.user;
@@ -46,19 +48,22 @@ export class Turn {
 
     end(endGame?: boolean): void {
         clearInterval(this.timeOut as number);
-        if (!endGame) {
-            const tempInactivePlayer: IUser | undefined = this.inactivePlayers?.shift();
-            if (this.activePlayer) {
-                this.inactivePlayers?.push(this.activePlayer);
-            }
-            this.activePlayer = tempInactivePlayer;
-            this.start();
-            this.endTurn.next(this.activePlayer?.username);
+        if (endGame) {
+            this.activePlayer = undefined;
+            this.inactivePlayers = undefined;
+            this.endTurn.next(this.activePlayer);
+
             return;
         }
-        this.activePlayer = undefined;
-        this.inactivePlayers = undefined;
-        this.endTurn.next(this.activePlayer);
+
+        const tempInactivePlayer: IUser | undefined = this.inactivePlayers?.shift();
+        if (this.activePlayer) {
+            this.inactivePlayers?.push(this.activePlayer);
+        }
+        this.activePlayer = tempInactivePlayer;
+
+        this.start();
+        if (this.activePlayer) this.endTurn.next(this.activePlayer);
     }
 
     validating(playerName: string): boolean {
@@ -68,11 +73,13 @@ export class Turn {
     skipTurn(): void {
         const timesToEnd = 6;
         this.incrementSkipCounter();
-        if (this.skipCounter !== timesToEnd) {
-            this.end();
+
+        if (this.skipCounter === timesToEnd) {
+            this.end(true);
             return;
         }
-        this.end(true);
+
+        this.end();
     }
 
     resetSkipCounter(): void {

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { SocketEvents } from '@common/constants/socket-events';
@@ -15,7 +15,7 @@ const TIMEOUT_PASS = 30;
 @Injectable({
     providedIn: 'root',
 })
-export class GameClientService {
+export class GameClientService implements OnDestroy {
     timer: number;
     activePlayer: IUser;
     players: PlayerInformation[];
@@ -39,6 +39,10 @@ export class GameClientService {
                 this.configureBaseSocketFeatures();
             }
         });
+    }
+
+    ngOnDestroy(): void {
+        console.log('destroyed game-client');
     }
 
     initGameInformation() {
@@ -66,10 +70,6 @@ export class GameClientService {
 
         this.clientSocketService.on(SocketEvents.GameEnd, () => {
             this.gameEndEvent();
-        });
-
-        this.clientSocketService.on(SocketEvents.OpponentGameLeave, () => {
-            this.opponentLeaveGameEvent();
         });
 
         this.clientSocketService.on(SocketEvents.PublicViewUpdate, (info: GameInfo) => {
@@ -176,11 +176,8 @@ export class GameClientService {
             this.findWinnerByScore();
             this.isGameFinish = true;
         }
-    }
-
-    private opponentLeaveGameEvent() {
-        this.isGameFinish = true;
-        this.winningMessage = "Bravo vous avez gagné la partie, l'adversaire a quitté la partie";
+        this.quitGameSubject.next();
+        this.router.navigate([`${AppRoutes.HomePage}`]);
     }
 
     private skipEvent(gameInfo: GameInfo) {

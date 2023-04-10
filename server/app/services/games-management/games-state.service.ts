@@ -61,14 +61,14 @@ export class GamesStateService {
     }
 
     initSocketsEvents(): void {
-        this.socketManager.on(SocketEvents.Disconnect, (socket: Socket) => {
-            this.disconnect(socket);
+        this.socketManager.io(SocketEvents.Disconnect, (server: Server, socket: Socket) => {
+            this.disconnect(server, socket);
         });
-        this.socketManager.on(SocketEvents.AbandonGame, async (socket: Socket) => {
-            await this.abandonGame(socket);
+        this.socketManager.io(SocketEvents.AbandonGame, async (server: Server, socket: Socket) => {
+            await this.abandonGame(server, socket);
         });
-        this.socketManager.on(SocketEvents.QuitGame, (socket: Socket) => {
-            this.disconnect(socket);
+        this.socketManager.io(SocketEvents.QuitGame, (server: Server, socket: Socket) => {
+            this.disconnect(server, socket);
         });
         this.socketManager.io(SocketEvents.JoinAsObserver, (server: Server, socket: Socket, botID: string) => {
             this.joinAsObserver(server, socket, botID);
@@ -85,7 +85,9 @@ export class GamesStateService {
 
         gamePlayers.forEach((player: GamePlayer) => {
             this.gamesHandler.players.push(player);
-            game.letterReserve.generateLetters(MAX_QUANTITY, player.rack);
+            if (player.player.type !== PlayerType.Observer) {
+                game.letterReserve.generateLetters(MAX_QUANTITY, player.rack);
+            }
         });
 
         game.turn.determineStartingPlayer(gamePlayers);
@@ -101,7 +103,9 @@ export class GamesStateService {
         } as GameInfo);
         server.to(room.id).emit(SocketEvents.LetterReserveUpdated, game.letterReserve.lettersReserve);
         game.turn.start();
-        if (!game.turn.activePlayer?.email) game.turn.endTurn.next(game.turn.activePlayer?.username);
+        if (game.turn.activePlayer && !game.turn.activePlayer?.email) {
+            game.turn.endTurn.next(game.turn.activePlayer);
+        }
     }
 
     addObserver(server: Server, roomId: string, player: RoomPlayer): void {
@@ -141,8 +145,8 @@ export class GamesStateService {
                 case PlayerType.User: {
                     const newPlayer: RealPlayer = new RealPlayer(roomPlayer);
 
-                    gamePlayers.push(newPlayer);
                     newPlayer.game = game;
+                    gamePlayers.push(newPlayer);
 
                     // TODO : Is this usefull?
                     // if (this.gamesHandler.gamePlayers.get(roomPlayer.roomId) === undefined) {
@@ -186,7 +190,11 @@ export class GamesStateService {
                     break;
                 }
                 case PlayerType.Observer: {
-                    //     TODO : Implement that
+                    const newGamePlayer = new GamePlayer(roomPlayer);
+
+                    newGamePlayer.game = game;
+                    gamePlayers.push(newGamePlayer);
+
                     break;
                 }
                 default: {
@@ -204,10 +212,10 @@ export class GamesStateService {
     }
 
     private async setupGameSubscriptions(room: GameRoom, game: Game) {
-        game.turn.endTurn.subscribe(async () => {
+        game.turn.endTurn.subscribe(async (activePlayer) => {
             this.calculateEndGameScore(room.id);
-            if (!game.turn.activePlayer) {
-                await this.broadcastHighScores(room.players, room.id);
+            if (!activePlayer) {
+                await this.broadcastHighScores(room.id);
             } else this.changeTurn(room.id);
             this.sendPublicViewUpdate(game, room);
         });
@@ -308,34 +316,37 @@ export class GamesStateService {
         this.socketManager.emitRoom(roomId, SocketEvents.TimerClientUpdate, timer);
     }
 
-    private async abandonGame(socket: Socket): Promise<void> {
+    private async abandonGame(server: Server, socket: Socket): Promise<void> {
         const gamePlayer = this.gamesHandler.getPlayerFromSocketId(socket.id);
         if (!gamePlayer) return;
 
-        const room = gamePlayer.player.roomId;
-        const gameHistoryInfo = this.formatGameInfo(gamePlayer);
-        await this.userStatsStorage.updatePlayerStats(gameHistoryInfo);
+        console.log('user ' + gamePlayer.player.user + ' is abandoning');
+
+        await this.userStatsStorage.updatePlayerStats(this.formatGameInfo(gamePlayer));
+
         this.gamesHandler.removePlayerFromSocketId(socket.id);
+        const bot = this.replacePlayerWithBot(gamePlayer as RealPlayer);
 
-        socket.leave(gamePlayer.player.roomId);
-        if (
-            !gamePlayer.game.isModeSolo &&
-            this.gamesHandler.getPlayersFromRoomId(room).filter((player) => player.player.type === PlayerType.User).length > 0
-        ) {
-            this.socketManager.emitRoom(room, SocketEvents.UserDisconnect);
-            // TODO : Repair and make that better for 4 players and bots
+        socket.leave(bot.player.roomId);
+        this.gamesHandler.players.push(bot);
 
-            const bot = this.replacePlayerWithBot(gamePlayer as RealPlayer);
-            this.gamesHandler.players.push(bot);
+        server.to(bot.player.roomId).emit(SocketEvents.PublicViewUpdate, {
+            gameboard: bot.game.gameboard.toStringArray(),
+            players: this.gamesHandler.getPlayersFromRoomId(bot.player.roomId).map((p: GamePlayer) => {
+                return p.getInformation();
+            }),
+            activePlayer: bot.game.turn.activePlayer,
+        });
 
-            // TODO: Update room
+        if (gamePlayer.game.isModeSolo || !this.gamesHandler.usersRemaining(gamePlayer.player.roomId)) {
+            console.log('removing room');
+            gamePlayer.game.abandon();
+            this.gamesHandler.getPlayersFromRoomId(gamePlayer.player.roomId).forEach((player: GamePlayer) => {
+                this.socketManager.getSocketFromId(player.player.socketId)?.leave(bot.player.roomId);
+            });
+
             return;
         }
-        // TODO: What to do if there are still observers in game ?
-
-        gamePlayer.game.abandon();
-        // this.gameEnded.next(room);
-        this.gamesHandler.removeRoomFromRoomId(room);
     }
 
     // private async switchToSolo(playerToReplace: GamePlayer): Promise<void> {
@@ -414,7 +425,7 @@ export class GamesStateService {
     //     this.gamesHandler.updatePlayersInfo(roomId, game);
     // }
 
-    private disconnect(socket: Socket) {
+    private disconnect(server: Server, socket: Socket) {
         const gamePlayer = this.gamesHandler.getPlayerFromSocketId(socket.id);
         if (!gamePlayer) return;
 
@@ -426,7 +437,7 @@ export class GamesStateService {
                 this.gamesHandler.players.push(bot);
                 // TODO: Update room that a new bot has replaced the player
             }
-            this.waitBeforeDisconnect(socket);
+            this.waitBeforeDisconnect(server, socket);
             return;
         }
 
@@ -435,41 +446,41 @@ export class GamesStateService {
         this.socketManager.emitRoom(gamePlayer.player.roomId, SocketEvents.UserDisconnect);
     }
 
-    private waitBeforeDisconnect(socket: Socket) {
+    private waitBeforeDisconnect(server: Server, socket: Socket) {
         let tempTime = 5;
         setInterval(async () => {
             tempTime = tempTime - 1;
             if (tempTime === 0) {
-                await this.abandonGame(socket);
+                await this.abandonGame(server, socket);
             }
         }, SECOND);
     }
-    private async endGame(socketId: string) {
-        const gamePlayer = this.gamesHandler.getPlayerFromSocketId(socketId);
-        if (!gamePlayer) return;
-        const gamePlayers = this.gamesHandler.getPlayersFromRoomId(gamePlayer.player.roomId);
-        if (gamePlayers.length === 0 && gamePlayer.game.isGameFinish) return;
 
-        this.gameEnded.next(gamePlayer.player.roomId);
-        gamePlayer.game.isGameFinish = true;
+    private async endGame(roomId: string) {
+        const gamePlayers = this.gamesHandler.getPlayersFromRoomId(roomId);
+
+        this.gameEnded.next(roomId);
+        gamePlayers[0].game.isGameFinish = true;
         this.updatePlayersStats(gamePlayers);
-        this.socketManager.emitRoom(gamePlayer.player.roomId, SocketEvents.GameEnd);
-        this.gamesHandler.removeRoomFromRoomId(gamePlayer.player.roomId);
+
+        console.log('kicking players');
+        gamePlayers.forEach((g: GamePlayer) => {
+            const socket = this.socketManager.getSocketFromId(g.player.socketId);
+            if (!socket) return;
+
+            console.log(socket.id);
+            socket.emit(SocketEvents.GameEnd);
+        });
+        this.gamesHandler.removeRoomFromRoomId(roomId);
     }
 
-    private async broadcastHighScores(players: RoomPlayer[], roomId: string): Promise<void> {
-        const playersInRoom = players.filter((player: RoomPlayer) => {
-            const gamePlayer = this.gamesHandler.getPlayerFromSocketId(player.socketId);
-            if (!gamePlayer) return;
+    private async broadcastHighScores(roomId: string): Promise<void> {
+        const players = this.gamesHandler.getPlayersFromRoomId(roomId);
 
-            if (gamePlayer.player.roomId === roomId) return player.socketId;
-            return;
-        });
+        if (players.length > 0) await this.endGame(roomId);
 
-        if (playersInRoom.length !== 0) await this.endGame(playersInRoom[0].socketId);
-
-        for (const player of playersInRoom) {
-            await this.sendHighScore(player);
+        for (const player of players) {
+            await this.sendHighScore(player.player);
         }
     }
 

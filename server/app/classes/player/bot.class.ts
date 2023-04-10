@@ -54,7 +54,7 @@ export class Bot extends GamePlayer {
         });
         this.endTurnSubscription = this.game.turn.endTurn.subscribe((activePlayer) => {
             this.isNotTurn = false;
-            if (activePlayer === this.player.user.username) {
+            if (activePlayer?._id === this.player.user._id) {
                 this.countUp = 0;
                 this.playTurn();
             }
