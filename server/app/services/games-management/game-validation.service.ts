@@ -6,10 +6,10 @@ import { Service } from 'typedi';
 
 export enum ErrorType {
     CommandCoordinateOutOfBounds = 'Placement invalide pour la premiere coordonnée',
-    LettersNotInRack = 'Les lettres ne sont pas dans le chavalet',
+    LettersNotInRack = 'game.not_in_rack',
     InvalidFirstWordPlacement = "Le mot doit être attaché à un autre mot (ou passer par la case du milieu si c'est le premier tour)",
     InvalidWordBuild = "Le mot ne possède qu'une lettre OU les lettres en commande sortent du plateau",
-    WrongTurn = 'wrong turn',
+    WrongTurn = 'game.wrong_turn',
     UndefinedGame = 'undefined game',
 }
 
