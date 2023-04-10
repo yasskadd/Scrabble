@@ -4,9 +4,8 @@
 </div> -->
 <mat-card class="justified">
     <div class="players">
-        <div
+        <button
             class="player"
-            color="accent"
             *ngFor="let playerInfos of gameClientService.players"
             [ngClass]="{ active: gameClientService.activePlayer.username === playerInfos.player.user.username }"
             id="player-1"
@@ -33,7 +32,7 @@
                     {{ timer.secondsToMinute(gameClientService.timer) }}:{{ timer.timerToSecond(gameClientService.timer) }}
                 </div>
             </mat-card-content>
-        </div>
+        </button>
     </div>
 
     <!--    <div class="objectives" *ngIf="gameClientService.playerOne?.objective">-->

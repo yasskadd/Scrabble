@@ -143,6 +143,7 @@ export class GameClientService {
         });
 
         this.clientSocketService.on(SocketEvents.GameAboutToStart, (info: GameInfo) => {
+            console.log('game about to start');
             this.viewUpdateEvent(info);
 
             // console.log('Received new game with :');
@@ -194,8 +195,8 @@ export class GameClientService {
 
     getLocalPlayer(): PlayerInformation {
         // TODO : FOR TESTING
-        //  return this.players.find((info: PlayerInformation) => info.player.user.username === this.userService.user.username);
-        return this.players[0];
+        return this.players.find((info: PlayerInformation) => info.player.user.username === this.userService.user.username);
+        // return this.players[0];
     }
 
     currentlyPlaying(): boolean {
