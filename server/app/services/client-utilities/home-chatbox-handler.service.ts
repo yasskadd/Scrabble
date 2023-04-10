@@ -163,19 +163,18 @@ export class HomeChatBoxHandlerService {
     }
 
     private async deleteChatRoom(sio: Server, socket: Socket, chatRoomName: string) {
-        if (this.isChatRoomExist(chatRoomName) === undefined) {
+        const chatroom = this.isChatRoomExist(chatRoomName);
+        if (chatroom === undefined) {
             socket.emit(SocketEvents.DeleteChatRoomNotFoundError, '');
             return;
         }
         const userId = this.socketManager.getUserIdFromSocket(socket);
-        const index = this.chatRooms.findIndex(
-            (chatRoom) => chatRoom.name === 'main' && chatRoom.creatorId === userId && chatRoom.isDeletable === true,
-        );
-        if (index === NOT_FOUND) {
+        if (chatroom.creatorId !== userId || !chatroom.isDeletable) {
             socket.emit(SocketEvents.DeleteChatNotCreatorError, '');
             return;
         }
-        const deletedChatRoom = this.chatRooms.splice(index, 1)[0];
+        const indexToDelete = this.chatRooms.findIndex((room) => room.name === chatRoomName);
+        const deletedChatRoom = this.chatRooms.splice(indexToDelete, 1)[0];
         await this.chatRoomsStorage.deleteRoom(deletedChatRoom.name);
         sio.emit(SocketEvents.DeleteChatRoom, deletedChatRoom);
     }
