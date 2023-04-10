@@ -131,7 +131,7 @@ export class GamesActionsService {
         this.socketManager.emitRoom(gamePlayer.player.roomId, SocketEvents.PublicViewUpdate, viewUpdateInfo);
         this.gamesHandler.updatePlayersInfo(gamePlayer.player.roomId, gamePlayer.game);
 
-        if (wordPlacementResult.hasPassed) socket.broadcast.to(gamePlayer.player.roomId).emit(SocketEvents.PlacementSuccess);
+        if (wordPlacementResult.hasPassed) this.socketManager.emitRoom(gamePlayer.player.roomId, SocketEvents.PlacementSuccess);
         else wordPlacementResult.invalidWords.forEach((invalidWord: Word) => socket.emit(SocketEvents.PlacementFailure, invalidWord));
     }
 }

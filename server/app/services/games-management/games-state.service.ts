@@ -32,7 +32,7 @@ import { Subject } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import { GamesHandlerService } from './games-handler.service';
-import { Letter } from '@common/interfaces/letter';
+import { IUser } from '@common/interfaces/user';
 
 const MAX_SKIP = 6;
 const SECOND = 1000;
@@ -94,17 +94,6 @@ export class GamesStateService {
             return player.getInformation();
         });
 
-        console.log('Start of game with : ');
-        playersInfo.forEach((playerInfo: PlayerInformation) => {
-            console.log(playerInfo.player.user.username);
-            console.log(
-                playerInfo.rack.map((letter: Letter) => {
-                    return letter.value;
-                }),
-            );
-            console.log('');
-        });
-
         server.to(room.id).emit(SocketEvents.GameAboutToStart, {
             gameboard: game.gameboard.toStringArray(),
             players: playersInfo,
@@ -126,16 +115,20 @@ export class GamesStateService {
         this.gamesHandler.players.push(newGamePlayer);
         socket.emit(SocketEvents.GameAboutToStart, {
             gameboard: newGamePlayer.game.gameboard.toStringArray(),
-            players: this.gamesHandler.players.map((p: GamePlayer) => {
-                return p.getInformation();
-            }),
+            players: this.gamesHandler.players
+                .filter((p: GamePlayer) => p.player.roomId === roomId)
+                .map((p: GamePlayer) => {
+                    return p.getInformation();
+                }),
             activePlayer: newGamePlayer.game.turn.activePlayer,
         });
         server.to(roomId).emit(SocketEvents.PublicViewUpdate, {
             gameboard: newGamePlayer.game.gameboard.toStringArray(),
-            players: this.gamesHandler.players.map((p: GamePlayer) => {
-                return p.getInformation();
-            }),
+            players: this.gamesHandler.players
+                .filter((p: GamePlayer) => p.player.roomId === roomId)
+                .map((p: GamePlayer) => {
+                    return p.getInformation();
+                }),
             activePlayer: newGamePlayer.game.turn.activePlayer,
         });
     }
@@ -238,8 +231,19 @@ export class GamesStateService {
             return;
         }
 
-        if (players.filter((player: GamePlayer) => player.rackIsEmpty()).length > 0) {
-            const finishingPlayer = players.find((player: GamePlayer) => player.rackIsEmpty());
+        if (
+            players.filter((player: GamePlayer) => {
+                if (player.player.type === PlayerType.User) {
+                    return player.rackIsEmpty();
+                }
+                return false;
+            }).length > 0
+        ) {
+            const finishingPlayer = players.find((player: GamePlayer) => {
+                if (player.player.type === PlayerType.User) {
+                    player.rackIsEmpty();
+                }
+            });
             if (!finishingPlayer) return;
             players.filter((player: GamePlayer) => {
                 if (player.player.user.username !== finishingPlayer.player.user.username) {
@@ -305,10 +309,8 @@ export class GamesStateService {
     }
 
     private async abandonGame(socket: Socket): Promise<void> {
-        console.log(socket.id);
         const gamePlayer = this.gamesHandler.getPlayerFromSocketId(socket.id);
         if (!gamePlayer) return;
-        console.log(gamePlayer.player.user.username);
 
         const room = gamePlayer.player.roomId;
         const gameHistoryInfo = this.formatGameInfo(gamePlayer);
@@ -554,17 +556,29 @@ export class GamesStateService {
             return;
         }
 
+        observer.player.type = PlayerType.User;
         const newPlayer: RealPlayer = this.replaceBotWithObserver(observer.player, bot as Bot);
         // Update gamesHandler player list
-        this.gamesHandler.players = this.gamesHandler.players.filter(
-            (player) => player.player.user._id !== observer.player.user._id || player.player.user._id !== bot?.player.user._id,
+        const botIndex = this.gamesHandler.players.findIndex((player: GamePlayer) => player.player.user._id === bot.player.user._id);
+        this.gamesHandler.players.splice(botIndex, 1);
+        const obsIndex = this.gamesHandler.players.findIndex((player: GamePlayer) => player.player.user._id === observer.player.user._id);
+        this.gamesHandler.players.splice(obsIndex, 1);
+        const botTurnIndex: number | undefined = this.gamesHandler.players[0].game.turn.inactivePlayers?.findIndex(
+            (p: IUser) => p._id === bot.player.user._id,
         );
+        if (!botTurnIndex) return;
+        this.gamesHandler.players[0].game.turn.inactivePlayers?.splice(botTurnIndex, 1);
+        this.gamesHandler.players[0].game.turn.inactivePlayers?.push(observer.player.user);
         this.gamesHandler.players.push(newPlayer);
 
         // TODO: Update room with roomID
         server.to(newPlayer.player.roomId).emit(SocketEvents.PublicViewUpdate, {
             gameboard: newPlayer.game.gameboard.toStringArray(),
-            players: this.gamesHandler.getPlayersFromRoomId(newPlayer.player.roomId),
+            players: this.gamesHandler.players
+                .filter((p: GamePlayer) => p.player.roomId === newPlayer.player.roomId)
+                .map((p: GamePlayer) => {
+                    return p.getInformation();
+                }),
             activePlayer: newPlayer.game.turn.activePlayer,
         });
     }
@@ -588,7 +602,4 @@ export class GamesStateService {
         const gameDate = player.game.beginningTime;
         this.accountStorage.addUserEventHistory(username, HistoryActions.Game, gameDate, gameWon);
     }
-    // Replace observer and bot in list by observer
-    // Add Socket event to let observer join the room (need to verify if its possible to join or not)
-    // Need method to update all room clients that an observer has joined
 }

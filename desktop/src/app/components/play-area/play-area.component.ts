@@ -93,8 +93,8 @@ export class PlayAreaComponent {
         this.gridService.letterSize = this.sliderForm.value;
     }
 
-    selectPlayer(player: PlayerInformation): void {
-        this.selectedPlayer = player;
+    selectPlayer(index: number): void {
+        this.selectedPlayer = this.gameClientService.players[index];
     }
 
     getPosition(index: number): RackPosition {

@@ -9,11 +9,7 @@ import { IUser } from '@common/interfaces/user';
 import { UserService } from '@services/user.service';
 import { ReplaySubject, Subject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
-import { AlphabetLetter } from '@common/models/alphabet-letter';
-import { PlayerType } from '@common/models/player-type';
 
-// type CompletedObjective = { objective: Objective; name: string };
-// type InitObjective = { objectives1: Objective[]; objectives2: Objective[]; playerName: string };
 const TIMEOUT_PASS = 30;
 
 @Injectable({
@@ -43,63 +39,6 @@ export class GameClientService {
                 this.configureBaseSocketFeatures();
             }
         });
-
-        // TODO : FOR TESTING
-        this.players = [
-            {
-                player: {
-                    user: {
-                        _id: '',
-                        username: 'test',
-                        password: 'test',
-                        profilePicture: {
-                            name: 'test',
-                            isDefaultPicture: false,
-                            key: 'http://http.cat/100',
-                        },
-                    },
-                    socketId: '',
-                    roomId: '',
-                    isCreator: false,
-                    type: PlayerType.Observer,
-                },
-                score: 0,
-                rack: [
-                    {
-                        value: AlphabetLetter.A,
-                        quantity: 1,
-                        points: 7,
-                    },
-                ],
-            },
-            {
-                player: {
-                    user: {
-                        _id: '',
-                        username: 'test2',
-                        password: 'test',
-                        profilePicture: {
-                            name: 'test',
-                            isDefaultPicture: false,
-                            key: 'http://http.cat/100',
-                        },
-                    },
-                    socketId: '',
-                    roomId: '',
-                    isCreator: false,
-                    type: PlayerType.Bot,
-                },
-                score: 0,
-                rack: [
-                    {
-                        value: AlphabetLetter.B,
-                        quantity: 1,
-                        points: 7,
-                    },
-                ],
-            },
-        ];
-        this.activePlayer = this.players[0].player.user;
     }
 
     initGameInformation() {
@@ -144,28 +83,8 @@ export class GameClientService {
 
         this.clientSocketService.on(SocketEvents.GameAboutToStart, (info: GameInfo) => {
             this.viewUpdateEvent(info);
-
-            // console.log('Received new game with :');
-            // this.players.forEach((player: PlayerInformation) => {
-            // console.log(player.player);
-            // console.log(
-            // player.rack.map((letter: Letter) => {
-            // return letter.value;
-            // }),
-            // );
-            // console.log('');
-            // });
-
             this.router.navigate([`${AppRoutes.GamePage}`]).then();
         });
-
-        // this.clientSocketService.on('CompletedObjective', (completedObjective: CompletedObjective) => {
-        // this.completeObjective(completedObjective);
-        // });
-
-        // this.clientSocketService.on('InitObjective', (objective: InitObjective) => {
-        // this.setObjectives(objective);
-        // });
 
         this.clientSocketService.on(SocketEvents.Skip, (gameInfo: GameInfo) => {
             setTimeout(() => {
@@ -193,39 +112,12 @@ export class GameClientService {
     }
 
     getLocalPlayer(): PlayerInformation {
-        // TODO : FOR TESTING
-        //  return this.players.find((info: PlayerInformation) => info.player.user.username === this.userService.user.username);
-        return this.players[0];
+        return this.players.find((info: PlayerInformation) => info.player.user._id === this.userService.user._id);
     }
 
     currentlyPlaying(): boolean {
         return this.activePlayer?.username === this.userService.user.username;
     }
-
-    // private completeObjective(completedObjective: CompletedObjective) {
-    //     if (this.playerOne.objective === undefined || this.secondPlayer.objective === undefined) return;
-    //     const indexPlayerOne = this.playerOne.objective.findIndex((element) => element.user.username === completedObjective.objective.name);
-    //     const indexSecondPlayer = this.secondPlayer.objective.findIndex((element) => element.name === completedObjective.objective.name);
-    //     if (indexPlayerOne !== constants.INVALID_INDEX && !this.playerOne.objective[indexPlayerOne].complete) {
-    //         this.playerOne.objective[indexPlayerOne].complete = true;
-    //         this.playerOne.objective[indexPlayerOne].user = completedObjective.name;
-    //         this.openSnackBar(`L'objectif ${this.playerOne.objective[indexPlayerOne].name} a été complété`);
-    //     }
-    //     if (indexSecondPlayer !== constants.INVALID_INDEX && !this.secondPlayer.objective[indexSecondPlayer].complete) {
-    //         this.secondPlayer.objective[indexSecondPlayer].complete = true;
-    //         this.secondPlayer.objective[indexSecondPlayer].user = completedObjective.name;
-    //     }
-    // }
-
-    // private setObjectives(objective: InitObjective) {
-    //     if (objective.playerName === this.playerOne.name) {
-    //         this.playerOne.objective = objective.objectives1;
-    //         this.secondPlayer.objective = objective.objectives2;
-    //         return;
-    //     }
-    //     this.secondPlayer.objective = objective.objectives1;
-    //     this.playerOne.objective = objective.objectives2;
-    // }
 
     private updateOpponentInformationEvent(players: PlayerInformation[]) {
         this.players = players;
