@@ -24,7 +24,7 @@ export class ChatRoomsStorageService {
     }
 
     async createRoom(roomName: string) {
-        const room: ChatRoom = { name: roomName, messages: [] };
+        const room: ChatRoom = { name: roomName, messages: [], isDeletable: true };
         await this.databaseService.chatRooms.addDocument(room);
     }
 

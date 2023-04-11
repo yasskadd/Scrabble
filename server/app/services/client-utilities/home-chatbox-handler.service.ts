@@ -29,9 +29,6 @@ interface ChatRoomInfo {
 
 @Service()
 export class HomeChatBoxHandlerService {
-    // private homeRoom: HomeRoom;
-    // private messageList: ChatboxMessage[];
-
     private chatRooms: ChatRoomInfo[];
     private gameChatRooms: Set<string>;
 
@@ -40,9 +37,10 @@ export class HomeChatBoxHandlerService {
         private accountStorage: AccountStorageService,
         private chatRoomsStorage: ChatRoomsStorageService,
     ) {
-        this.chatRooms = [{ name: 'main', messageCount: 0, readingUsers: [], isDeletable: false }];
-        // TODO: refactor or do it in another way, works for now
+        this.chatRooms = [];
+        // TODO: refactor or do it in another way, works for now (We can wait for this before launching the server maybe?)
         this.chatRoomsStorage.getAllRooms().then((rooms) => {
+            // TODO: Maybe check if mainRoom is created
             rooms.forEach((room) => {
                 if (this.isChatRoomExist(room.name)) return;
                 const messageCount = room.messages.length;
