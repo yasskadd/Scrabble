@@ -33,6 +33,8 @@ import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import { GamesHandlerService } from './games-handler.service';
 import { IUser } from '@common/interfaces/user';
+import { SimpleLetterInfos } from '@common/interfaces/simple-letter-infos';
+import { DragInfos } from '@common/interfaces/drag-infos';
 
 const MAX_SKIP = 6;
 const SECOND = 1000;
@@ -72,6 +74,15 @@ export class GamesStateService {
         });
         this.socketManager.io(SocketEvents.JoinAsObserver, (server: Server, socket: Socket, botID: string) => {
             this.joinAsObserver(server, socket, botID);
+        });
+        this.socketManager.io(SocketEvents.SendDrag, (server: Server, socket: Socket, dragInfos: DragInfos) => {
+            server.to(dragInfos.roomId).emit(SocketEvents.DragEvent, dragInfos);
+        });
+        this.socketManager.io(SocketEvents.LetterTaken, (server: Server, socket: Socket, tile: SimpleLetterInfos) => {
+            server.to(tile.roomId).emit(SocketEvents.LetterTaken, tile);
+        });
+        this.socketManager.io(SocketEvents.LetterPlaced, (server: Server, socket: Socket, tile: SimpleLetterInfos) => {
+            server.to(tile.roomId).emit(SocketEvents.LetterPlaced, tile);
         });
     }
 

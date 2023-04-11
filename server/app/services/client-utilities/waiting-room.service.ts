@@ -60,11 +60,11 @@ export class WaitingRoomService {
     }
 
     removeRoom(server: Server, roomId: string): void {
-        console.log('removing waiting room');
+        console.log('removing waiting room : ' + roomId);
         const roomIndex = this.waitingRooms.findIndex((room: GameRoom) => room.id === roomId);
         this.waitingRooms.splice(roomIndex, 1);
 
-        server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
+        server.emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
 
     private enterRoomLobby(server: Server, socket: Socket): void {

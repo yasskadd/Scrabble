@@ -172,6 +172,7 @@ export class GameClientService implements OnDestroy {
     }
 
     private gameEndEvent() {
+        console.log('game end');
         if (this.winningMessage === '') {
             this.findWinnerByScore();
             this.isGameFinish = true;

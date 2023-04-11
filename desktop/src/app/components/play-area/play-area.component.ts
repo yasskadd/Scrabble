@@ -12,11 +12,11 @@ import { PlayerType } from '@common/models/player-type';
 import { ClientSocketService } from '@app/services/communication/client-socket.service';
 import { SocketEvents } from '@common/constants/socket-events';
 
-export enum MouseButton {
-    Left = 0,
-    Right = 2,
-    Back = 3,
-}
+// export enum MouseButton {
+//     Left = 0,
+//     Right = 2,
+//     Back = 3,
+// }
 
 @Component({
     selector: 'app-play-area',
@@ -34,7 +34,7 @@ export class PlayAreaComponent {
 
     constructor(
         private readonly gridService: GridService,
-        private letterService: LetterPlacementService,
+        protected letterService: LetterPlacementService,
         private clientSocketService: ClientSocketService,
         public gameClientService: GameClientService,
     ) {

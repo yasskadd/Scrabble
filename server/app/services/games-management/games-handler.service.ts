@@ -69,6 +69,7 @@ export class GamesHandlerService {
         playerIndexes.forEach((index: number) => {
             this.players.splice(index, 1);
         });
+        console.log('deleted game room of id ' + roomId);
     }
 
     async setDictionaries() {

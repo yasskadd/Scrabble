@@ -24,6 +24,9 @@
                 ]"
                 cdkDrag
                 [cdkDragData]="tile"
+                (cdkDragStarted)="startedDragging(tile)"
+                (cdkDragEnded)="stoppedDragging(tile)"
+                (cdkDragMoved)="dragging($event, tile)"
             >
                 <div class="letter-value">
                     {{ tile.letter?.value.toUpperCase() }}

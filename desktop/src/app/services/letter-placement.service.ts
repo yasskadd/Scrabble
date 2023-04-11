@@ -18,6 +18,9 @@ import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info
 import { ClientSocketService } from './communication/client-socket.service';
 import { GameClientService } from './game-client.service';
 import { first } from 'rxjs/operators';
+import { DragInfos } from '@common/interfaces/drag-infos';
+import { window as tauriWindow } from '@tauri-apps/api';
+import { SimpleLetterInfos } from '@common/interfaces/simple-letter-infos';
 
 // const ASCII_ALPHABET_START = 96;
 
@@ -30,6 +33,7 @@ export class LetterPlacementService {
     currentSelection: Letter;
     selectionPositions: SelectionPosition[];
     origin: number;
+    dragLetter: DragInfos;
 
     private placedLetters: BoardTileInfo[];
     private placingMode: PlacingState;
@@ -56,6 +60,47 @@ export class LetterPlacementService {
         this.gameClientService.quitGameSubject.subscribe(() => {
             this.resetView();
         });
+        this.subscribeDrag();
+    }
+
+    subscribeDrag(): void {
+        this.clientSocketService.on(SocketEvents.DragEvent, async (event: DragInfos) => {
+            if (event.socketId === this.gameClientService.getLocalPlayer().player.socketId) return;
+
+            this.dragLetter = {
+                roomId: event.roomId,
+                socketId: event.socketId,
+                letter: event.letter,
+                coord: await this.scaleCoord(event.window, event.coord),
+                window: [],
+            };
+        });
+
+        this.clientSocketService.on(SocketEvents.LetterTaken, (event: SimpleLetterInfos) => {
+            if (event.socketId === this.gameClientService.getLocalPlayer().player.socketId) return;
+            this.resetTile(event.coord);
+        });
+
+        this.clientSocketService.on(SocketEvents.LetterPlaced, (event: SimpleLetterInfos) => {
+            if (event.socketId === this.gameClientService.getLocalPlayer().player.socketId) return;
+            this.dragLetter = undefined;
+            this.boardTiles[event.coord].letter.value = event.letter as AlphabetLetter;
+            this.boardTiles[event.coord].state = BoardTileState.Pending;
+        });
+    }
+
+    async scaleCoord(window: number[], coord: number[]): Promise<number[]> {
+        const windowSize = await tauriWindow.appWindow.innerSize();
+        const windowScale = await tauriWindow.appWindow.scaleFactor();
+        const size = [windowSize.width, windowSize.height];
+
+        coord[0] *= size[0] / window[0];
+        coord[1] *= size[1] / window[1];
+
+        coord[0] = Math.max(0, Math.min(coord[0], size[0] - 36 * windowScale));
+        coord[1] = Math.max(0, Math.min(coord[1], size[1] - 36 * windowScale));
+
+        return coord;
     }
 
     resetTile(coord: number): void {
@@ -195,6 +240,10 @@ export class LetterPlacementService {
             coord: boardTile.coord,
         };
         this.boardTiles[boardTile.coord] = playedTile;
+        this.clientSocketService.send(SocketEvents.LetterPlaced, {
+            coord: boardTile.coord,
+            letter: letter.value.toString(),
+        });
 
         this.gameClientService.getLocalPlayer().rack.splice(
             this.gameClientService.getLocalPlayer().rack.findIndex((letterElement: Letter) => {

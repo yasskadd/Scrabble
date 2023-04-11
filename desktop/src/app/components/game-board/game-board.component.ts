@@ -1,4 +1,4 @@
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, CdkDragMove } from '@angular/cdk/drag-drop';
 import { Component } from '@angular/core';
 import { CENTER_TILE } from '@app/constants/board-view';
 import { BoardTileInfo } from '@app/interfaces/board-tile-info';
@@ -11,6 +11,11 @@ import { AlphabetLetter } from '@common/models/alphabet-letter';
 import { WebviewWindow } from '@tauri-apps/api/window';
 import { TauriEvent } from '@tauri-apps/api/event';
 import { TauriStateService } from '@services/tauri-state.service';
+import { ClientSocketService } from '@app/services/communication/client-socket.service';
+import { SocketEvents } from '@common/constants/socket-events';
+import { window as tauriWindow } from '@tauri-apps/api';
+import { GameConfigurationService } from '@app/services/game-configuration.service';
+import { GameClientService } from '@services/game-client.service';
 
 @Component({
     selector: 'app-game-board',
@@ -21,10 +26,16 @@ export class GameBoardComponent {
     protected boardTileStates: typeof BoardTileState = BoardTileState;
     protected playDirection: typeof PlayDirection = PlayDirection;
 
-    constructor(protected letterPlacementService: LetterPlacementService, private tauriStateService: TauriStateService) {
+    constructor(
+        protected letterPlacementService: LetterPlacementService,
+        protected clientSocketService: ClientSocketService,
+        private gameConfigurationService: GameConfigurationService,
+        private gameClientService: GameClientService,
+        private tauriStateService: TauriStateService,
+    ) {
         if (this.tauriStateService.useTauri) {
-            const tauriWindow = WebviewWindow.getByLabel('main');
-            tauriWindow
+            const appWindow = WebviewWindow.getByLabel('main');
+            appWindow
                 .listen(TauriEvent.WINDOW_CLOSE_REQUESTED, () => {
                     alert('Cannot close while in game');
                 })
@@ -36,6 +47,11 @@ export class GameBoardComponent {
         if (event.previousContainer.id === 'player-rack') {
             this.letterPlacementService.handleDragPlacement(event.previousIndex, event.previousContainer.data[event.previousIndex], tile);
         }
+
+        this.clientSocketService.send(SocketEvents.LetterPlaced, {
+            coord: tile.coord,
+            letter: event.item.data.letter.value.toString(),
+        });
 
         this.letterPlacementService.currentSelection = undefined;
     }
@@ -55,6 +71,39 @@ export class GameBoardComponent {
         if (this.letterPlacementService.boardTiles[tile.coord].state === BoardTileState.Temp) {
             this.letterPlacementService.resetTile(tile.coord);
         }
+    }
+
+    protected async startedDragging(tile: BoardTileInfo): Promise<void> {
+        console.log('letter taken');
+        this.clientSocketService.send(SocketEvents.LetterTaken, {
+            roomId: this.gameConfigurationService.localGameRoom.id,
+            socketId: this.gameClientService.getLocalPlayer().player.socketId,
+            coord: tile.coord,
+            letter: tile.letter.value.toString(),
+        });
+    }
+
+    protected stoppedDragging(tile: BoardTileInfo): void {
+        this.clientSocketService.send(SocketEvents.LetterPlaced, {
+            roomId: this.gameConfigurationService.localGameRoom.id,
+            socketId: this.gameClientService.getLocalPlayer().player.socketId,
+            coord: tile.coord,
+            letter: tile.letter.value.toString(),
+        });
+    }
+
+    protected async dragging(event: CdkDragMove, tile: BoardTileInfo): Promise<void> {
+        if (!this.gameClientService.currentlyPlaying()) return;
+
+        const windowSize = await tauriWindow.appWindow.innerSize();
+        // console.log('x:' + (event.event as MouseEvent).clientX + ' y:' + (event.event as MouseEvent).clientY);
+        this.clientSocketService.send(SocketEvents.SendDrag, {
+            roomId: this.gameConfigurationService.localGameRoom.id,
+            socketId: this.gameClientService.getLocalPlayer().player.socketId,
+            letter: tile.letter.value.toString(),
+            coord: [(event.event as MouseEvent).clientX, (event.event as MouseEvent).clientY],
+            window: [windowSize.width, windowSize.height],
+        });
     }
 
     protected identify(index: number, item: { coord: number }): number {
