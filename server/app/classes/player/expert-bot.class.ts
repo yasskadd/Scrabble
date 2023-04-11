@@ -23,8 +23,8 @@ export class ExpertBot extends Bot {
             this.exchangeLetters();
             return;
         }
-        this.emitPlaceCommand(commandInfo);
         this.isNotTurn = true;
+        this.emitPlaceCommand(commandInfo);
     }
 
     exchangeLetters(): void {
