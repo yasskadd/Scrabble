@@ -116,7 +116,7 @@ export class GameClientService implements OnDestroy {
     }
 
     currentlyPlaying(): boolean {
-        return this.activePlayer?.username === this.userService.user.username;
+        return this.activePlayer?._id === this.userService.user._id;
     }
 
     private updateOpponentInformationEvent(players: PlayerInformation[]) {
