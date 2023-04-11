@@ -48,11 +48,6 @@ export class GameBoardComponent {
             this.letterPlacementService.handleDragPlacement(event.previousIndex, event.previousContainer.data[event.previousIndex], tile);
         }
 
-        this.clientSocketService.send(SocketEvents.LetterPlaced, {
-            coord: tile.coord,
-            letter: event.item.data.letter.value.toString(),
-        });
-
         this.letterPlacementService.currentSelection = undefined;
     }
 
@@ -96,12 +91,14 @@ export class GameBoardComponent {
         if (!this.gameClientService.currentlyPlaying()) return;
 
         const windowSize = await tauriWindow.appWindow.innerSize();
-        // console.log('x:' + (event.event as MouseEvent).clientX + ' y:' + (event.event as MouseEvent).clientY);
+        const windowPosition = await tauriWindow.appWindow.innerPosition();
+        console.log('x:' + (event.event as MouseEvent).clientX + ' y:' + (event.event as MouseEvent).clientY);
+
         this.clientSocketService.send(SocketEvents.SendDrag, {
             roomId: this.gameConfigurationService.localGameRoom.id,
             socketId: this.gameClientService.getLocalPlayer().player.socketId,
             letter: tile.letter.value.toString(),
-            coord: [(event.event as MouseEvent).clientX, (event.event as MouseEvent).clientY],
+            coord: [(event.event as MouseEvent).clientX - windowPosition.x, (event.event as MouseEvent).clientY - windowPosition.y],
             window: [windowSize.width, windowSize.height],
         });
     }
