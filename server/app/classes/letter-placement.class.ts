@@ -26,7 +26,6 @@ export class LetterPlacement {
         this.placeNewLettersOnBoard(commandInfo, commandWord, currentGameboard);
 
         const wordValidationResult = this.dictionaryValidation.validateWord(commandWord, currentGameboard);
-        // wordValidationResult.invalidWords.forEach((word) => console.log('Wrong words: ' + word.stringFormat));
         if (!wordValidationResult.points) {
             this.removeLettersFromBoard(commandWord, currentGameboard);
             return { hasPassed: false, gameboard: currentGameboard, invalidWords: wordValidationResult.invalidWords };

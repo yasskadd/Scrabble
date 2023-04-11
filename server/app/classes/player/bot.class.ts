@@ -112,13 +112,8 @@ export class Bot extends GamePlayer {
     private play(randomCommandInfo: PlaceWordCommandInfo) {
         const gamePlayer = this as GamePlayer;
         if (!gamePlayer) return;
-
         const game = gamePlayer.game;
         if (!game) return;
-
-        randomCommandInfo.letters = randomCommandInfo.letters.map((letter) => {
-            return letter.toUpperCase();
-        });
         const placement: Word = this.gameValidationService.verifyPlaceWordCommand(gamePlayer, randomCommandInfo) as Word;
         // TODO: Remove this if when lettre blanche is fixed
         if (!(placement instanceof Word)) {
