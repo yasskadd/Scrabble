@@ -93,13 +93,13 @@ export class SocketManager {
                 // Verify jwt token
                 const token = cookie.parse(cookies).session_token;
                 let isTokenValid = false;
-                let username = '';
+                let userID = '';
                 jwt.verify(token, SECRET_KEY, (err: jwt.VerifyErrors, decoded: any) => {
                     if (err) isTokenValid = false;
                     else {
                         isTokenValid = true;
                         // eslint-disable-next-line no-underscore-dangle
-                        username = decoded.userID;
+                        userID = decoded.userID;
                     }
                 });
 
@@ -110,7 +110,7 @@ export class SocketManager {
 
                 let keepConnecting = true;
                 this.socketIdMap.forEach((value: string) => {
-                    if (value === username) {
+                    if (value === userID) {
                         keepConnecting = false;
                     }
                 });
@@ -119,16 +119,16 @@ export class SocketManager {
                     return;
                 }
 
-                this.socketIdMap.set(socket, username);
+                this.socketIdMap.set(socket, userID);
 
                 for (const callback of this.onConnectEvents) {
                     callback(socket);
                 }
 
-                this.accountStorageService.addUserEventHistory(username, HistoryActions.Connection, new Date());
+                this.accountStorageService.addUserEventHistory(userID, HistoryActions.Connection, new Date());
 
                 // eslint-disable-next-line no-console
-                console.log('Connection of client with socketid = ' + socket.id + ' from user = ' + username);
+                console.log('Connection of client with socketid = ' + socket.id + ' from user = ' + userID);
                 socket.emit(SocketEvents.SuccessfulConnection);
             } else {
                 socket.disconnect();
