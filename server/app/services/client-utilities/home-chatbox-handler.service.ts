@@ -94,10 +94,14 @@ export class HomeChatBoxHandlerService {
         // });
     }
 
-    checkForChatNotification(chatRooms: UserChatRoom[]): string[] {
+    checkForChatNotification(userId: string, chatRooms: UserChatRoom[]): string[] {
         const notificationRooms: string[] = [];
         chatRooms.forEach((chatRoom) => {
-            const room = this.isChatRoomExist(chatRoom.name) as ChatRoomInfo;
+            const room = this.isChatRoomExist(chatRoom.name);
+            if (room === undefined) {
+                this.accountStorage.deleteChatRoom(userId, chatRoom.name);
+                return;
+            }
             if (chatRoom.messageCount < room.messageCount) {
                 notificationRooms.push(room.name);
             }
