@@ -31,6 +31,10 @@ export class HeaderComponent {
         }
     }
 
+    redirectProfilePage() {
+        this.router.navigate(['/profile']).then();
+    }
+
     redirectSettingsPage() {
         this.router.navigate(['/settings']).then();
     }
