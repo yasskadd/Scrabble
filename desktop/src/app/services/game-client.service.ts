@@ -155,11 +155,11 @@ export class GameClientService implements OnDestroy {
             else dictionaryLetter.counter++;
         });
 
-        const resultingRack = [] as Letter[];
+        const resultingRack: Letter[] = [];
         this.getLocalPlayer()?.rack.forEach((letter) => {
             const dictionaryLetter = dictionary.get(letter.value);
             if (dictionaryLetter !== undefined && dictionaryLetter.counter > 0) {
-                resultingRack.push(letter);
+                resultingRack.push(JSON.parse(JSON.stringify(letter)));
                 dictionaryLetter.counter--;
             }
         });

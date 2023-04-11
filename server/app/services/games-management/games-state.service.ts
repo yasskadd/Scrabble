@@ -353,14 +353,14 @@ export class GamesStateService {
             this.gamesHandler.getPlayersFromRoomId(gamePlayer.player.roomId).forEach((player: GamePlayer) => {
                 this.socketManager.getSocketFromId(player.player.socketId)?.leave(bot.player.roomId);
             });
+            this.gamesHandler.removeRoomFromRoomId(gamePlayer.player.roomId);
+            gamePlayer.game.abandon();
 
             return;
         }
         // TODO: What to do if there are still observers in game ?
 
-        gamePlayer.game.abandon();
         // this.gameEnded.next(room);
-        this.gamesHandler.removeRoomFromRoomId(gamePlayer.player.roomId);
     }
 
     // private async switchToSolo(playerToReplace: GamePlayer): Promise<void> {
