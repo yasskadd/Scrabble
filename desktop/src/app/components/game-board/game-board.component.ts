@@ -25,6 +25,7 @@ import { GameClientService } from '@services/game-client.service';
 export class GameBoardComponent {
     protected boardTileStates: typeof BoardTileState = BoardTileState;
     protected playDirection: typeof PlayDirection = PlayDirection;
+    protected tileState: typeof BoardTileState = BoardTileState;
 
     constructor(
         protected letterPlacementService: LetterPlacementService,
@@ -44,6 +45,7 @@ export class GameBoardComponent {
     }
 
     protected drop(event: CdkDragDrop<Letter[]>, tile: BoardTileInfo): void {
+        console.log('letter dropped in gameboard');
         if (event.previousContainer.id === 'player-rack') {
             this.letterPlacementService.handleDragPlacement(event.previousIndex, event.previousContainer.data[event.previousIndex], tile);
         }
@@ -52,8 +54,11 @@ export class GameBoardComponent {
     }
 
     protected entered(event: MouseEvent, tile: BoardTileInfo) {
-        if (this.letterPlacementService.boardTiles[tile.coord].state === BoardTileState.Empty) {
-            this.letterPlacementService.boardTiles[tile.coord] = {
+        if (
+            this.letterPlacementService.liveBoard[tile.coord].state === BoardTileState.Empty ||
+            this.letterPlacementService.liveBoard[tile.coord].state === BoardTileState.Temp
+        ) {
+            this.letterPlacementService.liveBoard[tile.coord] = {
                 type: BoardTileType.Empty,
                 state: BoardTileState.Temp,
                 letter: this.letterPlacementService.currentSelection,
@@ -62,26 +67,28 @@ export class GameBoardComponent {
         }
     }
 
-    protected exited(event: MouseEvent, tile: BoardTileInfo) {
-        if (this.letterPlacementService.boardTiles[tile.coord].state === BoardTileState.Temp) {
-            this.letterPlacementService.resetTile(tile.coord);
-        }
+    protected exited() {
+        this.letterPlacementService.liveBoard = JSON.parse(JSON.stringify(this.letterPlacementService.confirmedBoard));
     }
 
     protected async startedDragging(tile: BoardTileInfo): Promise<void> {
         console.log('letter taken');
+        console.log(tile);
+        if (!this.gameClientService.currentlyPlaying()) return;
         this.clientSocketService.send(SocketEvents.LetterTaken, {
             roomId: this.gameConfigurationService.localGameRoom.id,
-            socketId: this.gameClientService.getLocalPlayer().player.socketId,
+            socketId: this.gameClientService.getLocalPlayer()?.player.socketId,
             coord: tile.coord,
             letter: tile.letter.value.toString(),
         });
     }
 
     protected stoppedDragging(tile: BoardTileInfo): void {
+        console.log('letter placed');
+        console.log(tile);
         this.clientSocketService.send(SocketEvents.LetterPlaced, {
             roomId: this.gameConfigurationService.localGameRoom.id,
-            socketId: this.gameClientService.getLocalPlayer().player.socketId,
+            socketId: this.gameClientService.getLocalPlayer()?.player.socketId,
             coord: tile.coord,
             letter: tile.letter.value.toString(),
         });
@@ -91,14 +98,14 @@ export class GameBoardComponent {
         if (!this.gameClientService.currentlyPlaying()) return;
 
         const windowSize = await tauriWindow.appWindow.innerSize();
-        const windowPosition = await tauriWindow.appWindow.innerPosition();
+        // const windowPosition = await tauriWindow.appWindow.innerPosition();
         console.log('x:' + (event.event as MouseEvent).clientX + ' y:' + (event.event as MouseEvent).clientY);
 
         this.clientSocketService.send(SocketEvents.SendDrag, {
             roomId: this.gameConfigurationService.localGameRoom.id,
-            socketId: this.gameClientService.getLocalPlayer().player.socketId,
+            socketId: this.gameClientService.getLocalPlayer()?.player.socketId,
             letter: tile.letter.value.toString(),
-            coord: [(event.event as MouseEvent).clientX - windowPosition.x, (event.event as MouseEvent).clientY - windowPosition.y],
+            coord: [(event.event as MouseEvent).clientX, (event.event as MouseEvent).clientY],
             window: [windowSize.width, windowSize.height],
         });
     }

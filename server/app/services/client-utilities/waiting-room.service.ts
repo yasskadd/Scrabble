@@ -71,7 +71,11 @@ export class WaitingRoomService {
 
         console.log(this.waitingRooms.map((wr: GameRoom) => wr.players.map((p: RoomPlayer) => p.type)));
         this.waitingRooms = this.waitingRooms.filter((r: GameRoom) => {
-            return this.gamesHandler.usersRemaining(r.id);
+            if (!this.gamesHandler.usersRemaining(r.id)) {
+                this.gamesHandler.removeRoomFromRoomId(r.id);
+                return false;
+            }
+            return true;
         });
         console.log(this.waitingRooms.map((wr: GameRoom) => wr.players.map((p: RoomPlayer) => p.type)));
 

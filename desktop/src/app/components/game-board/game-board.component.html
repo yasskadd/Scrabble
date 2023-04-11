@@ -1,9 +1,9 @@
 <mat-grid-list cols='15' class='board' id='board' [gutterSize]="'8px'">
     <mat-grid-tile
-        *ngFor='let tile of letterPlacementService.boardTiles; trackBy: identify'
+        *ngFor='let tile of letterPlacementService.liveBoard; trackBy: identify'
         class='tile'
         (mouseenter)='entered($event, tile)'
-        (mouseleave)='exited($event, tile)'
+        (mouseleave)='exited()'
     >
         <div
             cdkDropList
@@ -22,7 +22,7 @@
                     tile.state === boardTileStates.Confirmed ? 'confirmed-letter' : '',
                     tile.state === boardTileStates.Pending ? 'pending-letter' : ''
                 ]"
-                *ngIf='tile.state === tileState.Pending'
+                *ngIf='tile.state === tileState.Pending || tile.state === tileState.Temp'
                 cdkDrag
                 [cdkDragData]='tile'
                 (cdkDragStarted)='startedDragging(tile)'
