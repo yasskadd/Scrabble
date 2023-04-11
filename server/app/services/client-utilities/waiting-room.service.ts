@@ -22,6 +22,7 @@ import { PlayerType } from '@common/models/player-type';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import * as uuid from 'uuid';
+import { GamesHandlerService } from '../games-management/games-handler.service';
 
 // const PLAYERS_REJECT_FROM_ROOM_ERROR = "L'adversaire à rejeter votre demande";
 
@@ -33,8 +34,12 @@ export class WaitingRoomService {
         private gameStateService: GamesStateService,
         private virtualPlayerStorageService: VirtualPlayersStorageService,
         private socketManager: SocketManager,
+        private gamesHandler: GamesHandlerService,
     ) {
         this.waitingRooms = [];
+        this.gamesHandler.deleteWaitingRoom.subscribe((roomID: string) => {
+            this.clearWaitingRoom(roomID);
+        })
     }
 
     initSocketEvents() {
@@ -362,5 +367,9 @@ export class WaitingRoomService {
         });
 
         return virtualPlayers;
+    }
+
+    clearWaitingRoom(waitingRoomID: string) {
+        this.waitingRooms = this.waitingRooms.filter((waitingRoom: GameRoom) => waitingRoom.id !== waitingRoomID);
     }
 }
