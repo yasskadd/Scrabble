@@ -69,6 +69,12 @@ export class WaitingRoomService {
         const roomIndex = this.waitingRooms.findIndex((room: GameRoom) => room.id === roomId);
         this.waitingRooms.splice(roomIndex, 1);
 
+        console.log(this.waitingRooms.map((wr: GameRoom) => wr.players.map((p: RoomPlayer) => p.type)));
+        this.waitingRooms = this.waitingRooms.filter((r: GameRoom) => {
+            return this.gamesHandler.usersRemaining(r.id);
+        });
+        console.log(this.waitingRooms.map((wr: GameRoom) => wr.players.map((p: RoomPlayer) => p.type)));
+
         server.emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
 
@@ -218,6 +224,10 @@ export class WaitingRoomService {
     }
 
     private async createWaitingRoom(server: Server, socket: SocketType, gameQuery: GameCreationQuery): Promise<void> {
+        this.waitingRooms = this.waitingRooms.filter((r: GameRoom) => {
+            return this.gamesHandler.usersRemaining(r.id);
+        });
+
         const room: GameRoom = await this.setupNewGameRoom(gameQuery, socket.id);
         this.waitingRooms.push(room);
 
