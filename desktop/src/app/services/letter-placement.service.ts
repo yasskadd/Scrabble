@@ -21,6 +21,7 @@ import { first } from 'rxjs/operators';
 import { DragInfos } from '@common/interfaces/drag-infos';
 import { window as tauriWindow } from '@tauri-apps/api';
 import { SimpleLetterInfos } from '@common/interfaces/simple-letter-infos';
+import { GameConfigurationService } from '@services/game-configuration.service';
 
 // const ASCII_ALPHABET_START = 96;
 
@@ -41,6 +42,7 @@ export class LetterPlacementService {
 
     constructor(
         private clientSocketService: ClientSocketService,
+        private gameConfigurationService: GameConfigurationService,
         private gameClientService: GameClientService, // private chatboxService: ChatboxHandlerService,
     ) {
         this.boardTiles = [];
@@ -84,6 +86,9 @@ export class LetterPlacementService {
         this.clientSocketService.on(SocketEvents.LetterPlaced, (event: SimpleLetterInfos) => {
             if (event.socketId === this.gameClientService.getLocalPlayer().player.socketId) return;
             this.dragLetter = undefined;
+            // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+            if (event.coord === -1) return;
+
             this.boardTiles[event.coord].letter.value = event.letter as AlphabetLetter;
             this.boardTiles[event.coord].state = BoardTileState.Pending;
         });
@@ -241,6 +246,8 @@ export class LetterPlacementService {
         };
         this.boardTiles[boardTile.coord] = playedTile;
         this.clientSocketService.send(SocketEvents.LetterPlaced, {
+            roomId: this.gameConfigurationService.localGameRoom.id,
+            socketId: this.gameClientService.getLocalPlayer().player.socketId,
             coord: boardTile.coord,
             letter: letter.value.toString(),
         });
