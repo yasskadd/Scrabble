@@ -25,7 +25,6 @@ import { GameClientService } from '@services/game-client.service';
 export class GameBoardComponent {
     protected boardTileStates: typeof BoardTileState = BoardTileState;
     protected playDirection: typeof PlayDirection = PlayDirection;
-    protected tileState: typeof BoardTileState = BoardTileState;
 
     constructor(
         protected letterPlacementService: LetterPlacementService,
@@ -64,12 +63,25 @@ export class GameBoardComponent {
             this.letterPlacementService.liveBoard[tile.coord].state === BoardTileState.Empty ||
             this.letterPlacementService.liveBoard[tile.coord].state === BoardTileState.Temp
         ) {
-            this.letterPlacementService.liveBoard[tile.coord] = {
-                type: BoardTileType.Empty,
-                state: BoardTileState.Temp,
-                letter: this.letterPlacementService.currentSelection,
-                coord: tile.coord,
-            };
+            if (this.letterPlacementService.currentSelection) {
+                this.letterPlacementService.liveBoard[tile.coord] = {
+                    type: BoardTileType.Empty,
+                    state: BoardTileState.Temp,
+                    letter: this.letterPlacementService.currentSelection,
+                    coord: tile.coord,
+                };
+            } else {
+                this.letterPlacementService.liveBoard[tile.coord] = {
+                    type: BoardTileType.Empty,
+                    state: BoardTileState.Temp,
+                    letter: {
+                        value: AlphabetLetter.None,
+                        quantity: undefined,
+                        points: undefined,
+                    },
+                    coord: tile.coord,
+                };
+            }
         }
     }
 
@@ -175,5 +187,21 @@ export class GameBoardComponent {
         });
 
         return tile.coord === CENTER_TILE && tile.state === BoardTileState.Empty && show;
+    }
+
+    protected isTempTile(state: BoardTileState) {
+        return state === BoardTileState.Temp;
+    }
+
+    protected isConfirmedTile(state: BoardTileState) {
+        return state === BoardTileState.Confirmed;
+    }
+
+    protected isPendingTile(state: BoardTileState) {
+        return state === BoardTileState.Pending;
+    }
+
+    protected isEmptyTile(state: BoardTileState) {
+        return state === BoardTileState.Empty;
     }
 }
