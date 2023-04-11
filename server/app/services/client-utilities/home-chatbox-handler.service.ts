@@ -44,10 +44,11 @@ export class HomeChatBoxHandlerService {
             rooms.forEach((room) => {
                 if (this.isChatRoomExist(room.name)) return;
                 const messageCount = room.messages.length;
-                this.chatRooms.push({ name: room.name, messageCount, readingUsers: [], isDeletable: true });
+                this.chatRooms.push({ name: room.name, messageCount, readingUsers: [], isDeletable: room.isDeletable });
             });
 
             console.log('ChatRooms loaded');
+            console.log(this.chatRooms);
         });
     }
 
