@@ -73,11 +73,11 @@ export class AuthentificationController {
                 const userId = await this.accountStorage.getUserIdFromUsername(user.username);
                 if (isLoginValid) {
                     const userData = (await this.accountStorage.getUserData(user.username)) as any;
-                    const hasNotification = this.chatBoxHandler.checkForChatNotification(userId, userData.chatRooms);
+                    userData.chatRooms = this.chatBoxHandler.getChatRoomsWithState(userId, userData.chatRooms);
                     // eslint-disable-next-line no-underscore-dangle
                     const token = this.createJWToken(userData._id.toString());
                     // Sending updated IUser with email and profile picture data added
-                    res.status(SUCCESS).cookie('session_token', token).send({ userData, hasNotification, sessionToken: token });
+                    res.status(SUCCESS).cookie('session_token', token).send({ userData, sessionToken: token });
                     return;
                 }
             }

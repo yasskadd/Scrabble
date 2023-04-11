@@ -1,4 +1,4 @@
-import { UserChatRoom } from '@app/interfaces/user-chat-room';
+import { UserChatRoom, UserChatRoomWithState } from '@app/interfaces/user-chat-room';
 import { AccountStorageService } from '@app/services/database/account-storage.service';
 import { ChatRoomsStorageService } from '@app/services/database/chat-rooms-storage.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
@@ -94,17 +94,19 @@ export class HomeChatBoxHandlerService {
         // });
     }
 
-    checkForChatNotification(userId: string, chatRooms: UserChatRoom[]): string[] {
-        const notificationRooms: string[] = [];
+    getChatRoomsWithState(userId: string, chatRooms: UserChatRoom[]): UserChatRoomWithState[] {
+        const notificationRooms: UserChatRoomWithState[] = [];
         chatRooms.forEach((chatRoom) => {
             const room = this.isChatRoomExist(chatRoom.name);
             if (room === undefined) {
                 this.accountStorage.deleteChatRoom(userId, chatRoom.name);
                 return;
             }
+            const roomWithState = { name: room.name, notified: false } as UserChatRoomWithState;
             if (chatRoom.messageCount < room.messageCount) {
-                notificationRooms.push(room.name);
+                roomWithState.notified = true;
             }
+            notificationRooms.push(roomWithState);
         });
         return notificationRooms;
     }
