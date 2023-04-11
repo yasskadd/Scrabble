@@ -1,9 +1,21 @@
-<div class="load" *ngIf="isLoading">
+<div class='load' *ngIf='isLoading'>
     <h1>{{ "game.state.loading" | translate }}</h1>
-    <mat-spinner diameter="200"></mat-spinner>
+    <mat-spinner diameter='200'></mat-spinner>
 </div>
-<div *ngIf="!isLoading" class="encapsulating-div mat-app-background">
+<div *ngIf='!isLoading' class='encapsulating-div mat-app-background'>
     <app-header></app-header>
 
-    <app-play-area class="play-area justified mat-app-background" tabindex="0"></app-play-area>
+    <app-play-area class='play-area justified mat-app-background' tabindex='0'></app-play-area>
+
+    <div class='tile-content tile'
+         *ngIf='letterService.dragLetter'
+         [style.left.px]='letterService.dragLetter.coord[0]'
+         [style.top.px]='letterService.dragLetter.coord[1]'
+    >
+        <div class='pending-letter'>
+            <div class='letter-value'>
+                {{ letterService.dragLetter.letter.toUpperCase() }}
+            </div>
+        </div>
+    </div>
 </div>

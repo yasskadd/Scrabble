@@ -11,20 +11,22 @@ import { INVALID_INDEX } from '@common/constants/board-info';
 import { SocketEvents } from '@common/constants/socket-events';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
 import { PlayerInformation } from '@common/interfaces/player-information';
-import { Service } from 'typedi';
 import { PlayerType } from '@common/models/player-type';
+import { ReplaySubject } from 'rxjs/internal/ReplaySubject';
+import { Service } from 'typedi';
 
 @Service()
 export class GamesHandlerService {
     players: GamePlayer[];
     // gamePlayers: Map<string, { room: GameRoom; players: GamePlayer[] }>;
     dictionaries: Map<string, DictionaryContainer>;
-
+    deleteWaitingRoom: ReplaySubject<string | undefined>;
     constructor(private socketManager: SocketManager, private dictionaryStorage: DictionaryStorageService) {
         // this.gamePlayers = new Map();
         this.players = [];
         this.dictionaries = new Map();
         this.setDictionaries().then();
+        this.deleteWaitingRoom = new ReplaySubject(1);
     }
 
     updatePlayersInfo(roomId: string, game: Game) {
@@ -69,6 +71,8 @@ export class GamesHandlerService {
         playerIndexes.forEach((index: number) => {
             this.players.splice(index, 1);
         });
+
+        this.deleteWaitingRoom.next(roomId);
     }
 
     async setDictionaries() {

@@ -90,11 +90,8 @@ export class GameConfigurationService {
         });
 
         this.clientSocket.on(SocketEvents.UpdateGameRooms, (gamesToJoin: GameRoom[]) => {
+            console.log(gamesToJoin.map((g: GameRoom) => g.id));
             this.availableRooms = gamesToJoin;
-            if (!gamesToJoin.map((room: GameRoom) => room.id).includes(this.localGameRoom.id)) {
-                this.exitWaitingRoom();
-                this.router.navigate([`${AppRoutes.HomePage}`]);
-            }
         });
 
         this.clientSocket.on(SocketEvents.ErrorJoining, (reason: ServerErrors) => {

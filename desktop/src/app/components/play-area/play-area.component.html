@@ -8,8 +8,10 @@
             <div class="always-visible">
                 <app-information-panel></app-information-panel>
 
+
                 <div class="middle" cdkDropListGroup>
                     <app-game-board></app-game-board>
+
 
                     <div *ngIf="gameClientService.getLocalPlayer().player.type === playerType.Observer">
                         <app-player-rack

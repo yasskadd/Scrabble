@@ -26,14 +26,15 @@
             <div
                 cdkDrag
                 [cdkDragData]="letter"
-                (cdkDragStarted)="letterPlacementService.currentSelection = letter"
                 *ngFor="let letter of gameClient.getLocalPlayer()?.rack; index as i"
                 (click)="onSelection($event, i)"
                 class="rack"
+                (cdkDragStarted)="startedDragging(letter)"
+                (cdkDragMoved)="dragging($event, letter)"
             >
                 <button mat-flat-button color="accent" class="rack-letter letter-shadow" *cdkDragPlaceholder></button>
                 <button mat-raised-button color="accent" class="rack-letter">
-                    <div class="letter-value">{{ letter.value.toUpperCase() }}:with</div>
+                    <div class="letter-value">{{ letter.value.toUpperCase() }}</div>
                     <div class="letter-points">{{ letter.points }}</div>
                 </button>
             </div>

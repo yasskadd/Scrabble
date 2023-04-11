@@ -22,6 +22,7 @@ import { PlayerType } from '@common/models/player-type';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import * as uuid from 'uuid';
+import { GamesHandlerService } from '../games-management/games-handler.service';
 
 // const PLAYERS_REJECT_FROM_ROOM_ERROR = "L'adversaire à rejeter votre demande";
 
@@ -33,8 +34,12 @@ export class WaitingRoomService {
         private gameStateService: GamesStateService,
         private virtualPlayerStorageService: VirtualPlayersStorageService,
         private socketManager: SocketManager,
+        private gamesHandler: GamesHandlerService,
     ) {
         this.waitingRooms = [];
+        this.gamesHandler.deleteWaitingRoom.subscribe((roomID: string) => {
+            this.removeRoom(this.socketManager.server, roomID);
+        });
     }
 
     initSocketEvents() {
@@ -60,11 +65,21 @@ export class WaitingRoomService {
     }
 
     removeRoom(server: Server, roomId: string): void {
-        console.log('removing waiting room');
+        console.log('removing waiting room : ' + roomId);
         const roomIndex = this.waitingRooms.findIndex((room: GameRoom) => room.id === roomId);
         this.waitingRooms.splice(roomIndex, 1);
 
-        server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
+        console.log(this.waitingRooms.map((wr: GameRoom) => wr.players.map((p: RoomPlayer) => p.type)));
+        this.waitingRooms = this.waitingRooms.filter((r: GameRoom) => {
+            if (!this.gamesHandler.usersRemaining(r.id)) {
+                this.gamesHandler.removeRoomFromRoomId(r.id);
+                return false;
+            }
+            return true;
+        });
+        console.log(this.waitingRooms.map((wr: GameRoom) => wr.players.map((p: RoomPlayer) => p.type)));
+
+        server.emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
 
     private enterRoomLobby(server: Server, socket: Socket): void {
@@ -213,6 +228,10 @@ export class WaitingRoomService {
     }
 
     private async createWaitingRoom(server: Server, socket: SocketType, gameQuery: GameCreationQuery): Promise<void> {
+        this.waitingRooms = this.waitingRooms.filter((r: GameRoom) => {
+            return this.gamesHandler.usersRemaining(r.id);
+        });
+
         const room: GameRoom = await this.setupNewGameRoom(gameQuery, socket.id);
         this.waitingRooms.push(room);
 

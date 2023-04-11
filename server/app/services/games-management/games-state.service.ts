@@ -19,11 +19,14 @@ import { ScoreStorageService } from '@app/services/database/score-storage.servic
 import { UserStatsStorageService } from '@app/services/database/user-stats-storage.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
+import { DragInfos } from '@common/interfaces/drag-infos';
 import { GameHistoryInfo } from '@common/interfaces/game-history-info';
 import { GameRoom } from '@common/interfaces/game-room';
 import { GameInfo } from '@common/interfaces/game-state';
 import { PlayerInformation } from '@common/interfaces/player-information';
 import { RoomPlayer } from '@common/interfaces/room-player';
+import { SimpleLetterInfos } from '@common/interfaces/simple-letter-infos';
+import { IUser } from '@common/interfaces/user';
 import { GameDifficulty } from '@common/models/game-difficulty';
 import { GameMode } from '@common/models/game-mode';
 import { HistoryActions } from '@common/models/history-actions';
@@ -32,7 +35,6 @@ import { Subject } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import { GamesHandlerService } from './games-handler.service';
-import { IUser } from '@common/interfaces/user';
 
 const MAX_SKIP = 6;
 const SECOND = 1000;
@@ -72,6 +74,15 @@ export class GamesStateService {
         });
         this.socketManager.io(SocketEvents.JoinAsObserver, (server: Server, socket: Socket, botID: string) => {
             this.joinAsObserver(server, socket, botID);
+        });
+        this.socketManager.io(SocketEvents.SendDrag, (server: Server, socket: Socket, dragInfos: DragInfos) => {
+            server.to(dragInfos.roomId).emit(SocketEvents.DragEvent, dragInfos);
+        });
+        this.socketManager.io(SocketEvents.LetterTaken, (server: Server, socket: Socket, tile: SimpleLetterInfos) => {
+            server.to(tile.roomId).emit(SocketEvents.LetterTaken, tile);
+        });
+        this.socketManager.io(SocketEvents.LetterPlaced, (server: Server, socket: Socket, tile: SimpleLetterInfos) => {
+            server.to(tile.roomId).emit(SocketEvents.LetterPlaced, tile);
         });
     }
 
@@ -212,9 +223,9 @@ export class GamesStateService {
     }
 
     private async setupGameSubscriptions(room: GameRoom, game: Game) {
-        game.turn.endTurn.subscribe(async (activePlayer) => {
-            this.calculateEndGameScore(room.id);
-            if (!activePlayer) {
+        game.turn.endTurn.subscribe(async () => {
+            if (!game.turn.activePlayer) {
+                this.calculateEndGameScore(room.id);
                 await this.broadcastHighScores(room.id);
             } else this.changeTurn(room.id);
             this.sendPublicViewUpdate(game, room);
@@ -225,18 +236,15 @@ export class GamesStateService {
         });
     }
 
-    private calculateEndGameScore(roomID: string) {
+    private calculateEndGameScore(roomID: string): void {
         const players = this.gamesHandler.getPlayersFromRoomId(roomID);
-        if (!players) return;
-
         const game = players.find((gamePlayer: GamePlayer) => gamePlayer.player.type === PlayerType.User)?.game;
-        if (!game) return;
+        if (!game || !players) return;
 
         if (game.turn.skipCounter === MAX_SKIP) {
             players.forEach((player) => {
                 player.deductPoints();
             });
-            return;
         }
 
         if (
@@ -259,18 +267,21 @@ export class GamesStateService {
                     finishingPlayer.addPoints(player.rack);
                 }
             });
-            // TODO: Add GameEvent History to each player
-            const realPlayers = players.filter((player) => player.player.type === PlayerType.User);
-            const winnerPlayer = players.reduce((prev, current) => {
-                return prev.score > current.score ? prev : current;
-            });
-            realPlayers.forEach((player: GamePlayer) => {
-                if (player.player.type === PlayerType.User) {
-                    if (player.player.user.username === winnerPlayer.player.user.username) this.addGameEventHistory(player as RealPlayer, true);
-                    else this.addGameEventHistory(player as RealPlayer, false);
-                }
-            });
         }
+        this.addGameEventToPlayers(players);
+    }
+
+    private addGameEventToPlayers(players: GamePlayer[]) {
+        const realPlayers = players.filter((player) => player.player.type === PlayerType.User);
+        const winnerPlayer = players.reduce((prev, current) => {
+            return prev.score > current.score ? prev : current;
+        });
+        realPlayers.forEach((player: GamePlayer) => {
+            if (player.player.type === PlayerType.User) {
+                if (player.player.user.username === winnerPlayer.player.user.username) this.addGameEventHistory(player as RealPlayer, true);
+                else this.addGameEventHistory(player as RealPlayer, false);
+            }
+        });
     }
 
     private createNewGame(room: GameRoom): Game | undefined {
@@ -306,8 +317,6 @@ export class GamesStateService {
             players: informations,
             activePlayer: players[0].game.turn.activePlayer,
         };
-
-        console.log('Next turn');
 
         this.socketManager.emitRoom(roomId, SocketEvents.NextTurn, gameInfo);
     }
@@ -347,6 +356,11 @@ export class GamesStateService {
 
             return;
         }
+        // TODO: What to do if there are still observers in game ?
+
+        gamePlayer.game.abandon();
+        // this.gameEnded.next(room);
+        this.gamesHandler.removeRoomFromRoomId(gamePlayer.player.roomId);
     }
 
     // private async switchToSolo(playerToReplace: GamePlayer): Promise<void> {
@@ -455,12 +469,14 @@ export class GamesStateService {
             }
         }, SECOND);
     }
+    private async endGame(socketId: string) {
+        const gamePlayer = this.gamesHandler.getPlayerFromSocketId(socketId);
+        if (!gamePlayer) return;
+        const gamePlayers = this.gamesHandler.getPlayersFromRoomId(gamePlayer.player.roomId);
+        if (gamePlayers.length === 0 && gamePlayer.game.isGameFinish) return;
 
-    private async endGame(roomId: string) {
-        const gamePlayers = this.gamesHandler.getPlayersFromRoomId(roomId);
-
-        this.gameEnded.next(roomId);
-        gamePlayers[0].game.isGameFinish = true;
+        this.gameEnded.next(gamePlayer.player.roomId);
+        gamePlayer.game.isGameFinish = true;
         this.updatePlayersStats(gamePlayers);
 
         console.log('kicking players');
@@ -471,7 +487,7 @@ export class GamesStateService {
             console.log(socket.id);
             socket.emit(SocketEvents.GameEnd);
         });
-        this.gamesHandler.removeRoomFromRoomId(roomId);
+        this.gamesHandler.removeRoomFromRoomId(gamePlayer.player.roomId);
     }
 
     private async broadcastHighScores(roomId: string): Promise<void> {
@@ -609,8 +625,9 @@ export class GamesStateService {
     }
 
     private addGameEventHistory(player: RealPlayer, gameWon: boolean) {
-        const username = player.player.user.username;
+        console.log('ENTERED ADD GAME EVENT HISTORY');
+        const userID = player.player.user._id;
         const gameDate = player.game.beginningTime;
-        this.accountStorage.addUserEventHistory(username, HistoryActions.Game, gameDate, gameWon);
+        this.accountStorage.addUserEventHistory(userID, HistoryActions.Game, gameDate, gameWon);
     }
 }
