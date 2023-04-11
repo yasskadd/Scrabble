@@ -70,9 +70,10 @@ export class AuthentificationController {
             const user: IUser = req.body;
             if (await this.accountStorage.isUsernameRegistered(user.username)) {
                 const isLoginValid = await this.accountStorage.loginValidator(user);
+                const userId = await this.accountStorage.getUserIdFromUsername(user.username);
                 if (isLoginValid) {
                     const userData = (await this.accountStorage.getUserData(user.username)) as any;
-                    const hasNotification = this.chatBoxHandler.checkForChatNotification(userData.chatRooms);
+                    const hasNotification = this.chatBoxHandler.checkForChatNotification(userId, userData.chatRooms);
                     // eslint-disable-next-line no-underscore-dangle
                     const token = this.createJWToken(userData._id.toString());
                     // Sending updated IUser with email and profile picture data added

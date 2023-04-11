@@ -84,6 +84,11 @@ export class AccountStorageService {
         return userDocument as IUser;
     }
 
+    async getUserIdFromUsername(username: string): Promise<string> {
+        const userDocument = (await this.database.users.collection.findOne({ username }, { projection: { _id: 1 } })) as Document;
+        return userDocument._id as string;
+    }
+
     async getProfilePicInfoFromID(id: string): Promise<ImageInfo> {
         const userDocument = (await this.database.users.collection?.findOne({ _id: new ObjectId(id) })) as Document;
         return userDocument.profilePicture as ImageInfo;
