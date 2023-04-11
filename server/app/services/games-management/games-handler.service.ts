@@ -71,6 +71,8 @@ export class GamesHandlerService {
         playerIndexes.forEach((index: number) => {
             this.players.splice(index, 1);
         });
+
+        this.deleteWaitingRoom.next(roomId);
     }
 
     async setDictionaries() {

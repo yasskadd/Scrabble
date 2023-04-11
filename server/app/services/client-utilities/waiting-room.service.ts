@@ -38,8 +38,8 @@ export class WaitingRoomService {
     ) {
         this.waitingRooms = [];
         this.gamesHandler.deleteWaitingRoom.subscribe((roomID: string) => {
-            this.clearWaitingRoom(roomID);
-        })
+            this.removeRoom(this.socketManager.server, roomID);
+        });
     }
 
     initSocketEvents() {
@@ -375,9 +375,5 @@ export class WaitingRoomService {
         });
 
         return virtualPlayers;
-    }
-
-    clearWaitingRoom(waitingRoomID: string) {
-        this.waitingRooms = this.waitingRooms.filter((waitingRoom: GameRoom) => waitingRoom.id !== waitingRoomID);
     }
 }
