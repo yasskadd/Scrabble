@@ -27,8 +27,8 @@ export class ChatRoomsController {
             const userID = req.params.id as string;
             if (userID === undefined) return;
             const untreatedUserInfo = await this.accountStorage.getChatUserInfo(userID);
-            if (untreatedUserInfo === undefined) {
-                res.status(HTTP_STATUS.NOT_FOUND);
+            if (untreatedUserInfo === undefined || untreatedUserInfo === null || untreatedUserInfo.username === undefined) {
+                res.status(HTTP_STATUS.NOT_FOUND).send();
                 return;
             }
             const userInfo = { username: untreatedUserInfo.username } as ChatRoomUser;
