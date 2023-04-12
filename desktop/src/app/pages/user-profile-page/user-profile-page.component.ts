@@ -14,7 +14,7 @@ export class UserProfilePageComponent {
     userStats: UserStats;
 
     ngAfterViewInit() {
-        //TODO: Language
+        // TODO: Language
         const canvas = this.canvasRef.nativeElement;
         const context = canvas.getContext('2d');
         const myChart = new Chart(context, {
@@ -49,7 +49,7 @@ export class UserProfilePageComponent {
     }
 
     constructor(protected userService: UserService, private router: Router) {
-        // this.setUserStats();
+        this.setUserStats();
         console.log(this.userStats + '0');
     }
 

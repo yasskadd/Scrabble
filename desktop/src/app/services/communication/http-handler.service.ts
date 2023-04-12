@@ -150,7 +150,7 @@ export class HttpHandlerService {
     }
 
     async getStats(): Promise<{ userStats: UserStats }> {
-        const res: HttpResponse = await invoke('httpPost', { url: `${this.baseUrl}/profile/stats` });
+        const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/profile/stats` });
         console.log(JSON.parse(res.body));
         return JSON.parse(res.body);
     }
