@@ -25,7 +25,6 @@ import { GameClientService } from '@services/game-client.service';
 export class GameBoardComponent {
     protected boardTileStates: typeof BoardTileState = BoardTileState;
     protected playDirection: typeof PlayDirection = PlayDirection;
-    protected tileState: typeof BoardTileState = BoardTileState;
 
     constructor(
         protected letterPlacementService: LetterPlacementService,
@@ -50,6 +49,12 @@ export class GameBoardComponent {
             this.letterPlacementService.handleDragPlacement(event.previousIndex, event.previousContainer.data[event.previousIndex], tile);
         }
 
+        // this.clientSocketService.send(SocketEvents.LetterPlaced, {
+        //     roomId: this.gameConfigurationService.localGameRoom.id,
+        //     socketId: this.gameClientService.getLocalPlayer()?.player.socketId,
+        //     coord: -tile.coord,
+        //     letter: event.previousContainer.data[event.previousIndex],
+        // });
         this.letterPlacementService.currentSelection = undefined;
     }
 
@@ -58,12 +63,25 @@ export class GameBoardComponent {
             this.letterPlacementService.liveBoard[tile.coord].state === BoardTileState.Empty ||
             this.letterPlacementService.liveBoard[tile.coord].state === BoardTileState.Temp
         ) {
-            this.letterPlacementService.liveBoard[tile.coord] = {
-                type: BoardTileType.Empty,
-                state: BoardTileState.Temp,
-                letter: this.letterPlacementService.currentSelection,
-                coord: tile.coord,
-            };
+            if (this.letterPlacementService.currentSelection) {
+                this.letterPlacementService.liveBoard[tile.coord] = {
+                    type: BoardTileType.Empty,
+                    state: BoardTileState.Temp,
+                    letter: this.letterPlacementService.currentSelection,
+                    coord: tile.coord,
+                };
+            } else {
+                this.letterPlacementService.liveBoard[tile.coord] = {
+                    type: BoardTileType.Empty,
+                    state: BoardTileState.Temp,
+                    letter: {
+                        value: AlphabetLetter.None,
+                        quantity: undefined,
+                        points: undefined,
+                    },
+                    coord: tile.coord,
+                };
+            }
         }
     }
 
@@ -72,8 +90,6 @@ export class GameBoardComponent {
     }
 
     protected async startedDragging(tile: BoardTileInfo): Promise<void> {
-        console.log('letter taken');
-        console.log(tile);
         if (!this.gameClientService.currentlyPlaying()) return;
         this.clientSocketService.send(SocketEvents.LetterTaken, {
             roomId: this.gameConfigurationService.localGameRoom.id,
@@ -84,8 +100,6 @@ export class GameBoardComponent {
     }
 
     protected stoppedDragging(tile: BoardTileInfo): void {
-        console.log('letter placed');
-        console.log(tile);
         this.clientSocketService.send(SocketEvents.LetterPlaced, {
             roomId: this.gameConfigurationService.localGameRoom.id,
             socketId: this.gameClientService.getLocalPlayer()?.player.socketId,
@@ -98,9 +112,6 @@ export class GameBoardComponent {
         if (!this.gameClientService.currentlyPlaying()) return;
 
         const windowSize = await tauriWindow.appWindow.innerSize();
-        // const windowPosition = await tauriWindow.appWindow.innerPosition();
-        console.log('x:' + (event.event as MouseEvent).clientX + ' y:' + (event.event as MouseEvent).clientY);
-
         this.clientSocketService.send(SocketEvents.SendDrag, {
             roomId: this.gameConfigurationService.localGameRoom.id,
             socketId: this.gameClientService.getLocalPlayer()?.player.socketId,
@@ -176,5 +187,21 @@ export class GameBoardComponent {
         });
 
         return tile.coord === CENTER_TILE && tile.state === BoardTileState.Empty && show;
+    }
+
+    protected isTempTile(state: BoardTileState) {
+        return state === BoardTileState.Temp;
+    }
+
+    protected isConfirmedTile(state: BoardTileState) {
+        return state === BoardTileState.Confirmed;
+    }
+
+    protected isPendingTile(state: BoardTileState) {
+        return state === BoardTileState.Pending;
+    }
+
+    protected isEmptyTile(state: BoardTileState) {
+        return state === BoardTileState.Empty;
     }
 }

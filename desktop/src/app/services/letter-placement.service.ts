@@ -22,6 +22,7 @@ import { DragInfos } from '@common/interfaces/drag-infos';
 import { window as tauriWindow } from '@tauri-apps/api';
 import { SimpleLetterInfos } from '@common/interfaces/simple-letter-infos';
 import { GameConfigurationService } from '@services/game-configuration.service';
+import { SnackBarService } from '@services/snack-bar.service';
 
 // const ASCII_ALPHABET_START = 96;
 
@@ -45,6 +46,7 @@ export class LetterPlacementService {
         private clientSocketService: ClientSocketService,
         private gameConfigurationService: GameConfigurationService,
         private gameClientService: GameClientService, // private chatboxService: ChatboxHandlerService,
+        private snackBarService: SnackBarService,
     ) {
         this.liveBoard = [];
         this.defaultBoard = [];
@@ -92,6 +94,7 @@ export class LetterPlacementService {
             console.log(event);
             if (event.socketId === this.gameClientService.getLocalPlayer()?.player.socketId) return;
             console.log('removing letter');
+            if (event.coord === -1) return;
             this.initLiveTile(event.coord);
         });
 
@@ -102,7 +105,7 @@ export class LetterPlacementService {
             this.dragLetter = undefined;
 
             // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-            if (event.coord > 0) {
+            if (event.coord >= 0) {
                 this.liveBoard[event.coord].state = BoardTileState.Pending;
                 this.liveBoard[event.coord].letter.value = event.letter as AlphabetLetter;
             } else {
@@ -138,22 +141,19 @@ export class LetterPlacementService {
     }
 
     initLiveTile(coord: number): void {
-        this.liveBoard[coord] = JSON.parse(
-            JSON.stringify({
-                type: this.defaultBoard[coord].type,
-                state: this.defaultBoard[coord].state,
-                letter: this.defaultBoard[coord].letter,
-                coord: this.defaultBoard[coord].coord,
-            }),
-        );
-        this.confirmedBoard[coord] = JSON.parse(
-            JSON.stringify({
-                type: this.defaultBoard[coord].type,
-                state: this.defaultBoard[coord].state,
-                letter: this.defaultBoard[coord].letter,
-                coord: this.defaultBoard[coord].coord,
-            }),
-        );
+        this.liveBoard[coord] = {
+            type: JSON.parse(JSON.stringify(this.defaultBoard[coord].type)),
+            state: JSON.parse(JSON.stringify(this.defaultBoard[coord].state)),
+            letter: JSON.parse(JSON.stringify(this.defaultBoard[coord].letter)),
+            coord: JSON.parse(JSON.stringify(this.defaultBoard[coord].coord)),
+        };
+        this.confirmedBoard[coord] = {
+            type: JSON.parse(JSON.stringify(this.defaultBoard[coord].type)),
+            state: JSON.parse(JSON.stringify(this.defaultBoard[coord].state)),
+            letter: JSON.parse(JSON.stringify(this.defaultBoard[coord].letter)),
+            coord: JSON.parse(JSON.stringify(this.defaultBoard[coord].coord)),
+        };
+
         console.log(this.liveBoard[coord]);
     }
 
@@ -164,6 +164,14 @@ export class LetterPlacementService {
         }
 
         if (this.placingMode !== PlacingState.Drag || this.hasPlacingEnded || !this.gameClientService.currentlyPlaying()) {
+            if (this.hasPlacingEnded) {
+                // TODO : Language
+                this.snackBarService.openError('Cannot place letter here');
+            }
+            if (!this.gameClientService.currentlyPlaying()) {
+                // TODO : Language
+                this.snackBarService.openError('Please wait for you turn');
+            }
             return;
         }
         if (index === constants.INVALID_INDEX) {
@@ -238,23 +246,30 @@ export class LetterPlacementService {
     }
 
     undoEverything() {
+        console.log(this.placedLetters.map((l: BoardTileInfo) => l.letter.value));
         this.placedLetters.forEach((tile) => {
-            this.gameClientService.getLocalPlayer()?.rack.push(tile.letter);
+            const removedBoardTile = JSON.parse(JSON.stringify(tile));
+            this.gameClientService.getLocalPlayer()?.rack.push(removedBoardTile.letter);
             console.log(tile.letter.value);
             this.clientSocketService.send(SocketEvents.LetterPlaced, {
                 roomId: this.gameConfigurationService.localGameRoom.id,
                 socketId: this.gameClientService.getLocalPlayer()?.player.socketId,
-                coord: -tile.coord,
-                letter: tile.letter.value.toString(),
+                coord: -removedBoardTile.coord,
+                letter: removedBoardTile.letter.value.toString(),
             });
-            this.initLiveTile(tile.coord);
-            this.resetSelectionPositions(tile);
+            this.initLiveTile(removedBoardTile.coord);
         });
         // this.resetView();
+        this.placedLetters = [];
+        this.selectionPositions = [];
+        this.hasPlacingEnded = this.isPositionOutOfBound();
+        this.currentSelection = undefined;
     }
 
     resetSelectionPositions(removedBoardTile: BoardTileInfo): void {
-        this.placedLetters.pop();
+        const tileIndex = this.placedLetters.findIndex((t: BoardTileInfo) => t === removedBoardTile);
+        this.placedLetters.splice(tileIndex, 1);
+        // this.placedLetters.pop();
         this.computeNewPosition(removedBoardTile.coord, true);
         this.hasPlacingEnded = this.isPositionOutOfBound();
         this.currentSelection = undefined;
@@ -290,6 +305,10 @@ export class LetterPlacementService {
             return;
         }
         if (this.isPositionOutOfBound()) {
+            if (this.hasPlacingEnded) {
+                // TODO : Language
+                this.snackBarService.openError('Cannot place letter outside the board');
+            }
             return;
         }
 
@@ -483,6 +502,8 @@ export class LetterPlacementService {
         let validity = false;
 
         if (this.liveBoard[coord].state === BoardTileState.Confirmed) {
+            // TODO : Language
+            this.snackBarService.openError('Cannot place over a tile');
             return false;
         }
 
@@ -495,6 +516,11 @@ export class LetterPlacementService {
                 validity = true;
             }
         });
+
+        if (!validity) {
+            // TODO : Language
+            this.snackBarService.openError('You cannot place a tile here');
+        }
 
         return validity;
     }
@@ -529,15 +555,16 @@ export class LetterPlacementService {
         gameBoard.splice(0, TOTAL_TILES_IN_ROW);
         gameBoard.forEach((tile: string, coord) => {
             if (Math.floor(coord / TOTAL_TILES_IN_ROW) !== coord % TOTAL_TILES_IN_ROW) {
+                if (this.liveBoard[coord - 1].letter.value === AlphabetLetter.None || !tile) {
+                    this.liveBoard[coord - 1].letter.points = undefined;
+                    this.confirmedBoard[coord - 1].letter.points = undefined;
+                    return;
+                }
+
                 this.liveBoard[coord - 1].letter.value = tile.toUpperCase() as AlphabetLetter;
                 this.liveBoard[coord - 1].state = BoardTileState.Confirmed;
                 this.confirmedBoard[coord - 1].letter.value = tile.toUpperCase() as AlphabetLetter;
                 this.confirmedBoard[coord - 1].state = BoardTileState.Confirmed;
-
-                if (!this.liveBoard[coord - 1].letter.value && !tile) {
-                    this.liveBoard[coord - 1].letter.points = undefined;
-                    this.confirmedBoard[coord - 1].letter.points = undefined;
-                }
             }
         });
     }

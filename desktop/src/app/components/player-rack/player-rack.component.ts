@@ -122,7 +122,6 @@ export class PlayerRackComponent {
     }
 
     protected drop(event: CdkDragDrop<Letter[]>): void {
-        console.log('letter dropped in rack');
         if (!this.letterPlacementService.isRemoveValid(event.item.data)) {
             return;
         }
@@ -160,9 +159,6 @@ export class PlayerRackComponent {
         if (!this.gameClient.currentlyPlaying()) return;
 
         const windowSize = await tauriWindow.appWindow.innerSize();
-        // const windowPosition = await tauriWindow.appWindow.innerPosition();
-        // console.log('x:' + (event.event as MouseEvent).clientX + ' y:' + (event.event as MouseEvent).clientY);
-
         this.clientSocketService.send(SocketEvents.SendDrag, {
             roomId: this.gameConfigurationService.localGameRoom.id,
             socketId: this.gameClient.getLocalPlayer()?.player.socketId,

@@ -150,8 +150,7 @@ export class WaitingRoomService {
 
         if (
             (room.state === GameRoomState.Waiting && this.getPlayerFromQuery(userQuery)?.isCreator) ||
-            (room.state === GameRoomState.Playing &&
-                room.players.filter((playerElement: RoomPlayer) => playerElement.type === PlayerType.User).length === 0)
+            (room.state === GameRoomState.Playing && !this.gamesHandler.usersRemaining(room.id))
         ) {
             for (const p of room.players) {
                 this.rejectOpponent(server, socket, p);

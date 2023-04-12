@@ -18,11 +18,11 @@
             <div
                 [ngClass]="[
                     tile.letter?.value ? 'board-letter' : 'blank-letter',
-                    tile.state === boardTileStates.Temp ? 'temp-letter' : '',
-                    tile.state === boardTileStates.Confirmed ? 'confirmed-letter' : '',
-                    tile.state === boardTileStates.Pending ? 'pending-letter' : ''
+                    isTempTile(tile.state) ? 'temp-letter' : '',
+                    isConfirmedTile(tile.state)  ? 'confirmed-letter' : '',
+                    isPendingTile(tile.state) ? 'pending-letter' : ''
                 ]"
-                *ngIf='tile.state === tileState.Pending || tile.state === tileState.Temp'
+                *ngIf="isPendingTile(tile.state) || isTempTile(tile.state)"
                 cdkDrag
                 [cdkDragData]='tile'
                 (cdkDragStarted)='startedDragging(tile)'
@@ -49,11 +49,11 @@
             <div
                 [ngClass]="[
                     tile.letter?.value ? 'board-letter' : 'blank-letter',
-                    tile.state === boardTileStates.Temp ? 'temp-letter' : '',
-                    tile.state === boardTileStates.Confirmed ? 'confirmed-letter' : '',
-                    tile.state === boardTileStates.Pending ? 'pending-letter' : ''
+                    isTempTile(tile.state) ? 'temp-letter' : '',
+                    isConfirmedTile(tile.state) ? 'confirmed-letter' : '',
+                    isPendingTile(tile.state) ? 'pending-letter' : ''
                 ]"
-                *ngIf='tile.state !== tileState.Pending'>
+                *ngIf='!isPendingTile(tile.state)'>
                 <div class='letter-value'>
                     {{ tile.letter?.value.toUpperCase() }}
                 </div>
