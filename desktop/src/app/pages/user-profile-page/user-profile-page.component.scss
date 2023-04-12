@@ -36,6 +36,15 @@ h2 {
     margin-left: 5px;
 }
 
+canvas {
+    margin-bottom: 10px;
+}
+
 mat-card > div {
     transform: scale(0.9);
+}
+
+mat-tab-group {
+    height: 85%;
+    margin-bottom: 5px;
 }
