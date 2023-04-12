@@ -107,8 +107,11 @@ export class GamesStateService {
             players: playersInfo,
             activePlayer: game.turn.activePlayer,
         } as GameInfo);
+
         server.to(room.id).emit(SocketEvents.LetterReserveUpdated, game.letterReserve.lettersReserve);
         game.turn.start();
+
+        //Sketchy bot turn
         if (game.turn.activePlayer && !game.turn.activePlayer?.email) {
             game.turn.endTurn.next(game.turn.activePlayer);
         }
@@ -162,13 +165,7 @@ export class GamesStateService {
                     break;
                 }
             }
-
-            // TODO : Is this still usefull ?
-            //     if (this.gamesHandler.gamePlayers.get(newPlayer.room) === undefined)
-            //         this.gamesHandler.gamePlayers.set(newPlayer.room, { room, players: [] as GamePlayer[] });
-            //     (this.gamesHandler.gamePlayers.get(newPlayer.room)?.players as GamePlayer[]).push(newPlayer);
         });
-
         return gamePlayers;
     }
 
@@ -197,19 +194,8 @@ export class GamesStateService {
             });
         }
 
-        if (
-            players.filter((player: GamePlayer) => {
-                if (player.player.type === PlayerType.User) {
-                    return player.rackIsEmpty();
-                }
-                return false;
-            }).length > 0
-        ) {
-            const finishingPlayer = players.find((player: GamePlayer) => {
-                if (player.player.type === PlayerType.User) {
-                    player.rackIsEmpty();
-                }
-            });
+        if (this.playerHasEmptyRack(players)) {
+            const finishingPlayer = this.returnEmptyRackPlayer(players) as GamePlayer;
             if (!finishingPlayer) return;
             players.filter((player: GamePlayer) => {
                 if (player.player.user.username !== finishingPlayer.player.user.username) {
@@ -219,6 +205,13 @@ export class GamesStateService {
             });
         }
         this.addGameEventToPlayers(players);
+    }
+
+    private playerHasEmptyRack(players: GamePlayer[]): boolean {
+        return players.filter((player) => player.player.type !== PlayerType.Observer && player.rackIsEmpty()).length > 0;
+    }
+    private returnEmptyRackPlayer(players: GamePlayer[]): GamePlayer | undefined {
+        return players.find((player) => player.player.type !== PlayerType.Observer && player.rackIsEmpty());
     }
 
     private addGameEventToPlayers(players: GamePlayer[]) {
