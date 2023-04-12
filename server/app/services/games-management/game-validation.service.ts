@@ -1,5 +1,5 @@
 import { GamePlayer } from '@app/classes/player/player.class';
-import { Word } from '@app/classes/word.class';
+import { Word } from '@common/classes/word.class';
 import { RackService } from '@app/services/rack.service';
 import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
 import { Service } from 'typedi';
