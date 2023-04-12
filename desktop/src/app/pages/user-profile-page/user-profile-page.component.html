@@ -13,13 +13,39 @@
                 <div>Temps moy :</div>
                 <div>Score moy :</div>
                 <div>Jeux joués :</div>
-                <canvas #myChart width="200" height="200"></canvas>
+                <canvas #myChart width="160" height="160"></canvas>
             </mat-card>
             <mat-card class="justified">
                 <h4>Historique</h4>
+                <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+                    <mat-tab label="Parties">
+                        <mat-list role="list">
+                            <mat-list-item role="listitem">
+                                <p>Victoire</p>
+                                <p>Date</p>
+                            </mat-list-item>
+                            <mat-list-item role="listitem">
+                                <p>Victoire</p>
+                                <p>Date</p>
+                            </mat-list-item>
+                            <mat-list-item role="listitem">
+                                <p>Victoire</p>
+                                <p>Date</p>
+                            </mat-list-item>
+                        </mat-list>
+                    </mat-tab>
+                    <mat-tab label="Connexions"
+                        ><mat-list role="list">
+                            <mat-list-item role="listitem">Item 1</mat-list-item>
+                            <mat-list-item role="listitem">Item 2</mat-list-item>
+                            <mat-list-item role="listitem">Item 3</mat-list-item>
+                        </mat-list>
+                    </mat-tab>
+                </mat-tab-group>
             </mat-card>
         </div>
     </body>
 
     <app-footer></app-footer>
 </div>
+<!-- TODO: LANGUAGE!! -->
