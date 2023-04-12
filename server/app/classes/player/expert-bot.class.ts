@@ -5,6 +5,7 @@ import { Bot } from './bot.class';
 
 export class ExpertBot extends Bot {
     playTurn(): void {
+        console.log(this.rack);
         const bestCommandInfo: PlaceWordCommandInfo = [...this.processWordSolver().entries()].reduce(
             (highestScore, currentScore) => {
                 return currentScore[1] > highestScore[1] ? currentScore : highestScore;

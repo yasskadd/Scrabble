@@ -150,7 +150,6 @@ export class GamesStateService {
                         }, 500);
                     }
                     newBot.game = game;
-                    console.log(newBot);
                     gamePlayers.push(newBot);
                     newBot.setGame(game);
                     newBot.start();
