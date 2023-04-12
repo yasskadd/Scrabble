@@ -13,7 +13,7 @@ import { ScoreRelatedBot } from '@app/classes/player/score-related-bot.class';
 import { Turn } from '@app/classes/turn.class';
 import { MAX_QUANTITY } from '@app/constants/letter-reserve';
 import { DictionaryContainer } from '@app/interfaces/dictionary-container';
-import { HomeChatBoxHandlerService } from '@app/services/client-utilities/home-chatbox-handler.service';
+import { ChatHandlerService } from '@app/services/client-utilities/chat-handler.service';
 import { AccountStorageService } from '@app/services/database/account-storage.service';
 import { HistoryStorageService } from '@app/services/database/history-storage.service';
 import { ScoreStorageService } from '@app/services/database/score-storage.service';
@@ -49,7 +49,7 @@ export class GamesStateService {
         private socketManager: SocketManager,
         private scoreStorage: ScoreStorageService,
         private userStatsStorage: UserStatsStorageService,
-        private homeChatBoxHandlerService: HomeChatBoxHandlerService,
+        private homeChatBoxHandlerService: ChatHandlerService,
         private historyStorageService: HistoryStorageService, // private virtualPlayerStorage: VirtualPlayersStorageService,
     ) {
         this.gameEnded = new Subject();

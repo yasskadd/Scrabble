@@ -1,12 +1,12 @@
 import { Application } from '@app/app';
+import * as fs from 'fs';
 import * as http from 'http';
+import * as https from 'https';
 import { AddressInfo } from 'net';
 import { Service } from 'typedi';
 import { DatabaseService } from './services/database/database.service';
+import { InitializationHandler } from './services/socket/initialization-handler.service';
 import { SocketManager } from './services/socket/socket-manager.service';
-import { SocketSubscribeHandler } from './services/socket/socket-subscribe-handler.service';
-import * as https from 'https';
-import * as fs from 'fs';
 
 @Service()
 export class Server {
@@ -20,7 +20,7 @@ export class Server {
     constructor(
         private readonly application: Application,
         private socketManager: SocketManager,
-        private handler: SocketSubscribeHandler,
+        private handler: InitializationHandler,
         private databaseService: DatabaseService,
     ) {}
 
@@ -47,9 +47,21 @@ export class Server {
             },
             this.application.app,
         );
+
+        try {
+            await this.databaseService.connect();
+            // eslint-disable-next-line no-console
+            console.log('Connected to database');
+        } catch {
+            // eslint-disable-next-line no-console
+            console.log('Failed to connected to the database, exiting...');
+            process.exit(1);
+        }
+
         this.socketManager.init(this.server);
         this.socketManager.handleSockets();
         this.handler.initSocketsEvents();
+        await this.handler.loadConfig();
 
         this.server.listen(Server.appPort);
         this.secureServer.listen(Server.secureAppPort);
@@ -57,12 +69,6 @@ export class Server {
         this.server.on('listening', () => this.onListening(this.server));
         this.secureServer.on('error', (error: NodeJS.ErrnoException) => this.onError(error));
         this.secureServer.on('listening', () => this.onListening(this.secureServer));
-
-        try {
-            await this.databaseService.connect();
-        } catch {
-            process.exit(1);
-        }
     }
 
     private onError(error: NodeJS.ErrnoException): void {

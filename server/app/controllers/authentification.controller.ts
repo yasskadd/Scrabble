@@ -1,6 +1,6 @@
 import { SECRET_KEY } from '@app/../very-secret-file';
 import { defaultImagesMap } from '@app/constants/profile-pictures';
-import { HomeChatBoxHandlerService } from '@app/services/client-utilities/home-chatbox-handler.service';
+import { ChatHandlerService } from '@app/services/client-utilities/chat-handler.service';
 import { AccountStorageService } from '@app/services/database/account-storage.service';
 import { IUser } from '@common/interfaces/user';
 import { Request, Response, Router } from 'express';
@@ -18,7 +18,7 @@ const TEMP_REDIRECT = 307;
 export class AuthentificationController {
     router: Router;
 
-    constructor(private accountStorage: AccountStorageService, private chatBoxHandler: HomeChatBoxHandlerService) {
+    constructor(private accountStorage: AccountStorageService, private chatBoxHandler: ChatHandlerService) {
         this.configureRouter();
     }
 
