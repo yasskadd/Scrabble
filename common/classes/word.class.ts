@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { Gameboard } from '@common/classes/gameboard.class';
-import { Coordinate } from '@common/interfaces/coordinate';
-import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
+import { Gameboard } from './gameboard.class';
+import { Coordinate } from '../interfaces/coordinate';
+import { PlaceWordCommandInfo } from '../interfaces/place-word-command-info';
 
 const SEVEN_LETTERS = 7;
 const SEVEN_LETTER_BONUS = 50;

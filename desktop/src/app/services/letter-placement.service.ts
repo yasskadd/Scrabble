@@ -4,7 +4,6 @@ import { BOARD_TILES } from '@app/constants/board-tiles';
 import { BoardTileInfo } from '@app/interfaces/board-tile-info';
 import { BoardTileState, BoardTileType } from '@app/models/board-tile';
 import * as constants from '@common/constants/board-info';
-import { TOTAL_TILES_IN_ROW } from '@common/constants/board-info';
 import { AlphabetLetter } from '@common/models/alphabet-letter';
 // import { Coordinate } from '@common/interfaces/coordinate';
 import { TOTAL_COLUMNS, TOTAL_ROWS } from '@app/constants/board-view';
@@ -552,20 +551,27 @@ export class LetterPlacementService {
     }
 
     private updateGameBoard(gameBoard: string[]) {
-        gameBoard.splice(0, TOTAL_TILES_IN_ROW);
-        gameBoard.forEach((tile: string, coord) => {
-            if (Math.floor(coord / TOTAL_TILES_IN_ROW) !== coord % TOTAL_TILES_IN_ROW) {
-                if (this.liveBoard[coord - 1].letter.value === AlphabetLetter.None || !tile) {
-                    this.liveBoard[coord - 1].letter.points = undefined;
-                    this.confirmedBoard[coord - 1].letter.points = undefined;
-                    return;
-                }
-
-                this.liveBoard[coord - 1].letter.value = tile.toUpperCase() as AlphabetLetter;
-                this.liveBoard[coord - 1].state = BoardTileState.Confirmed;
-                this.confirmedBoard[coord - 1].letter.value = tile.toUpperCase() as AlphabetLetter;
-                this.confirmedBoard[coord - 1].state = BoardTileState.Confirmed;
+        gameBoard.forEach((tile: string, coord: number) => {
+            if (!tile) {
+                this.liveBoard[coord].letter = {
+                    value: AlphabetLetter.None,
+                    quantity: undefined,
+                    points: undefined,
+                };
+                this.liveBoard[coord].state = BoardTileState.Empty;
+                this.confirmedBoard[coord].letter = {
+                    value: AlphabetLetter.None,
+                    quantity: undefined,
+                    points: undefined,
+                };
+                this.confirmedBoard[coord].state = BoardTileState.Empty;
+                return;
             }
+
+            this.liveBoard[coord].letter.value = tile.toUpperCase() as AlphabetLetter;
+            this.liveBoard[coord].state = BoardTileState.Confirmed;
+            this.confirmedBoard[coord].letter.value = tile.toUpperCase() as AlphabetLetter;
+            this.confirmedBoard[coord].state = BoardTileState.Confirmed;
         });
     }
 

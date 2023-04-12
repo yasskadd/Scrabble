@@ -1,5 +1,5 @@
 import { GamePlayer } from '@app/classes/player/player.class';
-import { Word } from '@app/classes/word.class';
+import { Word } from '@common/classes/word.class';
 import { WordPlacementResult } from '@app/interfaces/word-placement-result';
 import { ErrorType } from '@app/services/games-management/game-validation.service';
 import { Gameboard } from '@common/classes/gameboard.class';

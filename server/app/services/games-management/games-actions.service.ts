@@ -1,6 +1,6 @@
 import { GamePlayer } from '@app/classes/player/player.class';
 import { RealPlayer } from '@app/classes/player/real-player.class';
-import { Word } from '@app/classes/word.class';
+import { Word } from '@common/classes/word.class';
 import { RackService } from '@app/services/rack.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
@@ -99,9 +99,9 @@ export class GamesActionsService {
             letters: commandInfo.letters.map((letter: string) => {
                 if (letter === letter.toUpperCase()) return letter.toLowerCase();
                 else return letter.toUpperCase();
-            })
-        }
-        console.log(commandInfo.letters);
+            }),
+        };
+
         const gamePlayer = this.gamesHandler.getPlayer(socket.id) as RealPlayer;
         if (!gamePlayer) return;
 
