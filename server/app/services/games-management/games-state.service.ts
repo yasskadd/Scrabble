@@ -190,7 +190,7 @@ export class GamesStateService {
                             timer: room.timer,
                             roomId: room.id,
                             dictionaryValidation: dictionaryValidation as DictionaryValidation,
-                        });
+                        }, 500);
                     }
                     newBot.game = game;
                     gamePlayers.push(newBot);
