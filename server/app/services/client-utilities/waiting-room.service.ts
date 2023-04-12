@@ -312,10 +312,11 @@ export class WaitingRoomService {
             username: user.username,
             password: 'null',
             profilePicture: user.profilePicture,
+            chatRooms: user.chatRooms,
             historyEventList: user.historyEventList,
             theme: user.theme,
             language: user.language,
-        };
+        } as IUser;
     }
 
     private stripPlayerPassword(player: RoomPlayer): RoomPlayer {
@@ -358,6 +359,7 @@ export class WaitingRoomService {
                         isDefaultPicture: true,
                         key: 'f553ba598dbcfc7e9e07f8366b6684b5.jpg',
                     },
+                    chatRooms: [],
                 },
                 socketId: '',
                 roomId,

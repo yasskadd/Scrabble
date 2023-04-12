@@ -16,11 +16,15 @@ export class SocketManager {
     private socketIdMap: Map<io.Socket, string>;
     private onEvents: Map<string, CallbackSignature[]>;
     private onAndSioEvents: Map<string, OnSioCallbackSignature[]>;
+    private onConnectEvents: CallbackSignature[];
+    private onDisconnectEvents: CallbackSignature[];
 
     constructor(private accountStorageService: AccountStorageService) {
         this.onEvents = new Map<string, CallbackSignature[]>();
         this.onAndSioEvents = new Map<string, OnSioCallbackSignature[]>();
         this.socketIdMap = new Map<io.Socket, string>();
+        this.onConnectEvents = [];
+        this.onDisconnectEvents = [];
     }
 
     init(server: http.Server) {
@@ -33,6 +37,14 @@ export class SocketManager {
         }
         const onElement = this.onEvents.get(event) as CallbackSignature[];
         onElement.push(callback);
+    }
+
+    onConnect(callback: CallbackSignature) {
+        this.onConnectEvents.push(callback);
+    }
+
+    onDisconnect(callback: CallbackSignature) {
+        this.onDisconnectEvents.push(callback);
     }
 
     io(event: string, callback: OnSioCallbackSignature) {
@@ -51,6 +63,14 @@ export class SocketManager {
         }
 
         return undefined;
+    }
+
+    getUserIdFromSocket(socket: io.Socket): string | undefined {
+        return this.socketIdMap.get(socket);
+    }
+
+    deleteRoom(room: string) {
+        this.server.sockets.in(room).socketsLeave(room);
     }
 
     emitRoom(room: string, event: string, ...args: unknown[]) {
@@ -73,13 +93,13 @@ export class SocketManager {
                 // Verify jwt token
                 const token = cookie.parse(cookies).session_token;
                 let isTokenValid = false;
-                let username = '';
+                let userID = '';
                 jwt.verify(token, SECRET_KEY, (err: jwt.VerifyErrors, decoded: any) => {
                     if (err) isTokenValid = false;
                     else {
                         isTokenValid = true;
                         // eslint-disable-next-line no-underscore-dangle
-                        username = decoded.userID;
+                        userID = decoded.userID;
                     }
                 });
 
@@ -90,7 +110,7 @@ export class SocketManager {
 
                 let keepConnecting = true;
                 this.socketIdMap.forEach((value: string) => {
-                    if (value === username) {
+                    if (value === userID) {
                         keepConnecting = false;
                     }
                 });
@@ -99,12 +119,16 @@ export class SocketManager {
                     return;
                 }
 
-                this.socketIdMap.set(socket, username);
+                this.socketIdMap.set(socket, userID);
 
-                this.accountStorageService.addUserEventHistory(username, HistoryActions.Connection, new Date());
+                for (const callback of this.onConnectEvents) {
+                    callback(socket);
+                }
+
+                this.accountStorageService.addUserEventHistory(userID, HistoryActions.Connection, new Date());
 
                 // eslint-disable-next-line no-console
-                console.log('Connection of client with socketid = ' + socket.id + ' from user = ' + username);
+                console.log('Connection of client with socketid = ' + socket.id + ' from user = ' + userID);
                 socket.emit(SocketEvents.SuccessfulConnection);
             } else {
                 socket.disconnect();
@@ -124,6 +148,10 @@ export class SocketManager {
                 }
             }
             socket.on('disconnect', () => {
+                for (const callback of this.onDisconnectEvents) {
+                    callback(socket);
+                }
+
                 if (this.socketIdMap.has(socket)) {
                     this.accountStorageService.addUserEventHistory(this.socketIdMap.get(socket) as string, HistoryActions.Logout, new Date());
                     this.socketIdMap.delete(socket);
