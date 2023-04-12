@@ -9,19 +9,11 @@ import * as moment from 'moment';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 
-// type HomeRoom = Pick<GameRoom, 'id' | 'isAvailable'> & { userMap: Map<string, string>; usernameSet: Set<string> };
-const NOT_FOUND = -1;
-// interface HomeRoom {
-//     id: string;
-//     userMap: Map<string, string>;
-//     usernameSet: Set<string>;
-//     isAvailable: boolean;
-// }
 interface ChatRoomInfo {
     name: string;
     messageCount: number;
     creatorId?: string;
-    readingUsers: string[];
+    readingUsers: Set<string>;
     isDeletable: boolean;
 }
 
@@ -38,7 +30,6 @@ export class ChatHandlerService {
         private chatRoomsStorage: ChatRoomsStorageService,
     ) {
         this.chatRooms = [];
-        // TODO: refactor or do it in another way, works for now (We can wait for this before launching the server maybe?)
     }
 
     async initConfig() {
@@ -47,11 +38,10 @@ export class ChatHandlerService {
             rooms.forEach((room) => {
                 if (this.isChatRoomExist(room.name)) return;
                 const messageCount = room.messages.length;
-                this.chatRooms.push({ name: room.name, messageCount, readingUsers: [], isDeletable: room.isDeletable });
+                this.chatRooms.push({ name: room.name, messageCount, readingUsers: new Set(), isDeletable: room.isDeletable });
             });
 
             console.log('ChatRooms loaded');
-            console.log(this.chatRooms);
         });
     }
 
@@ -88,12 +78,9 @@ export class ChatHandlerService {
             this.subscribeUserToRooms(socket);
         });
 
-        // this.socketManager.io(SocketEvents.UserLeftRoom, (sio: Server, socket: Socket) => {
-        //     this.leaveRoom(sio, socket);
-        // });
-        // this.socketManager.io(SocketEvents.Disconnect, (sio: Server, socket: Socket) => {
-        //     this.leaveRoom(sio, socket);
-        // });
+        this.socketManager.onDisconnect((socket: Socket) => {
+            this.leaveUserFromAllRoomSessions(socket);
+        });
     }
 
     getChatRoomsWithState(userId: string, chatRooms: UserChatRoom[]): UserChatRoomWithState[] {
@@ -163,7 +150,7 @@ export class ChatHandlerService {
             return;
         }
         const userId = this.socketManager.getUserIdFromSocket(socket);
-        const newChatRoom = { name: chatRoomName, messageCount: 0, creatorId: userId, readingUsers: [], isDeletable: true };
+        const newChatRoom = { name: chatRoomName, messageCount: 0, creatorId: userId, readingUsers: new Set<string>(), isDeletable: true };
         this.chatRooms.push(newChatRoom);
         await this.chatRoomsStorage.createRoom(chatRoomName);
         await this.joinChatRoom(socket, chatRoomName);
@@ -222,7 +209,7 @@ export class ChatHandlerService {
             return;
         }
         const userId = this.socketManager.getUserIdFromSocket(socket) as string;
-        room.readingUsers.push(userId);
+        room.readingUsers.add(userId);
         const chatRoomSession = await this.loadMessages(chatRoomName);
         socket.emit(SocketEvents.JoinChatRoomSession, chatRoomSession);
     }
@@ -234,16 +221,22 @@ export class ChatHandlerService {
             return;
         }
 
-        const userId = this.socketManager.getUserIdFromSocket(socket);
-        const userIdIndex = room.readingUsers.findIndex((id) => {
-            return id === userId;
-        });
-        if (userIdIndex !== NOT_FOUND) {
-            room.readingUsers.splice(userIdIndex, 1);
+        const userId = this.socketManager.getUserIdFromSocket(socket) as string;
+        if (room.readingUsers.has(userId)) {
+            room.readingUsers.delete(userId);
             await this.accountStorage.updateChatRoomMessageCount(userId as string, chatRoomName, room.messageCount);
             socket.emit(SocketEvents.LeaveChatRoomSession, '');
         } else {
             socket.emit(SocketEvents.LeaveChatRoomSessionNotFoundError, '');
+        }
+    }
+
+    private leaveUserFromAllRoomSessions(socket: Socket) {
+        const userId = this.socketManager.getUserIdFromSocket(socket) as string;
+        for (const room of this.chatRooms) {
+            if (!room.readingUsers.has(userId)) continue;
+            this.accountStorage.updateChatRoomMessageCount(userId as string, room.name, room.messageCount);
+            room.readingUsers.delete(userId);
         }
     }
 
