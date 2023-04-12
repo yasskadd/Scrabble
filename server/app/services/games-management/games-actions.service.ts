@@ -60,21 +60,21 @@ export class GamesActionsService {
     }
 
     private reserveCommand(socket: Socket) {
-        const player = this.gamesHandler.getPlayerFromSocketId(socket.id);
+        const player = this.gamesHandler.getPlayer(socket.id);
         if (!player) return;
 
         socket.emit(SocketEvents.AllReserveLetters, player.game.letterReserve.lettersReserve);
     }
 
     private skip(socket: Socket) {
-        const gamePlayer = this.gamesHandler.getPlayerFromSocketId(socket.id) as RealPlayer;
+        const gamePlayer = this.gamesHandler.getPlayer(socket.id) as RealPlayer;
         if (!gamePlayer) return;
 
         gamePlayer.skipTurn();
     }
 
     private exchange(socket: Socket, letters: string[]) {
-        const gamePlayer = this.gamesHandler.getPlayerFromSocketId(socket.id) as RealPlayer;
+        const gamePlayer = this.gamesHandler.getPlayer(socket.id) as RealPlayer;
         if (!gamePlayer) return;
 
         const lettersToExchange = letters.length;
@@ -98,7 +98,7 @@ export class GamesActionsService {
             ...commandInfo,
             letters: commandInfo.letters.map((letter: string) => letter.toLowerCase())
         }
-        const gamePlayer = this.gamesHandler.getPlayerFromSocketId(socket.id) as RealPlayer;
+        const gamePlayer = this.gamesHandler.getPlayer(socket.id) as RealPlayer;
         if (!gamePlayer) return;
 
         const game = gamePlayer.game;

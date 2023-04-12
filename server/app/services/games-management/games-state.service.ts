@@ -80,6 +80,7 @@ export class GamesStateService {
         });
     }
 
+
     async createGame(server: Server, room: GameRoom) {
         const game = this.createNewGame(room);
         if (!game) return;
@@ -113,93 +114,48 @@ export class GamesStateService {
         }
     }
 
-    addObserver(server: Server, roomId: string, player: RoomPlayer): void {
-        const gamePlayers: GamePlayer[] = this.gamesHandler.getPlayersInRoom(roomId);
-        const socket: Socket | undefined = this.socketManager.getSocketFromId(player.socketId);
-        if (!socket) return;
-
-        const newGamePlayer = new GamePlayer(player);
-        newGamePlayer.game = gamePlayers[0].game;
-
-        this.gamesHandler.players.push(newGamePlayer);
-        socket.emit(SocketEvents.GameAboutToStart, {
-            gameboard: newGamePlayer.game.gameboard.toStringArray(),
-            players: this.gamesHandler.players
-                .filter((p: GamePlayer) => p.player.roomId === roomId)
-                .map((p: GamePlayer) => {
-                    return p.getInformation();
-                }),
-            activePlayer: newGamePlayer.game.turn.activePlayer,
-        });
-        server.to(roomId).emit(SocketEvents.PublicViewUpdate, {
-            gameboard: newGamePlayer.game.gameboard.toStringArray(),
-            players: this.gamesHandler.players
-                .filter((p: GamePlayer) => p.player.roomId === roomId)
-                .map((p: GamePlayer) => {
-                    return p.getInformation();
-                }),
-            activePlayer: newGamePlayer.game.turn.activePlayer,
-        });
-    }
-
     private initPlayers(game: Game, room: GameRoom): GamePlayer[] {
         const gamePlayers: GamePlayer[] = [];
-
         room.players.forEach((roomPlayer: RoomPlayer) => {
             switch (roomPlayer.type) {
                 case PlayerType.User: {
                     const newPlayer: RealPlayer = new RealPlayer(roomPlayer);
-
                     newPlayer.game = game;
                     gamePlayers.push(newPlayer);
-
-                    // TODO : Is this usefull?
-                    // if (this.gamesHandler.gamePlayers.get(roomPlayer.roomId) === undefined) {
-                    //     this.gamesHandler.gamePlayers.set(newPlayer.room, { room, players: [] as GamePlayer[] });
-                    //     (this.gamesHandler.gamePlayers.get(newPlayer.room)?.players as GamePlayer[]).push(newPlayer);
-                    // }
-
                     break;
                 }
                 case PlayerType.Bot: {
                     if (roomPlayer.type !== PlayerType.Bot) return;
-
-                    const dictionaryValidation = (this.gamesHandler.dictionaries.get(room.dictionary) as DictionaryContainer).dictionaryValidation;
-
                     let newBot: Bot;
                     if (room.difficulty === GameDifficulty.Easy) {
                         newBot = new BeginnerBot(roomPlayer, {
                             timer: room.timer,
                             roomId: room.id,
-                            dictionaryValidation: dictionaryValidation as DictionaryValidation,
+                            dictionaryValidation: game.dictionaryValidation as DictionaryValidation,
                         });
                     } else if (room.difficulty === GameDifficulty.Hard) {
                         newBot = new ExpertBot(roomPlayer, {
                             timer: room.timer,
                             roomId: room.id,
-                            dictionaryValidation: dictionaryValidation as DictionaryValidation,
+                            dictionaryValidation: game.dictionaryValidation as DictionaryValidation,
                         });
                     } else {
                         newBot = new ScoreRelatedBot(roomPlayer, {
                             timer: room.timer,
                             roomId: room.id,
-                            dictionaryValidation: dictionaryValidation as DictionaryValidation,
+                            dictionaryValidation: game.dictionaryValidation as DictionaryValidation,
                         }, 500);
                     }
                     newBot.game = game;
                     gamePlayers.push(newBot);
-
                     newBot.setGame(game);
                     newBot.start();
-
                     break;
                 }
                 case PlayerType.Observer: {
                     const newGamePlayer = new GamePlayer(roomPlayer);
-
                     newGamePlayer.game = game;
                     gamePlayers.push(newGamePlayer);
-
                     break;
                 }
                 default: {
@@ -513,6 +469,35 @@ export class GamesStateService {
                     return p.getInformation();
                 }),
             activePlayer: newPlayer.game.turn.activePlayer,
+        });
+    }
+
+    addObserver(server: Server, roomId: string, player: RoomPlayer): void {
+        const gamePlayers: GamePlayer[] = this.gamesHandler.getPlayersInRoom(roomId);
+        const socket: Socket | undefined = this.socketManager.getSocketFromId(player.socketId);
+        if (!socket) return;
+
+        const newGamePlayer = new GamePlayer(player);
+        newGamePlayer.game = gamePlayers[0].game;
+
+        this.gamesHandler.players.push(newGamePlayer);
+        socket.emit(SocketEvents.GameAboutToStart, {
+            gameboard: newGamePlayer.game.gameboard.toStringArray(),
+            players: this.gamesHandler.players
+                .filter((p: GamePlayer) => p.player.roomId === roomId)
+                .map((p: GamePlayer) => {
+                    return p.getInformation();
+                }),
+            activePlayer: newGamePlayer.game.turn.activePlayer,
+        });
+        server.to(roomId).emit(SocketEvents.PublicViewUpdate, {
+            gameboard: newGamePlayer.game.gameboard.toStringArray(),
+            players: this.gamesHandler.players
+                .filter((p: GamePlayer) => p.player.roomId === roomId)
+                .map((p: GamePlayer) => {
+                    return p.getInformation();
+                }),
+            activePlayer: newGamePlayer.game.turn.activePlayer,
         });
     }
 
