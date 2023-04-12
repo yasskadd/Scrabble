@@ -97,7 +97,7 @@ export class LetterPlacementService {
             this.initLiveTile(event.coord);
         });
 
-        this.clientSocketService.on(SocketEvents.LetterPlaced, (event: SimpleLetterInfos) => {
+        this.clientSocketService.on(SocketEvents.LetterPlaced, async (event: SimpleLetterInfos) => {
             console.log('letter placed: ');
             console.log(event);
             if (event.socketId === this.gameClientService.getLocalPlayer()?.player.socketId) return;
@@ -124,8 +124,10 @@ export class LetterPlacementService {
         coord[0] *= size[0] / window[0];
         coord[1] *= size[1] / window[1];
 
-        coord[0] = Math.max(0, Math.min(coord[0], size[0] - 36 * windowScale));
-        coord[1] = Math.max(0, Math.min(coord[1], size[1] - 36 * windowScale));
+        coord[0] = Math.max(0, Math.min(coord[0], size[0]));
+        coord[1] = Math.max(0, Math.min(coord[1], size[1]));
+        coord[0] -= 18 * windowScale;
+        coord[1] -= 18 * windowScale;
 
         return coord;
     }
