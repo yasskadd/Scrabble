@@ -35,3 +35,7 @@ h2 {
 .user-stats > mat-card:last-of-type {
     margin-left: 5px;
 }
+
+mat-card > div {
+    transform: scale(0.9);
+}

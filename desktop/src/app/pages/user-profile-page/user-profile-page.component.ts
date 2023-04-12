@@ -14,18 +14,18 @@ export class UserProfilePageComponent {
     userStats: UserStats;
 
     ngAfterViewInit() {
+        //TODO: Language
         const canvas = this.canvasRef.nativeElement;
         const context = canvas.getContext('2d');
         const myChart = new Chart(context, {
-            type: 'pie',
+            type: 'doughnut',
             data: {
-                labels: ['Red', 'Blue', 'Yellow'],
+                labels: ['Perdues', 'Gagnées'],
                 datasets: [
                     {
-                        label: '# of Votes',
-                        data: [12, 19, 3],
-                        backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)'],
-                        borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)'],
+                        data: [12, 19],
+                        backgroundColor: ['rgba(255, 99, 132, 1)', 'rgba(201, 242, 155, 1)'],
+                        borderColor: ['rgba(255, 99, 132, 1)', 'rgba(201, 242, 155, 1)'],
                         borderWidth: 1,
                     },
                 ],
@@ -36,15 +36,15 @@ export class UserProfilePageComponent {
                     legend: {
                         position: 'top',
                     },
-                    title: {
-                        display: true,
-                        text: 'Chart.js Pie Chart',
-                    },
+                    // title: {
+                    //     display: true,
+                    //     text: 'Taux de réussite',
+                    // },
                 },
             },
         });
 
-        myChart.data.datasets[0].data = [5, 10, 15];
+        // myChart.data.datasets[0].data = [5, 10];
         myChart.update();
     }
 
