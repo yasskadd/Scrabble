@@ -188,14 +188,14 @@ export class Word {
 
     private addLetterPointsWithMultiplier(gameboard: Gameboard, coord: Coordinate) {
         const letter = gameboard.getLetterTile(coord).letter;
-        let point = LETTER_POINTS.get(letter);
+        let point = gameboard.getLetterTile(coord).points != 0 ? LETTER_POINTS.get(letter) : undefined;
         if (point === undefined) point = 0;
         this.points += point * gameboard.getLetterTile(coord).multiplier.number;
     }
 
     private addLetterPointsWithoutMultiplier(gameboard: Gameboard, coord: Coordinate) {
         const letter = gameboard.getLetterTile(coord).letter;
-        let point = LETTER_POINTS.get(letter);
+        let point = gameboard.getLetterTile(coord).points != 0 ? LETTER_POINTS.get(letter) : undefined;
         if (point === undefined) point = 0;
         this.points += point;
     }

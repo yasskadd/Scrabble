@@ -101,7 +101,6 @@ export class GamesActionsService {
                 else return letter.toUpperCase();
             })
         }
-        console.log(commandInfo.letters);
         const gamePlayer = this.gamesHandler.getPlayer(socket.id) as RealPlayer;
         if (!gamePlayer) return;
 
