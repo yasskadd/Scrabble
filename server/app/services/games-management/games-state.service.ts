@@ -48,10 +48,9 @@ export class GamesStateService {
         private scoreStorage: ScoreStorageService,
         private userStatsStorage: UserStatsStorageService,
         private historyStorageService: HistoryStorageService, // private virtualPlayerStorage: VirtualPlayersStorageService,
-    ) { }
+    ) {}
 
     initSocketsEvents(): void {
-
         // LEAVE GAME
         this.socketManager.io(SocketEvents.Disconnect, (server: Server, socket: Socket) => {
             this.disconnect(server, socket);
@@ -79,7 +78,6 @@ export class GamesStateService {
             server.to(tile.roomId).emit(SocketEvents.LetterPlaced, tile);
         });
     }
-
 
     async createGame(server: Server, room: GameRoom) {
         const game = this.createNewGame(room);
@@ -111,7 +109,7 @@ export class GamesStateService {
         server.to(room.id).emit(SocketEvents.LetterReserveUpdated, game.letterReserve.lettersReserve);
         game.turn.start();
 
-        //Sketchy bot turn
+        // Sketchy bot turn
         if (game.turn.activePlayer && !game.turn.activePlayer?.email) {
             game.turn.endTurn.next(game.turn.activePlayer);
         }
@@ -143,11 +141,15 @@ export class GamesStateService {
                             dictionaryValidation: game.dictionaryValidation as DictionaryValidation,
                         });
                     } else {
-                        newBot = new ScoreRelatedBot(roomPlayer, {
-                            timer: room.timer,
-                            roomId: room.id,
-                            dictionaryValidation: game.dictionaryValidation as DictionaryValidation,
-                        }, 500);
+                        newBot = new ScoreRelatedBot(
+                            roomPlayer,
+                            {
+                                timer: room.timer,
+                                roomId: room.id,
+                                dictionaryValidation: game.dictionaryValidation as DictionaryValidation,
+                            },
+                            500,
+                        );
                     }
                     newBot.game = game;
                     gamePlayers.push(newBot);
@@ -302,7 +304,6 @@ export class GamesStateService {
             return;
         }
         // TODO: What to do if there are still observers in game ?
-
     }
 
     private disconnect(server: Server, socket: Socket) {
