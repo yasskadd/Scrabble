@@ -71,7 +71,11 @@ export class WaitingRoomService {
 
         console.log(this.waitingRooms.map((wr: GameRoom) => wr.players.map((p: RoomPlayer) => p.type)));
         this.waitingRooms = this.waitingRooms.filter((r: GameRoom) => {
-            return this.gamesHandler.usersRemaining(r.id);
+            if (!this.gamesHandler.usersRemaining(r.id)) {
+                this.gamesHandler.removeRoom(r.id);
+                return false;
+            }
+            return true;
         });
         console.log(this.waitingRooms.map((wr: GameRoom) => wr.players.map((p: RoomPlayer) => p.type)));
 
@@ -146,8 +150,7 @@ export class WaitingRoomService {
 
         if (
             (room.state === GameRoomState.Waiting && this.getPlayerFromQuery(userQuery)?.isCreator) ||
-            (room.state === GameRoomState.Playing &&
-                room.players.filter((playerElement: RoomPlayer) => playerElement.type === PlayerType.User).length === 0)
+            (room.state === GameRoomState.Playing && !this.gamesHandler.usersRemaining(room.id))
         ) {
             for (const p of room.players) {
                 this.rejectOpponent(server, socket, p);

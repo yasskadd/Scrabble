@@ -21,6 +21,7 @@ export class GamesHandlerService {
     // gamePlayers: Map<string, { room: GameRoom; players: GamePlayer[] }>;
     dictionaries: Map<string, DictionaryContainer>;
     deleteWaitingRoom: ReplaySubject<string | undefined>;
+
     constructor(private socketManager: SocketManager, private dictionaryStorage: DictionaryStorageService) {
         // this.gamePlayers = new Map();
         this.players = [];
@@ -29,26 +30,26 @@ export class GamesHandlerService {
         this.deleteWaitingRoom = new ReplaySubject(1);
     }
 
+
     updatePlayersInfo(roomId: string, game: Game) {
         const infos: PlayerInformation[] = this.players.map((player: GamePlayer) => player.getInformation());
-
         this.socketManager.emitRoom(roomId, SocketEvents.UpdatePlayersInformation, infos);
         this.socketManager.emitRoom(roomId, SocketEvents.LetterReserveUpdated, game.letterReserve.lettersReserve);
     }
 
-    getPlayerFromSocketId(socketId: string): GamePlayer | undefined {
+    getPlayer(socketId: string): GamePlayer | undefined {
         return this.players.find((gamePlayer: GamePlayer) => gamePlayer.player.socketId === socketId);
     }
 
-    getPlayersFromRoomId(roomId: string): GamePlayer[] {
+    getPlayersInRoom(roomId: string): GamePlayer[] {
         return this.players.filter((gamePlayer: GamePlayer) => gamePlayer.player.roomId === roomId);
     }
 
     usersRemaining(roomId: string): boolean {
-        return this.getPlayersFromRoomId(roomId).filter((p: GamePlayer) => p.player.type === PlayerType.User).length > 0;
+        return this.getPlayersInRoom(roomId).filter((p: GamePlayer) => p.player.type === PlayerType.User).length > 0;
     }
 
-    removePlayerFromSocketId(socketId: string): void {
+    removePlayer(socketId: string): void {
         const player = this.players.find((gamePlayer: GamePlayer) => gamePlayer.player.socketId === socketId);
         if (!player) return;
 
@@ -59,21 +60,23 @@ export class GamesHandlerService {
         }
     }
 
-    removeRoomFromRoomId(roomId: string): void {
+    removeRoom(roomId: string): void {
         let playerIndexes: number[] = [];
         this.players.forEach((gamePlayer: GamePlayer, index: number) => {
             if (gamePlayer.player.roomId === roomId) {
                 playerIndexes.push(index);
             }
         });
-        playerIndexes = playerIndexes.sort();
-        playerIndexes.reverse();
+        playerIndexes = playerIndexes.sort().reverse();
         playerIndexes.forEach((index: number) => {
             this.players.splice(index, 1);
         });
 
+        // Observable notify to delete waiting room
         this.deleteWaitingRoom.next(roomId);
     }
+
+    /* --------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
 
     async setDictionaries() {
         const dictionaries = await this.getDictionaries();

@@ -77,7 +77,7 @@ export class PlayerRackComponent {
     }
 
     isCurrentPlayerPlaying(): boolean {
-        return this.gameClient.getLocalPlayer().player.type === PlayerType.User && this.player.player.type === PlayerType.User;
+        return this.gameClient.getLocalPlayer()?.player.type === PlayerType.User;
     }
 
     // findDuplicates() {
@@ -111,7 +111,7 @@ export class PlayerRackComponent {
     exchangeLetters(): void {
         let letters = '';
         for (const i of this.lettersToExchange) {
-            letters += this.gameClient.getLocalPlayer().rack[i].value;
+            letters += this.gameClient.getLocalPlayer()?.rack[i].value;
         }
         this.cancelSelection();
         this.chatBoxHandler.submitMessage('!échanger ' + letters);
@@ -129,15 +129,15 @@ export class PlayerRackComponent {
         if (event.previousContainer === event.container) {
             moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
         } else {
-            this.letterPlacementService.resetTile(event.item.data.coord);
-            this.gameClient.getLocalPlayer().rack.push(event.item.data.letter);
+            this.letterPlacementService.initLiveTile(event.item.data.coord);
+            this.gameClient.getLocalPlayer()?.rack.push(event.item.data.letter);
             this.letterPlacementService.resetSelectionPositions(event.item.data);
         }
 
         this.clientSocketService.send(SocketEvents.LetterPlaced, {
             roomId: this.gameConfigurationService.localGameRoom.id,
-            socketId: this.gameClient.getLocalPlayer().player.socketId,
-            coord: -1,
+            socketId: this.gameClient.getLocalPlayer()?.player.socketId,
+            coord: -event.item.data.coord,
             letter: event.item.data.letter.value.toString(),
         });
 
@@ -149,7 +149,7 @@ export class PlayerRackComponent {
 
         this.clientSocketService.send(SocketEvents.LetterTaken, {
             roomId: this.gameConfigurationService.localGameRoom.id,
-            socketId: this.gameClient.getLocalPlayer().player.socketId,
+            socketId: this.gameClient.getLocalPlayer()?.player.socketId,
             coord: -1,
             letter: letter.value.toString(),
         });
@@ -159,12 +159,9 @@ export class PlayerRackComponent {
         if (!this.gameClient.currentlyPlaying()) return;
 
         const windowSize = await tauriWindow.appWindow.innerSize();
-        // const windowPosition = await tauriWindow.appWindow.innerPosition();
-        // console.log('x:' + (event.event as MouseEvent).clientX + ' y:' + (event.event as MouseEvent).clientY);
-
         this.clientSocketService.send(SocketEvents.SendDrag, {
             roomId: this.gameConfigurationService.localGameRoom.id,
-            socketId: this.gameClient.getLocalPlayer().player.socketId,
+            socketId: this.gameClient.getLocalPlayer()?.player.socketId,
             letter: letter.value.toString(),
             coord: [(event.event as MouseEvent).clientX, (event.event as MouseEvent).clientY],
             window: [windowSize.width, windowSize.height],

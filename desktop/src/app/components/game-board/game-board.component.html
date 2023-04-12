@@ -1,9 +1,9 @@
 <mat-grid-list cols='15' class='board' id='board' [gutterSize]="'8px'">
     <mat-grid-tile
-        *ngFor='let tile of letterPlacementService.boardTiles; trackBy: identify'
+        *ngFor='let tile of letterPlacementService.liveBoard; trackBy: identify'
         class='tile'
         (mouseenter)='entered($event, tile)'
-        (mouseleave)='exited($event, tile)'
+        (mouseleave)='exited()'
     >
         <div
             cdkDropList
@@ -18,11 +18,11 @@
             <div
                 [ngClass]="[
                     tile.letter?.value ? 'board-letter' : 'blank-letter',
-                    tile.state === boardTileStates.Temp ? 'temp-letter' : '',
-                    tile.state === boardTileStates.Confirmed ? 'confirmed-letter' : '',
-                    tile.state === boardTileStates.Pending ? 'pending-letter' : ''
+                    isTempTile(tile.state) ? 'temp-letter' : '',
+                    isConfirmedTile(tile.state)  ? 'confirmed-letter' : '',
+                    isPendingTile(tile.state) ? 'pending-letter' : ''
                 ]"
-                *ngIf='tile.state === tileState.Pending'
+                *ngIf="isPendingTile(tile.state) || isTempTile(tile.state)"
                 cdkDrag
                 [cdkDragData]='tile'
                 (cdkDragStarted)='startedDragging(tile)'
@@ -49,11 +49,11 @@
             <div
                 [ngClass]="[
                     tile.letter?.value ? 'board-letter' : 'blank-letter',
-                    tile.state === boardTileStates.Temp ? 'temp-letter' : '',
-                    tile.state === boardTileStates.Confirmed ? 'confirmed-letter' : '',
-                    tile.state === boardTileStates.Pending ? 'pending-letter' : ''
+                    isTempTile(tile.state) ? 'temp-letter' : '',
+                    isConfirmedTile(tile.state) ? 'confirmed-letter' : '',
+                    isPendingTile(tile.state) ? 'pending-letter' : ''
                 ]"
-                *ngIf='tile.state !== tileState.Pending'>
+                *ngIf='!isPendingTile(tile.state)'>
                 <div class='letter-value'>
                     {{ tile.letter?.value.toUpperCase() }}
                 </div>

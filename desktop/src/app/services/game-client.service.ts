@@ -29,6 +29,8 @@ export class GameClientService implements OnDestroy {
     turnFinish: ReplaySubject<boolean>;
 
     constructor(private clientSocketService: ClientSocketService, private userService: UserService, private router: Router) {
+        this.players = [];
+
         this.gameboardUpdated = new Subject<string[]>();
         this.quitGameSubject = new Subject<void>();
         this.nextTurnSubject = new Subject<void>();
@@ -111,7 +113,7 @@ export class GameClientService implements OnDestroy {
         this.quitGameSubject.next();
     }
 
-    getLocalPlayer(): PlayerInformation {
+    getLocalPlayer(): PlayerInformation | undefined {
         return this.players.find((info: PlayerInformation) => info.player.user._id === this.userService.user._id);
     }
 
@@ -153,11 +155,11 @@ export class GameClientService implements OnDestroy {
             else dictionaryLetter.counter++;
         });
 
-        const resultingRack = [] as Letter[];
-        this.getLocalPlayer().rack.forEach((letter) => {
+        const resultingRack: Letter[] = [];
+        this.getLocalPlayer()?.rack.forEach((letter) => {
             const dictionaryLetter = dictionary.get(letter.value);
             if (dictionaryLetter !== undefined && dictionaryLetter.counter > 0) {
-                resultingRack.push(letter);
+                resultingRack.push(JSON.parse(JSON.stringify(letter)));
                 dictionaryLetter.counter--;
             }
         });
@@ -182,7 +184,9 @@ export class GameClientService implements OnDestroy {
     }
 
     private skipEvent(gameInfo: GameInfo) {
-        this.getLocalPlayer().rack = this.updateRack(this.getLocalPlayer().rack);
+        if (this.getLocalPlayer()) {
+            this.getLocalPlayer().rack = this.updateRack(this.getLocalPlayer().rack);
+        }
         this.updateGameboard(gameInfo.gameboard);
     }
 

@@ -8,6 +8,7 @@ import { BotNameSwitcher } from '@common/interfaces/bot-name-switcher';
 import { GameHistoryInfo } from '@common/interfaces/game-history-info';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
 import { IUser } from '@common/interfaces/user';
+import { UserStats } from '@common/interfaces/user-stats';
 import { fs, invoke } from '@tauri-apps/api';
 import { environment } from 'src/environments/environment';
 
@@ -145,6 +146,12 @@ export class HttpHandlerService {
 
     async login(user: IUser): Promise<{ userData: IUser; sessionToken: string }> {
         const res: HttpResponse = await invoke('httpPost', { url: `${this.baseUrl}/auth/login`, onceToldMe: JSON.stringify(user) });
+        return JSON.parse(res.body);
+    }
+
+    async getStats(): Promise<{ userStats: UserStats }> {
+        const res: HttpResponse = await invoke('httpPost', { url: `${this.baseUrl}/profile/stats` });
+        console.log(JSON.parse(res.body));
         return JSON.parse(res.body);
     }
 
