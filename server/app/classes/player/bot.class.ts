@@ -1,6 +1,6 @@
 import { Game } from '@app/classes/game.class';
 import { WordSolver } from '@app/classes/word-solver.class';
-import { Word } from '@app/classes/word.class';
+import { Word } from '@common/classes/word.class';
 import * as Constant from '@app/constants/bot';
 import { BotInformation } from '@app/interfaces/bot-information';
 import { GameValidationService } from '@app/services/games-management/game-validation.service';

@@ -1,5 +1,5 @@
 import { GamePlayer } from '@app/classes/player/player.class';
-import { Word } from '@app/classes/word.class';
+import { Word } from '@common/classes/word.class';
 import * as ObjectivesInfo from '@app/constants/objectives-description';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { Objective } from '@common/interfaces/objective';

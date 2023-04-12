@@ -89,7 +89,7 @@ export class Gameboard {
         const gameboard = Array(TOTAL_TILES_IN_ROW ** 2).fill('', 0, TOTAL_TILES_IN_ROW ** 2);
 
         this.gameboardTiles.forEach((tile) => {
-            gameboard[tile.coordinate.x + tile.coordinate.y * TOTAL_TILES_IN_ROW] = tile.letter;
+            gameboard[tile.coordinate.x - 1 + (tile.coordinate.y - 1) * TOTAL_TILES_IN_ROW] = tile.letter;
         });
 
         return gameboard;
