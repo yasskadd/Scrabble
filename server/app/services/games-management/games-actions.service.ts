@@ -96,7 +96,6 @@ export class GamesActionsService {
     private placeWord(socket: Socket, commandInfo: PlaceWordCommandInfo) {
         commandInfo = {
             ...commandInfo,
-            letters: commandInfo.letters.map((letter: string) => letter.toLowerCase())
             letters: commandInfo.letters.map((letter: string) => letter.toLowerCase()),
         };
         const gamePlayer = this.gamesHandler.getPlayer(socket.id) as RealPlayer;
