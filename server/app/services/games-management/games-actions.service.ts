@@ -78,7 +78,8 @@ export class GamesActionsService {
         if (!gamePlayer) return;
 
         const lettersToExchange = letters.length;
-        if (!this.rackService.areLettersInRack(letters, gamePlayer)) {
+        const lettersCopy = letters.map((letter) => letter.toLowerCase());
+        if (!this.rackService.areLettersInRack(lettersCopy, gamePlayer) || gamePlayer.game.turn.activePlayer?.username !== gamePlayer.player.user.username) {
             socket.emit(SocketEvents.ExchangeFailure);
             return;
         }
