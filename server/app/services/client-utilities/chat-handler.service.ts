@@ -40,8 +40,6 @@ export class ChatHandlerService {
                 const messageCount = room.messages.length;
                 this.chatRooms.push({ name: room.name, messageCount, readingUsers: new Set(), isDeletable: room.isDeletable });
             });
-
-            console.log('ChatRooms loaded');
         });
     }
 

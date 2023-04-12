@@ -1,5 +1,6 @@
 /* eslint-disable quote-props */
 import { UserChatRoom } from '@app/interfaces/user-chat-room';
+import { ChatRoomUserInfo } from '@common/interfaces/chat-room';
 import { HistoryEvent } from '@common/interfaces/history-event';
 import { ImageInfo } from '@common/interfaces/image-info';
 import { Theme } from '@common/interfaces/theme';
@@ -87,6 +88,14 @@ export class AccountStorageService {
     async getUserIdFromUsername(username: string): Promise<string> {
         const userDocument = (await this.database.users.collection.findOne({ username }, { projection: { _id: 1 } })) as Document;
         return userDocument._id as string;
+    }
+
+    async getChatUserInfo(id: string): Promise<ChatRoomUserInfo> {
+        const userDocument = (await this.database.users.collection.findOne(
+            { _id: new ObjectId(id) },
+            { projection: { username: 1, profilePicture: 1 } },
+        )) as Document;
+        return userDocument as ChatRoomUserInfo;
     }
 
     async getProfilePicInfoFromID(id: string): Promise<ImageInfo> {

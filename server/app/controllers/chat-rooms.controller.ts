@@ -1,46 +1,42 @@
-import { ChatRoomsStorageService } from '@app/services/database/chat-rooms-storage.service';
+import { AccountStorageService } from '@app/services/database/account-storage.service';
+import { ImageStorageService, PRESIGNED_URL_EXPIRY } from '@app/services/database/image-storage.service';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { ChatRoomUser } from '@common/interfaces/chat-room';
+import { HTTP_STATUS } from '@common/models/http-status';
 import { Request, Response, Router } from 'express';
-import { StatusCodes } from 'http-status-codes';
 import { Service } from 'typedi';
 
 @Service()
 export class ChatRoomsController {
     router: Router;
 
-    constructor(private readonly chatRoomsStorage: ChatRoomsStorageService) {
+    constructor(private readonly accountStorage: AccountStorageService, private imageStorage: ImageStorageService) {
         this.configureRouter();
     }
 
     private configureRouter(): void {
         this.router = Router();
 
-        this.router.post('/create', async (req: Request, res: Response) => {
-            const roomName = req.body.roomName;
-            console.log(roomName);
-            if (await this.chatRoomsStorage.roomExists(roomName)) {
-                res.status(StatusCodes.CONFLICT).send('Room already exist');
+        /**
+         * HTTP GET request to request the username and image url from a userID
+         *
+         * @param { string } id - String of the userID
+         * @return {{ username: string, url: string }} data - username of the user and URL of his image
+         */
+        this.router.get('/user/:id', async (req: Request, res: Response) => {
+            const userID = req.params.id as string;
+            if (userID === undefined) return;
+            const untreatedUserInfo = await this.accountStorage.getChatUserInfo(userID);
+            if (untreatedUserInfo === undefined) {
+                res.status(HTTP_STATUS.NOT_FOUND);
                 return;
             }
-            await this.chatRoomsStorage.createRoom(roomName);
-            res.status(StatusCodes.CREATED).send('Room created with success');
-        });
-
-        this.router.patch('/sendMessage', async (req: Request, res: Response) => {
-            const roomName = req.body.roomName;
-            const message = req.body.message;
-            if (!(await this.chatRoomsStorage.roomExists(roomName))) {
-                res.status(StatusCodes.NOT_FOUND).send('Room does not exist');
-                return;
+            const userInfo = { username: untreatedUserInfo.username } as ChatRoomUser;
+            if (untreatedUserInfo.profilePicture.key !== undefined) {
+                const imageGetCommand = this.imageStorage.createGetCommand(untreatedUserInfo.profilePicture.key as string);
+                userInfo.imageUrl = await getSignedUrl(this.imageStorage.s3Client, imageGetCommand, { expiresIn: PRESIGNED_URL_EXPIRY });
             }
-            await this.chatRoomsStorage.addMessageInRoom(roomName, message);
-            res.status(StatusCodes.NO_CONTENT).send('Message has been sent with success');
-        });
-
-        this.router.get('/', async (req: Request, res: Response) => {
-            const roomName = 'main';
-            const room = await this.chatRoomsStorage.getRooms([roomName]);
-            console.log(room);
-            res.json(room);
+            res.status(HTTP_STATUS.OK).json(userInfo);
         });
     }
 }
