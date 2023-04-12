@@ -67,5 +67,3 @@ export class HeaderComponent {
         return this.router.url.includes(AppRoutes.GamePage);
     }
 }
-
-// TODO: removed commented code or implement home and admin button for authorised users
