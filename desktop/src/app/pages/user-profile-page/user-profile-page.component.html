@@ -1,0 +1,25 @@
+<div class="encapsulating-div">
+    <app-header></app-header>
+
+    <body class="mat-app-background">
+        <mat-card class="user-info justified">
+            <h2>{{ userService.user.username }}</h2>
+            <img mat-fab-button [src]="userService.user.profilePicture.key" class="selector-avatar mat-elevation-z5" />
+            <button mat-flat-button color="primary" (click)="redirectSettingsPage()"><mat-icon>settings</mat-icon>Settings</button>
+        </mat-card>
+        <div class="user-stats">
+            <mat-card class="justified">
+                <h4>Stastiques</h4>
+                <div>Temps moy :</div>
+                <div>Score moy :</div>
+                <div>Jeux joués :</div>
+                <canvas #myChart width="200" height="200"></canvas>
+            </mat-card>
+            <mat-card class="justified">
+                <h4>Historique</h4>
+            </mat-card>
+        </div>
+    </body>
+
+    <app-footer></app-footer>
+</div>

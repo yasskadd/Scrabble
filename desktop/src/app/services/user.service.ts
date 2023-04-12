@@ -2,22 +2,24 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
+import { SocketEvents } from '@common/constants/socket-events';
 import { AvatarData } from '@common/interfaces/avatar-data';
 import { ImageInfo } from '@common/interfaces/image-info';
 import { IUser } from '@common/interfaces/user';
+import { UserStats } from '@common/interfaces/user-stats';
 import { ImageType } from '@common/models/image-type';
 import { ClientSocketService } from '@services/communication/client-socket.service';
+import { SnackBarService } from '@services/snack-bar.service';
 import { Subject } from 'rxjs';
 import { AppCookieService } from './communication/app-cookie.service';
 import { HttpHandlerService } from './communication/http-handler.service';
-import { SocketEvents } from '@common/constants/socket-events';
-import { SnackBarService } from '@services/snack-bar.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class UserService {
     user: IUser;
+    userStats: UserStats;
 
     constructor(
         private httpHandlerService: HttpHandlerService,
@@ -27,6 +29,7 @@ export class UserService {
         private router: Router,
     ) {
         this.initUser();
+        this.initUserStats();
     }
 
     isConnected(): boolean {
@@ -46,6 +49,7 @@ export class UserService {
 
                 this.cookieService.updateUserSessionCookie(loginRes.sessionToken).then(() => {
                     this.user = loginRes.userData;
+
                     // TODO : Language
                     this.snackBarService.openInfo('Connection successful');
                     this.updateUserWithImageUrl(loginRes.userData);
@@ -64,9 +68,17 @@ export class UserService {
     async logout(): Promise<void> {
         this.httpHandlerService.logout(this.user).then(async () => {
             this.initUser();
+            this.initUserStats();
             this.cookieService.removeSessionCookie();
             await this.clientSocketService.disconnect();
             this.router.navigate([AppRoutes.ConnectionPage]).then();
+        });
+    }
+
+    async getStats(): Promise<UserStats> {
+        return this.httpHandlerService.getStats().then((result) => {
+            console.log(result.userStats + '2');
+            return result.userStats;
         });
     }
 
@@ -92,6 +104,20 @@ export class UserService {
             historyEventList: [],
             language: 'fr', // TODO: To change if necessary
             theme: null, // TODO: to change
+        };
+    }
+
+    private initUserStats(): void {
+        this.userStats = {
+            userIdRef: '',
+            ranking: 0,
+            gameCount: 0,
+            win: 0,
+            loss: 0,
+            totalGameTime: 0,
+            totalGameScore: 0,
+            averageGameTime: '',
+            averageGameScore: 0,
         };
     }
 
