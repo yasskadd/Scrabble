@@ -54,7 +54,7 @@ export class GameBoardComponent {
     protected entered(event: MouseEvent, tile: BoardTileInfo) {
         const liveTile = this.letterPlacementService.liveBoard[tile.coord];
         if (
-            liveTile.state === BoardTileState.Empty &&
+            (liveTile.state === BoardTileState.Empty || liveTile.state === BoardTileState.Temp) &&
             !this.letterPlacementService.selectionPositions.find((sp: SelectionPosition) => sp.coord === tile.coord)
         ) {
             this.letterPlacementService.liveBoard[tile.coord] = {

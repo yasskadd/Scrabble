@@ -91,8 +91,6 @@ export class WaitingRoomService {
      * @private
      */
     private joinGameRoom(server: Server, socket: SocketType, joinGameQuery: UserRoomQuery): void {
-        this.gamesHandler.cleanRooms();
-
         const room: GameRoom | undefined = this.getRoom(joinGameQuery.roomId);
         if (this.userAlreadyConnected(joinGameQuery)) {
             socket.emit(SocketEvents.ErrorJoining, ServerErrors.RoomSameUser);

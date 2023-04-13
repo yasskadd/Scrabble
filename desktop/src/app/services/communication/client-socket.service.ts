@@ -114,7 +114,6 @@ export class ClientSocketService {
 
     on<T>(eventName: string, action: (data: T) => void): void {
         if (this.tauriStateService.useTauri) {
-            console.log('listening to ' + eventName);
             tauri.event
                 .listen(eventName, (event: Event<unknown>) => {
                     action(JSON.parse(event.payload as string));

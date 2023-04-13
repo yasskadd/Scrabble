@@ -82,7 +82,7 @@ fn socketEstablishConnection(
             // println!("Got event: {:?} {:?}", event, payload);
             if let Payload::String(payload) = payload {
                 println!("Got event: {}", String::from(event.clone()));
-                println!("Got payload: {}", payload);
+                // println!("Got payload: {}", payload);
 
                 if payload.to_string() == "\"SuccessfulConnection\""
                     || payload.to_string() == "\"UserAlreadyConnected\""
