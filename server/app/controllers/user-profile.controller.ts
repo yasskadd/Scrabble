@@ -120,7 +120,6 @@ export class UserProfileController {
         this.router.get('/stats', verifyToken, async (req: Request, res: Response) => {
             const userID: string = res.locals.user.userID;
             const userStats = await this.userStatsStorageService.getUserStats(userID);
-            console.log(userStats + '3');
             res.status(StatusCodes.OK).json(userStats);
         });
 

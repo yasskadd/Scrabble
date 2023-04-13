@@ -17,7 +17,6 @@ export class DialogBoxLetterSelectorComponent {
         this.letterForm = new FormControl(AlphabetLetter.None, [Validators.minLength(1), Validators.maxLength(1), Validators.required]);
 
         this.letterForm.valueChanges.subscribe((value: string) => {
-            console.log(value);
             this.updateValidity();
         });
         this.letterForm.markAsTouched();
@@ -32,8 +31,8 @@ export class DialogBoxLetterSelectorComponent {
     }
 
     private updateValidity(): boolean {
+        // TODO : Validate that
         if (this.letterForm.invalid) {
-            console.log(this.letterForm.value);
             if (/[A-Z]/.test(this.letterForm.value)) {
                 // TODO : Language
                 this.errorMessage = 'Please enter a letter';

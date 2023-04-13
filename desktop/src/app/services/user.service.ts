@@ -66,7 +66,6 @@ export class UserService {
 
     subscribeConnectionEvents(): void {
         this.clientSocketService.on(SocketEvents.SuccessfulConnection, () => {
-            console.log(this.tempUserData);
             this.user = undefined;
             this.user = this.tempUserData;
             this.tempUserData = undefined;
@@ -86,7 +85,6 @@ export class UserService {
     }
 
     getUser(): IUser {
-        // console.log(this.user);
         return this.user;
     }
 

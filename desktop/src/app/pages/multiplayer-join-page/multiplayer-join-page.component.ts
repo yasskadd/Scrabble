@@ -31,7 +31,6 @@ export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
     }
 
     get availableRooms(): GameRoom[] {
-        console.log(this.gameConfiguration.availableRooms);
         return this.gameConfiguration.availableRooms;
     }
 

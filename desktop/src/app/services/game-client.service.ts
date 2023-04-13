@@ -92,7 +92,6 @@ export class GameClientService {
         });
 
         this.clientSocketService.on(SocketEvents.PlacementFailure, (word: Word) => {
-            console.log(word);
             if (!word.isValid) {
                 this.snackBarService.openError(word as unknown as string);
             }

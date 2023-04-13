@@ -13,11 +13,13 @@ export class UserProfilePageComponent {
     @ViewChild('myChart') canvasRef: ElementRef<HTMLCanvasElement>;
     userStats: UserStats;
 
+    constructor(protected userService: UserService, private router: Router) {
+        this.setUserStats();
+    }
+
     ngAfterViewInit() {
         // TODO: Language
-        const canvas = this.canvasRef.nativeElement;
-        const context = canvas.getContext('2d');
-        const myChart = new Chart(context, {
+        const myChart = new Chart(this.canvasRef.nativeElement.getContext('2d'), {
             type: 'doughnut',
             data: {
                 labels: ['Perdues', 'Gagnées'],
@@ -48,18 +50,12 @@ export class UserProfilePageComponent {
         myChart.update();
     }
 
-    constructor(protected userService: UserService, private router: Router) {
-        this.setUserStats();
-        console.log(this.userStats + '0');
-    }
-
     redirectSettingsPage() {
         this.router.navigate(['/settings']).then();
     }
 
     setUserStats() {
         this.userService.getStats().then((userStats) => {
-            console.log(this.userStats + '1');
             this.userStats = userStats;
         });
     }

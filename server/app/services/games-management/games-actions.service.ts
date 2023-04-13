@@ -72,7 +72,6 @@ export class GamesActionsService {
     }
 
     private exchange(socket: Socket, letters: string[]) {
-        console.log(letters);
         const gamePlayer = this.gamesHandler.getPlayer(socket.id) as RealPlayer;
         if (!gamePlayer) return;
 

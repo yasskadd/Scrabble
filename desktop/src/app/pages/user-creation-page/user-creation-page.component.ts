@@ -138,7 +138,6 @@ export class UserCreationPageComponent {
 
     private addPasswordValidator(): void {
         this.passwordForm.valueChanges.subscribe(() => {
-            console.log(this.passwordCopyForm.validator);
             this.equalValidatorFn = equalStringValidator(this.passwordForm.value);
             this.passwordCopyForm.setValidators([this.equalValidatorFn, Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]);
             this.passwordCopyForm.updateValueAndValidity();

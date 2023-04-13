@@ -457,10 +457,6 @@ export class GamesStateService {
         // Update gamesHandler player list
         this.gamesHandler.removePlayerFromId(bot.player.user._id);
         this.gamesHandler.removePlayerFromId(observer.player.user._id);
-        // const botIndex = this.gamesHandler.players.findIndex((player: GamePlayer) => player.player.user._id === bot.player.user._id);
-        // this.gamesHandler.players.splice(botIndex, 1);
-        // const obsIndex = this.gamesHandler.players.findIndex((player: GamePlayer) => player.player.user._id === observer.player.user._id);
-        // this.gamesHandler.players.splice(obsIndex, 1);
 
         const botTurnIndex: number | undefined = this.gamesHandler
             .getPlayersInRoom(newPlayer.player.roomId)[0]

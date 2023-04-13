@@ -90,12 +90,6 @@ export class GamesHandlerService {
 
         // Observable notify to delete waiting room
         this.deleteWaitingRoom.next(roomId);
-
-        console.log(
-            this.players.map((p: GamePlayer) => {
-                return p.player.user.username;
-            }),
-        );
     }
 
     /*
