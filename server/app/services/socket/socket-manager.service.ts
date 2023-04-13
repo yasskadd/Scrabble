@@ -68,50 +68,51 @@ export class SocketManager {
 
     handleSockets(): void {
         this.server.on('connection', (socket) => {
-            if (socket.handshake.headers.cookie) {
-                const cookies = socket.handshake.headers.cookie;
-                // Verify jwt token
-                const token = cookie.parse(cookies).session_token;
-                let isTokenValid = false;
-                let username = '';
-                jwt.verify(token, SECRET_KEY, (err: jwt.VerifyErrors, decoded: any) => {
-                    if (err) isTokenValid = false;
-                    else {
-                        isTokenValid = true;
-                        // eslint-disable-next-line no-underscore-dangle
-                        username = decoded.userID;
-                    }
-                });
-
-                if (!isTokenValid || this.socketIdMap.has(socket)) {
-                    socket.disconnect();
-                    return;
-                }
-
-                let keepConnecting = true;
-                this.socketIdMap.forEach((value: string) => {
-                    if (value === username) {
-                        keepConnecting = false;
-                    }
-                });
-                if (!keepConnecting) {
-                    socket.emit(SocketEvents.UserAlreadyConnected);
-                    return;
-                }
-
-                this.socketIdMap.set(socket, username);
-
-                this.accountStorageService.addUserEventHistory(username, HistoryActions.Connection, new Date());
-
-                // eslint-disable-next-line no-console
-                console.log('Connection of client with socketid = ' + socket.id + ' from user = ' + username);
-                socket.emit(SocketEvents.SuccessfulConnection);
-            } else {
+            if (!socket.handshake.headers.cookie) {
                 socket.disconnect();
                 // eslint-disable-next-line no-console
                 console.log('Connection failed of client with id = ' + socket.id + ' from : ' + socket.handshake.headers.host);
                 return;
             }
+
+            const cookies = socket.handshake.headers.cookie;
+            // Verify jwt token
+            const token = cookie.parse(cookies).session_token;
+            let isTokenValid = false;
+            let username = '';
+            jwt.verify(token, SECRET_KEY, (err: jwt.VerifyErrors, decoded: any) => {
+                if (err) isTokenValid = false;
+                else {
+                    isTokenValid = true;
+                    // eslint-disable-next-line no-underscore-dangle
+                    username = decoded.userID;
+                }
+            });
+
+            if (!isTokenValid || this.socketIdMap.has(socket)) {
+                socket.disconnect();
+                return;
+            }
+
+            let keepConnecting = true;
+            this.socketIdMap.forEach((value: string) => {
+                if (value === username) {
+                    keepConnecting = false;
+                }
+            });
+            if (!keepConnecting) {
+                socket.emit(SocketEvents.UserAlreadyConnected);
+                return;
+            }
+
+            this.socketIdMap.set(socket, username);
+
+            this.accountStorageService.addUserEventHistory(username, HistoryActions.Connection, new Date());
+
+            // eslint-disable-next-line no-console
+            console.log('Connection of client with socketid = ' + socket.id + ' from user = ' + username);
+            socket.emit(SocketEvents.SuccessfulConnection);
+
             for (const [event, callbacks] of this.onEvents.entries()) {
                 for (const callback of callbacks) {
                     socket.on(event, (...args: unknown[]) => callback(socket, ...args));
@@ -123,6 +124,7 @@ export class SocketManager {
                     socket.on(event, (...args: unknown[]) => callback(this.server, socket, ...args));
                 }
             }
+
             socket.on('disconnect', () => {
                 if (this.socketIdMap.has(socket)) {
                     this.accountStorageService.addUserEventHistory(this.socketIdMap.get(socket) as string, HistoryActions.Logout, new Date());
