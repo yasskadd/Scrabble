@@ -188,11 +188,21 @@ export class WaitingRoomService {
         server.to(player.roomId).emit(SocketEvents.UpdateWaitingRoom, this.getRoom(player.roomId));
     }
 
-    private exitRoom(server: Server, socket: SocketType, userQuery: UserRoomQuery): void {
+    private async exitRoom(server: Server, socket: SocketType, userQuery: UserRoomQuery): Promise<void> {
         const player: RoomPlayer | undefined = this.getPlayerFromQuery(userQuery);
         if (!player) return;
 
         this.removePlayerFromGameRoom(socket, player);
+        if (this.getRoom(userQuery.roomId) !== undefined && this.getRoom(userQuery.roomId)?.state !== GameRoomState.Playing) {
+            const waitingRoom = this.getRoom(userQuery.roomId) as GameRoom;
+            console.log(userQuery.roomId);
+            console.log(waitingRoom.difficulty);
+            const bot = await this.createReplacementBot(waitingRoom?.difficulty as GameDifficulty, userQuery.roomId);
+            console.log(bot);
+            waitingRoom?.players.push(bot as unknown as RoomPlayer);
+            console.log(waitingRoom.players);
+            server.to(waitingRoom.id).emit(SocketEvents.UpdateWaitingRoom, waitingRoom);
+        }
 
         server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
@@ -247,7 +257,7 @@ export class WaitingRoomService {
 
     private async setupNewGameRoom(parameters: GameCreationQuery, socketId: string): Promise<GameRoom> {
         const roomId = this.generateRoomId();
-        const bots = await this.makeThreeBots(parameters.botDifficulty, roomId);
+        const bots = await this.makeBots(parameters.botDifficulty, roomId, 3);
 
         return {
             id: roomId,
@@ -364,10 +374,12 @@ export class WaitingRoomService {
         return this.getRoom(userQuery.roomId)?.players.find((playerElement: RoomPlayer) => this.areUsersTheSame(playerElement.user, userQuery.user));
     }
 
-    private async makeThreeBots(difficulty: GameDifficulty, roomId: string): Promise<RoomPlayer[]> {
+    private async makeBots(difficulty: GameDifficulty, roomId: string, numberOfBots: number): Promise<RoomPlayer[]> {
         const virtualPlayers: RoomPlayer[] = [];
 
-        const botNames: string[] = await this.virtualPlayerStorageService.getBotName(3, difficulty);
+        const botNames: string[] = await this.virtualPlayerStorageService.getBotName(numberOfBots, difficulty);
+        console.log('bot name');
+        console.log(botNames);
         botNames.forEach((name: string) => {
             virtualPlayers.push({
                 user: {
@@ -388,5 +400,28 @@ export class WaitingRoomService {
         });
 
         return virtualPlayers;
+    }
+
+    private async createReplacementBot(difficulty: GameDifficulty, roomId: string): Promise<RoomPlayer> {
+        const botNames = await this.virtualPlayerStorageService.getBotName(3, difficulty);
+        const waitingRoom = this.getRoom(roomId);
+        const currentRoomBotNames: string[] | undefined = waitingRoom?.players.filter((player) => player.type === PlayerType.Bot).map((player) => player.user.username);
+        const validBotName = botNames.find((name: string) => !currentRoomBotNames?.includes(name));
+        return {
+            user: {
+                _id: uuid.v4(),
+                username: validBotName as string,
+                password: 'null',
+                profilePicture: {
+                    name: 'bot-image',
+                    isDefaultPicture: true,
+                    key: 'f553ba598dbcfc7e9e07f8366b6684b5.jpg',
+                },
+            },
+            socketId: '',
+            roomId,
+            type: PlayerType.Bot,
+            isCreator: false,
+        } as RoomPlayer
     }
 }
