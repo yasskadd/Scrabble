@@ -67,15 +67,23 @@
                         <mat-icon> login </mat-icon>
                     </button>
                 </mat-form-field>
+
+                <div>
                 <button
                     (click)="joinRandomRoom()"
-                    class="join-random-game-button"
                     mat-icon-button
                     [matTooltip]="'new_game_page.random' | translate"
                     [disabled]="availableRooms.length <= 1"
                 >
                     <mat-icon>casino</mat-icon>
                 </button>
+                <button
+                    (click)='refresh()'
+                    mat-icon-button
+                >
+                    <mat-icon>refresh</mat-icon>
+                </button>
+                </div>
             </div>
         </mat-card>
     </body>

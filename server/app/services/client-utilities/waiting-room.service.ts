@@ -62,6 +62,10 @@ export class WaitingRoomService {
         this.socketManager.io(SocketEvents.StartScrabbleGame, async (server: Server, socket: SocketType, roomId: string) => {
             await this.startScrabbleGame(server, roomId);
         });
+
+        this.socketManager.io(SocketEvents.UpdateWaitingRoom, (server: Server) => {
+            server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
+        });
     }
 
     removeRoom(server: Server, roomId: string): void {
