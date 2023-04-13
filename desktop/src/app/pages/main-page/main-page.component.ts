@@ -44,7 +44,7 @@ export class MainPageComponent {
     ) {
         this.multiplayerCreateLink = `/${AppRoutes.MultiGameCreationPage}/${GameMode.Multi}`;
         this.multiplayerjoinLink = `/${AppRoutes.MultiJoinPage}/classique`;
-        if (!this.userService.isConnected()) {
+        if (!this.userService.isConnected) {
             // TODO : FOR TESTING
             this.router.navigate([`${AppRoutes.ConnectionPage}`]);
             // this.router.navigate([`${AppRoutes.GamePage}`]);

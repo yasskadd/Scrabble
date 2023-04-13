@@ -19,6 +19,7 @@ import { SocketEvents } from '@common/constants/socket-events';
 export class UserService {
     user: IUser;
     userStats: UserStats;
+    isConnected: boolean;
 
     constructor(
         private httpHandlerService: HttpHandlerService,
@@ -31,21 +32,19 @@ export class UserService {
         this.initUserStats();
     }
 
-    isConnected(): boolean {
-        return this.user.username && this.user.password ? true : false;
-    }
-
     login(user: IUser): Subject<string> {
         const subject = new Subject<string>();
 
         this.httpHandlerService.login(user).then(
             (loginRes: { userData: IUser; sessionToken: string }) => {
                 this.clientSocketService.on(SocketEvents.SuccessfulConnection, () => {
+                    this.initUser();
                     this.user = loginRes.userData;
 
                     // TODO : Language
                     this.snackBarService.openInfo('Connection successful');
                     this.updateUserWithImageUrl(loginRes.userData);
+                    this.isConnected = true;
                     subject.next('');
                 });
                 this.clientSocketService.on(SocketEvents.UserAlreadyConnected, () => {
@@ -53,14 +52,7 @@ export class UserService {
                     this.snackBarService.openError('User already connected');
                     this.logout().then();
                 });
-                this.cookieService.updateUserSessionCookie(loginRes.sessionToken).then(() => {
-                    // this.user = loginRes.userData;
-                    //
-                    // // TODO : Language
-                    // this.snackBarService.openInfo('Connection successful');
-                    // this.updateUserWithImageUrl(loginRes.userData);
-                    // subject.next('');
-                });
+                this.cookieService.updateUserSessionCookie(loginRes.sessionToken).then(() => {});
             },
             (error: any) => {
                 // TODO : Language
@@ -77,13 +69,13 @@ export class UserService {
             this.initUserStats();
             this.cookieService.removeSessionCookie();
             await this.clientSocketService.disconnect();
+            this.isConnected = false;
             this.router.navigate([AppRoutes.ConnectionPage]).then();
         });
     }
 
     async getStats(): Promise<UserStats> {
         return this.httpHandlerService.getStats().then((result) => {
-            console.log(result.userStats + '2');
             return result.userStats;
         });
     }
@@ -119,6 +111,11 @@ export class UserService {
         }
     }
 
+    getUser(): IUser {
+        console.log(this.user);
+        return this.user;
+    }
+
     private initUser(): void {
         this.user = {
             _id: '',
@@ -130,6 +127,7 @@ export class UserService {
             language: 'fr', // TODO: To change if necessary
             theme: null, // TODO: to change
         };
+        this.isConnected = false;
     }
 
     private initUserStats(): void {

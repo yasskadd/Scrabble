@@ -15,7 +15,7 @@
         id="user-icon"
         mat-fab
         color="primary"
-        *ngIf="!userService.isConnected() || !userService.user.profilePicture"
+        *ngIf="!userService.isConnected || !userService.user.profilePicture"
         [mat-menu-trigger-for]="isGamePage() ? null : accountMenu"
     >
         <mat-icon>person</mat-icon>
@@ -23,8 +23,8 @@
 
     <img
         style="cursor: pointer;"
-        *ngIf="userService.isConnected() && userService.user.profilePicture"
-        [src]="userService.user.profilePicture.key"
+        *ngIf="userService.isConnected && userService.user.profilePicture"
+        [src]="userService.getUser().profilePicture.key"
         [mat-menu-trigger-for]="isGamePage() ? null : accountMenu"
         class="selector-avatar mat-elevation-z5"
     />
@@ -40,14 +40,14 @@
         </button>
 
         <!-- TODO: Language -->
-        <button mat-menu-item *ngIf="userService.isConnected()" (click)="redirectProfilePage()">Profile</button>
+        <button mat-menu-item *ngIf="userService.isConnected" (click)="redirectProfilePage()">Profile</button>
         <!-- TODO: Language -->
-        <button mat-menu-item *ngIf="userService.isConnected()" (click)="redirectSettingsPage()">Settings</button>
+        <button mat-menu-item *ngIf="userService.isConnected" (click)="redirectSettingsPage()">Settings</button>
         <!-- TODO: Language -->
-        <button mat-menu-item *ngIf="!userService.isConnected()" (click)="redirectUserPage()">Sign Up</button>
+        <button mat-menu-item *ngIf="!userService.isConnected" (click)="redirectUserPage()">Sign Up</button>
         <!-- TODO: Language -->
-        <button mat-menu-item *ngIf="!userService.isConnected()" (click)="redirectLoginPage()">Sign In</button>
+        <button mat-menu-item *ngIf="!userService.isConnected" (click)="redirectLoginPage()">Sign In</button>
         <!-- TODO: Language -->
-        <button mat-menu-item *ngIf="userService.isConnected()" (click)="userService.logout()">Sign Out</button>
+        <button mat-menu-item *ngIf="userService.isConnected" (click)="userService.logout()">Sign Out</button>
     </mat-menu>
 </mat-toolbar>
