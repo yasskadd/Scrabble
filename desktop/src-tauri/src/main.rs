@@ -25,6 +25,12 @@ struct HttpResponse {
     err: String,
 }
 
+// the payload type must implement `Serialize` and `Clone`.
+#[derive(Clone, serde::Serialize)]
+struct TestPayload {
+    message: String,
+}
+
 enum RustEvent {
     SocketConnectionFailed,
     SocketDisconnectionFailed,
@@ -57,6 +63,7 @@ fn socketEstablishConnection(
     cookie: Option<&str>,
     state: tauri::State<SocketClient>,
     window: tauri::Window,
+    handle: tauri::AppHandle,
 ) {
     let mut socket = state.socket.lock().expect("Error locking the socket");
 
@@ -70,16 +77,34 @@ fn socketEstablishConnection(
         None => ClientBuilder::new(address).reconnect(false),
     };
 
-    let socketEventWindow = window.clone();
     let connection = clientBuilder
         .on_any(move |event, payload, _raw_client| {
             // println!("Got event: {:?} {:?}", event, payload);
             if let Payload::String(payload) = payload {
-                // println!("Got payload: {}", payload);
                 println!("Got event: {}", String::from(event.clone()));
-                socketEventWindow
-                    .emit(&String::from(event), payload)
-                    .expect("Couldn't emit the event to Angular");
+                println!("Got payload: {}", payload);
+
+                if payload.to_string() == "\"SuccessfulConnection\""
+                    || payload.to_string() == "\"UserAlreadyConnected\""
+                {
+                    let new_payload = payload
+                        .strip_prefix("\"")
+                        .unwrap()
+                        .strip_suffix("\"")
+                        .unwrap();
+
+                    handle
+                        .emit_all(&String::from(new_payload), payload.clone())
+                        .expect("Couldn't emit the event to Angular");
+                } else {
+                    handle
+                        .emit_all(&String::from(event), payload)
+                        .expect("Couldn't emit the event to Angular");
+                }
+
+                // socketEventWindow
+                //     .emit(&String::from(event), payload)
+                //     .expect("Couldn't emit the event to Angular");
             }
         })
         .connect();

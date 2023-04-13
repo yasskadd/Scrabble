@@ -1,29 +1,39 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { RustCommand, RustEvent } from '@app/models/rust-command';
 import { LanguageService } from '@services/language.service';
 import { SnackBarService } from '@services/snack-bar.service';
 import { TauriStateService } from '@services/tauri-state.service';
 import * as tauri from '@tauri-apps/api';
-import { Event } from '@tauri-apps/api/event';
+import { Event, TauriEvent } from '@tauri-apps/api/event';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
+import { WebviewWindow } from '@tauri-apps/api/window';
 
 @Injectable({
     providedIn: 'root',
 })
-export class ClientSocketService implements OnDestroy {
-    updateSubject: Subject<void>;
+export class ClientSocketService {
+    appUpdate: Subject<void>;
     connected: BehaviorSubject<boolean>;
+    cancelConnection: Subject<void>;
+
     private socket: Socket;
 
     constructor(private snackBarService: SnackBarService, private languageService: LanguageService, private tauriStateService: TauriStateService) {
+        this.appUpdate = new Subject();
         this.connected = new BehaviorSubject<boolean>(false);
-        this.updateSubject = new Subject<void>();
-    }
+        this.cancelConnection = new Subject();
 
-    ngOnDestroy() {
-        this.disconnect().then();
+        if (this.tauriStateService.useTauri) {
+            const appWindow = WebviewWindow.getByLabel('main');
+            appWindow
+                .listen(TauriEvent.WINDOW_CLOSE_REQUESTED, async () => {
+                    await this.disconnect();
+                    await appWindow.close();
+                })
+                .then();
+        }
     }
 
     async isSocketAlive() {
@@ -100,10 +110,11 @@ export class ClientSocketService implements OnDestroy {
 
     on<T>(eventName: string, action: (data: T) => void): void {
         if (this.tauriStateService.useTauri) {
+            console.log('listening to ' + eventName);
             tauri.event
                 .listen(eventName, (event: Event<unknown>) => {
                     action(JSON.parse(event.payload as string));
-                    this.updateSubject.next();
+                    this.appUpdate.next();
                 })
                 .then();
         } else {
