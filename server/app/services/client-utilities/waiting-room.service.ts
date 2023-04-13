@@ -65,7 +65,6 @@ export class WaitingRoomService {
     }
 
     removeRoom(server: Server, roomId: string): void {
-        console.log('removing waiting room : ' + roomId);
         const roomIndex = this.waitingRooms.findIndex((room: GameRoom) => room.id === roomId);
         this.waitingRooms.splice(roomIndex, 1);
 
@@ -77,7 +76,6 @@ export class WaitingRoomService {
             }
             return true;
         });
-        console.log(this.waitingRooms.map((wr: GameRoom) => wr.players.map((p: RoomPlayer) => p.type)));
 
         server.emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
@@ -195,12 +193,8 @@ export class WaitingRoomService {
         this.removePlayerFromGameRoom(socket, player);
         if (this.getRoom(userQuery.roomId) !== undefined && this.getRoom(userQuery.roomId)?.state !== GameRoomState.Playing) {
             const waitingRoom = this.getRoom(userQuery.roomId) as GameRoom;
-            console.log(userQuery.roomId);
-            console.log(waitingRoom.difficulty);
             const bot = await this.createReplacementBot(waitingRoom?.difficulty as GameDifficulty, userQuery.roomId);
-            console.log(bot);
             waitingRoom?.players.push(bot as unknown as RoomPlayer);
-            console.log(waitingRoom.players);
             server.to(waitingRoom.id).emit(SocketEvents.UpdateWaitingRoom, waitingRoom);
         }
 
@@ -378,8 +372,6 @@ export class WaitingRoomService {
         const virtualPlayers: RoomPlayer[] = [];
 
         const botNames: string[] = await this.virtualPlayerStorageService.getBotName(numberOfBots, difficulty);
-        console.log('bot name');
-        console.log(botNames);
         botNames.forEach((name: string) => {
             virtualPlayers.push({
                 user: {

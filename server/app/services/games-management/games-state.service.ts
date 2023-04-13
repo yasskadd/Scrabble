@@ -350,7 +350,6 @@ export class GamesStateService {
             const socket = this.socketManager.getSocketFromId(g.player.socketId);
             if (!socket) return;
 
-            console.log(socket.id);
             socket.emit(SocketEvents.GameEnd);
         });
         this.gamesHandler.removeRoom(gamePlayer.player.roomId);
@@ -510,7 +509,6 @@ export class GamesStateService {
     }
 
     private addGameEventHistory(player: RealPlayer, gameWon: boolean) {
-        console.log('ENTERED ADD GAME EVENT HISTORY');
         const userID = player.player.user._id;
         const gameDate = player.game.beginningTime;
         this.accountStorage.addUserEventHistory(userID, HistoryActions.Game, gameDate, gameWon);
