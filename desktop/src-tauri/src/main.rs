@@ -285,7 +285,7 @@ async fn httpPatch(
             let mut cache_dir = tauri::api::path::cache_dir().unwrap();
             cache_dir.push(path.to_owned());
 
-            let file = fs::read(tauri::api::path::cache_dir().unwrap().as_path());
+            let file = fs::read(cache_dir.as_path());
             req = req.multipart(
                 reqwest::multipart::Form::new()
                     .part(

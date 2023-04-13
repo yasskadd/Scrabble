@@ -54,12 +54,8 @@ export class LetterPlacementService {
         this.liveBoard = [];
         this.defaultBoard = [];
         this.confirmedBoard = [];
-        this.currentSelection = {
-            value: AlphabetLetter.None,
-            quantity: 0,
-            points: 0,
-        };
 
+        this.initSelection();
         this.setPropreties();
         this.gameClientService.gameboardUpdated.pipe(first()).subscribe((gameBoard: string[]) => {
             this.resetView();
@@ -77,6 +73,14 @@ export class LetterPlacementService {
         });
         this.subscribeDrag();
         this.initTiles();
+    }
+
+    initSelection(): void {
+        this.currentSelection = {
+            value: AlphabetLetter.None,
+            quantity: undefined,
+            points: undefined,
+        };
     }
 
     subscribeDrag(): void {
@@ -251,7 +255,6 @@ export class LetterPlacementService {
                 coord: -removedBoardTile.coord,
                 letter: removedBoardTile.letter.value.toString(),
             });
-            this.gameClientService.getLocalPlayer().rack.push(removedBoardTile.letter);
             this.initLiveTile(removedBoardTile.coord);
         });
 

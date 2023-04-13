@@ -1,9 +1,14 @@
 <div class="encapsulating-div">
     <app-header></app-header>
     <body class="mat-app-background">
-        <button mat-fab *ngIf="!userService.user.profilePicture" color="primary" (click)="openAvatarSelector()" class="avatar-selector">
+    <div style='display: flex; flex-direction: column'>
+        <button mat-fab *ngIf="!userService.user.profilePicture" color="primary" (click)="openAvatarSelector()" class="avatar-selector" style='margin-bottom: 4px'>
             <mat-icon>person</mat-icon>
         </button>
+        <button mat-mini-fab (click)='reloadImage()' class='avatar-selector' style='margin-bottom: 20px'>
+            <mat-icon >refresh</mat-icon>
+        </button>
+    </div>
         <img
             *ngIf="userService.user.profilePicture && !profilePicForm.value"
             [src]="userService.user.profilePicture.key"

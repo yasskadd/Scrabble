@@ -67,4 +67,8 @@ export class SettingsPageComponent implements OnInit {
             this.newUsernameConfirmation.addValidators(equalValidatorFn);
         });
     }
+
+    protected reloadImage(): void {
+        this.userService.reloadProfilePicture();
+    }
 }

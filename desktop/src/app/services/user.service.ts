@@ -94,6 +94,25 @@ export class UserService {
             });
     }
 
+    reloadProfilePicture(): void {
+        if (this.user.profilePicture.isDefaultPicture) {
+            this.httpHandlerService.getDefaultImages().then((map: Map<string, string[]>) => {
+                // Set url in userData for local access to the default image
+                // (yes we download all of the keys, but it's easier like that)
+                Object.entries(map).forEach((entry: [string, string[]]) => {
+                    if (entry[0] === this.user.profilePicture.name) {
+                        this.user.profilePicture.key = entry[1][0];
+                    }
+                });
+            });
+        } else {
+            this.httpHandlerService.getProfilePicture().then((res: { url: string }) => {
+                // Set url in userData for local access to the image
+                this.user.profilePicture.key = res.url;
+            });
+        }
+    }
+
     private initUser(): void {
         this.user = {
             _id: '',

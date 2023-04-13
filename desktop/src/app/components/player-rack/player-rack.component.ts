@@ -123,6 +123,7 @@ export class PlayerRackComponent {
 
     protected drop(event: CdkDragDrop<Letter[]>): void {
         if (!this.letterPlacementService.isRemoveValid(event.item.data)) {
+            this.letterPlacementService.initSelection();
             return;
         }
 
@@ -141,7 +142,7 @@ export class PlayerRackComponent {
             letter: event.item.data.letter.value.toString(),
         });
 
-        this.letterPlacementService.currentSelection = undefined;
+        this.letterPlacementService.initSelection();
     }
 
     protected async startedDragging(letter: Letter): Promise<void> {

@@ -48,33 +48,23 @@ export class GameBoardComponent {
             this.letterPlacementService.handleDragPlacement(event.previousIndex, event.previousContainer.data[event.previousIndex], tile);
         }
 
-        this.letterPlacementService.currentSelection = undefined;
+        this.letterPlacementService.initSelection();
     }
 
     protected entered(event: MouseEvent, tile: BoardTileInfo) {
+        const liveTile = this.letterPlacementService.liveBoard[tile.coord];
         if (
-            this.letterPlacementService.liveBoard[tile.coord].state === BoardTileState.Empty ||
-            this.letterPlacementService.liveBoard[tile.coord].state === BoardTileState.Temp
+            liveTile.state === BoardTileState.Empty &&
+            !this.letterPlacementService.selectionPositions.find((sp: SelectionPosition) => sp.coord === tile.coord)
         ) {
-            if (this.letterPlacementService.currentSelection) {
-                this.letterPlacementService.liveBoard[tile.coord] = {
-                    type: BoardTileType.Empty,
-                    state: BoardTileState.Temp,
-                    letter: this.letterPlacementService.currentSelection,
-                    coord: tile.coord,
-                };
-            } else {
-                this.letterPlacementService.liveBoard[tile.coord] = {
-                    type: BoardTileType.Empty,
-                    state: BoardTileState.Temp,
-                    letter: {
-                        value: AlphabetLetter.None,
-                        quantity: undefined,
-                        points: undefined,
-                    },
-                    coord: tile.coord,
-                };
-            }
+            this.letterPlacementService.liveBoard[tile.coord] = {
+                type: BoardTileType.Empty,
+                state: BoardTileState.Temp,
+                letter: this.letterPlacementService.currentSelection
+                    ? { value: '', quantity: undefined, points: undefined }
+                    : this.letterPlacementService.currentSelection,
+                coord: tile.coord,
+            };
         }
     }
 
