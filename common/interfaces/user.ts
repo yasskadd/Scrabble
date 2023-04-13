@@ -1,4 +1,4 @@
-import { UserChatRoom } from '@app/interfaces/user-chat-room';
+import { UserChatRoom } from '../../server/app/interfaces/user-chat-room';
 import { HistoryEvent } from './history-event';
 import { ImageInfo } from './image-info';
 import { Theme } from './theme';
