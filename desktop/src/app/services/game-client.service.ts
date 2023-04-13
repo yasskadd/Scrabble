@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { SocketEvents } from '@common/constants/socket-events';
@@ -9,13 +9,15 @@ import { IUser } from '@common/interfaces/user';
 import { UserService } from '@services/user.service';
 import { ReplaySubject, Subject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
+import { SnackBarService } from '@services/snack-bar.service';
+import { Word } from '@common/classes/word.class';
 
 const TIMEOUT_PASS = 30;
 
 @Injectable({
     providedIn: 'root',
 })
-export class GameClientService implements OnDestroy {
+export class GameClientService {
     timer: number;
     activePlayer: IUser;
     players: PlayerInformation[];
@@ -28,7 +30,12 @@ export class GameClientService implements OnDestroy {
     nextTurnSubject: Subject<void>;
     turnFinish: ReplaySubject<boolean>;
 
-    constructor(private clientSocketService: ClientSocketService, private userService: UserService, private router: Router) {
+    constructor(
+        private clientSocketService: ClientSocketService,
+        private userService: UserService,
+        private snackBarService: SnackBarService,
+        private router: Router,
+    ) {
         this.players = [];
 
         this.gameboardUpdated = new Subject<string[]>();
@@ -41,10 +48,6 @@ export class GameClientService implements OnDestroy {
                 this.configureBaseSocketFeatures();
             }
         });
-    }
-
-    ngOnDestroy(): void {
-        console.log('destroyed game-client');
     }
 
     initGameInformation() {
@@ -81,6 +84,17 @@ export class GameClientService implements OnDestroy {
         this.clientSocketService.on(SocketEvents.NextTurn, (info: GameInfo) => {
             this.viewUpdateEvent(info);
             this.nextTurnSubject.next();
+        });
+
+        this.clientSocketService.on(SocketEvents.PlacementSuccess, () => {
+            // TODO : Language
+            this.snackBarService.openInfo('Word placed successfully!');
+        });
+
+        this.clientSocketService.on(SocketEvents.PlacementFailure, (word: Word) => {
+            if (!word.isValid) {
+                this.snackBarService.openError(word as unknown as string);
+            }
         });
 
         this.clientSocketService.on(SocketEvents.GameAboutToStart, (info: GameInfo) => {
@@ -174,7 +188,6 @@ export class GameClientService implements OnDestroy {
     }
 
     private gameEndEvent() {
-        console.log('game end');
         if (this.winningMessage === '') {
             this.findWinnerByScore();
             this.isGameFinish = true;

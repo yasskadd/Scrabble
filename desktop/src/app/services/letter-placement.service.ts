@@ -93,17 +93,12 @@ export class LetterPlacementService {
         });
 
         this.clientSocketService.on(SocketEvents.LetterTaken, (event: SimpleLetterInfos) => {
-            console.log('letter taken: ');
-            console.log(event);
             if (event.socketId === this.gameClientService.getLocalPlayer()?.player.socketId) return;
-            console.log('removing letter');
             if (event.coord === -1) return;
             this.initLiveTile(event.coord);
         });
 
         this.clientSocketService.on(SocketEvents.LetterPlaced, async (event: SimpleLetterInfos) => {
-            console.log('letter placed: ');
-            console.log(event);
             if (event.socketId === this.gameClientService.getLocalPlayer()?.player.socketId) return;
             this.dragLetter = undefined;
 
@@ -115,8 +110,6 @@ export class LetterPlacementService {
                 this.liveBoard[-event.coord].state = BoardTileState.Empty;
                 this.liveBoard[-event.coord].letter.value = AlphabetLetter.None;
             }
-
-            // this.refreshView();
         });
     }
 
@@ -158,8 +151,6 @@ export class LetterPlacementService {
             letter: JSON.parse(JSON.stringify(this.defaultBoard[coord].letter)),
             coord: JSON.parse(JSON.stringify(this.defaultBoard[coord].coord)),
         };
-
-        console.log(this.liveBoard[coord]);
     }
 
     handleDragPlacement(index: number, letter: Letter, tile: BoardTileInfo): void {
@@ -237,6 +228,7 @@ export class LetterPlacementService {
 
         // this.resetGameBoardView();
         const removedBoardTile = this.placedLetters[this.placedLetters.length - 1];
+        this.gameClientService.getLocalPlayer().rack.push(removedBoardTile.letter);
 
         this.clientSocketService.send(SocketEvents.LetterPlaced, {
             roomId: this.gameConfigurationService.localGameRoom.id,
@@ -259,6 +251,7 @@ export class LetterPlacementService {
                 coord: -removedBoardTile.coord,
                 letter: removedBoardTile.letter.value.toString(),
             });
+            this.gameClientService.getLocalPlayer().rack.push(removedBoardTile.letter);
             this.initLiveTile(removedBoardTile.coord);
         });
 
@@ -273,7 +266,6 @@ export class LetterPlacementService {
         this.placedLetters.splice(tileIndex, 1);
         // this.placedLetters.pop();
         this.computeNewPosition(removedBoardTile.coord, true);
-        console.log(this.selectionPositions);
         this.hasPlacingEnded = this.isPositionOutOfBound();
         this.currentSelection = undefined;
     }
