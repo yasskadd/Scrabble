@@ -2,16 +2,16 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
+import { SocketEvents } from '@common/constants/socket-events';
 import { AvatarData } from '@common/interfaces/avatar-data';
 import { ImageInfo } from '@common/interfaces/image-info';
 import { IUser } from '@common/interfaces/user';
 import { ImageType } from '@common/models/image-type';
 import { ClientSocketService } from '@services/communication/client-socket.service';
+import { SnackBarService } from '@services/snack-bar.service';
 import { Subject } from 'rxjs';
 import { AppCookieService } from './communication/app-cookie.service';
 import { HttpHandlerService } from './communication/http-handler.service';
-import { SocketEvents } from '@common/constants/socket-events';
-import { SnackBarService } from '@services/snack-bar.service';
 
 @Injectable({
     providedIn: 'root',
@@ -88,6 +88,7 @@ export class UserService {
             email: '',
             username: '',
             password: '',
+            chatRooms: [],
             profilePicture: undefined,
             historyEventList: [],
             language: 'fr', // TODO: To change if necessary

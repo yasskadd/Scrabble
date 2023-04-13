@@ -58,8 +58,8 @@
         </button>
 
         <mat-drawer #drawer class="chat-sidenav" mode="side" position="end">
-            <div *ngIf="!loggedIn">{{ "chat.disconnected" | translate }}</div>
-            <app-generic-chat *ngIf="loggedIn"></app-generic-chat>
+            <!-- <div *ngIf="!loggedIn">{{ "chat.disconnected" | translate }}</div> -->
+            <app-generic-chat></app-generic-chat>
         </mat-drawer>
     </mat-drawer-container>
 
