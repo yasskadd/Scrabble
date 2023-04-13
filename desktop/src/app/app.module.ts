@@ -56,6 +56,7 @@ import { SettingsPageComponent } from './pages/settings-page/settings-page.compo
 import { UserCreationPageComponent } from './pages/user-creation-page/user-creation-page.component';
 import { UserProfilePageComponent } from './pages/user-profile-page/user-profile-page.component';
 import { WaitingOpponentPageComponent } from './pages/waiting-opponent-page/waiting-opponent-page.component';
+import { DialogBoxLetterSelectorComponent } from './components/dialog-box-letter-selector/dialog-box-letter-selector.component';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(http, '../assets/i18n/', '.json');
@@ -103,6 +104,7 @@ export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(h
         GameBoardComponent,
         DialogBoxPasswordComponent,
         UserProfilePageComponent,
+        DialogBoxLetterSelectorComponent,
     ],
     imports: [
         CommonModule,

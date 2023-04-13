@@ -44,17 +44,10 @@ export class GameBoardComponent {
     }
 
     protected drop(event: CdkDragDrop<Letter[]>, tile: BoardTileInfo): void {
-        console.log('letter dropped in gameboard');
         if (event.previousContainer.id === 'player-rack') {
             this.letterPlacementService.handleDragPlacement(event.previousIndex, event.previousContainer.data[event.previousIndex], tile);
         }
 
-        // this.clientSocketService.send(SocketEvents.LetterPlaced, {
-        //     roomId: this.gameConfigurationService.localGameRoom.id,
-        //     socketId: this.gameClientService.getLocalPlayer()?.player.socketId,
-        //     coord: -tile.coord,
-        //     letter: event.previousContainer.data[event.previousIndex],
-        // });
         this.letterPlacementService.currentSelection = undefined;
     }
 

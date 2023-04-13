@@ -36,12 +36,6 @@
                 <div class='tile-text' *ngIf='tileEmpty(tile)'>
                     {{ getTileText(tile.type) }}
                 </div>
-                <div class='icon-tile' *ngFor='let selection of letterPlacementService.selectionPositions'>
-                    <div *ngIf='selection.coord === tile.coord' [ngSwitch]='selection.direction'>
-                        <mat-icon class='direction' *ngSwitchCase='playDirection.Right'>chevron_right</mat-icon>
-                        <mat-icon class='direction' *ngSwitchCase='playDirection.Down'>expand_more</mat-icon>
-                    </div>
-                </div>
                 <div class='icon-tile outlined' *ngIf='showCenterTile(tile)'>
                     <mat-icon>star</mat-icon>
                 </div>

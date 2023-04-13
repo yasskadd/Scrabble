@@ -22,6 +22,9 @@ import { window as tauriWindow } from '@tauri-apps/api';
 import { SimpleLetterInfos } from '@common/interfaces/simple-letter-infos';
 import { GameConfigurationService } from '@services/game-configuration.service';
 import { SnackBarService } from '@services/snack-bar.service';
+import { DialogBoxLetterSelectorComponent } from '@app/components/dialog-box-letter-selector/dialog-box-letter-selector.component';
+import { Observable } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
 
 // const ASCII_ALPHABET_START = 96;
 
@@ -46,6 +49,7 @@ export class LetterPlacementService {
         private gameConfigurationService: GameConfigurationService,
         private gameClientService: GameClientService, // private chatboxService: ChatboxHandlerService,
         private snackBarService: SnackBarService,
+        private matDialog: MatDialog,
     ) {
         this.liveBoard = [];
         this.defaultBoard = [];
@@ -233,7 +237,6 @@ export class LetterPlacementService {
 
         // this.resetGameBoardView();
         const removedBoardTile = this.placedLetters[this.placedLetters.length - 1];
-        this.gameClientService.getLocalPlayer()?.rack.push(removedBoardTile.letter);
 
         this.clientSocketService.send(SocketEvents.LetterPlaced, {
             roomId: this.gameConfigurationService.localGameRoom.id,
@@ -247,11 +250,9 @@ export class LetterPlacementService {
     }
 
     undoEverything() {
-        console.log(this.placedLetters.map((l: BoardTileInfo) => l.letter.value));
         this.placedLetters.forEach((tile) => {
             const removedBoardTile = JSON.parse(JSON.stringify(tile));
             this.gameClientService.getLocalPlayer()?.rack.push(removedBoardTile.letter);
-            console.log(tile.letter.value);
             this.clientSocketService.send(SocketEvents.LetterPlaced, {
                 roomId: this.gameConfigurationService.localGameRoom.id,
                 socketId: this.gameClientService.getLocalPlayer()?.player.socketId,
@@ -260,7 +261,7 @@ export class LetterPlacementService {
             });
             this.initLiveTile(removedBoardTile.coord);
         });
-        // this.resetView();
+
         this.placedLetters = [];
         this.selectionPositions = [];
         this.hasPlacingEnded = this.isPositionOutOfBound();
@@ -272,6 +273,7 @@ export class LetterPlacementService {
         this.placedLetters.splice(tileIndex, 1);
         // this.placedLetters.pop();
         this.computeNewPosition(removedBoardTile.coord, true);
+        console.log(this.selectionPositions);
         this.hasPlacingEnded = this.isPositionOutOfBound();
         this.currentSelection = undefined;
     }
@@ -313,14 +315,38 @@ export class LetterPlacementService {
             return;
         }
 
+        if (letter.value === AlphabetLetter.Any) {
+            this.openLetterSelector().subscribe((l: AlphabetLetter) => {
+                if (l === AlphabetLetter.None) return;
+                letter.value = l;
+                this.commitLetter(letter, boardTile, true);
+            });
+
+            return;
+        }
+
+        this.commitLetter(letter, boardTile, false);
+    }
+
+    commitLetter(letter: Letter, boardTile: BoardTileInfo, isStar: boolean): void {
         const playedTile: BoardTileInfo = {
             type: boardTile.type,
             state: BoardTileState.Pending,
-            letter,
+            letter: {
+                value: isStar ? letter.value.toLowerCase() : letter.value.toUpperCase(),
+                points: letter.points,
+                quantity: letter.quantity,
+            },
             coord: boardTile.coord,
         };
         this.liveBoard[boardTile.coord] = playedTile;
         this.confirmedBoard[boardTile.coord] = playedTile;
+        this.placedLetters.push(playedTile);
+
+        if (isStar) {
+            letter.value = AlphabetLetter.Any;
+        }
+
         this.clientSocketService.send(SocketEvents.LetterPlaced, {
             roomId: this.gameConfigurationService.localGameRoom.id,
             socketId: this.gameClientService.getLocalPlayer()?.player.socketId,
@@ -334,7 +360,6 @@ export class LetterPlacementService {
             }),
             1,
         );
-        this.placedLetters.push(playedTile);
 
         if (this.placedLetters.length === 2 && this.placingMode === PlacingState.Drag) {
             this.computeDirection(playedTile.coord);
@@ -382,7 +407,21 @@ export class LetterPlacementService {
 
         if (this.placingMode === PlacingState.Drag) {
             if (this.placedLetters.length === 1) {
+                // if (revert) {
+                // if (this.selectionPositions[0].direction === PlayDirection.Right) {
+                //     this.selectionPositions = [
+                //         this.computeNextRightPosition(playedCoord - 1, revert),
+                //         this.computeNextDownPosition(playedCoord - 1, revert),
+                //     ];
+                // } else if (this.selectionPositions[0].direction === PlayDirection.Down) {
+                //     this.selectionPositions = [
+                //         this.computeNextRightPosition(playedCoord - TOTAL_COLUMNS, revert),
+                //         this.computeNextDownPosition(playedCoord - TOTAL_COLUMNS, revert),
+                //     ];
+                // }
+                // } else {
                 this.selectionPositions = [this.computeNextRightPosition(playedCoord, revert), this.computeNextDownPosition(playedCoord, revert)];
+                // }
                 return;
             }
         }
@@ -553,6 +592,7 @@ export class LetterPlacementService {
     }
 
     private updateGameBoard(gameBoard: string[]) {
+        this.dragLetter = undefined;
         gameBoard.forEach((tile: string, coord: number) => {
             if (!tile) {
                 this.liveBoard[coord].letter = {
@@ -578,53 +618,67 @@ export class LetterPlacementService {
     }
 
     private computeNextRightPosition(coord: number, revert: boolean): SelectionPosition {
-        if (!revert) {
-            if (this.liveBoard[coord + 1].letter.value !== AlphabetLetter.None && this.liveBoard[coord + 1].state === BoardTileState.Confirmed) {
-                if (this.isTileOutOfBoard(coord + 1)) {
+        if (revert) {
+            if (this.placedLetters.length === 1) {
+                return this.computeNextRightPosition(this.placedLetters[0].coord, false);
+            }
+
+            if (this.liveBoard[coord - 1].state === BoardTileState.Confirmed) {
+                if (this.isTileOutOfBoard(coord - 1)) {
                     return { coord: -1, direction: PlayDirection.Right };
                 } else {
-                    return this.computeNextRightPosition(coord + 1, revert);
+                    return this.computeNextRightPosition(coord - 1, revert);
                 }
             }
 
-            return { coord: coord + 1, direction: PlayDirection.Right };
+            return { coord, direction: PlayDirection.Right };
         }
 
-        if (this.liveBoard[coord].letter.value && this.liveBoard[coord].state === BoardTileState.Confirmed) {
-            if (this.isTileOutOfBoard(coord - 1)) {
+        if (this.liveBoard[coord + 1].state === BoardTileState.Confirmed) {
+            if (this.isTileOutOfBoard(coord + 1)) {
                 return { coord: -1, direction: PlayDirection.Right };
             } else {
-                return this.computeNextRightPosition(coord - 1, revert);
+                return this.computeNextRightPosition(coord + 1, revert);
             }
         }
 
-        return { coord, direction: PlayDirection.Right };
+        return { coord: coord + 1, direction: PlayDirection.Right };
     }
 
     private computeNextDownPosition(coord: number, revert: boolean): SelectionPosition {
-        if (!revert) {
-            if (
-                this.liveBoard[coord + TOTAL_COLUMNS].letter.value !== AlphabetLetter.None &&
-                this.liveBoard[coord + TOTAL_COLUMNS].state === BoardTileState.Confirmed
-            ) {
-                if (this.isTileOutOfBoard(coord + TOTAL_COLUMNS)) {
+        if (revert) {
+            if (this.placedLetters.length === 1) {
+                return this.computeNextDownPosition(this.placedLetters[0].coord, false);
+            }
+
+            if (this.liveBoard[coord].state === BoardTileState.Confirmed) {
+                if (this.isTileOutOfBoard(coord)) {
                     return { coord: -1, direction: PlayDirection.Down };
                 } else {
-                    return this.computeNextDownPosition(coord + TOTAL_COLUMNS, revert);
+                    return this.computeNextDownPosition(coord - TOTAL_COLUMNS, revert);
                 }
             }
 
-            return { coord: coord + TOTAL_COLUMNS, direction: PlayDirection.Down };
+            return { coord, direction: PlayDirection.Down };
         }
 
-        if (this.liveBoard[coord].letter.value && this.liveBoard[coord].state === BoardTileState.Confirmed) {
-            if (this.isTileOutOfBoard(coord)) {
+        if (this.liveBoard[coord + TOTAL_COLUMNS].state === BoardTileState.Confirmed) {
+            if (this.isTileOutOfBoard(coord + TOTAL_COLUMNS)) {
                 return { coord: -1, direction: PlayDirection.Down };
             } else {
-                return this.computeNextDownPosition(coord - TOTAL_COLUMNS, revert);
+                return this.computeNextDownPosition(coord + TOTAL_COLUMNS, revert);
             }
         }
 
-        return { coord, direction: PlayDirection.Down };
+        return { coord: coord + TOTAL_COLUMNS, direction: PlayDirection.Down };
+    }
+
+    private openLetterSelector(): Observable<AlphabetLetter> {
+        return this.matDialog
+            .open(DialogBoxLetterSelectorComponent, {
+                width: 'auto',
+                disableClose: true,
+            })
+            .afterClosed();
     }
 }
