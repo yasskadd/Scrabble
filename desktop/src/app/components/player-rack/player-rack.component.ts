@@ -13,6 +13,7 @@ import { ClientSocketService } from '@services/communication/client-socket.servi
 import { SocketEvents } from '@common/constants/socket-events';
 import { window as tauriWindow } from '@tauri-apps/api';
 import { GameConfigurationService } from '@services/game-configuration.service';
+// import { Socket } from 'socket.io-client';
 
 @Component({
     selector: 'app-player-rack',
@@ -52,7 +53,7 @@ export class PlayerRackComponent {
     @HostListener('window: click', ['$event'])
     clickOutside(event: { target: unknown; preventDefault: () => void }) {
         if (!this.eRef.nativeElement.contains(event.target)) {
-            this.cancelSelection();
+            this.lettersToExchange = [];
             this.currentSelection = board.INVALID_INDEX;
             this.previousSelection = board.INVALID_INDEX;
         }
@@ -109,12 +110,13 @@ export class PlayerRackComponent {
     }
 
     exchangeLetters(): void {
-        let letters = '';
+        const letters = [];
         for (const i of this.lettersToExchange) {
-            letters += this.gameClient.getLocalPlayer()?.rack[i].value;
+            letters.push(this.gameClient.getLocalPlayer()?.rack[i].value);
         }
-        this.cancelSelection();
-        this.chatBoxHandler.submitMessage('!échanger ' + letters);
+        this.lettersToExchange = [];
+        this.clientSocketService.send(SocketEvents.Exchange, letters);
+        // this.chatBoxHandler.submitMessage('!échanger ' + letters);
     }
 
     cancelSelection(): void {
@@ -122,6 +124,7 @@ export class PlayerRackComponent {
     }
 
     protected drop(event: CdkDragDrop<Letter[]>): void {
+        this.lettersToExchange = [];
         if (!this.letterPlacementService.isRemoveValid(event.item.data)) {
             this.letterPlacementService.initSelection();
             return;
@@ -143,9 +146,11 @@ export class PlayerRackComponent {
         });
 
         this.letterPlacementService.initSelection();
+        this.lettersToExchange = [];
     }
 
     protected async startedDragging(letter: Letter): Promise<void> {
+        this.lettersToExchange = [];
         this.letterPlacementService.currentSelection = letter;
 
         this.clientSocketService.send(SocketEvents.LetterTaken, {

@@ -12,15 +12,15 @@ import { SocketEvents } from '@common/constants/socket-events';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
 import { PlayerInformation } from '@common/interfaces/player-information';
 import { PlayerType } from '@common/models/player-type';
-import { ReplaySubject } from 'rxjs/internal/ReplaySubject';
+import { ReplaySubject } from 'rxjs';
 import { Service } from 'typedi';
 
 @Service()
 export class GamesHandlerService {
-    players: GamePlayer[];
     // gamePlayers: Map<string, { room: GameRoom; players: GamePlayer[] }>;
     dictionaries: Map<string, DictionaryContainer>;
     deleteWaitingRoom: ReplaySubject<string | undefined>;
+    private players: GamePlayer[];
 
     constructor(private socketManager: SocketManager, private dictionaryStorage: DictionaryStorageService) {
         // this.gamePlayers = new Map();
@@ -40,23 +40,40 @@ export class GamesHandlerService {
         return this.players.find((gamePlayer: GamePlayer) => gamePlayer.player.socketId === socketId);
     }
 
+    getBot(botId: string): GamePlayer | undefined {
+        return this.players.find((gamePlayer: GamePlayer) => gamePlayer.player.user._id === botId);
+    }
+
     getPlayersInRoom(roomId: string): GamePlayer[] {
         return this.players.filter((gamePlayer: GamePlayer) => gamePlayer.player.roomId === roomId);
+    }
+
+    getPlayersInfos(roomId: string): PlayerInformation[] {
+        return this.getPlayersInRoom(roomId).map((gp: GamePlayer) => gp.getInformation());
+    }
+
+    addPlayer(player: GamePlayer): void {
+        this.players.push(player);
     }
 
     usersRemaining(roomId: string): boolean {
         return this.getPlayersInRoom(roomId).filter((p: GamePlayer) => p.player.type === PlayerType.User).length > 0;
     }
 
-    removePlayer(socketId: string): void {
-        const player = this.players.find((gamePlayer: GamePlayer) => gamePlayer.player.socketId === socketId);
-        if (!player) return;
+    removePlayerFromId(playerId: string): void {
+        const playerIndex = this.players.findIndex((gamePlayer: GamePlayer) => gamePlayer.player.user._id === playerId);
+        if (playerIndex === INVALID_INDEX) return;
 
+        console.log('removing player ' + this.players[playerIndex].player.user.username + ' from his game room');
+        this.players.splice(playerIndex, 1);
+    }
+
+    removePlayerFromSocketId(socketId: string): void {
         const playerIndex = this.players.findIndex((gamePlayer: GamePlayer) => gamePlayer.player.socketId === socketId);
-        if (playerIndex !== INVALID_INDEX) {
-            console.log('removing player ' + player.player.user.username + ' from his game room');
-            this.players.splice(playerIndex, 1);
-        }
+        if (playerIndex === INVALID_INDEX) return;
+
+        console.log('removing player ' + this.players[playerIndex].player.user.username + ' from his game room');
+        this.players.splice(playerIndex, 1);
     }
 
     removeRoom(roomId: string): void {
@@ -81,7 +98,28 @@ export class GamesHandlerService {
         );
     }
 
-    /* --------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+    /*
+     * Method to remove all rooms that have no players left in them
+     * @return {string[]} The ids of the rooms that were deleted
+     */
+    cleanRooms(): string[] {
+        const roomIds: string[] = [];
+        this.players.forEach((gp: GamePlayer) => {
+            if (!roomIds.includes(gp.player.roomId)) {
+                roomIds.push(gp.player.roomId);
+            }
+        });
+
+        roomIds.forEach((id: string) => {
+            if (!this.usersRemaining(id)) {
+                this.removeRoom(id);
+            }
+        });
+
+        return roomIds;
+    }
+
+    /* ------------------------------------------------------------------------------------------------------------------------------- */
 
     async setDictionaries() {
         const dictionaries = await this.getDictionaries();

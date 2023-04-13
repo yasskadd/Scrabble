@@ -69,18 +69,15 @@ export class WaitingRoomService {
         this.waitingRooms.splice(roomIndex, 1);
 
         console.log(this.waitingRooms.map((wr: GameRoom) => wr.players.map((p: RoomPlayer) => p.type)));
-        this.waitingRooms = this.waitingRooms.filter((r: GameRoom) => {
-            if (!this.gamesHandler.usersRemaining(r.id)) {
-                this.gamesHandler.removeRoom(r.id);
-                return false;
-            }
-            return true;
+        this.gamesHandler.cleanRooms().forEach((id: string) => {
+            this.waitingRooms = this.waitingRooms.filter((wr: GameRoom) => wr.id === id);
         });
 
         server.emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
 
     private enterRoomLobby(server: Server, socket: Socket): void {
+        this.gamesHandler.cleanRooms();
         socket.join(GAME_LOBBY_ROOM_ID);
         server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
@@ -94,6 +91,8 @@ export class WaitingRoomService {
      * @private
      */
     private joinGameRoom(server: Server, socket: SocketType, joinGameQuery: UserRoomQuery): void {
+        this.gamesHandler.cleanRooms();
+
         const room: GameRoom | undefined = this.getRoom(joinGameQuery.roomId);
         if (this.userAlreadyConnected(joinGameQuery)) {
             socket.emit(SocketEvents.ErrorJoining, ServerErrors.RoomSameUser);
@@ -198,6 +197,7 @@ export class WaitingRoomService {
             server.to(waitingRoom.id).emit(SocketEvents.UpdateWaitingRoom, waitingRoom);
         }
 
+        this.gamesHandler.cleanRooms();
         server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
 
@@ -397,7 +397,9 @@ export class WaitingRoomService {
     private async createReplacementBot(difficulty: GameDifficulty, roomId: string): Promise<RoomPlayer> {
         const botNames = await this.virtualPlayerStorageService.getBotName(3, difficulty);
         const waitingRoom = this.getRoom(roomId);
-        const currentRoomBotNames: string[] | undefined = waitingRoom?.players.filter((player) => player.type === PlayerType.Bot).map((player) => player.user.username);
+        const currentRoomBotNames: string[] | undefined = waitingRoom?.players
+            .filter((player) => player.type === PlayerType.Bot)
+            .map((player) => player.user.username);
         const validBotName = botNames.find((name: string) => !currentRoomBotNames?.includes(name));
         return {
             user: {
@@ -414,6 +416,6 @@ export class WaitingRoomService {
             roomId,
             type: PlayerType.Bot,
             isCreator: false,
-        } as RoomPlayer
+        } as RoomPlayer;
     }
 }

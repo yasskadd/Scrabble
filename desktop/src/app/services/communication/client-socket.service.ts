@@ -20,7 +20,11 @@ export class ClientSocketService {
 
     private socket: Socket;
 
-    constructor(private snackBarService: SnackBarService, private languageService: LanguageService, private tauriStateService: TauriStateService) {
+    constructor(
+        private snackBarService: SnackBarService,
+        private languageService: LanguageService,
+        private tauriStateService: TauriStateService, // private dialog: MatDialog,
+    ) {
         this.appUpdate = new Subject();
         this.connected = new BehaviorSubject<boolean>(false);
         this.cancelConnection = new Subject();
@@ -132,6 +136,8 @@ export class ClientSocketService {
                         .listen(RustEvent.SocketSendFailed, (error: Event<unknown>) => {
                             this.languageService.getWord('error.socket.send_failed').subscribe((word: string) => {
                                 this.snackBarService.openError((word + ' : ' + error.payload) as string);
+                                // TODO : Propose a reconnection attempt
+                                // this.dialog.open();
                             });
                         })
                         .then();

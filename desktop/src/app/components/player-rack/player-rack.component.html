@@ -33,7 +33,7 @@
                 (cdkDragMoved)="dragging($event, letter)"
             >
                 <button mat-flat-button color="accent" class="rack-letter letter-shadow" *cdkDragPlaceholder></button>
-                <button mat-raised-button color="accent" class="rack-letter">
+                <button mat-raised-button [color]="lettersToExchange.includes(i) ? 'primary' : 'accent'" class="rack-letter">
                     <div class="letter-value">{{ letter.value.toUpperCase() }}</div>
                     <div class="letter-points">{{ letter.points }}</div>
                 </button>

@@ -10,7 +10,6 @@ import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
 import { GameInfo } from '@common/interfaces/game-state';
 import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
-import { PlayerInformation } from '@common/interfaces/player-information';
 import { RoomPlayer } from '@common/interfaces/room-player';
 import { Subscription } from 'rxjs';
 import { Container } from 'typedi';
@@ -130,13 +129,9 @@ export class Bot extends GamePlayer {
         // Complete turn
         game.concludeGameVerification(gamePlayer);
 
-        const playersInfo: PlayerInformation[] = this.gamesHandler.players.map((player: GamePlayer) => {
-            return player.getInformation();
-        });
-
         const viewUpdateInfo: GameInfo = {
             gameboard: wordPlacementResult.gameboard.toStringArray(),
-            players: playersInfo,
+            players: this.gamesHandler.getPlayersInfos(this.player.roomId),
             activePlayer: gamePlayer.game.turn.activePlayer,
         };
 

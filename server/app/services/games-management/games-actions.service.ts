@@ -1,4 +1,3 @@
-import { GamePlayer } from '@app/classes/player/player.class';
 import { RealPlayer } from '@app/classes/player/real-player.class';
 import { Word } from '@common/classes/word.class';
 import { RackService } from '@app/services/rack.service';
@@ -7,7 +6,6 @@ import { SocketEvents } from '@common/constants/socket-events';
 import { ExchangePublicInfo } from '@common/interfaces/exchange-public-info';
 import { GameInfo } from '@common/interfaces/game-state';
 import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
-import { PlayerInformation } from '@common/interfaces/player-information';
 import { Socket } from 'socket.io';
 import { Service } from 'typedi';
 import { ErrorType, GameValidationService } from './game-validation.service';
@@ -34,7 +32,7 @@ export class GamesActionsService {
 
     private clueCommand(socket: Socket) {
         const letterString: string[] = [];
-        const player = this.gamesHandler.players.find((gamePlayer: GamePlayer) => gamePlayer.player.socketId === socket.id);
+        const player = this.gamesHandler.getPlayer(socket.id);
         if (!player) return;
 
         player.clueCommandUseCount++;
@@ -74,12 +72,16 @@ export class GamesActionsService {
     }
 
     private exchange(socket: Socket, letters: string[]) {
+        console.log(letters);
         const gamePlayer = this.gamesHandler.getPlayer(socket.id) as RealPlayer;
         if (!gamePlayer) return;
 
         const lettersToExchange = letters.length;
         const lettersCopy = letters.map((letter) => letter.toLowerCase());
-        if (!this.rackService.areLettersInRack(lettersCopy, gamePlayer) || gamePlayer.game.turn.activePlayer?.username !== gamePlayer.player.user.username) {
+        if (
+            !this.rackService.areLettersInRack(lettersCopy, gamePlayer) ||
+            gamePlayer.game.turn.activePlayer?.username !== gamePlayer.player.user.username
+        ) {
             socket.emit(SocketEvents.ExchangeFailure);
             return;
         }
@@ -127,13 +129,9 @@ export class GamesActionsService {
         // Complete turn
         game.concludeGameVerification(gamePlayer);
 
-        const playersInfo: PlayerInformation[] = this.gamesHandler.players.map((player: GamePlayer) => {
-            return player.getInformation();
-        });
-
         const viewUpdateInfo: GameInfo = {
             gameboard: wordPlacementResult.gameboard.toStringArray(),
-            players: playersInfo,
+            players: this.gamesHandler.getPlayersInfos(gamePlayer.player.roomId),
             activePlayer: gamePlayer.game.turn.activePlayer,
         };
 

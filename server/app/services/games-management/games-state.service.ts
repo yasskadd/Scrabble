@@ -88,7 +88,7 @@ export class GamesStateService {
         await this.setupGameSubscriptions(room, game);
 
         gamePlayers.forEach((player: GamePlayer) => {
-            this.gamesHandler.players.push(player);
+            this.gamesHandler.addPlayer(player);
             if (player.player.type !== PlayerType.Observer) {
                 game.letterReserve.generateLetters(MAX_QUANTITY, player.rack);
             }
@@ -96,13 +96,9 @@ export class GamesStateService {
 
         game.turn.determineStartingPlayer(gamePlayers);
 
-        const playersInfo: PlayerInformation[] = this.gamesHandler.players.map((player: GamePlayer) => {
-            return player.getInformation();
-        });
-
         server.to(room.id).emit(SocketEvents.GameAboutToStart, {
             gameboard: game.gameboard.toStringArray(),
-            players: playersInfo,
+            players: this.gamesHandler.getPlayersInfos(room.id),
             activePlayer: game.turn.activePlayer,
         } as GameInfo);
 
@@ -113,6 +109,27 @@ export class GamesStateService {
         if (game.turn.activePlayer && !game.turn.activePlayer?.email) {
             game.turn.endTurn.next(game.turn.activePlayer);
         }
+    }
+
+    addObserver(server: Server, roomId: string, player: RoomPlayer): void {
+        const gamePlayers: GamePlayer[] = this.gamesHandler.getPlayersInRoom(roomId);
+        const socket: Socket | undefined = this.socketManager.getSocketFromId(player.socketId);
+        if (!socket) return;
+
+        const newGamePlayer = new GamePlayer(player);
+        newGamePlayer.game = gamePlayers[0].game;
+
+        this.gamesHandler.addPlayer(newGamePlayer);
+        socket.emit(SocketEvents.GameAboutToStart, {
+            gameboard: newGamePlayer.game.gameboard.toStringArray(),
+            players: this.gamesHandler.getPlayersInfos(roomId),
+            activePlayer: newGamePlayer.game.turn.activePlayer,
+        });
+        server.to(roomId).emit(SocketEvents.PublicViewUpdate, {
+            gameboard: newGamePlayer.game.gameboard.toStringArray(),
+            players: this.gamesHandler.getPlayersInfos(roomId),
+            activePlayer: newGamePlayer.game.turn.activePlayer,
+        });
     }
 
     private initPlayers(game: Game, room: GameRoom): GamePlayer[] {
@@ -278,11 +295,11 @@ export class GamesStateService {
 
         await this.userStatsStorage.updatePlayerStats(this.formatGameInfo(gamePlayer));
 
-        this.gamesHandler.removePlayer(socket.id);
+        this.gamesHandler.removePlayerFromSocketId(socket.id);
         const bot = this.replacePlayerWithBot(gamePlayer as RealPlayer);
 
         socket.leave(bot.player.roomId);
-        this.gamesHandler.players.push(bot);
+        this.gamesHandler.addPlayer(bot);
 
         server.to(bot.player.roomId).emit(SocketEvents.PublicViewUpdate, {
             gameboard: bot.game.gameboard.toStringArray(),
@@ -311,11 +328,11 @@ export class GamesStateService {
         if (!gamePlayer) return;
 
         if (this.gamesHandler.getPlayersInRoom(gamePlayer.player.roomId).length > 0 && !gamePlayer.game.isGameFinish) {
-            const player = this.gamesHandler.players.find((realPlayer) => realPlayer.player.socketId === socket.id);
+            const player = this.gamesHandler.getPlayer(socket.id);
             if (player) {
                 const bot = this.replacePlayerWithBot(player as RealPlayer);
-                this.gamesHandler.removePlayer(socket.id);
-                this.gamesHandler.players.push(bot);
+                this.gamesHandler.removePlayerFromSocketId(socket.id);
+                this.gamesHandler.addPlayer(bot);
                 // TODO: Update room that a new bot has replaced the player
             }
             this.waitBeforeDisconnect(server, socket);
@@ -323,7 +340,7 @@ export class GamesStateService {
         }
 
         socket.leave(gamePlayer.player.roomId);
-        this.gamesHandler.removePlayer(socket.id);
+        this.gamesHandler.removePlayerFromSocketId(socket.id);
         this.socketManager.emitRoom(gamePlayer.player.roomId, SocketEvents.UserDisconnect);
     }
 
@@ -394,13 +411,9 @@ export class GamesStateService {
     }
 
     private sendPublicViewUpdate(game: Game, room: GameRoom) {
-        const playersInfo: PlayerInformation[] = this.gamesHandler.players.map((player: GamePlayer) => {
-            return player.getInformation();
-        });
-
         this.socketManager.emitRoom(room.id, SocketEvents.PublicViewUpdate, {
             gameboard: game.gameboard.toStringArray(),
-            players: playersInfo,
+            players: this.gamesHandler.getPlayersInfos(room.id),
             activePlayer: game.turn.activePlayer,
         });
     }
@@ -431,7 +444,7 @@ export class GamesStateService {
         const observer = this.gamesHandler.getPlayer(socketID) as GamePlayer;
         if (!observer) return;
 
-        const bot = this.gamesHandler.players.find((player) => player.player.user._id === botID);
+        const bot = this.gamesHandler.getBot(botID);
         if (!bot) {
             // TODO: Socket event to notify observer he cannot replace bot
             socket.emit(SocketEvents.CannotReplaceBot, ERROR_REPLACING_BOT);
@@ -440,57 +453,28 @@ export class GamesStateService {
 
         observer.player.type = PlayerType.User;
         const newPlayer: RealPlayer = this.replaceBotWithObserver(observer.player, bot as Bot);
+
         // Update gamesHandler player list
-        const botIndex = this.gamesHandler.players.findIndex((player: GamePlayer) => player.player.user._id === bot.player.user._id);
-        this.gamesHandler.players.splice(botIndex, 1);
-        const obsIndex = this.gamesHandler.players.findIndex((player: GamePlayer) => player.player.user._id === observer.player.user._id);
-        this.gamesHandler.players.splice(obsIndex, 1);
-        const botTurnIndex: number | undefined = this.gamesHandler.players[0].game.turn.inactivePlayers?.findIndex(
-            (p: IUser) => p._id === bot.player.user._id,
-        );
+        this.gamesHandler.removePlayerFromId(bot.player.user._id);
+        this.gamesHandler.removePlayerFromId(observer.player.user._id);
+        // const botIndex = this.gamesHandler.players.findIndex((player: GamePlayer) => player.player.user._id === bot.player.user._id);
+        // this.gamesHandler.players.splice(botIndex, 1);
+        // const obsIndex = this.gamesHandler.players.findIndex((player: GamePlayer) => player.player.user._id === observer.player.user._id);
+        // this.gamesHandler.players.splice(obsIndex, 1);
+
+        const botTurnIndex: number | undefined = this.gamesHandler
+            .getPlayersInRoom(newPlayer.player.roomId)[0]
+            .game.turn.inactivePlayers?.findIndex((p: IUser) => p._id === bot.player.user._id);
         if (!botTurnIndex) return;
-        this.gamesHandler.players[0].game.turn.inactivePlayers?.splice(botTurnIndex, 1);
-        this.gamesHandler.players[0].game.turn.inactivePlayers?.push(observer.player.user);
-        this.gamesHandler.players.push(newPlayer);
+        this.gamesHandler.getPlayersInRoom(newPlayer.player.roomId)[0].game.turn.inactivePlayers?.splice(botTurnIndex, 1);
+        this.gamesHandler.getPlayersInRoom(newPlayer.player.roomId)[0].game.turn.inactivePlayers?.push(observer.player.user);
+        this.gamesHandler.addPlayer(newPlayer);
 
         // TODO: Update room with roomID
         server.to(newPlayer.player.roomId).emit(SocketEvents.PublicViewUpdate, {
             gameboard: newPlayer.game.gameboard.toStringArray(),
-            players: this.gamesHandler.players
-                .filter((p: GamePlayer) => p.player.roomId === newPlayer.player.roomId)
-                .map((p: GamePlayer) => {
-                    return p.getInformation();
-                }),
+            players: this.gamesHandler.getPlayersInfos(newPlayer.player.roomId),
             activePlayer: newPlayer.game.turn.activePlayer,
-        });
-    }
-
-    addObserver(server: Server, roomId: string, player: RoomPlayer): void {
-        const gamePlayers: GamePlayer[] = this.gamesHandler.getPlayersInRoom(roomId);
-        const socket: Socket | undefined = this.socketManager.getSocketFromId(player.socketId);
-        if (!socket) return;
-
-        const newGamePlayer = new GamePlayer(player);
-        newGamePlayer.game = gamePlayers[0].game;
-
-        this.gamesHandler.players.push(newGamePlayer);
-        socket.emit(SocketEvents.GameAboutToStart, {
-            gameboard: newGamePlayer.game.gameboard.toStringArray(),
-            players: this.gamesHandler.players
-                .filter((p: GamePlayer) => p.player.roomId === roomId)
-                .map((p: GamePlayer) => {
-                    return p.getInformation();
-                }),
-            activePlayer: newGamePlayer.game.turn.activePlayer,
-        });
-        server.to(roomId).emit(SocketEvents.PublicViewUpdate, {
-            gameboard: newGamePlayer.game.gameboard.toStringArray(),
-            players: this.gamesHandler.players
-                .filter((p: GamePlayer) => p.player.roomId === roomId)
-                .map((p: GamePlayer) => {
-                    return p.getInformation();
-                }),
-            activePlayer: newGamePlayer.game.turn.activePlayer,
         });
     }
 
