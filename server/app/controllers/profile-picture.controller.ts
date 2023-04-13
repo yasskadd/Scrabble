@@ -14,7 +14,6 @@ import * as uuid from 'uuid';
 @Service()
 export class ProfilePictureController {
     router: Router;
-    private defaultImagesMap: Map<string, string>; // Map (key, )
 
     constructor(private accountStorage: AccountStorageService, private imageStorage: ImageStorageService) {
         this.configureRouter();
@@ -34,7 +33,7 @@ export class ProfilePictureController {
          */
         this.router.get('/default-pictures', async (req: Request, res: Response) => {
             const imageUrlsMap: Map<string, string[]> = new Map();
-            for (const image of this.defaultImagesMap.entries()) {
+            for (const image of this.imageStorage.defaultImagesMap.entries()) {
                 const getImageCommand = this.imageStorage.createGetCommand(image[1]);
                 const signedUrl = await getSignedUrl(this.imageStorage.s3Client, getImageCommand, { expiresIn: PRESIGNED_URL_EXPIRY });
                 imageUrlsMap.set(image[0], [signedUrl, image[1]]);
@@ -161,7 +160,7 @@ export class ProfilePictureController {
             }
             // Update DB (ImageKey to empty string and hasDefaultPicture to true and name to req.body.name)
             this.accountStorage
-                .updateDefaultImage(userID, req.body.fileName, this.defaultImagesMap.get(req.body.fileName) as string)
+                .updateDefaultImage(userID, req.body.fileName, this.imageStorage.defaultImagesMap.get(req.body.fileName) as string)
                 .then(async () => {
                     res.status(StatusCodes.OK).send({ userData: await this.accountStorage.getUserDataFromID(userID) });
                 })
