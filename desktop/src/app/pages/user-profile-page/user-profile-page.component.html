@@ -3,9 +3,9 @@
 
     <body class="mat-app-background">
         <mat-card class="user-info justified">
-            <h2>{{ userService.user.username }}</h2>
-            <img mat-fab-button [src]="userService.user.profilePicture.key" class="selector-avatar mat-elevation-z5" />
-            <button mat-flat-button color="primary" (click)="redirectSettingsPage()"><mat-icon>settings</mat-icon>Settings</button>
+            <h2 *ngIf='userService.isConnected.getValue()'>{{ userService.getUser().username }}</h2>
+            <img *ngIf='userService.isConnected.getValue()' [src]="userService.getUser().profilePicture.key" class="selector-avatar mat-elevation-z5"  alt='profile picture'/>
+            <button mat-button color="primary" (click)="redirectSettingsPage()"><mat-icon>settings</mat-icon>Settings</button>
         </mat-card>
         <div class="user-stats">
             <mat-card class="justified">

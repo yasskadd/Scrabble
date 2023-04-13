@@ -49,7 +49,7 @@
                         matTooltip="{{ 'main_page.tooltip.play' | translate }}"
                         matTooltipPosition="right"
                         matTooltipClass="toolMainPage"
-                        [disabled]="!userService.isConnected()"
+                        [disabled]="!userService.isConnected.getValue()"
                         hidden
                     >
                         {{ "main_page.play" | translate }}

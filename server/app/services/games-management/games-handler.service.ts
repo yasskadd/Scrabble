@@ -30,7 +30,6 @@ export class GamesHandlerService {
         this.deleteWaitingRoom = new ReplaySubject(1);
     }
 
-
     updatePlayersInfo(roomId: string, game: Game) {
         const infos: PlayerInformation[] = this.players.map((player: GamePlayer) => player.getInformation());
         this.socketManager.emitRoom(roomId, SocketEvents.UpdatePlayersInformation, infos);
@@ -74,6 +73,12 @@ export class GamesHandlerService {
 
         // Observable notify to delete waiting room
         this.deleteWaitingRoom.next(roomId);
+
+        console.log(
+            this.players.map((p: GamePlayer) => {
+                return p.player.user.username;
+            }),
+        );
     }
 
     /* --------------------------------------------------------------------------------------------------------------------------------------------------------------------- */

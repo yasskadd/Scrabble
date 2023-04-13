@@ -8,7 +8,7 @@ import { UserStats } from '@common/interfaces/user-stats';
 import { ImageType } from '@common/models/image-type';
 import { ClientSocketService } from '@services/communication/client-socket.service';
 import { SnackBarService } from '@services/snack-bar.service';
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { AppCookieService } from './communication/app-cookie.service';
 import { HttpHandlerService } from './communication/http-handler.service';
 import { SocketEvents } from '@common/constants/socket-events';
@@ -19,6 +19,9 @@ import { SocketEvents } from '@common/constants/socket-events';
 export class UserService {
     user: IUser;
     userStats: UserStats;
+    isConnected: BehaviorSubject<boolean>;
+
+    private tempUserData: IUser;
 
     constructor(
         private httpHandlerService: HttpHandlerService,
@@ -27,63 +30,68 @@ export class UserService {
         private snackBarService: SnackBarService,
         private router: Router,
     ) {
-        this.initUser();
+        this.isConnected = new BehaviorSubject<boolean>(false);
+        this.user = undefined;
+
         this.initUserStats();
+        this.subscribeConnectionEvents();
     }
 
-    isConnected(): boolean {
-        return this.user.username && this.user.password ? true : false;
-    }
-
-    login(user: IUser): Subject<string> {
-        const subject = new Subject<string>();
-
+    login(user: IUser): void {
         this.httpHandlerService.login(user).then(
             (loginRes: { userData: IUser; sessionToken: string }) => {
-                this.clientSocketService.on(SocketEvents.SuccessfulConnection, () => {
-                    this.user = loginRes.userData;
-
-                    // TODO : Language
-                    this.snackBarService.openInfo('Connection successful');
-                    this.updateUserWithImageUrl(loginRes.userData);
-                    subject.next('');
-                });
-                this.clientSocketService.on(SocketEvents.UserAlreadyConnected, () => {
-                    // TODO : Language
-                    this.snackBarService.openError('User already connected');
-                    this.logout().then();
-                });
-                this.cookieService.updateUserSessionCookie(loginRes.sessionToken).then(() => {
-                    // this.user = loginRes.userData;
-                    //
-                    // // TODO : Language
-                    // this.snackBarService.openInfo('Connection successful');
-                    // this.updateUserWithImageUrl(loginRes.userData);
-                    // subject.next('');
-                });
+                this.tempUserData = loginRes.userData;
+                this.cookieService.updateUserSessionCookie(loginRes.sessionToken).then(() => {});
             },
-            (error: any) => {
+            () => {
                 // TODO : Language
-                subject.next(error.error.message);
+                this.isConnected.next(false);
             },
         );
-
-        return subject;
     }
 
     async logout(): Promise<void> {
         this.httpHandlerService.logout(this.user).then(async () => {
-            this.initUser();
+            this.user = undefined;
+            this.tempUserData = undefined;
             this.initUserStats();
+
             this.cookieService.removeSessionCookie();
             await this.clientSocketService.disconnect();
+
+            this.isConnected.next(false);
             this.router.navigate([AppRoutes.ConnectionPage]).then();
         });
     }
 
+    subscribeConnectionEvents(): void {
+        this.clientSocketService.on(SocketEvents.SuccessfulConnection, () => {
+            console.log(this.tempUserData);
+            this.user = undefined;
+            this.user = this.tempUserData;
+            this.tempUserData = undefined;
+
+            // TODO : Language
+            this.snackBarService.openInfo('Connection successful');
+            this.updateUserWithImageUrl(this.user);
+            this.isConnected.next(true);
+
+            this.router.navigate([AppRoutes.HomePage]).then();
+        });
+        this.clientSocketService.on(SocketEvents.UserAlreadyConnected, () => {
+            // TODO : Language
+            this.snackBarService.openError('User already connected');
+            this.logout().then();
+        });
+    }
+
+    getUser(): IUser {
+        // console.log(this.user);
+        return this.user;
+    }
+
     async getStats(): Promise<UserStats> {
         return this.httpHandlerService.getStats().then((result) => {
-            console.log(result.userStats + '2');
             return result.userStats;
         });
     }
@@ -93,43 +101,12 @@ export class UserService {
             .modifyProfilePicture(avatarData, this.avatarDataToImageInfo(avatarData).isDefaultPicture)
             .then((data: { userData: IUser }) => {
                 if (data.userData) {
+                    this.user = data.userData;
                     this.updateUserWithImageUrl(data.userData);
                     return true;
                 }
                 return false;
             });
-    }
-
-    reloadProfilePicture(): void {
-        if (this.user.profilePicture.isDefaultPicture) {
-            this.httpHandlerService.getDefaultImages().then((map: Map<string, string[]>) => {
-                // Set url in userData for local access to the default image
-                // (yes we download all of the keys, but it's easier like that)
-                Object.entries(map).forEach((entry: [string, string[]]) => {
-                    if (entry[0] === this.user.profilePicture.name) {
-                        this.user.profilePicture.key = entry[1][0];
-                    }
-                });
-            });
-        } else {
-            this.httpHandlerService.getProfilePicture().then((res: { url: string }) => {
-                // Set url in userData for local access to the image
-                this.user.profilePicture.key = res.url;
-            });
-        }
-    }
-
-    private initUser(): void {
-        this.user = {
-            _id: '',
-            email: '',
-            username: '',
-            password: '',
-            profilePicture: undefined,
-            historyEventList: [],
-            language: 'fr', // TODO: To change if necessary
-            theme: null, // TODO: to change
-        };
     }
 
     private initUserStats(): void {
