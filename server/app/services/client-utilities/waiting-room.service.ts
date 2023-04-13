@@ -22,6 +22,7 @@ import { PlayerType } from '@common/models/player-type';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import * as uuid from 'uuid';
+import { ChatHandlerService } from './chat-handler.service';
 
 // const PLAYERS_REJECT_FROM_ROOM_ERROR = "L'adversaire à rejeter votre demande";
 
@@ -33,6 +34,7 @@ export class WaitingRoomService {
         private gameStateService: GamesStateService,
         private virtualPlayerStorageService: VirtualPlayersStorageService,
         private socketManager: SocketManager,
+        private chatHandler: ChatHandlerService,
     ) {
         this.waitingRooms = [];
     }
@@ -62,6 +64,7 @@ export class WaitingRoomService {
     removeRoom(server: Server, roomId: string): void {
         const roomIndex = this.waitingRooms.findIndex((room: GameRoom) => room.id === roomId);
         this.waitingRooms.splice(roomIndex, 1);
+        this.chatHandler.deleteGameChatRoom(roomId);
 
         server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
@@ -141,7 +144,6 @@ export class WaitingRoomService {
         for (const player of room.players) {
             this.rejectOpponent(server, socket, player);
         }
-
         this.removeRoom(server, userQuery.roomId);
     }
 
@@ -212,6 +214,7 @@ export class WaitingRoomService {
         socket.leave(GAME_LOBBY_ROOM_ID);
 
         socket.join(room.id);
+        this.chatHandler.createGameChatRoom(socket, room.id);
         socket.emit(SocketEvents.UpdateWaitingRoom, room);
     }
 

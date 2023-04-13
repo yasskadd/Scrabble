@@ -82,8 +82,6 @@ export class GamesStateService {
         if (!game) return;
 
         const gamePlayers: GamePlayer[] = this.initPlayers(game, room);
-
-        this.createChatRoom(room);
         await this.setupGameSubscriptions(room, game);
 
         gamePlayers.forEach((player: GamePlayer) => {
@@ -566,11 +564,4 @@ export class GamesStateService {
     // Replace observer and bot in list by observer
     // Add Socket event to let observer join the room (need to verify if its possible to join or not)
     // Need method to update all room clients that an observer has joined
-
-    private createChatRoom(room: GameRoom) {
-        const socketIds = room.players.map((player) => {
-            return player.socketId;
-        });
-        this.homeChatBoxHandlerService.makeUsersJoinGameChatRoom(socketIds, room.id);
-    }
 }

@@ -22,7 +22,7 @@ interface ChatRoomInfo {
 @Service()
 export class ChatHandlerService {
     private chatRooms: ChatRoomInfo[];
-    private gameChatRooms: Set<string>;
+    private gameChatRooms: Map<string, ChatRoom>;
 
     constructor(
         public socketManager: SocketManager,
@@ -30,13 +30,13 @@ export class ChatHandlerService {
         private chatRoomsStorage: ChatRoomsStorageService,
     ) {
         this.chatRooms = [];
+        this.gameChatRooms = new Map();
     }
 
     async initConfig() {
         await this.chatRoomsStorage.getAllRooms().then((rooms) => {
-            // TODO: Maybe check if mainRoom is created
             rooms.forEach((room) => {
-                if (this.isChatRoomExist(room.name)) return;
+                if (this.getChatRoom(room.name)) return;
                 const messageCount = room.messages.length;
                 this.chatRooms.push({ name: room.name, messageCount, readingUsers: new Set(), isDeletable: room.isDeletable });
             });
@@ -84,7 +84,7 @@ export class ChatHandlerService {
     getChatRoomsWithState(userId: string, chatRooms: UserChatRoom[]): UserChatRoomWithState[] {
         const notificationRooms: UserChatRoomWithState[] = [];
         chatRooms.forEach((chatRoom) => {
-            const room = this.isChatRoomExist(chatRoom.name);
+            const room = this.getChatRoom(chatRoom.name);
             if (room === undefined) {
                 this.accountStorage.deleteChatRoom(userId, chatRoom.name);
                 return;
@@ -98,32 +98,46 @@ export class ChatHandlerService {
         return notificationRooms;
     }
 
-    getAllChatRooms(socket: Socket) {
+    joinGameChatRoom(socket: Socket, chatRoomName: string) {
+        const gameChatRoom = this.getChatRoom(chatRoomName);
+        this.leaveUserFromAllRoomSessions(socket); // Leave client from other chatrooms
+        socket.emit(SocketEvents.CreateChatRoom, gameChatRoom); // Create chatRoom on client
+        this.joinChatRoom(socket, chatRoomName); // Add client to chatroom
+        this.joinChatRoomSession(socket, chatRoomName); // Make him join the chatRoom
+    }
+
+    leaveGameChatRoom(socket: Socket, chatRoomName: string) {
+        socket.emit(SocketEvents.DeleteChatRoom, chatRoomName);
+        socket.leave(chatRoomName);
+    }
+
+    createGameChatRoom(socket: Socket, gameId: string) {
+        const gameChatRoomName = 'game' + gameId;
+        const gameChatRoom = { name: gameChatRoomName, messages: [], isDeletable: false } as ChatRoom;
+        this.gameChatRooms.set(gameChatRoomName, gameChatRoom);
+        this.joinGameChatRoom(socket, gameChatRoomName);
+    }
+
+    deleteGameChatRoom(gameId: string) {
+        const gameChatRoomName = 'game' + gameId;
+        const gameChatRoom = this.getChatRoom(gameChatRoomName);
+        this.socketManager.server.in(gameChatRoomName).emit(SocketEvents.DeleteChatRoom, gameChatRoom);
+        this.socketManager.deleteRoom(gameChatRoomName);
+        this.gameChatRooms.delete(gameChatRoomName);
+    }
+
+    private getAllChatRooms(socket: Socket) {
         const chatRooms = this.chatRooms.map((chatRoom) => {
             return { name: chatRoom.name, creatorId: chatRoom.creatorId, isDeletable: chatRoom.isDeletable };
         });
         socket.emit(SocketEvents.GetAllChatRooms, chatRooms);
     }
 
-    makeUsersJoinGameChatRoom(socketIds: string[], gameId: string) {
-        const newGameChatRoomName = this.createGameChatRoom(gameId);
-        socketIds.forEach((socketId) => {
-            const socket: Socket = this.socketManager.getSocketFromId(socketId) as Socket;
-            socket.join(newGameChatRoomName);
-        });
-    }
-
-    deleteGameChatRoom(gameId: string) {
-        const gameChatRoomName = 'game' + gameId;
-        this.socketManager.deleteRoom(gameChatRoomName);
-        this.gameChatRooms.delete(gameChatRoomName);
-    }
-
     private async subscribeUserToRooms(socket: Socket) {
         const userId = this.socketManager.getUserIdFromSocket(socket) as string;
         const userData = await this.accountStorage.getUserDataFromID(userId);
         userData.chatRooms.forEach((room) => {
-            if (this.isChatRoomExist(room.name) !== undefined) {
+            if (this.getChatRoom(room.name) !== undefined) {
                 socket.join(room.name);
             }
         });
@@ -135,20 +149,27 @@ export class ChatHandlerService {
 
     private async loadMessages(chatRoomName: string): Promise<ChatRoom> {
         // const allUsersData = await this.accountStorage.getAllUsersData();
+        if (this.gameChatRooms.has(chatRoomName)) {
+            return this.gameChatRooms.get(chatRoomName) as ChatRoom;
+        }
         const room = await this.chatRoomsStorage.getRoom(chatRoomName);
-        // room.messages.map((message) => {
-        //     message.username = allUsersData[message.userId];
-        // });
         return room;
     }
+
     private async createChatRoom(sio: Server, socket: Socket, chatRoomName: string) {
-        const room = this.isChatRoomExist(chatRoomName);
+        const room = this.getChatRoom(chatRoomName);
         if (room !== undefined) {
             socket.emit(SocketEvents.CreateChatRoomError, chatRoomName);
             return;
         }
         const userId = this.socketManager.getUserIdFromSocket(socket);
-        const newChatRoom = { name: chatRoomName, messageCount: 0, creatorId: userId, readingUsers: new Set<string>(), isDeletable: true };
+        const newChatRoom = {
+            name: chatRoomName,
+            messageCount: 0,
+            creatorId: userId,
+            readingUsers: new Set<string>(),
+            isDeletable: true,
+        };
         this.chatRooms.push(newChatRoom);
         await this.chatRoomsStorage.createRoom(chatRoomName);
         await this.joinChatRoom(socket, chatRoomName);
@@ -156,7 +177,7 @@ export class ChatHandlerService {
     }
 
     private async deleteChatRoom(sio: Server, socket: Socket, chatRoomName: string) {
-        const chatroom = this.isChatRoomExist(chatRoomName);
+        const chatroom = this.getChatRoom(chatRoomName);
         if (chatroom === undefined) {
             socket.emit(SocketEvents.DeleteChatRoomNotFoundError, '');
             return;
@@ -174,19 +195,20 @@ export class ChatHandlerService {
     }
 
     private async joinChatRoom(socket: Socket, chatRoomName: string) {
-        const room = this.isChatRoomExist(chatRoomName);
+        const room = this.getChatRoom(chatRoomName);
         if (room === undefined) {
             socket.emit(SocketEvents.JoinChatRoomNotFoundError, '');
             return;
         }
         const userId = this.socketManager.getUserIdFromSocket(socket) as string;
-        await this.accountStorage.addChatRoom(userId, { name: room.name, messageCount: room.messageCount });
+        if (!this.gameChatRooms.has(chatRoomName))
+            await this.accountStorage.addChatRoom(userId, { name: room.name, messageCount: room.messageCount });
         socket.join(room.name);
         socket.emit(SocketEvents.JoinChatRoom, room);
     }
 
     private async leaveChatRoom(sio: Server, socket: Socket, chatRoomName: string) {
-        const room = this.isChatRoomExist(chatRoomName);
+        const room = this.getChatRoom(chatRoomName);
         if (room === undefined) {
             socket.emit(SocketEvents.LeaveChatRoomNotFoundError, '');
             return;
@@ -201,21 +223,26 @@ export class ChatHandlerService {
     }
 
     private async joinChatRoomSession(socket: Socket, chatRoomName: string) {
-        const room = this.isChatRoomExist(chatRoomName);
+        const room = this.getChatRoom(chatRoomName);
         if (room === undefined) {
             socket.emit(SocketEvents.JoinChatRoomSessionNotFoundError, '');
             return;
         }
         const userId = this.socketManager.getUserIdFromSocket(socket) as string;
-        room.readingUsers.add(userId);
+        if (!this.gameChatRooms.has(chatRoomName)) room.readingUsers.add(userId);
         const chatRoomSession = await this.loadMessages(chatRoomName);
         socket.emit(SocketEvents.JoinChatRoomSession, chatRoomSession);
     }
 
     private async leaveChatRoomSession(socket: Socket, chatRoomName: string) {
-        const room = this.isChatRoomExist(chatRoomName);
+        const room = this.getChatRoom(chatRoomName);
         if (room === undefined) {
             socket.emit(SocketEvents.LeaveChatRoomSessionNotFoundError, '');
+            return;
+        }
+
+        if (this.gameChatRooms.has(chatRoomName)) {
+            socket.emit(SocketEvents.LeaveChatRoomSession, '');
             return;
         }
 
@@ -244,12 +271,12 @@ export class ChatHandlerService {
         const formattedDate: string = momentDate.format('HH:mm:ss YYYY-MM-DD');
         const newMessage: Message = { userId, message: msg, date: formattedDate };
 
-        if (!chatRoomName.startsWith('game')) await this.saveMessage(socket, chatRoomName, newMessage);
+        if (this.gameChatRooms.has(chatRoomName)) await this.saveMessage(socket, chatRoomName, newMessage);
         this.socketManager.emitRoom(chatRoomName, SocketEvents.SendMessage, { newMessage, room: chatRoomName });
     }
 
     private async saveMessage(socket: Socket, chatRoomName: string, message: Message) {
-        const room = this.isChatRoomExist(chatRoomName);
+        const room = this.getChatRoom(chatRoomName);
         if (room === undefined) {
             socket.emit(SocketEvents.SendMessageError, '');
             return;
@@ -258,98 +285,11 @@ export class ChatHandlerService {
         await this.chatRoomsStorage.addMessageInRoom(chatRoomName, message);
     }
 
-    private isChatRoomExist(chatRoomName: string) {
+    private getChatRoom(chatRoomName: string) {
+        if (this.gameChatRooms.has(chatRoomName)) {
+            const chatRoom = this.gameChatRooms.get(chatRoomName);
+            return { name: chatRoom?.name, isDeletable: chatRoom?.isDeletable, messageCount: chatRoom?.messages.length } as ChatRoomInfo;
+        }
         return this.chatRooms.find((chatRoom) => chatRoom.name === chatRoomName);
     }
-
-    private createGameChatRoom(gameId: string) {
-        const gameChatRoomName = 'game' + gameId;
-        this.gameChatRooms.add(gameChatRoomName);
-        return gameChatRoomName;
-    }
-
-    // private initGameRoom(): void {
-    //     const roomID = uuid.v4();
-    //     this.homeRoom = {
-    //         id: roomID,
-    //         userMap: new Map<string, string>(),
-    //         isAvailable: true,
-    //         usernameSet: new Set(),
-    //     } as HomeRoom;
-    // }
-
-    // private joinHomeRoom(sio: Server, socket: Socket, username: string): void {
-    //     if (this.userMap.has(socket.id)) {
-    //         // Because already connected
-    //         this.notifyAlreadyConnected(socket, username);
-    //     }
-    //     if (this.usernameSet.has(username)) {
-    //         this.notifyInvalidUsername(socket, username);
-    //         return;
-    //     }
-    //     if (!this.homeRoom.isAvailable) {
-    //         this.notifyClientFullRoom(socket);
-    //         return;
-    //     }
-    //     // eslint-disable-next-line no-console
-    //     console.log(`${username} has joined`);
-    //     this.userMap.set(socket.id, username);
-    //     this.usernameSet.add(username);
-    //     socket.join(this.homeRoom.id);
-    //     this.notifyUserJoinedRoom(sio, username, this.homeRoom.id);
-    //     this.setIsAvailable();
-    // }
-
-    // private setIsAvailable(): void {
-    //     this.homeRoom.isAvailable = this.userMap.size < ROOM_LIMIT;
-    // }
-
-    // private notifyAlreadyConnected(socket: Socket, username: string): void {
-    //     socket.emit(SocketEvents.UserConnected, username);
-    // }
-
-    // // Notify sender
-    // private notifyInvalidUsername(socket: Socket, username: string): void {
-    //     socket.emit(SocketEvents.UsernameTaken, username);
-    // }
-
-    // private notifyClientFullRoom(socket: Socket): void {
-    //     socket.emit(SocketEvents.RoomIsFull);
-    // }
-
-    // // Notify everyone except sender
-    // private broadCastMessage(socket: Socket, message: ChatboxMessage) {
-    //     // TODO: Send message with username (need to decide which format)
-    //     socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.ReceiveHomeMessage, message);
-    // }
-
-    // private leaveRoom(sio: Server, socket: Socket): void {
-    //     if (this.userMap.has(socket.id)) {
-    //         const username: string = this.userMap.get(socket.id) as string;
-    //         this.userMap.delete(socket.id);
-    //         this.usernameSet.delete(username);
-    //         this.setIsAvailable();
-    //         this.notifyUserQuittedRoom(sio, username, this.homeRoom.id);
-    //         // socket.broadcast.to(this.homeRoom.id).emit(SocketEvents.UserLeftHomeRoom, username);
-    //         socket.leave(this.homeRoom.id);
-    //     }
-    // }
-
-    // // Notify everyone
-    // private notifyUserJoinedRoom(sio: Server, username: string, roomID: string): void {
-    //     sio.sockets.to(roomID).emit(SocketEvents.UserJoinedRoom, username);
-    // }
-
-    // private notifyUserQuittedRoom(sio: Server, username: string, roomID: string): void {
-    //     sio.sockets.to(roomID).emit(SocketEvents.UserLeftHomeRoom, username);
-    // }
-
-    // // Getters and setters
-    // get userMap(): Map<string, string> {
-    //     return this.homeRoom.userMap;
-    // }
-
-    // get usernameSet(): Set<string> {
-    //     return this.homeRoom.usernameSet;
-    // }
 }
