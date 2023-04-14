@@ -66,7 +66,6 @@ export class WaitingRoomService {
         });
 
         this.socketManager.on(SocketEvents.UpdateGameRooms, (socket: Socket) => {
-            console.log('received room update query');
             this.gamesHandler.cleanRooms();
             socket.emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
         });
