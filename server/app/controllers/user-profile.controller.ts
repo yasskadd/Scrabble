@@ -9,7 +9,7 @@ import { IUser } from '@common/interfaces/user';
 import { Request, Response, Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { Service } from 'typedi';
-import { createMailOptions, transporter } from '@app/config/nodemailer';
+import { createMailOptions, transporter, getPasswordResetEmail } from '@app/config/nodemailer';
 
 @Service()
 export class UserProfileController {
@@ -134,15 +134,17 @@ export class UserProfileController {
             const username: string = req.body.username;
             const user : IUser = await this.accountStorageService.getUserData(username);
             const email = user.email;
+            const tempPassword = (Math.random() + 1).toString(36).substring(7);
             if (email) {
+                this.accountStorageService.updatePassword(user._id, tempPassword);
                 await transporter.sendMail({
                     ...createMailOptions(email),
-                    subject: 'Forget password',
-                    text: 'TEST',
-                    html: '<h1>TEST TEXT</h1>'
+                    subject: 'PolyScrabble Password Reset',
+                    text: 'Password reset',
+                    html: getPasswordResetEmail(username, tempPassword),
                 });
             }
-            res.sendStatus(StatusCodes.OK);
+            res.sendStatus(StatusCodes.CREATED);
         })
     }
 }
