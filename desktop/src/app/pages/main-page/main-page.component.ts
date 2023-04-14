@@ -9,6 +9,9 @@ import { SocketResponse } from '@app/interfaces/server-responses';
 import { AppRoutes } from '@app/models/app-routes';
 import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
 import { UserService } from '@app/services/user.service';
+import { SocketEvents } from '@common/constants/socket-events';
+import { GameMode } from '@common/models/game-mode';
+import { ClientSocketService } from '@services/communication/client-socket.service';
 import { LanguageService } from '@services/language.service';
 import { Subject } from 'rxjs';
 
@@ -22,34 +25,37 @@ export class MainPageComponent {
     protected homeConnectionResponse: SocketResponse;
     protected connectionSubject: Subject<SocketResponse>;
     protected disconnectionSubject: Subject<void>;
+    protected multiplayerCreateLink: string;
 
     protected chatIsOpen: boolean;
 
     private readonly dialogWidth: string = '500px';
     private readonly dialogWidthHighScore: string = '750px';
+    private subscribed: boolean;
 
     constructor(
         protected chatBoxHandlerService: ChatboxHandlerService,
         protected userService: UserService,
         protected languageService: LanguageService,
-        // private clientSocketService: ClientSocketService,
+        private clientSocketService: ClientSocketService,
         private dialog: MatDialog,
         private highScore: MatDialog,
         private router: Router,
     ) {
-        if (!this.userService.isConnected()) {
+        this.subscribed = false;
+        this.multiplayerCreateLink = `/${AppRoutes.MultiGameCreationPage}/${GameMode.Multi}`;
+        if (!this.userService.isConnected.getValue()) {
             this.router.navigate([`${AppRoutes.ConnectionPage}`]);
         }
 
         this.homeConnectionResponse = { validity: false };
         this.userNameForm = new FormControl('', Validators.required);
         this.chatIsOpen = false;
-
-        // this.clientSocketService.connected.subscribe((connected: boolean) => {
-        //     if (connected) {
-        //         this.subscribeConnectionEvents();
-        //     }
-        // });
+        this.clientSocketService.connected.subscribe((connected: boolean) => {
+            if (connected) {
+                this.subscribeConnectionEvents();
+            }
+        });
     }
 
     protected get loggedIn(): boolean {
@@ -128,19 +134,28 @@ export class MainPageComponent {
         this.chatIsOpen = false;
     }
 
-    // private subscribeConnectionEvents(): void {
-    //     this.connectionSubject = this.chatBoxHandlerService.subscribeToUserConnection();
-    //     this.connectionSubject.subscribe((res: SocketResponse) => {
-    //         this.homeConnectionResponse = res;
-    //         if (!res.validity) {
-    //             this.userNameForm.setErrors({ notMatched: true });
-    //         }
-    //     });
+    private subscribeConnectionEvents(): void {
+        if (this.subscribed) return;
 
-    //     this.disconnectionSubject = this.chatBoxHandlerService.subscribeToUserDisconnecting();
-    //     this.disconnectionSubject.subscribe(() => {
-    //         this.userService.user.username = '';
-    //         this.userNameForm.setValue('');
-    //     });
-    // }
+        // this.connectionSubject = this.chatBoxHandlerService.subscribeToUserConnection();
+        this.connectionSubject.subscribe((res: SocketResponse) => {
+            this.homeConnectionResponse = res;
+            if (!res.validity) {
+                this.userNameForm.setErrors({ notMatched: true });
+            }
+        });
+
+        // this.disconnectionSubject = this.chatBoxHandlerService.subscribeToUserDisconnecting();
+        this.disconnectionSubject.subscribe(() => {
+            this.userService.user.username = '';
+            this.userNameForm.setValue('');
+        });
+
+        this.subscribed = true;
+    }
+
+    navigateJoinPage() {
+        this.clientSocketService.send(SocketEvents.UpdateGameRooms);
+        this.router.navigate([`/${AppRoutes.MultiJoinPage}/classique`]);
+    }
 }

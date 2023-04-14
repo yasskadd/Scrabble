@@ -90,6 +90,7 @@ export class GameConfigurationService {
         });
 
         this.clientSocket.on(SocketEvents.UpdateGameRooms, (gamesToJoin: GameRoom[]) => {
+            console.log(gamesToJoin.map((g: GameRoom) => g.id));
             this.availableRooms = gamesToJoin;
         });
 
@@ -166,7 +167,7 @@ export class GameConfigurationService {
         this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
             roomId: this.localGameRoom.id,
             user: this.userService.user,
-        } as RoomPlayer);
+        });
 
         this.resetRoomInformations();
     }

@@ -1,5 +1,5 @@
 import { Game } from '@app/classes/game.class';
-import { Word } from '@app/classes/word.class';
+import { Word } from '@common/classes/word.class';
 import { Gameboard } from '@common/classes/gameboard.class';
 import { Letter } from '@common/interfaces/letter';
 import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';

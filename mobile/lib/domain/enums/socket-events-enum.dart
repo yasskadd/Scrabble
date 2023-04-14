@@ -48,10 +48,14 @@ enum GameSocketEvent {
   Exchange('ExchangeLetters'),
   Skip('skip'),
   QuitGame('quitGame'),
+  AbandonGame('AbandonGame'),
   ReserveCommand('reserveCommand'),
   ClueCommand('clueCommand'),
   NextTurn('nextTurn'),
-  GameEnded('endGame');
+  GameEnded('endGame'),
+  PlacementSuccess('placementSuccess'),
+  PlacementFailure('placementFailure'),
+  LetterReserveUpdated("letterReserveUpdated");
 
   const GameSocketEvent(this.event);
 

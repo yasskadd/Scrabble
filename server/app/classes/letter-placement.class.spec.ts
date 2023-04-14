@@ -5,7 +5,7 @@
 import { Game } from '@app/classes/game.class';
 import { ObjectivesHandler } from '@app/classes/objectives-handler.class';
 import { GamePlayer } from '@app/classes/player/player.class';
-import { Word } from '@app/classes/word.class';
+import { Word } from '@common/classes/word.class';
 import { RackService } from '@app/services/rack.service';
 import { Gameboard } from '@common/classes/gameboard.class';
 import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';

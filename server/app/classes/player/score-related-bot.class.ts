@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import * as Constant from '@app/constants/bot';
 import { PlayMoves } from '@app/constants/bot';
+import { BotInformation } from '@app/interfaces/bot-information';
+import { RoomPlayer } from '@common/interfaces/room-player';
 import { BeginnerBot } from './beginner-bot.class';
 
 export class ScoreRelatedBot extends BeginnerBot {
@@ -8,6 +10,11 @@ export class ScoreRelatedBot extends BeginnerBot {
     private placeProb: number;
     private exchangeProb: number;
     private skipProb: number;
+
+    constructor(roomPlayer: RoomPlayer, botInfo: BotInformation, score: number) {
+        super(roomPlayer, botInfo);
+        this.setupScoreProbs(score);
+    }
 
     setupScoreProbs(score: number): void {
         this.opponentScore = score < 1000 ? score : 1000;
@@ -31,7 +38,6 @@ export class ScoreRelatedBot extends BeginnerBot {
     placeLetters(): void {
         const commandInfoMap = this.processWordSolver();
         const commandInfoList = [...commandInfoMap.keys()].sort((a, b) => (commandInfoMap.get(a) as number) - (commandInfoMap.get(b) as number));
-
         if (commandInfoList.length === 0) {
             setTimeout(() => this.skipTurn(), Constant.SECOND_3 - this.countUp * Constant.SECOND_1);
             return;
@@ -43,7 +49,7 @@ export class ScoreRelatedBot extends BeginnerBot {
         const uncertainty: number = 0.05 * commandInfoList.length;
         const randomIndex = Math.floor(Math.random() * (index + uncertainty - (index - uncertainty) + 1)) + (index - uncertainty);
         index = randomIndex < commandInfoList.length && randomIndex > 0 ? randomIndex : index;
-        const randomCommandInfo = commandInfoList[index];
+        const randomCommandInfo = commandInfoList[Math.floor(index)];
         if (this.countUp >= 3 && this.countUp < Constant.TIME_SKIP) this.placeWord(randomCommandInfo);
         else if (this.countUp < 3) setTimeout(() => this.placeWord(randomCommandInfo), Constant.SECOND_3 - this.countUp * Constant.SECOND_1);
     }

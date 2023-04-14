@@ -5,6 +5,7 @@ import { DialogBoxAbandonGameComponent } from '@app/components/dialog-box-abando
 import { DialogGameHelpComponent } from '@app/components/dialog-game-help/dialog-game-help.component';
 import { AppRoutes } from '@app/models/app-routes';
 import { GameClientService } from '@app/services/game-client.service';
+import { PlayerInformation } from '@common/interfaces/player-information';
 import { TimeService } from '@services/time.service';
 
 @Component({
@@ -14,6 +15,10 @@ import { TimeService } from '@services/time.service';
 })
 export class InformationPanelComponent {
     constructor(public gameClientService: GameClientService, public timer: TimeService, private dialog: MatDialog, private router: Router) {}
+
+    get players(): PlayerInformation[] {
+        return this.gameClientService.players;
+    }
 
     abandonGame(): void {
         this.dialog.open(DialogBoxAbandonGameComponent, {

@@ -82,4 +82,10 @@ export enum SocketEvents {
     ExchangeFailure = 'ExchangeFailure',
     UserAlreadyConnected = 'UserAlreadyConnected',
     SuccessfulConnection = 'SuccessfulConnection',
+
+    // Synchrous games UI
+    SendDrag = 'sd',
+    DragEvent = 'de',
+    LetterPlaced = 'lp',
+    LetterTaken = 'lt',
 }

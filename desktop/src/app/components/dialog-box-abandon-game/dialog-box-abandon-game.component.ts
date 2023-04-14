@@ -1,10 +1,6 @@
 import { Component } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
-import { GameClientService } from '@app/services/game-client.service';
-
-const TIMEOUT = 3000;
 
 @Component({
     selector: 'app-dialog-box-abandon-game',
@@ -12,18 +8,9 @@ const TIMEOUT = 3000;
     styleUrls: ['./dialog-box-abandon-game.component.scss'],
 })
 export class DialogBoxAbandonGameComponent {
-    constructor(private gameclient: GameClientService, private router: Router, private snackBar: MatSnackBar) {}
+    constructor(private router: Router) {}
 
     abandonGame() {
-        this.gameclient.abandonGame();
         this.router.navigate([`${AppRoutes.HomePage}`]).then();
-        this.openSnackBar();
-    }
-
-    openSnackBar(): void {
-        this.snackBar.open('Vous avez abandonné la partie', 'fermer', {
-            duration: TIMEOUT,
-            verticalPosition: 'top',
-        });
     }
 }

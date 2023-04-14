@@ -2,10 +2,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MAX_TEXT_LENGTH } from '@app/constants/user';
-import { AppRoutes } from '@app/models/app-routes';
 import { UserService } from '@app/services/user.service';
-import { IUser } from '@common/interfaces/user';
-import { Subject } from 'rxjs';
 
 @Component({
     selector: 'app-connection-page',
@@ -27,23 +24,26 @@ export class ConnectionPageComponent {
             usernameForm: this.usernameForm,
             passwordForm: this.passwordForm,
         });
-    }
 
-    protected login(): void {
-        const connectionSubject: Subject<string> = this.userService.login({
-            username: this.usernameForm.value,
-            password: this.passwordForm.value,
-        } as IUser);
-        connectionSubject.subscribe((res: string) => {
-            if (res) {
+        this.userService.isConnected.subscribe((connected: false) => {
+            if (connected) {
                 // TODO : Language
-                this.connectionError = res;
+                // this.connectionError = res;
                 this.passwordForm.reset();
                 return;
             }
-
-            this.router.navigate([AppRoutes.HomePage]).then();
-            connectionSubject.unsubscribe();
         });
+    }
+
+    protected login(): void {
+        this.userService.login({
+            _id: '',
+            username: this.usernameForm.value,
+            password: this.passwordForm.value,
+        });
+    }
+
+    protected redirectUserPage() {
+        this.router.navigate(['/user']).then();
     }
 }

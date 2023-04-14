@@ -1,6 +1,6 @@
 import { Game } from '@app/classes/game.class';
 import { WordSolver } from '@app/classes/word-solver.class';
-import { Word } from '@app/classes/word.class';
+import { Word } from '@common/classes/word.class';
 import * as Constant from '@app/constants/bot';
 import { BotInformation } from '@app/interfaces/bot-information';
 import { GameValidationService } from '@app/services/games-management/game-validation.service';
@@ -10,8 +10,8 @@ import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
 import { GameInfo } from '@common/interfaces/game-state';
 import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
-import { PlayerInformation } from '@common/interfaces/player-information';
 import { RoomPlayer } from '@common/interfaces/room-player';
+import { Subscription } from 'rxjs';
 import { Container } from 'typedi';
 import { GamePlayer } from './player.class';
 import { RealPlayer } from './real-player.class';
@@ -25,6 +25,9 @@ export class Bot extends GamePlayer {
     protected wordSolver: WordSolver;
     protected isNotTurn: boolean = false;
     private timer: number;
+
+    private countDownSubscription: Subscription;
+    private endTurnSubscription: Subscription;
 
     constructor(roomPlayer: RoomPlayer, protected botInfo: BotInformation) {
         super(roomPlayer);
@@ -44,13 +47,13 @@ export class Bot extends GamePlayer {
     }
 
     start(): void {
-        this.game.turn.countdown.subscribe((countdown) => {
+        this.countDownSubscription = this.game.turn.countdown.subscribe((countdown) => {
             this.countUp = this.timer - (countdown as number);
             if (this.countUp === Constant.TIME_SKIP && this.player.user === this.game.turn.activePlayer) this.skipTurn();
         });
-        this.game.turn.endTurn.subscribe((activePlayer) => {
+        this.endTurnSubscription = this.game.turn.endTurn.subscribe((activePlayer) => {
             this.isNotTurn = false;
-            if (activePlayer === this.player.user.username) {
+            if (activePlayer?._id === this.player.user._id) {
                 this.countUp = 0;
                 this.playTurn();
             }
@@ -75,8 +78,8 @@ export class Bot extends GamePlayer {
     }
 
     unsubscribeObservables(): void {
-        this.game.turn.countdown.unsubscribe();
-        this.game.turn.endTurn.unsubscribe();
+        this.countDownSubscription.unsubscribe();
+        this.endTurnSubscription.unsubscribe();
     }
 
     protected placeWord(commandInfo: PlaceWordCommandInfo): void {
@@ -126,13 +129,9 @@ export class Bot extends GamePlayer {
         // Complete turn
         game.concludeGameVerification(gamePlayer);
 
-        const playersInfo: PlayerInformation[] = this.gamesHandler.players.map((player: GamePlayer) => {
-            return player.getInformation();
-        });
-
         const viewUpdateInfo: GameInfo = {
             gameboard: wordPlacementResult.gameboard.toStringArray(),
-            players: playersInfo,
+            players: this.gamesHandler.getPlayersInfos(this.player.roomId),
             activePlayer: gamePlayer.game.turn.activePlayer,
         };
 

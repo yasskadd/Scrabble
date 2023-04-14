@@ -76,6 +76,10 @@ class _GameCreationScreenState extends State<GameCreationScreen> {
             : null;
       });
     });
+
+    if (_dictionaryService.dictionaries.isNotEmpty) {
+      _selectedDictionary = _dictionaryService.dictionaries[0].title;
+    }
   }
 
   @override
@@ -186,7 +190,7 @@ class _GameCreationScreenState extends State<GameCreationScreen> {
                                         _selectedDifficulty =
                                             GameDifficulty.fromString(value!)!;
                                       },
-                                      defaultValue: GameDifficulty.Easy.value,
+                                      value: GameDifficulty.Easy.value,
                                     ),
                                     menu.DropdownMenu(
                                       title:
@@ -206,7 +210,7 @@ class _GameCreationScreenState extends State<GameCreationScreen> {
                                       onChanged: (value) {
                                         _selectedTimer = int.parse(value!);
                                       },
-                                      defaultValue: "60",
+                                      value: "60",
                                     ),
                                     menu.DropdownMenu(
                                       title:
@@ -219,18 +223,13 @@ class _GameCreationScreenState extends State<GameCreationScreen> {
                                       onChanged: (value) {
                                         _selectedDictionary = value;
                                       },
-                                      defaultValue: _dictionaryService
-                                              .dictionaries.isNotEmpty
-                                          ? _dictionaryService
-                                              .dictionaries[0].title
-                                          : null,
+                                      value: _selectedDictionary,
                                     ),
                                   ],
                                 ),
                               ),
                             ],
                           ),
-                          //TODO: Add fields for gamemode selection,
                         ),
                       ),
                       const SizedBox(height: 10),

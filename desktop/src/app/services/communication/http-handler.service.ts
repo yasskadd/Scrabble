@@ -9,6 +9,7 @@ import { ChatRoomUser } from '@common/interfaces/chat-room';
 import { GameHistoryInfo } from '@common/interfaces/game-history-info';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
 import { IUser } from '@common/interfaces/user';
+import { UserStats } from '@common/interfaces/user-stats';
 import { fs, invoke } from '@tauri-apps/api';
 import { environment } from 'src/environments/environment';
 
@@ -145,13 +146,18 @@ export class HttpHandlerService {
         return JSON.parse(res.body);
     }
 
-    async signUp(newUser: IUser): Promise<{ imageKey: string }> {
+    async signUp(newUser: IUser): Promise<any> {
         const res: HttpResponse = await invoke('httpPost', { url: `${this.baseUrl}/auth/signUp`, onceToldMe: JSON.stringify(newUser) });
         return JSON.parse(res.body);
     }
 
     async login(user: IUser): Promise<{ userData: IUser; sessionToken: string }> {
         const res: HttpResponse = await invoke('httpPost', { url: `${this.baseUrl}/auth/login`, onceToldMe: JSON.stringify(user) });
+        return JSON.parse(res.body);
+    }
+
+    async getStats(): Promise<{ userStats: UserStats }> {
+        const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/profile/stats` });
         return JSON.parse(res.body);
     }
 

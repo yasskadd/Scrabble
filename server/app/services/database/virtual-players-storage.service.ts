@@ -31,14 +31,13 @@ export class VirtualPlayersStorageService {
         // TODO : Change GameDifficulty for VirtualPlayerDifficulty
         if (difficulty === GameDifficulty.Easy) {
             bots = (await this.database.virtualNames.fetchDocuments({ difficulty: VirtualPlayerDifficulty.Beginner })) as Bot[];
-        } else if (difficulty === GameDifficulty.Hard) {
+        } else if (difficulty === GameDifficulty.Hard || difficulty === GameDifficulty.ScoreBased) {
             bots = (await this.database.virtualNames.fetchDocuments({ difficulty: VirtualPlayerDifficulty.Expert })) as Bot[];
         }
 
         bots.forEach((bot: Bot) => {
             names.push(bot.username);
         });
-
         return names;
     }
 
