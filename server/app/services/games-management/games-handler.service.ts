@@ -5,6 +5,7 @@ import { GamePlayer } from '@app/classes/player/player.class';
 import { WordSolver } from '@app/classes/word-solver.class';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryContainer } from '@app/interfaces/dictionary-container';
+import { ChatHandlerService } from '@app/services/client-utilities/chat-handler.service';
 import { DictionaryStorageService } from '@app/services/database/dictionary-storage.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { INVALID_INDEX } from '@common/constants/board-info';
@@ -20,7 +21,7 @@ export class GamesHandlerService {
     // gamePlayers: Map<string, { room: GameRoom; players: GamePlayer[] }>;
     dictionaries: Map<string, DictionaryContainer>;
 
-    constructor(private socketManager: SocketManager, private dictionaryStorage: DictionaryStorageService) {
+    constructor(private socketManager: SocketManager, private dictionaryStorage: DictionaryStorageService, private chatHandler: ChatHandlerService) {
         // this.gamePlayers = new Map();
         this.players = [];
         this.dictionaries = new Map();
@@ -82,6 +83,7 @@ export class GamesHandlerService {
         playerIndexes.forEach((index: number) => {
             this.players.splice(index, 1);
         });
+        this.chatHandler.deleteGameChatRoom(roomId);
     }
 
     async setDictionaries() {

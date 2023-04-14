@@ -13,7 +13,6 @@ import { ScoreRelatedBot } from '@app/classes/player/score-related-bot.class';
 import { Turn } from '@app/classes/turn.class';
 import { MAX_QUANTITY } from '@app/constants/letter-reserve';
 import { DictionaryContainer } from '@app/interfaces/dictionary-container';
-import { ChatHandlerService } from '@app/services/client-utilities/chat-handler.service';
 import { AccountStorageService } from '@app/services/database/account-storage.service';
 import { HistoryStorageService } from '@app/services/database/history-storage.service';
 import { ScoreStorageService } from '@app/services/database/score-storage.service';
@@ -49,7 +48,6 @@ export class GamesStateService {
         private socketManager: SocketManager,
         private scoreStorage: ScoreStorageService,
         private userStatsStorage: UserStatsStorageService,
-        private homeChatBoxHandlerService: ChatHandlerService,
         private historyStorageService: HistoryStorageService, // private virtualPlayerStorage: VirtualPlayersStorageService,
     ) {
         this.gameEnded = new Subject();
@@ -306,7 +304,6 @@ export class GamesStateService {
             return;
         }
         // TODO: What to do if there are still observers in game ?
-        this.homeChatBoxHandlerService.deleteGameChatRoom(gamePlayer.player.roomId);
         gamePlayer.game.abandon();
         // this.gameEnded.next(room);
         this.gamesHandler.removeRoomFromRoomId(room);
@@ -429,7 +426,6 @@ export class GamesStateService {
         this.updatePlayersStats(gamePlayers);
         this.socketManager.emitRoom(gamePlayer.player.roomId, SocketEvents.GameEnd);
         this.gamesHandler.removeRoomFromRoomId(gamePlayer.player.roomId);
-        this.homeChatBoxHandlerService.deleteGameChatRoom(gamePlayer.player.roomId);
     }
 
     private async broadcastHighScores(players: RoomPlayer[], roomId: string): Promise<void> {

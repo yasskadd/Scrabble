@@ -100,6 +100,7 @@ export class WaitingRoomService {
         // TODO : Add user as an observer if room full
         socket.leave(GAME_LOBBY_ROOM_ID);
         socket.join(joinGameQuery.roomId);
+        this.chatHandler.joinGameChatRoom(socket, joinGameQuery.roomId);
 
         const newPlayer: RoomPlayer = {
             user: joinGameQuery.user,
@@ -270,6 +271,7 @@ export class WaitingRoomService {
         if (playerIndex === UNAVAILABLE_ELEMENT_INDEX) return;
         room.players.splice(playerIndex, 1); // remove player from room;
 
+        this.chatHandler.leaveGameChatRoom(socket, room.id);
         socket.leave(player.roomId);
         socket.join(GAME_LOBBY_ROOM_ID);
     }
