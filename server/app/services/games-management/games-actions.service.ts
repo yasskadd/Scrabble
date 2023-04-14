@@ -11,7 +11,7 @@ import { Service } from 'typedi';
 import { ErrorType, GameValidationService } from './game-validation.service';
 import { GamesHandlerService } from './games-handler.service';
 
-const CLUE_COUNT_PER_COMMAND_CALL = 3;
+const CLUE_COUNT_PER_COMMAND_CALL = 5;
 
 @Service()
 export class GamesActionsService {
