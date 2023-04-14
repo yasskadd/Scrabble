@@ -28,9 +28,9 @@
 <!-- TABS -->
 
 <div class="chat-rooms-container" *ngIf="activeTab === 'joinedChats' && chatSession === undefined">
-    <mat-card *ngFor="let i of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]">
+    <mat-card *ngFor="let room of joinedChats">
         <div class="chat-rooms">
-            <div>room name</div>
+            <div>{{ room.name }}</div>
             <button class="join" mat-button mat-stroked-button color="primary" (click)="selectChatSession('roomName')">
                 {{ "chat.join" | translate }}
             </button>
@@ -38,9 +38,9 @@
     </mat-card>
 </div>
 <div class="chat-rooms-container" *ngIf="activeTab === 'allChats' && chatSession === undefined">
-    <mat-card *ngFor="let i of [0, 1, 2, 3]">
+    <mat-card *ngFor="let room of allChats">
         <div class="chat-rooms">
-            <div>room name</div>
+            <div>{{ room.name }}</div>
             <button class="join" mat-button mat-stroked-button color="primary">{{ "chat.join" | translate }}</button>
         </div>
     </mat-card>
@@ -52,7 +52,7 @@
         <div *ngIf="message.username" class="chat-metadata">
             <img src="../../../assets/images/1.jpg" class="avatar" />
             <strong>{{ message.username }}</strong>
-            <p>{{ message.timeStamp }}</p>
+            <p>{{ message.date }}</p>
         </div>
         <div class="message">{{ message.message }}</div>
     </mat-card>

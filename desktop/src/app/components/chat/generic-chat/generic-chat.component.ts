@@ -2,7 +2,7 @@ import { AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, V
 import { FormControl } from '@angular/forms';
 import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
 import { UserService } from '@app/services/user.service';
-import { ChatboxMessage } from '@common/interfaces/chatbox-message';
+import { Message } from '@common/interfaces/message';
 
 @Component({
     selector: 'app-generic-chat',
@@ -15,7 +15,7 @@ export class GenericChatComponent implements AfterViewInit, AfterViewChecked {
     activeTab: string;
 
     inputForm: FormControl;
-    private lastMessage: ChatboxMessage;
+    private lastMessage: Message;
 
     constructor(private chatboxHandler: ChatboxHandlerService, protected userService: UserService) {
         this.inputForm = new FormControl('');
@@ -28,6 +28,14 @@ export class GenericChatComponent implements AfterViewInit, AfterViewChecked {
 
     get chatSession() {
         return this.chatboxHandler.chatSession;
+    }
+
+    get joinedChats() {
+        return this.chatboxHandler.joinedRooms;
+    }
+
+    get allChats() {
+        return this.chatboxHandler.availableRooms;
     }
 
     @HostListener('click')
@@ -47,10 +55,10 @@ export class GenericChatComponent implements AfterViewInit, AfterViewChecked {
         this.resetInput();
     }
 
-    submitMessage(message: string) {
-        this.inputForm.setValue(message);
-        this.submit();
-    }
+    // submitMessage(message: string) {
+    //     this.inputForm.setValue(message);
+    //     this.submit();
+    // }
 
     ngAfterViewChecked(): void {
         const lastMessage = this.chatboxHandler.messages[this.chatboxHandler.messages.length - 1];
