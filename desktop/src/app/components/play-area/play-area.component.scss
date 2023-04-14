@@ -91,6 +91,12 @@ app-game-board {
     width: 600px;
 }
 
+.clue-buttons {
+    position: absolute;
+    left: 50%;
+    translate: -50%;
+}
+
 .player-rack {
     bottom: 0px;
     margin-bottom: 32px;

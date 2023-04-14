@@ -206,6 +206,11 @@ export class HttpHandlerService {
         });
     }
 
+    async forgotPassword(username: string): Promise<void> {
+        const res: HttpResponse = await invoke('httpPost', { url: `${this.baseUrl}/profile/forgot-password`, onceToldMe: JSON.stringify(username) });
+        return JSON.parse(res.body);
+    }
+
     // private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
     //     return () => of(result as T);
     // }

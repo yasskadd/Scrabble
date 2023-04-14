@@ -1,40 +1,43 @@
-<div class="encapsulating-div">
-    <b id="winning-message" *ngIf="gameClientService.isGameFinish">
+<div class='encapsulating-div'>
+    <b id='winning-message' *ngIf='gameClientService.isGameFinish'>
         {{ gameClientService.winningMessage | translate : { playerName: gameClientService.winner } }}
     </b>
 
     <mat-drawer-container>
         <mat-drawer-content>
-            <div class="always-visible" cdkDropListGroup>
+            <div class='always-visible' cdkDropListGroup>
                 <app-information-panel></app-information-panel>
                 <app-game-board></app-game-board>
 
-                <div *ngIf="letterService.clueWords.length !== 0">
-                    <button mat-mini-fab (click)="prevClue()">
-                        <mat-icon>arrow_back_ios</mat-icon>
-                    </button>
-                    <button mat-raised-button (click)="placeClue()">Confirm</button>
-                    <button mat-mini-fab (click)="nextClue()">
-                        <mat-icon>arrow_forward_ios</mat-icon>
-                    </button>
-                </div>
 
-                <div *ngIf="gameClientService.getLocalPlayer().player.type === playerType.Observer" class="rack-container">
-                    <app-player-rack [keyboardParentSubject]="keyboardParentSubject" [player]="selectedPlayer" class="player-rack"></app-player-rack>
-                    <div class="player-selector">
-                        <div *ngFor="let player of gameClientService.players; index as i">
+                <div *ngIf='gameClientService.getLocalPlayer().player.type === playerType.Observer'
+                     class='rack-container'>
+                    <div *ngIf='letterService.clueWords.length !== 0' class='clue-buttons'>
+                        <button mat-mini-fab (click)='prevClue()'>
+                            <mat-icon>arrow_back_ios</mat-icon>
+                        </button>
+                        <button mat-raised-button (click)='placeClue()'>Confirm</button>
+                        <button mat-mini-fab (click)='nextClue()'>
+                            <mat-icon>arrow_forward_ios</mat-icon>
+                        </button>
+                    </div>
+                    <app-player-rack [keyboardParentSubject]='keyboardParentSubject' [player]='selectedPlayer'
+                                     class='player-rack'></app-player-rack>
+                    <div class='player-selector'>
+                        <div *ngFor='let player of gameClientService.players; index as i'>
                             <img
-                                [mat-menu-trigger-for]="player_menu"
-                                [src]="player.player.user.profilePicture.key"
-                                class="player-choice mat-elevation-z5"
+                                [mat-menu-trigger-for]='player_menu'
+                                [src]='player.player.user.profilePicture.key'
+                                class='player-choice mat-elevation-z5'
                             />
-                            <mat-menu #player_menu="matMenu">
-                                <button (click)="selectPlayer(i)" mat-menu-item>
+                            <mat-menu #player_menu='matMenu'>
+                                <button (click)='selectPlayer(i)' mat-menu-item>
                                     <mat-icon>visibility</mat-icon>
                                     <!-- TODO : Language -->
                                     <span>Voir</span>
                                 </button>
-                                <button (click)="replaceBot(player)" *ngIf="player.player.type === playerType.Bot" mat-menu-item>
+                                <button (click)='replaceBot(player)' *ngIf='player.player.type === playerType.Bot'
+                                        mat-menu-item>
                                     <mat-icon>sync</mat-icon>
                                     <!-- TODO : Language-->
                                     <span>Remplacer</span>
@@ -44,26 +47,28 @@
                     </div>
                 </div>
 
-                <div *ngIf="gameClientService.getLocalPlayer().player.type === playerType.User" class="rack-container">
+                <div *ngIf='gameClientService.getLocalPlayer().player.type === playerType.User' class='rack-container'>
                     <app-player-rack
-                        [keyboardParentSubject]="keyboardParentSubject"
-                        [player]="gameClientService.getLocalPlayer()"
-                        class="player-rack"
+                        [keyboardParentSubject]='keyboardParentSubject'
+                        [player]='gameClientService.getLocalPlayer()'
+                        class='player-rack'
                     ></app-player-rack>
                 </div>
 
-                <button *ngIf="chatIsOpen" class="open-chat-button" mat-button color="primary" (click)="drawer.toggle()" (click)="closeChat()">
+                <button *ngIf='chatIsOpen' class='open-chat-button' mat-button color='primary' (click)='drawer.toggle()'
+                        (click)='closeChat()'>
                     {{ "main_page.chat.close" | translate }}
                     <mat-icon>keyboard_arrow_right</mat-icon>
                 </button>
-                <button *ngIf="!chatIsOpen" class="open-chat-button" mat-button color="primary" (click)="drawer.toggle()" (click)="openChat()">
+                <button *ngIf='!chatIsOpen' class='open-chat-button' mat-button color='primary'
+                        (click)='drawer.toggle()' (click)='openChat()'>
                     <mat-icon>chat_bubble_outline</mat-icon>
                     {{ "main_page.chat.open" | translate }}
                 </button>
             </div>
         </mat-drawer-content>
 
-        <mat-drawer #drawer class="chat-sidenav" mode="side" position="end">
+        <mat-drawer #drawer class='chat-sidenav' mode='side' position='end'>
             <app-generic-chat></app-generic-chat>
         </mat-drawer>
     </mat-drawer-container>
