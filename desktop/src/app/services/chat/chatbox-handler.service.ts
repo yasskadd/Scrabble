@@ -55,7 +55,11 @@ export class ChatboxHandlerService {
         this.clientSocket.connected.subscribe((connected: boolean) => {
             if (connected) {
                 this.configureBaseSocketFeatures();
-                console.log(this.userService.user);
+            }
+        });
+
+        this.userService.isConnected.subscribe((connected: boolean) => {
+            if (connected) {
                 this.config(this.userService.user.chatRooms as UserChatRoomWithState[]);
             }
         });

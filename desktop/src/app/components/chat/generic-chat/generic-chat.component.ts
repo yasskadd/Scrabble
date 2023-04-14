@@ -1,4 +1,4 @@
-import { AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { AfterContentInit, AfterViewChecked, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
 import { UserService } from '@app/services/user.service';
@@ -9,7 +9,7 @@ import { Message } from '@common/interfaces/message';
     templateUrl: './generic-chat.component.html',
     styleUrls: ['./generic-chat.component.scss'],
 })
-export class GenericChatComponent implements AfterViewInit, AfterViewChecked {
+export class GenericChatComponent implements AfterViewChecked, AfterContentInit {
     @ViewChild('chatbox', { static: false }) chatbox: ElementRef;
     @ViewChild('container') private scrollBox: ElementRef;
     activeTab: string;
@@ -40,14 +40,12 @@ export class GenericChatComponent implements AfterViewInit, AfterViewChecked {
 
     @HostListener('click')
     clickInside() {
-        this.chatbox.nativeElement.focus();
+        this.chatbox?.nativeElement.focus();
     }
 
-    ngAfterViewInit() {
-        setTimeout(() => {
-            // this.chatboxHandler.resetMessage();
-            this.chatbox.nativeElement.focus();
-        }, 0);
+    ngAfterContentInit() {
+        // this.chatboxHandler.resetMessage();
+        this.chatbox?.nativeElement.focus();
     }
 
     submit() {
@@ -70,7 +68,7 @@ export class GenericChatComponent implements AfterViewInit, AfterViewChecked {
 
     selectTab(tabName: string) {
         this.activeTab = tabName;
-        //TODO: Insert get joined & all chat rooms
+        // TODO: Insert get joined & all chat rooms
     }
 
     selectChatSession(chatRoomName: string | undefined) {
