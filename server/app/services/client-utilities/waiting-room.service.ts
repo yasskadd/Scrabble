@@ -82,7 +82,6 @@ export class WaitingRoomService {
     }
 
     private enterRoomLobby(server: Server, socket: Socket): void {
-        this.gamesHandler.cleanRooms();
         socket.join(GAME_LOBBY_ROOM_ID);
         server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
