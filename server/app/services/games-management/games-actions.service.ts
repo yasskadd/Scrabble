@@ -11,7 +11,7 @@ import { Service } from 'typedi';
 import { ErrorType, GameValidationService } from './game-validation.service';
 import { GamesHandlerService } from './games-handler.service';
 
-const CLUE_COUNT_PER_COMMAND_CALL = 3;
+const CLUE_COUNT_PER_COMMAND_CALL = 5;
 
 @Service()
 export class GamesActionsService {
@@ -40,21 +40,19 @@ export class GamesActionsService {
         player.rack.forEach((letter) => {
             letterString.push(letter.value);
         });
-        const wordToChoose: PlaceWordCommandInfo[] = this.reduceClueOptions(player.game.wordSolver.findAllOptions(letterString));
-        socket.emit(SocketEvents.ClueCommand, wordToChoose);
+
+        const commandInfoScoreMap = player.game.wordSolver.commandInfoScore(player.game.wordSolver.findAllOptions(letterString));
+        const clueCommandInfos = this.reduceClueOptions(commandInfoScoreMap)
+        socket.emit(SocketEvents.ClueCommand, clueCommandInfos);
     }
 
-    private reduceClueOptions(commandInfoList: PlaceWordCommandInfo[]): PlaceWordCommandInfo[] {
-        const wordToChoose: PlaceWordCommandInfo[] = [];
-
-        for (let i = 0; i < CLUE_COUNT_PER_COMMAND_CALL; i++) {
-            if (commandInfoList.length === 0) break;
-            const random = Math.floor(Math.random() * commandInfoList.length);
-            wordToChoose.push(commandInfoList[random]);
-            commandInfoList.splice(random, 1);
-        }
-
-        return wordToChoose;
+    private reduceClueOptions(commandInfoMap: Map<PlaceWordCommandInfo, number>): PlaceWordCommandInfo[] {
+        const bestCommandInfos = Array.from(commandInfoMap)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, CLUE_COUNT_PER_COMMAND_CALL)
+        .map(([key]) => key);
+        console.log(bestCommandInfos);
+        return bestCommandInfos;
     }
 
     private reserveCommand(socket: Socket) {
