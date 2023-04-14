@@ -174,8 +174,8 @@ export class ChatHandlerService {
         };
         this.chatRooms.push(newChatRoom);
         await this.chatRoomsStorage.createRoom(newChatRoom);
-        await this.joinChatRoom(socket, chatRoomName);
         sio.emit(SocketEvents.CreateChatRoom, newChatRoom);
+        await this.joinChatRoom(socket, chatRoomName);
     }
 
     private async deleteChatRoom(sio: Server, socket: Socket, chatRoomName: string) {
