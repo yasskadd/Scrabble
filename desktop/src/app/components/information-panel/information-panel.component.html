@@ -113,6 +113,7 @@
 
         <!--        <button id="quitGame" *ngIf="gameClientService.isGameFinish" (click)="leaveGame()" mat-raised-button>{{ "action.quit" | translate }}</button>-->
         <button
+            hidden
             mat-fab
             color="accent"
             (click)="openHelpDialog()"
