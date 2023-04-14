@@ -102,28 +102,40 @@ export class LetterPlacementService {
         return coord;
     }
 
-    resetLiveTile(coord: number): void {
-        this.liveBoard[coord] = {
-            type: this.confirmedBoard[coord].type,
-            state: this.confirmedBoard[coord].state,
-            letter: this.confirmedBoard[coord].letter,
-            coord: this.confirmedBoard[coord].coord,
-        };
-    }
+    // resetLiveTile(coord: number): void {
+    //     this.liveBoard[coord] = {
+    //         type: JSON.parse(JSON.stringify(this.confirmedBoard[coord].type)),
+    //         state: JSON.parse(JSON.stringify(this.confirmedBoard[coord].state)),
+    //         letter: JSON.parse(JSON.stringify(this.confirmedBoard[coord].letter)),
+    //         coord: JSON.parse(JSON.stringify(this.confirmedBoard[coord].coord)),
+    //     };
+    // }
+    //
+    // resetConfirmedTile(coord: number): void {
+    //     this.confirmedBoard[coord] = {
+    //         type: JSON.parse(JSON.stringify(this.defaultBoard[coord].type)),
+    //         state: JSON.parse(JSON.stringify(this.defaultBoard[coord].state)),
+    //         letter: JSON.parse(JSON.stringify(this.defaultBoard[coord].letter)),
+    //         coord: JSON.parse(JSON.stringify(this.defaultBoard[coord].coord)),
+    //     };
+    // }
 
     initLiveTile(coord: number): void {
-        this.liveBoard[coord] = {
-            type: JSON.parse(JSON.stringify(this.defaultBoard[coord].type)),
-            state: JSON.parse(JSON.stringify(this.defaultBoard[coord].state)),
-            letter: JSON.parse(JSON.stringify(this.defaultBoard[coord].letter)),
-            coord: JSON.parse(JSON.stringify(this.defaultBoard[coord].coord)),
-        };
-        this.confirmedBoard[coord] = {
-            type: JSON.parse(JSON.stringify(this.defaultBoard[coord].type)),
-            state: JSON.parse(JSON.stringify(this.defaultBoard[coord].state)),
-            letter: JSON.parse(JSON.stringify(this.defaultBoard[coord].letter)),
-            coord: JSON.parse(JSON.stringify(this.defaultBoard[coord].coord)),
-        };
+        // this.liveBoard[coord] = {
+        //     type: JSON.parse(JSON.stringify(this.defaultBoard[coord].type)),
+        //     state: JSON.parse(JSON.stringify(this.defaultBoard[coord].state)),
+        //     letter: JSON.parse(JSON.stringify(this.defaultBoard[coord].letter)),
+        //     coord: JSON.parse(JSON.stringify(this.defaultBoard[coord].coord)),
+        // };
+        // this.confirmedBoard[coord] = {
+        //     type: JSON.parse(JSON.stringify(this.defaultBoard[coord].type)),
+        //     state: JSON.parse(JSON.stringify(this.defaultBoard[coord].state)),
+        //     letter: JSON.parse(JSON.stringify(this.defaultBoard[coord].letter)),
+        //     coord: JSON.parse(JSON.stringify(this.defaultBoard[coord].coord)),
+        // };
+        this.liveBoard[coord] = JSON.parse(JSON.stringify(this.defaultBoard[coord]));
+        this.confirmedBoard[coord] = JSON.parse(JSON.stringify(this.defaultBoard[coord]));
+        console.log(this.confirmedBoard[coord]);
     }
 
     handleDragPlacement(index: number, letter: Letter, tile: BoardTileInfo): void {
@@ -332,66 +344,6 @@ export class LetterPlacementService {
     handleTileClick(tile: BoardTileInfo) {
         if (this.placedLetters.length !== 0) return;
 
-        if (this.clueWords.length !== 0) {
-            let wordToPlace: PlaceWordCommandInfo;
-
-            this.clueWords.forEach((word: PlaceWordCommandInfo) => {
-                word.letters.forEach((letter: string, index: number) => {
-                    let nextCoord = index;
-                    const coord = word.firstCoordinate.x - 1 + (word.firstCoordinate.y - 1) * TOTAL_COLUMNS;
-                    if (!word.isHorizontal) {
-                        nextCoord *= TOTAL_COLUMNS;
-                    }
-
-                    if (coord + nextCoord === tile.coord) {
-                        wordToPlace = word;
-                    }
-                });
-            });
-
-            if (wordToPlace) {
-                // console.log(wordToPlace.firstCoordinate);
-                const coord = wordToPlace.firstCoordinate.x - 1 + (wordToPlace.firstCoordinate.y - 1) * TOTAL_COLUMNS;
-                this.selectionPositions = [{ coord, direction: wordToPlace.isHorizontal ? PlayDirection.Right : PlayDirection.Down }];
-
-                wordToPlace.letters = wordToPlace.letters.filter((letter: string, index: number) => {
-                    let nextCoord = index;
-                    if (!wordToPlace.isHorizontal) {
-                        nextCoord *= TOTAL_COLUMNS;
-                    }
-
-                    // const newCoord = coord + nextCoord;
-                    tile.coord = coord + nextCoord;
-                    console.log(tile.coord);
-
-                    console.log(this.confirmedBoard[tile.coord]);
-                    if (this.confirmedBoard[tile.coord].state === BoardTileState.Confirmed) return false;
-
-                    return true;
-                    // this.commitLetter(
-                    //     this.gameClientService.getLocalPlayer()?.rack[indexOfLetter],
-                    //     JSON.parse(JSON.stringify(tile)),
-                    //     letter === AlphabetLetter.Any,
-                    // );
-                });
-
-                wordToPlace.letters = wordToPlace.letters.map((letter: string) => {
-                    if (/^[A-Z]*$/.test(letter)) {
-                        return letter.toLowerCase();
-                    }
-                    return letter.toUpperCase();
-                });
-                console.log(wordToPlace);
-                this.clientSocketService.send(SocketEvents.PlaceWordCommand, wordToPlace);
-
-                // this.submitPlacement();
-            }
-            this.clueWords = [];
-            this.refreshView();
-
-            return;
-        }
-
         if (tile.coord !== this.origin) {
             this.origin = tile.coord;
             this.computeNewPosition(tile.coord, false);
@@ -455,31 +407,138 @@ export class LetterPlacementService {
         }
     }
 
+    getWordCoords(word: PlaceWordCommandInfo): number[] {
+        let nextCoord = this.computeCoordFromCoordinate(word.firstCoordinate);
+        const coords: number[] = [];
+
+        word.letters.forEach(() => {
+            coords.push(nextCoord);
+            console.log(nextCoord);
+            if (!word.isHorizontal) {
+                nextCoord += TOTAL_COLUMNS;
+                while (this.confirmedBoard[nextCoord].state === BoardTileState.Confirmed) {
+                    nextCoord += TOTAL_COLUMNS;
+                }
+            } else {
+                nextCoord++;
+                while (this.confirmedBoard[nextCoord].state === BoardTileState.Confirmed) {
+                    nextCoord++;
+                }
+            }
+        });
+
+        return coords;
+    }
+
+    removeClue(index: number): void {
+        console.log('removing');
+        console.log(index);
+        console.log(this.clueWords[index]);
+        this.getWordCoords(this.clueWords[index]).forEach((coord: number) => {
+            this.initLiveTile(coord);
+        });
+    }
+
+    showClueWord(index: number): void {
+        console.log(this.clueWords);
+        console.log('placing');
+        console.log(index);
+        console.log(this.clueWords[index]);
+        this.getWordCoords(this.clueWords[index]).forEach((coord: number, coordIndex: number) => {
+            if (this.confirmedBoard[coord].state === BoardTileState.Confirmed) return;
+            this.liveBoard[coord].state = BoardTileState.Temp;
+            this.liveBoard[coord].letter.value = this.clueWords[index].letters[coordIndex];
+            this.confirmedBoard[coord].state = BoardTileState.Temp;
+            this.confirmedBoard[coord].letter.value = this.clueWords[index].letters[coordIndex];
+        });
+
+        // this.clueWords[index].letters.forEach((letter: string, letterIndex: number) => {
+        //     let nextCoord = letterIndex;
+        //     const coord = this.clueWords[index].firstCoordinate.x - 1 + (this.clueWords[index].firstCoordinate.y - 1) * TOTAL_COLUMNS;
+        //     if (!this.clueWords[index].isHorizontal) {
+        //         nextCoord *= TOTAL_COLUMNS;
+        //         while (this.confirmedBoard[coord + nextCoord].state === BoardTileState.Confirmed) {
+        //             nextCoord += TOTAL_COLUMNS;
+        //         }
+        //     } else {
+        //         while (this.confirmedBoard[coord + nextCoord].state === BoardTileState.Confirmed) {
+        //             nextCoord++;
+        //         }
+        //     }
+        //
+        //     if (this.liveBoard[coord + nextCoord].state === BoardTileState.Temp) return;
+        //     this.liveBoard[coord + nextCoord].state = BoardTileState.Temp;
+        //     this.liveBoard[coord + nextCoord].letter.value = letter;
+        //     this.confirmedBoard[coord + nextCoord].state = BoardTileState.Temp;
+        //     this.confirmedBoard[coord + nextCoord].letter.value = letter;
+        // });
+    }
+
+    submitClue(index: number): void {
+        console.log('submitting clue');
+        const coord = this.clueWords[index].firstCoordinate.x - 1 + (this.clueWords[index].firstCoordinate.y - 1) * TOTAL_COLUMNS;
+        // const tile = this.liveBoard[coord];
+        this.selectionPositions = [{ coord, direction: this.clueWords[index].isHorizontal ? PlayDirection.Right : PlayDirection.Down }];
+        const letterCoords = this.getWordCoords(this.clueWords[index]);
+
+        this.clueWords[index].letters = this.clueWords[index].letters.filter((letter: string, letterIndex: number) => {
+            return this.confirmedBoard[letterCoords[letterIndex]].state !== BoardTileState.Confirmed;
+
+            // const newCoord = coord + nextCoord;
+            // tile.coord = coord + nextCoord;
+            // console.log(tile.coord);
+            //
+            // console.log(this.confirmedBoard[tile.coord]);
+            // if (this.confirmedBoard[tile.coord].state === BoardTileState.Confirmed) return false;
+
+            // return true;
+            // this.commitLetter(
+            //     this.gameClientService.getLocalPlayer()?.rack[indexOfLetter],
+            //     JSON.parse(JSON.stringify(tile)),
+            //     letter === AlphabetLetter.Any,
+            // );
+        });
+
+        this.clueWords[index].letters = this.clueWords[index].letters.map((letter: string) => {
+            if (/^[A-Z]*$/.test(letter)) {
+                return letter.toLowerCase();
+            }
+            return letter.toUpperCase();
+        });
+        console.log(this.clueWords[index].letters);
+        this.clientSocketService.send(SocketEvents.PlaceWordCommand, this.clueWords[index]);
+
+        // this.submitPlacement();
+        this.clueWords = [];
+        this.refreshView();
+    }
+
     private subscribeClue(): void {
         this.clientSocketService.on(SocketEvents.ClueCommand, (words: PlaceWordCommandInfo[]) => {
             this.clueWords = words;
-            this.clueWords.forEach((word: PlaceWordCommandInfo) => {
-                word.letters.forEach((letter: string, index: number) => {
-                    let nextCoord = index;
-                    const coord = word.firstCoordinate.x - 1 + (word.firstCoordinate.y - 1) * TOTAL_COLUMNS;
-                    if (!word.isHorizontal) {
-                        nextCoord *= TOTAL_COLUMNS;
-                        while (this.confirmedBoard[coord + nextCoord].state === BoardTileState.Confirmed) {
-                            nextCoord += TOTAL_COLUMNS;
-                        }
-                    } else {
-                        while (this.confirmedBoard[coord + nextCoord].state === BoardTileState.Confirmed) {
-                            nextCoord++;
-                        }
-                    }
-
-                    if (this.liveBoard[coord + nextCoord].state === BoardTileState.Temp) return;
-                    this.liveBoard[coord + nextCoord].state = BoardTileState.Temp;
-                    this.liveBoard[coord + nextCoord].letter.value = letter;
-                    this.confirmedBoard[coord + nextCoord].state = BoardTileState.Temp;
-                    this.confirmedBoard[coord + nextCoord].letter.value = letter;
-                });
-            });
+            this.showClueWord(0);
+            // this.clueWords.forEach((word: PlaceWordCommandInfo) => {
+            //     word.letters.forEach((letter: string, index: number) => {
+            //         let nextCoord = index;
+            //         const coord = word.firstCoordinate.x - 1 + (word.firstCoordinate.y - 1) * TOTAL_COLUMNS;
+            //         if (!word.isHorizontal) {
+            //             nextCoord *= TOTAL_COLUMNS;
+            //             while (this.confirmedBoard[coord + nextCoord].state === BoardTileState.Confirmed) {
+            //                 nextCoord += TOTAL_COLUMNS;
+            //             }
+            //         } else {
+            //             while (this.confirmedBoard[coord + nextCoord].state === BoardTileState.Confirmed) {
+            //                 nextCoord++;
+            //             }
+            //         }
+            //
+            //         if (this.liveBoard[coord + nextCoord].state === BoardTileState.Temp) return;
+            //         this.liveBoard[coord + nextCoord].state = BoardTileState.Temp;
+            //         this.liveBoard[coord + nextCoord].letter.value = letter;
+            //         this.confirmedBoard[coord + nextCoord].state = BoardTileState.Temp;
+            //         this.confirmedBoard[coord + nextCoord].letter.value = letter;
+            //     });
+            // });
             console.log(this.clueWords.map((word) => word.letters));
         });
     }
@@ -560,6 +619,7 @@ export class LetterPlacementService {
     // }
 
     private resetBoardState() {
+        console.log('resetting board');
         this.origin = undefined;
         this.selectionPositions = [];
         this.placedLetters = [];
@@ -593,6 +653,7 @@ export class LetterPlacementService {
             coord++;
         });
         this.defaultBoard = JSON.parse(JSON.stringify(this.liveBoard));
+        console.log(this.defaultBoard);
         this.confirmedBoard = JSON.parse(JSON.stringify(this.liveBoard));
     }
 
@@ -664,6 +725,10 @@ export class LetterPlacementService {
             x: (this.origin % TOTAL_COLUMNS) + 1,
             y: Math.floor(this.origin / TOTAL_ROWS) + 1,
         };
+    }
+
+    private computeCoordFromCoordinate(coordinates: Coordinate): number {
+        return coordinates.x - 1 + (coordinates.y - 1) * TOTAL_COLUMNS;
     }
 
     private updateGameBoard(gameBoard: string[]) {
