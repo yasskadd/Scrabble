@@ -1,82 +1,90 @@
-<div class="encapsulating-div">
+<div class='encapsulating-div'>
     <app-header></app-header>
 
-    <body class="justified mat-app-background">
-        <mat-card class="wrapper">
-            <mat-card-title *ngIf="availableRooms.length > 0">
-                {{ "new_game_page.available_games" | translate }}
-            </mat-card-title>
-            <a class="noRoomAvailable" *ngIf="availableRooms.length === 0">
-                {{ "new_game_page.no_available_games" | translate }}
-            </a>
-            <div class="list-container">
-                <table class="roomAvailable" *ngIf="availableRooms.length > 0">
-                    <thead class="tableContainer">
-                        <tr>
-                            <th>{{ "new_game_page.label.players" | translate }}</th>
-                            <th>{{ "new_game_page.label.host" | translate }}</th>
-                            <th>{{ "new_game_page.label.difficulty" | translate }}</th>
-                            <th>{{ "new_game_page.label.timer" | translate }}</th>
-                            <th>{{ "new_game_page.label.dictionary" | translate }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let gameRoom of availableRooms">
-                            <td>
-                                <span class="players-row">
+    <body class='justified mat-app-background'>
+    <mat-card class='wrapper'>
+        <mat-card-title *ngIf='availableRooms.length > 0'>
+            {{ "new_game_page.available_games" | translate }}
+        </mat-card-title>
+        <a class='noRoomAvailable' *ngIf='availableRooms.length === 0'>
+            {{ "new_game_page.no_available_games" | translate }}
+        </a>
+        <div class='list-container'>
+            <table class='roomAvailable' *ngIf='availableRooms.length > 0'>
+                <thead class='tableContainer'>
+                <tr>
+                    <th>{{ "new_game_page.label.players" | translate }}</th>
+                    <th>{{ "new_game_page.label.host" | translate }}</th>
+                    <th>{{ "new_game_page.label.difficulty" | translate }}</th>
+                    <th>{{ "new_game_page.label.timer" | translate }}</th>
+                    <th>{{ "new_game_page.label.dictionary" | translate }}</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor='let gameRoom of availableRooms'>
+                    <td>
+                                <span class='players-row'>
                                     <mat-icon>people</mat-icon>
                                     {{ getPlayers(gameRoom).length }} / 4
                                 </span>
-                                <span *ngIf="getBots(gameRoom)" class="players-row">
+                        <span *ngIf='getBots(gameRoom)' class='players-row'>
                                     <mat-icon>smart_toy</mat-icon>
-                                    {{ getBots(gameRoom).length }}
+                            {{ getBots(gameRoom).length }}
                                 </span>
-                                <span *ngIf="getObservers(gameRoom)" class="players-row">
+                        <span *ngIf='getObservers(gameRoom)' class='players-row'>
                                     <mat-icon>people_outline</mat-icon>
-                                    {{ getObservers(gameRoom).length }}
+                            {{ getObservers(gameRoom).length }}
                                 </span>
-                            </td>
-                            <td>
-                                {{ getGameCreator(gameRoom).user.username }}
-                            </td>
-                            <td>{{ gameRoom.state }}</td>
-                            <td>{{ timer.getTimeStamp(gameRoom.timer) }}</td>
-                            <td>{{ gameRoom.dictionary }}</td>
-                            <button class="join-game" (click)="joinRoom(gameRoom)" mat-raised-button>
-                                <mat-icon *ngIf="isGameRoomLocked(gameRoom)"> lock </mat-icon>
-                                {{ "action.join" | translate }}
-                                <!-- Outlined -->
-                                <mat-icon *ngIf="getPlayers(gameRoom).length >= 4"> person_outline </mat-icon>
-                            </button>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="container-button">
-                <button class="return-button" mat-icon-button routerLink="/home">
-                    <mat-icon>navigate_before</mat-icon>
-                </button>
-                <mat-form-field (keydown.enter)="joinSecretRoom()" appearance="outline">
-                    <mat-label>
-                        <!-- TODO : Language -->
-                        Code de connexion
-                    </mat-label>
-                    <input matInput [formControl]="roomIdForm" />
-                    <button mat-icon-button matSuffix (click)="joinSecretRoom()">
-                        <mat-icon> login </mat-icon>
+                    </td>
+                    <td>
+                        {{ getGameCreator(gameRoom)?.user.username }}
+                    </td>
+                    <td>{{ gameRoom.state }}</td>
+                    <td>{{ timer.getTimeStamp(gameRoom.timer) }}</td>
+                    <td>{{ gameRoom.dictionary }}</td>
+                    <button class='join-game' (click)='joinRoom(gameRoom)' mat-raised-button>
+                        <mat-icon *ngIf='isGameRoomLocked(gameRoom)'> lock</mat-icon>
+                        {{ "action.join" | translate }}
+                        <!-- Outlined -->
+                        <mat-icon *ngIf='getPlayers(gameRoom).length >= 4'> person_outline</mat-icon>
                     </button>
-                </mat-form-field>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class='container-button'>
+            <button class='return-button' mat-icon-button routerLink='/home'>
+                <mat-icon>navigate_before</mat-icon>
+            </button>
+            <mat-form-field (keydown.enter)='joinSecretRoom()' appearance='outline'>
+                <mat-label>
+                    <!-- TODO : Language -->
+                    Code de connexion
+                </mat-label>
+                <input matInput [formControl]='roomIdForm' />
+                <button mat-icon-button matSuffix (click)='joinSecretRoom()'>
+                    <mat-icon> login</mat-icon>
+                </button>
+            </mat-form-field>
+
+            <div>
                 <button
-                    (click)="joinRandomRoom()"
-                    class="join-random-game-button"
+                    (click)='joinRandomRoom()'
                     mat-icon-button
                     [matTooltip]="'new_game_page.random' | translate"
-                    [disabled]="availableRooms.length <= 1"
+                    [disabled]='availableRooms.length <= 1'
                 >
                     <mat-icon>casino</mat-icon>
                 </button>
+                <button
+                    (click)='refresh()'
+                    mat-icon-button
+                >
+                    <mat-icon>refresh</mat-icon>
+                </button>
             </div>
-        </mat-card>
+        </div>
+    </mat-card>
     </body>
 </div>

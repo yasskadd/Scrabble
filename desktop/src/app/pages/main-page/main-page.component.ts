@@ -26,12 +26,12 @@ export class MainPageComponent {
     protected connectionSubject: Subject<SocketResponse>;
     protected disconnectionSubject: Subject<void>;
     protected multiplayerCreateLink: string;
-    protected multiplayerjoinLink: string;
 
     protected chatIsOpen: boolean;
 
     private readonly dialogWidth: string = '500px';
     private readonly dialogWidthHighScore: string = '750px';
+    private subscribed: boolean;
 
     constructor(
         protected chatBoxHandlerService: ChatboxHandlerService,
@@ -42,8 +42,8 @@ export class MainPageComponent {
         private highScore: MatDialog,
         private router: Router,
     ) {
+        this.subscribed = false;
         this.multiplayerCreateLink = `/${AppRoutes.MultiGameCreationPage}/${GameMode.Multi}`;
-        this.multiplayerjoinLink = `/${AppRoutes.MultiJoinPage}/classique`;
         if (!this.userService.isConnected.getValue()) {
             this.router.navigate([`${AppRoutes.ConnectionPage}`]);
         }
@@ -135,6 +135,8 @@ export class MainPageComponent {
     }
 
     private subscribeConnectionEvents(): void {
+        if (this.subscribed) return;
+
         this.connectionSubject = this.chatBoxHandlerService.subscribeToUserConnection();
         this.connectionSubject.subscribe((res: SocketResponse) => {
             this.homeConnectionResponse = res;
@@ -148,5 +150,12 @@ export class MainPageComponent {
             this.userService.user.username = '';
             this.userNameForm.setValue('');
         });
+
+        this.subscribed = true;
+    }
+
+    navigateJoinPage() {
+        this.clientSocketService.send(SocketEvents.UpdateGameRooms);
+        this.router.navigate([`/${AppRoutes.MultiJoinPage}/classique`]);
     }
 }

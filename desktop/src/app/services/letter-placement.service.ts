@@ -39,8 +39,9 @@ export class LetterPlacementService {
     selectionPositions: SelectionPosition[];
     origin: number;
     dragLetter: DragInfos;
+    clueWords: PlaceWordCommandInfo[];
+    placedLetters: BoardTileInfo[];
 
-    private placedLetters: BoardTileInfo[];
     private placingMode: PlacingState;
     private hasPlacingEnded: boolean;
 
@@ -54,11 +55,12 @@ export class LetterPlacementService {
         this.liveBoard = [];
         this.defaultBoard = [];
         this.confirmedBoard = [];
+        this.clueWords = [];
 
         this.initSelection();
-        this.setPropreties();
+        this.resetBoardState();
         this.gameClientService.gameboardUpdated.pipe(first()).subscribe((gameBoard: string[]) => {
-            this.resetView();
+            this.resetBoardState();
             this.updateGameBoard(gameBoard);
         });
         this.gameClientService.gameboardUpdated.subscribe((gameBoard: string[]) => {
@@ -69,9 +71,10 @@ export class LetterPlacementService {
             this.selectionPositions = [];
         });
         this.gameClientService.quitGameSubject.subscribe(() => {
-            this.resetView();
+            this.resetBoardState();
         });
         this.subscribeDrag();
+        this.subscribeClue();
         this.initTiles();
     }
 
@@ -81,40 +84,6 @@ export class LetterPlacementService {
             quantity: undefined,
             points: undefined,
         };
-    }
-
-    subscribeDrag(): void {
-        this.clientSocketService.on(SocketEvents.DragEvent, async (event: DragInfos) => {
-            if (event.socketId === this.gameClientService.getLocalPlayer()?.player.socketId) return;
-
-            this.dragLetter = {
-                roomId: event.roomId,
-                socketId: event.socketId,
-                letter: event.letter,
-                coord: await this.scaleCoord(event.window, event.coord),
-                window: [],
-            };
-        });
-
-        this.clientSocketService.on(SocketEvents.LetterTaken, (event: SimpleLetterInfos) => {
-            if (event.socketId === this.gameClientService.getLocalPlayer()?.player.socketId) return;
-            if (event.coord === -1) return;
-            this.initLiveTile(event.coord);
-        });
-
-        this.clientSocketService.on(SocketEvents.LetterPlaced, async (event: SimpleLetterInfos) => {
-            if (event.socketId === this.gameClientService.getLocalPlayer()?.player.socketId) return;
-            this.dragLetter = undefined;
-
-            // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-            if (event.coord >= 0) {
-                this.liveBoard[event.coord].state = BoardTileState.Pending;
-                this.liveBoard[event.coord].letter.value = event.letter as AlphabetLetter;
-            } else {
-                this.liveBoard[-event.coord].state = BoardTileState.Empty;
-                this.liveBoard[-event.coord].letter.value = AlphabetLetter.None;
-            }
-        });
     }
 
     async scaleCoord(window: number[], coord: number[]): Promise<number[]> {
@@ -195,19 +164,12 @@ export class LetterPlacementService {
         }
 
         const placedLetter: Letter = this.gameClientService.getLocalPlayer()?.rack[indexOfLetter];
-        if (placedLetter?.value === '*') {
-            placedLetter.value = keyPressed.toUpperCase() as AlphabetLetter;
-        }
 
         this.placeLetter(placedLetter, this.liveBoard[this.selectionPositions[0].coord]);
     }
 
-    // TODO
     submitPlacement() {
         if (this.noLettersPlaced()) return;
-
-        // const verticalPlacement = String.fromCharCode(this.selectionPositions[0].coord + ASCII_ALPHABET_START);
-        // const lettersToSubmit = this.placedLetters.map((letter) => letter.letter.value).join('');
 
         const letters: string[] = [];
         this.placedLetters.forEach((tile: BoardTileInfo) => {
@@ -218,10 +180,6 @@ export class LetterPlacementService {
             isHorizontal: this.selectionPositions[0].direction === PlayDirection.Right,
             letters,
         } as PlaceWordCommandInfo);
-
-        // this.chatboxService.submitMessage(
-        //     `!placer ${verticalPlacement}${this.selectionPositions[0].coord}${this.selectionPositions[0].direction} ${lettersToSubmit}`,
-        // );
     }
 
     undoPlacement() {
@@ -323,7 +281,7 @@ export class LetterPlacementService {
         this.commitLetter(letter, boardTile, false);
     }
 
-    commitLetter(letter: Letter, boardTile: BoardTileInfo, isStar: boolean): void {
+    commitLetter(letter: Letter, boardTile: BoardTileInfo, isStar: boolean, forced?: boolean): void {
         const playedTile: BoardTileInfo = {
             type: boardTile.type,
             state: BoardTileState.Pending,
@@ -356,18 +314,15 @@ export class LetterPlacementService {
             1,
         );
 
-        if (this.placedLetters.length === 2 && this.placingMode === PlacingState.Drag) {
+        if (this.placedLetters.length === 2 && this.placingMode === PlacingState.Drag && !forced) {
             this.computeDirection(playedTile.coord);
         }
 
-        this.computeNewPosition(playedTile.coord, false);
+        if (!forced) this.computeNewPosition(playedTile.coord, false);
     }
 
     resetView() {
-        // this.resetGameBoardView();
-        this.setPropreties();
-        this.refreshView();
-        // this.initTiles();
+        this.resetBoardState();
     }
 
     noLettersPlaced() {
@@ -376,6 +331,66 @@ export class LetterPlacementService {
 
     handleTileClick(tile: BoardTileInfo) {
         if (this.placedLetters.length !== 0) return;
+
+        if (this.clueWords.length !== 0) {
+            let wordToPlace: PlaceWordCommandInfo;
+
+            this.clueWords.forEach((word: PlaceWordCommandInfo) => {
+                word.letters.forEach((letter: string, index: number) => {
+                    let nextCoord = index;
+                    const coord = word.firstCoordinate.x - 1 + (word.firstCoordinate.y - 1) * TOTAL_COLUMNS;
+                    if (!word.isHorizontal) {
+                        nextCoord *= TOTAL_COLUMNS;
+                    }
+
+                    if (coord + nextCoord === tile.coord) {
+                        wordToPlace = word;
+                    }
+                });
+            });
+
+            if (wordToPlace) {
+                // console.log(wordToPlace.firstCoordinate);
+                const coord = wordToPlace.firstCoordinate.x - 1 + (wordToPlace.firstCoordinate.y - 1) * TOTAL_COLUMNS;
+                this.selectionPositions = [{ coord, direction: wordToPlace.isHorizontal ? PlayDirection.Right : PlayDirection.Down }];
+
+                wordToPlace.letters = wordToPlace.letters.filter((letter: string, index: number) => {
+                    let nextCoord = index;
+                    if (!wordToPlace.isHorizontal) {
+                        nextCoord *= TOTAL_COLUMNS;
+                    }
+
+                    // const newCoord = coord + nextCoord;
+                    tile.coord = coord + nextCoord;
+                    console.log(tile.coord);
+
+                    console.log(this.confirmedBoard[tile.coord]);
+                    if (this.confirmedBoard[tile.coord].state === BoardTileState.Confirmed) return false;
+
+                    return true;
+                    // this.commitLetter(
+                    //     this.gameClientService.getLocalPlayer()?.rack[indexOfLetter],
+                    //     JSON.parse(JSON.stringify(tile)),
+                    //     letter === AlphabetLetter.Any,
+                    // );
+                });
+
+                wordToPlace.letters = wordToPlace.letters.map((letter: string) => {
+                    if (/^[A-Z]*$/.test(letter)) {
+                        return letter.toLowerCase();
+                    }
+                    return letter.toUpperCase();
+                });
+                console.log(wordToPlace);
+                this.clientSocketService.send(SocketEvents.PlaceWordCommand, wordToPlace);
+
+                // this.submitPlacement();
+            }
+            this.clueWords = [];
+            this.refreshView();
+
+            return;
+        }
 
         if (tile.coord !== this.origin) {
             this.origin = tile.coord;
@@ -440,6 +455,70 @@ export class LetterPlacementService {
         }
     }
 
+    private subscribeClue(): void {
+        this.clientSocketService.on(SocketEvents.ClueCommand, (words: PlaceWordCommandInfo[]) => {
+            this.clueWords = words;
+            this.clueWords.forEach((word: PlaceWordCommandInfo) => {
+                word.letters.forEach((letter: string, index: number) => {
+                    let nextCoord = index;
+                    const coord = word.firstCoordinate.x - 1 + (word.firstCoordinate.y - 1) * TOTAL_COLUMNS;
+                    if (!word.isHorizontal) {
+                        nextCoord *= TOTAL_COLUMNS;
+                        while (this.confirmedBoard[coord + nextCoord].state === BoardTileState.Confirmed) {
+                            nextCoord += TOTAL_COLUMNS;
+                        }
+                    } else {
+                        while (this.confirmedBoard[coord + nextCoord].state === BoardTileState.Confirmed) {
+                            nextCoord++;
+                        }
+                    }
+
+                    if (this.liveBoard[coord + nextCoord].state === BoardTileState.Temp) return;
+                    this.liveBoard[coord + nextCoord].state = BoardTileState.Temp;
+                    this.liveBoard[coord + nextCoord].letter.value = letter;
+                    this.confirmedBoard[coord + nextCoord].state = BoardTileState.Temp;
+                    this.confirmedBoard[coord + nextCoord].letter.value = letter;
+                });
+            });
+            console.log(this.clueWords.map((word) => word.letters));
+        });
+    }
+
+    private subscribeDrag(): void {
+        console.log('subscribing');
+        this.clientSocketService.on(SocketEvents.DragEvent, async (event: DragInfos) => {
+            if (event.socketId === this.gameClientService.getLocalPlayer()?.player.socketId) return;
+
+            this.dragLetter = {
+                roomId: event.roomId,
+                socketId: event.socketId,
+                letter: event.letter,
+                coord: await this.scaleCoord(event.window, event.coord),
+                window: [],
+            };
+        });
+
+        this.clientSocketService.on(SocketEvents.LetterTaken, (event: SimpleLetterInfos) => {
+            if (event.socketId === this.gameClientService.getLocalPlayer()?.player.socketId) return;
+            if (event.coord === -1) return;
+            this.initLiveTile(event.coord);
+        });
+
+        this.clientSocketService.on(SocketEvents.LetterPlaced, async (event: SimpleLetterInfos) => {
+            if (event.socketId === this.gameClientService.getLocalPlayer()?.player.socketId) return;
+            this.dragLetter = undefined;
+
+            // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+            if (event.coord >= 0) {
+                this.liveBoard[event.coord].state = BoardTileState.Pending;
+                this.liveBoard[event.coord].letter.value = event.letter as AlphabetLetter;
+            } else {
+                this.liveBoard[-event.coord].state = BoardTileState.Empty;
+                this.liveBoard[-event.coord].letter.value = AlphabetLetter.None;
+            }
+        });
+    }
+
     // private updateLettersView() {
     // let placementPosition = this.startTile;
     // this.placedLetters.forEach((letter) => {
@@ -480,10 +559,11 @@ export class LetterPlacementService {
     //     coordinate.x++;
     // }
 
-    private setPropreties() {
+    private resetBoardState() {
         this.origin = undefined;
         this.selectionPositions = [];
         this.placedLetters = [];
+        this.clueWords = [];
         this.hasPlacingEnded = false;
         // this.initTiles();
         this.refreshView();

@@ -30,12 +30,12 @@
                     </button>
 
                     <button
-                        [routerLink]="multiplayerjoinLink"
                         id="multiplayer-join"
                         class="button multiplayer"
                         mat-raised-button
                         color="primary"
                         mat-dialog-close=""
+                        (click)='navigateJoinPage()'
                     >
                         {{ "action.join" | translate }}
                         <mat-icon class="button-icon">leak_add</mat-icon>

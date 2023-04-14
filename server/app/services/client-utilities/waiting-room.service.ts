@@ -62,6 +62,11 @@ export class WaitingRoomService {
         this.socketManager.io(SocketEvents.StartScrabbleGame, async (server: Server, socket: SocketType, roomId: string) => {
             await this.startScrabbleGame(server, roomId);
         });
+
+        this.socketManager.io(SocketEvents.UpdateWaitingRoom, (server: Server) => {
+            this.gamesHandler.cleanRooms();
+            server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
+        });
     }
 
     removeRoom(server: Server, roomId: string): void {
@@ -91,8 +96,6 @@ export class WaitingRoomService {
      * @private
      */
     private joinGameRoom(server: Server, socket: SocketType, joinGameQuery: UserRoomQuery): void {
-        this.gamesHandler.cleanRooms();
-
         const room: GameRoom | undefined = this.getRoom(joinGameQuery.roomId);
         if (this.userAlreadyConnected(joinGameQuery)) {
             socket.emit(SocketEvents.ErrorJoining, ServerErrors.RoomSameUser);

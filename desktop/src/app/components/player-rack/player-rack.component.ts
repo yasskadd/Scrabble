@@ -13,6 +13,7 @@ import { ClientSocketService } from '@services/communication/client-socket.servi
 import { SocketEvents } from '@common/constants/socket-events';
 import { window as tauriWindow } from '@tauri-apps/api';
 import { GameConfigurationService } from '@services/game-configuration.service';
+
 // import { Socket } from 'socket.io-client';
 
 @Component({
@@ -172,5 +173,9 @@ export class PlayerRackComponent {
             coord: [(event.event as MouseEvent).clientX, (event.event as MouseEvent).clientY],
             window: [windowSize.width, windowSize.height],
         });
+    }
+
+    protected askForClue(): void {
+        this.clientSocketService.send(SocketEvents.ClueCommand);
     }
 }
