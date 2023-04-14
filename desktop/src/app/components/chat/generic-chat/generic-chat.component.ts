@@ -1,6 +1,7 @@
 import { AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
+import { UserService } from '@app/services/user.service';
 import { ChatboxMessage } from '@common/interfaces/chatbox-message';
 
 @Component({
@@ -11,12 +12,15 @@ import { ChatboxMessage } from '@common/interfaces/chatbox-message';
 export class GenericChatComponent implements AfterViewInit, AfterViewChecked {
     @ViewChild('chatbox', { static: false }) chatbox: ElementRef;
     @ViewChild('container') private scrollBox: ElementRef;
+    activeTab: string;
+    chatSession: string | undefined;
 
     inputForm: FormControl;
     private lastMessage: ChatboxMessage;
 
-    constructor(private chatboxHandler: ChatboxHandlerService) {
+    constructor(private chatboxHandler: ChatboxHandlerService, protected userService: UserService) {
         this.inputForm = new FormControl('');
+        this.activeTab = 'joinedChats';
     }
 
     get messages() {
@@ -51,6 +55,15 @@ export class GenericChatComponent implements AfterViewInit, AfterViewChecked {
             this.lastMessage = lastMessage;
             this.scrollToBottom();
         }
+    }
+
+    selectTab(tabName: string) {
+        this.activeTab = tabName;
+        //TODO: Insert get joined & all chat rooms
+    }
+
+    selectChatSession(chatRoomName: string | undefined) {
+        this.chatSession = chatRoomName;
     }
 
     private resetInput() {

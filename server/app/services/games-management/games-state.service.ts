@@ -22,6 +22,7 @@ import { SocketEvents } from '@common/constants/socket-events';
 import { GameHistoryInfo } from '@common/interfaces/game-history-info';
 import { GameRoom } from '@common/interfaces/game-room';
 import { GameInfo } from '@common/interfaces/game-state';
+import { Letter } from '@common/interfaces/letter';
 import { PlayerInformation } from '@common/interfaces/player-information';
 import { RoomPlayer } from '@common/interfaces/room-player';
 import { GameDifficulty } from '@common/models/game-difficulty';
@@ -32,7 +33,6 @@ import { Subject } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import { GamesHandlerService } from './games-handler.service';
-import { Letter } from '@common/interfaces/letter';
 
 const MAX_SKIP = 6;
 const SECOND = 1000;
@@ -80,7 +80,6 @@ export class GamesStateService {
         if (!game) return;
 
         const gamePlayers: GamePlayer[] = this.initPlayers(game, room);
-
         await this.setupGameSubscriptions(room, game);
 
         gamePlayers.forEach((player: GamePlayer) => {
@@ -286,7 +285,7 @@ export class GamesStateService {
         const gameHistoryInfo = this.formatGameInfo(gamePlayer);
         await this.userStatsStorage.updatePlayerStats(gameHistoryInfo);
         this.gamesHandler.removePlayerFromSocketId(socket.id);
-
+        socket.leave('game' + gamePlayer.player.roomId); // leave game chat room
         socket.leave(gamePlayer.player.roomId);
         if (
             !gamePlayer.game.isModeSolo &&
@@ -302,7 +301,6 @@ export class GamesStateService {
             return;
         }
         // TODO: What to do if there are still observers in game ?
-
         gamePlayer.game.abandon();
         // this.gameEnded.next(room);
     }

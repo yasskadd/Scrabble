@@ -1,6 +1,6 @@
 <mat-toolbar>
     <div *ngIf="!isHomePage" id="home" (click)="redirectHome()">
-        <button [hidden]="true" mat-flat-button color="accent" *ngFor="let letter of getLetters('header.home')">{{ letter }}</button>
+        <button [hidden]="true" mat-flat-button color="primary" *ngFor="let letter of getLetters('header.home')">{{ letter }}</button>
     </div>
 
     <div *ngIf="isHomePage" id="admin" (click)="redirectAdmin()">
@@ -15,7 +15,7 @@
         id="user-icon"
         mat-fab
         color="primary"
-        *ngIf="!userService.isConnected() || !userService.user.profilePicture && !isGamePage()"
+        *ngIf="!userService.isConnected() || (!userService.user.profilePicture && !isGamePage())"
         [matMenuTriggerFor]="accountMenu"
     >
         <mat-icon>person</mat-icon>

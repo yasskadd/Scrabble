@@ -1,5 +1,6 @@
 import { SECRET_KEY } from '@app/../very-secret-file';
 import { defaultImagesMap } from '@app/constants/profile-pictures';
+import { ChatHandlerService } from '@app/services/client-utilities/chat-handler.service';
 import { AccountStorageService } from '@app/services/database/account-storage.service';
 import { IUser } from '@common/interfaces/user';
 import { Request, Response, Router } from 'express';
@@ -17,7 +18,7 @@ const TEMP_REDIRECT = 307;
 export class AuthentificationController {
     router: Router;
 
-    constructor(private accountStorage: AccountStorageService) {
+    constructor(private accountStorage: AccountStorageService, private chatBoxHandler: ChatHandlerService) {
         this.configureRouter();
     }
 
@@ -69,8 +70,10 @@ export class AuthentificationController {
             const user: IUser = req.body;
             if (await this.accountStorage.isUsernameRegistered(user.username)) {
                 const isLoginValid = await this.accountStorage.loginValidator(user);
+                const userId = await this.accountStorage.getUserIdFromUsername(user.username);
                 if (isLoginValid) {
                     const userData = (await this.accountStorage.getUserData(user.username)) as any;
+                    userData.chatRooms = this.chatBoxHandler.getChatRoomsWithState(userId, userData.chatRooms);
                     // eslint-disable-next-line no-underscore-dangle
                     const token = this.createJWToken(userData._id.toString());
                     // Sending updated IUser with email and profile picture data added

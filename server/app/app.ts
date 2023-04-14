@@ -10,6 +10,7 @@ import * as swaggerJSDoc from 'swagger-jsdoc';
 import * as swaggerUi from 'swagger-ui-express';
 import { Service } from 'typedi';
 import { AuthentificationController } from './controllers/authentification.controller';
+import { ChatRoomsController } from './controllers/chat-rooms.controller';
 import { DictionaryController } from './controllers/dictionary.controller';
 import { HistoryController } from './controllers/history.controller';
 import { ProfilePictureController } from './controllers/profile-picture.controller';
@@ -30,6 +31,7 @@ export class Application {
         private readonly authentificationController: AuthentificationController,
         private readonly profilePictureController: ProfilePictureController,
         private readonly userProfileController: UserProfileController,
+        private readonly chatRoomsController: ChatRoomsController,
     ) {
         this.app = express();
 
@@ -58,6 +60,7 @@ export class Application {
         this.app.use('/auth', this.authentificationController.router);
         this.app.use('/image', this.profilePictureController.router);
         this.app.use('/profile', this.userProfileController.router);
+        this.app.use('/chat', this.chatRoomsController.router);
         this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerJSDoc(this.swaggerOptions)));
         this.app.use('/', (req, res) => {
             res.redirect('/docs');

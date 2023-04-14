@@ -1,0 +1,70 @@
+<!-- TABS -->
+<div id="tabs-container">
+    <button
+        class="tab"
+        mat-button
+        [ngClass]="[activeTab === 'joinedChats' ? 'activeTab' : '']"
+        [ngStyle]="{ 'background-color': activeTab === 'joinedChats' ? 'primary' : '' }"
+        (click)="selectTab('joinedChats')"
+        *ngIf="chatSession === undefined"
+    >
+        {{ "chat.joined_chats" | translate }}
+    </button>
+    <button
+        class="tab"
+        mat-button
+        [ngClass]="[activeTab === 'allChats' ? 'activeTab' : '']"
+        [ngStyle]="{ 'background-color': activeTab === 'allChats' ? 'primary' : '' }"
+        (click)="selectTab('allChats')"
+        *ngIf="chatSession === undefined"
+    >
+        {{ "chat.available_chats" | translate }}
+    </button>
+    <div mat-card-title class="chat-room-session-header" mat-button *ngIf="chatSession !== undefined" background-color="primary">
+        <mat-icon (click)="selectChatSession(undefined)">keyboard_backspace</mat-icon>
+        <div>{{ chatSession }}</div>
+    </div>
+</div>
+<!-- TABS -->
+
+<div class="chat-rooms-container" *ngIf="activeTab === 'joinedChats' && chatSession === undefined">
+    <mat-card *ngFor="let i of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]">
+        <div class="chat-rooms">
+            <div>room name</div>
+            <button class="join" mat-button mat-stroked-button color="primary" (click)="selectChatSession('roomName')">
+                {{ "chat.join" | translate }}
+            </button>
+        </div>
+    </mat-card>
+</div>
+<div class="chat-rooms-container" *ngIf="activeTab === 'allChats' && chatSession === undefined">
+    <mat-card *ngFor="let i of [0, 1, 2, 3]">
+        <div class="chat-rooms">
+            <div>room name</div>
+            <button class="join" mat-button mat-stroked-button color="primary">{{ "chat.join" | translate }}</button>
+        </div>
+    </mat-card>
+</div>
+
+<!-- CHAT SESSION -->
+<div #container class="message-container" *ngIf="chatSession !== undefined">
+    <mat-card *ngFor="let message of messages">
+        <div *ngIf="message.username" class="chat-metadata">
+            <img src="../../../assets/images/1.jpg" class="avatar" />
+            <strong>{{ message.username }}</strong>
+            <p>{{ message.timeStamp }}</p>
+        </div>
+        <div class="message">{{ message.message }}</div>
+    </mat-card>
+</div>
+
+<div class="chat-input" *ngIf="chatSession !== undefined">
+    <mat-form-field appearance="outline" (keydown.enter)="submit()" class="user-input">
+        <mat-label>{{ "chat.message_box" | translate }}</mat-label>
+        <input matInput maxlength="512" type="text" [formControl]="inputForm" placeholder="{{ 'chat.input_example' | translate }}" #chatbox />
+    </mat-form-field>
+    <button mat-mini-fab color="primary" (click)="submit()">
+        <mat-icon>send</mat-icon>
+    </button>
+</div>
+<!-- CHAT SESSION -->
