@@ -236,6 +236,7 @@ export class ChatboxHandlerService {
 
     private onNewChatRoomCreated(newChatRoom: ChatRoomClient) {
         this.allChatRooms.push(newChatRoom);
+        if (this.userService.user._id === newChatRoom.creatorId) this.joinedChatRooms.push(newChatRoom);
     }
 
     private leaveRoom(chatRoomName: string) {
