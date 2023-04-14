@@ -39,12 +39,12 @@ export class RackService {
     }
 
     isBlankLetter(tempCommandLetter: string) {
-        return tempCommandLetter !== tempCommandLetter.toUpperCase();
+        return tempCommandLetter === tempCommandLetter.toUpperCase();
     }
 
     findRackLetter(tempRack: Letter[], tempCommandLetter: string): string | undefined {
         const index = tempRack.findIndex((letterInRack) => {
-            return letterInRack.value === tempCommandLetter;
+            return letterInRack.value.toLowerCase() === tempCommandLetter;
         });
 
         if (index < 0) return;
