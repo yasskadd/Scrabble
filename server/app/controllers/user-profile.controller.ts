@@ -1,3 +1,4 @@
+import { createMailOptions, getPasswordResetEmail, transporter } from '@app/config/nodemailer';
 import { verifyToken } from '@app/middlewares/token-verification-middleware';
 import { AccountStorageService } from '@app/services/database/account-storage.service';
 import { HistoryStorageService } from '@app/services/database/history-storage.service';
@@ -9,7 +10,6 @@ import { IUser } from '@common/interfaces/user';
 import { Request, Response, Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { Service } from 'typedi';
-import { createMailOptions, transporter, getPasswordResetEmail } from '@app/config/nodemailer';
 
 @Service()
 export class UserProfileController {
@@ -132,7 +132,7 @@ export class UserProfileController {
 
         this.router.post('/forgot-password', async (req: Request, res: Response) => {
             const username: string = req.body.username;
-            const user : IUser = await this.accountStorageService.getUserData(username);
+            const user: IUser = await this.accountStorageService.getUserData(username);
             const email = user.email;
             const tempPassword = (Math.random() + 1).toString(36).substring(7);
             if (email) {
@@ -145,8 +145,8 @@ export class UserProfileController {
                 });
             }
             res.sendStatus(StatusCodes.CREATED);
-        })
-        
+        });
+
         this.router.get('/all', async (req: Request, res: Response) => {
             const userGamesHistory = await this.accountStorageService.getAllUsersData();
             res.status(StatusCodes.OK).json(userGamesHistory);
