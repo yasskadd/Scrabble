@@ -30,11 +30,12 @@ export class UserService {
         private snackBarService: SnackBarService,
         private router: Router,
     ) {
-        this.isConnected = new BehaviorSubject<boolean>(false);
         this.user = undefined;
+        this.userStats = undefined;
+        this.isConnected = new BehaviorSubject<boolean>(false);
 
-        this.initUserStats();
         this.subscribeConnectionEvents();
+
         this.clientSocketService.reconnect.subscribe(() => {
             this.clientSocketService.reconnectionDialog = undefined;
             this.login(this.tempUserData);
@@ -42,35 +43,6 @@ export class UserService {
         this.clientSocketService.cancelConnection.subscribe(() => {
             this.clientSocketService.reconnectionDialog = undefined;
             this.logout();
-        });
-    }
-
-    login(user: IUser): void {
-        this.user = user;
-        this.httpHandlerService.login(user).then(
-            (loginRes: { userData: IUser; sessionToken: string }) => {
-                this.tempUserData = loginRes.userData;
-                this.cookieService.updateUserSessionCookie(loginRes.sessionToken).then();
-            },
-            () => {
-                // TODO : Language
-                this.isConnected.next(false);
-                this.logout();
-            },
-        );
-    }
-
-    async logout(): Promise<void> {
-        this.httpHandlerService.logout(this.user).then(async () => {
-            this.user = undefined;
-            this.tempUserData = undefined;
-            this.initUserStats();
-
-            this.cookieService.removeSessionCookie();
-            await this.clientSocketService.disconnect();
-
-            this.isConnected.next(false);
-            this.router.navigate([AppRoutes.ConnectionPage]).then();
         });
     }
 
@@ -94,13 +66,38 @@ export class UserService {
         });
     }
 
-    getUser(): IUser {
-        return this.user;
+    login(user: IUser): void {
+        this.user = user;
+        this.httpHandlerService.login(user).then(
+            (loginRes: { userData: IUser; sessionToken: string }) => {
+                this.tempUserData = loginRes.userData;
+                this.cookieService.updateUserSessionCookie(loginRes.sessionToken).then();
+            },
+            () => {
+                // TODO : Language
+                this.isConnected.next(false);
+                this.logout();
+            },
+        );
+        this.setStats();
     }
 
-    async getStats(): Promise<UserStats> {
-        return this.httpHandlerService.getStats().then((result) => {
-            return result.userStats;
+    async logout(): Promise<void> {
+        this.httpHandlerService.logout(this.user).then(async () => {
+            this.user = undefined;
+            this.tempUserData = undefined;
+
+            this.cookieService.removeSessionCookie();
+            await this.clientSocketService.disconnect();
+
+            this.isConnected.next(false);
+            this.router.navigate([AppRoutes.ConnectionPage]).then();
+        });
+    }
+
+    setStats() {
+        this.httpHandlerService.getStats().then((result) => {
+            this.userStats = result;
         });
     }
 
@@ -115,20 +112,6 @@ export class UserService {
                 }
                 return false;
             });
-    }
-
-    private initUserStats(): void {
-        this.userStats = {
-            userIdRef: '',
-            ranking: 0,
-            gameCount: 0,
-            win: 0,
-            loss: 0,
-            totalGameTime: 0,
-            totalGameScore: 0,
-            averageGameTime: '',
-            averageGameScore: 0,
-        };
     }
 
     private avatarDataToImageInfo(avatarData: AvatarData): ImageInfo {

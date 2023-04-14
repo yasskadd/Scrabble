@@ -1,42 +1,48 @@
-<div class='encapsulating-div'>
+<div class="encapsulating-div">
     <app-header></app-header>
-    <body class='mat-app-background'>
-    <button mat-fab *ngIf='!userService.user.profilePicture' color='primary' (click)='openAvatarSelector()'
-            class='avatar-selector' style='margin-bottom: 4px'>
-        <mat-icon>person</mat-icon>
-    </button>
-    <img
-        *ngIf='userService.user.profilePicture && !profilePicForm.value'
-        [src]='userService.getUser().profilePicture.key'
-        (click)='openAvatarSelector()'
-        class='selecter-avatar mat-elevation-z5'
-    />
-    <img
-        *ngIf='profilePicForm.value && profilePicForm.value.type === imageTypes.Url'
-        [src]='profilePicForm.value.url'
-        (click)='openAvatarSelector()'
-        class='selecter-avatar mat-elevation-z5'
-    />
-    <img
-        *ngIf='profilePicForm.value && profilePicForm.value.type === imageTypes.ImageData'
-        [src]='profilePicForm.value.rawData'
-        (click)='openAvatarSelector()'
-        class='selecter-avatar mat-elevation-z5'
-    />
-    <mat-form-field appearance='outline'>
-        <!-- TODO : Language -->
-        <mat-label>Nouveau nom d'utilisateur</mat-label>
-        <input matInput [formControl]='newUsername' />
-    </mat-form-field>
-    <mat-form-field appearance='outline'>
-        <!-- TODO : Language -->
-        <mat-label>Confirmation de nom d'utilisateur</mat-label>
-        <input matInput [formControl]='newUsernameConfirmation' />
-    </mat-form-field>
-    <button mat-raised-button (click)='submitUsername()' class='username-confirmation'>
-        <!-- TODO : Language-->
-        Submit
-    </button>
+    <body class="mat-app-background">
+        <button
+            mat-fab
+            *ngIf="!userService.user.profilePicture"
+            color="primary"
+            (click)="openAvatarSelector()"
+            class="avatar-selector"
+            style="margin-bottom: 4px"
+        >
+            <mat-icon>person</mat-icon>
+        </button>
+        <img
+            *ngIf="userService.user.profilePicture && !profilePicForm.value"
+            [src]="userService.user.profilePicture.key"
+            (click)="openAvatarSelector()"
+            class="selecter-avatar mat-elevation-z5"
+        />
+        <img
+            *ngIf="profilePicForm.value && profilePicForm.value.type === imageTypes.Url"
+            [src]="profilePicForm.value.url"
+            (click)="openAvatarSelector()"
+            class="selecter-avatar mat-elevation-z5"
+        />
+        <img
+            *ngIf="profilePicForm.value && profilePicForm.value.type === imageTypes.ImageData"
+            [src]="profilePicForm.value.rawData"
+            (click)="openAvatarSelector()"
+            class="selecter-avatar mat-elevation-z5"
+        />
+        <mat-form-field appearance="outline">
+            <!-- TODO : Language -->
+            <mat-label>Nouveau nom d'utilisateur</mat-label>
+            <input matInput [formControl]="newUsername" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+            <!-- TODO : Language -->
+            <mat-label>Confirmation de nom d'utilisateur</mat-label>
+            <input matInput [formControl]="newUsernameConfirmation" />
+        </mat-form-field>
+        <button mat-raised-button (click)="submitUsername()" class="username-confirmation">
+            <!-- TODO : Language-->
+            Submit
+        </button>
     </body>
     <app-footer></app-footer>
 </div>

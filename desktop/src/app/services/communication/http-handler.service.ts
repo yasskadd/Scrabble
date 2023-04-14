@@ -149,13 +149,13 @@ export class HttpHandlerService {
         return JSON.parse(res.body);
     }
 
-    async getStats(): Promise<{ userStats: UserStats }> {
-        const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/profile/stats` });
+    async logout(user: IUser): Promise<any> {
+        const res: HttpResponse = await invoke('httpPost', { url: `${this.baseUrl}/auth/logout`, onceToldMe: JSON.stringify(user) });
         return JSON.parse(res.body);
     }
 
-    async logout(user: IUser): Promise<any> {
-        const res: HttpResponse = await invoke('httpPost', { url: `${this.baseUrl}/auth/logout`, onceToldMe: JSON.stringify(user) });
+    async getStats(): Promise<UserStats> {
+        const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/profile/stats` });
         return JSON.parse(res.body);
     }
 
