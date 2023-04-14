@@ -1,11 +1,9 @@
 /* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/naming-convention */
-import { defaultImagesMap } from '@app/constants/profile-pictures';
 import { FileRequest } from '@app/interfaces/file-request';
 import { uploadImage } from '@app/middlewares/multer-middleware';
 import { verifyToken } from '@app/middlewares/token-verification-middleware';
 import { AccountStorageService } from '@app/services/database/account-storage.service';
-import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, PutObjectCommandInput, S3Client } from '@aws-sdk/client-s3';
+import { ImageStorageService, PRESIGNED_URL_EXPIRY } from '@app/services/database/image-storage.service';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { ImageInfo } from '@common/interfaces/image-info';
 import { Request, Response, Router } from 'express';
@@ -13,22 +11,12 @@ import { StatusCodes } from 'http-status-codes';
 import { Service } from 'typedi';
 import * as uuid from 'uuid';
 
-const BUCKET_NAME = 'scrabble-images';
-const BUCKET_REGION = 'ca-central-1';
-const ACCESS_KEY = 'AKIA5IBYO7WFXIYKAMR6';
-const SECRET_ACCESS_KEY = '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';
-const PRESIGNED_URL_EXPIRY = 604800; // 1 week
-
 @Service()
 export class ProfilePictureController {
     router: Router;
-    private s3Client: S3Client;
-    private defaultImagesMap: Map<string, string>; // Map (key, )
 
-    constructor(private accountStorage: AccountStorageService) {
+    constructor(private accountStorage: AccountStorageService, private imageStorage: ImageStorageService) {
         this.configureRouter();
-        this.s3Client = this.configureS3Client();
-        this.defaultImagesMap = defaultImagesMap;
     }
 
     private configureRouter(): void {
@@ -45,9 +33,9 @@ export class ProfilePictureController {
          */
         this.router.get('/default-pictures', async (req: Request, res: Response) => {
             const imageUrlsMap: Map<string, string[]> = new Map();
-            for (const image of this.defaultImagesMap.entries()) {
-                const getImageCommand = this.CreateGetCommand(image[1]);
-                const signedUrl = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: PRESIGNED_URL_EXPIRY });
+            for (const image of this.imageStorage.defaultImagesMap.entries()) {
+                const getImageCommand = this.imageStorage.createGetCommand(image[1]);
+                const signedUrl = await getSignedUrl(this.imageStorage.s3Client, getImageCommand, { expiresIn: PRESIGNED_URL_EXPIRY });
                 imageUrlsMap.set(image[0], [signedUrl, image[1]]);
             }
             res.status(StatusCodes.OK).send(Object.fromEntries(imageUrlsMap));
@@ -70,8 +58,8 @@ export class ProfilePictureController {
                 return;
             }
 
-            const s3UploadCommand = this.createPutCommand(req.files[0], req.body.ImageKey);
-            await this.s3Client.send(s3UploadCommand);
+            const s3UploadCommand = this.imageStorage.createPutCommand(req.files[0], req.body.ImageKey);
+            await this.imageStorage.s3Client.send(s3UploadCommand);
 
             res.sendStatus(StatusCodes.CREATED);
         });
@@ -83,8 +71,8 @@ export class ProfilePictureController {
          * @return { number } HTTP Status - The return status of the request
          */
         this.router.get('/bot/profile-picture', async (req: Request, res: Response) => {
-            const getImageCommand = this.CreateGetCommand('f553ba598dbcfc7e9e07f8366b6684b5.jpg');
-            const signedURL = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: PRESIGNED_URL_EXPIRY });
+            const getImageCommand = this.imageStorage.createGetCommand('f553ba598dbcfc7e9e07f8366b6684b5.jpg');
+            const signedURL = await getSignedUrl(this.imageStorage.s3Client, getImageCommand, { expiresIn: PRESIGNED_URL_EXPIRY });
             res.status(StatusCodes.OK).send({ url: signedURL });
         });
 
@@ -100,8 +88,8 @@ export class ProfilePictureController {
             const profilePicInfo: ImageInfo = await this.accountStorage.getProfilePicInfoFromID(userID);
 
             // Create new signed_url
-            const getImageCommand = this.CreateGetCommand(profilePicInfo.key as string);
-            const signedURL = await getSignedUrl(this.s3Client, getImageCommand, { expiresIn: PRESIGNED_URL_EXPIRY });
+            const getImageCommand = this.imageStorage.createGetCommand(profilePicInfo.key as string);
+            const signedURL = await getSignedUrl(this.imageStorage.s3Client, getImageCommand, { expiresIn: PRESIGNED_URL_EXPIRY });
             res.status(StatusCodes.OK).send({ url: signedURL });
         });
 
@@ -125,14 +113,14 @@ export class ProfilePictureController {
             const userID = res.locals.user.userID;
             const oldProfilePicInfo = await this.accountStorage.getProfilePicInfoFromID(userID);
             const newImageKey = uuid.v4() + req.file?.originalname;
-            const putCommand = this.createPutCommand(req.file, newImageKey as string);
-            this.s3Client
+            const putCommand = this.imageStorage.createPutCommand(req.file, newImageKey as string);
+            this.imageStorage.s3Client
                 .send(putCommand)
                 .then(async () => {
                     // Delete the old image in the bucket (like an override)
                     if (oldProfilePicInfo.key?.length && !oldProfilePicInfo.isDefaultPicture) {
-                        const deleteImageCommand = this.createDeleteCommand(oldProfilePicInfo.key as string);
-                        this.s3Client.send(deleteImageCommand).catch((err) => {
+                        const deleteImageCommand = this.imageStorage.createDeleteCommand(oldProfilePicInfo.key as string);
+                        this.imageStorage.s3Client.send(deleteImageCommand).catch((err) => {
                             console.error(err);
                         });
                     }
@@ -164,15 +152,15 @@ export class ProfilePictureController {
 
             if (!profilePicInfo.isDefaultPicture) {
                 if (profilePicInfo.key?.length) {
-                    const deleteImageCommand = this.createDeleteCommand(profilePicInfo.key);
-                    this.s3Client.send(deleteImageCommand).catch((err) => {
+                    const deleteImageCommand = this.imageStorage.createDeleteCommand(profilePicInfo.key);
+                    this.imageStorage.s3Client.send(deleteImageCommand).catch((err) => {
                         console.error(err);
                     });
                 }
             }
             // Update DB (ImageKey to empty string and hasDefaultPicture to true and name to req.body.name)
             this.accountStorage
-                .updateDefaultImage(userID, req.body.fileName, this.defaultImagesMap.get(req.body.fileName) as string)
+                .updateDefaultImage(userID, req.body.fileName, this.imageStorage.defaultImagesMap.get(req.body.fileName) as string)
                 .then(async () => {
                     res.status(StatusCodes.OK).send({ userData: await this.accountStorage.getUserDataFromID(userID) });
                 })
@@ -181,39 +169,6 @@ export class ProfilePictureController {
                         error: err.message,
                     });
                 });
-        });
-    }
-
-    private configureS3Client(): S3Client {
-        return new S3Client({
-            credentials: {
-                accessKeyId: ACCESS_KEY,
-                secretAccessKey: SECRET_ACCESS_KEY,
-            },
-            region: BUCKET_REGION,
-        });
-    }
-
-    private createPutCommand(req: Express.Multer.File, imageKey: string): PutObjectCommand {
-        return new PutObjectCommand({
-            Bucket: BUCKET_NAME,
-            Key: imageKey,
-            Body: req.buffer,
-            ContentType: req.mimetype,
-        } as PutObjectCommandInput);
-    }
-
-    private CreateGetCommand(key: string): GetObjectCommand {
-        return new GetObjectCommand({
-            Bucket: BUCKET_NAME,
-            Key: key,
-        });
-    }
-
-    private createDeleteCommand(key: string): DeleteObjectCommand {
-        return new DeleteObjectCommand({
-            Bucket: BUCKET_NAME,
-            Key: key,
         });
     }
 }

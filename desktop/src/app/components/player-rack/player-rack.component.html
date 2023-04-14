@@ -1,6 +1,9 @@
 <div class="justified-rack">
     <div class="left-side" *ngIf="isCurrentPlayerPlaying()">
-        <button mat-raised-button [disabled]='!gameClient.currentlyPlaying() && letterPlacementService.placedLetters.length === 0' (click)='askForClue()'></button>
+        <button mat-raised-button [disabled]='!gameClient.currentlyPlaying() && letterPlacementService.placedLetters.length === 0' (click)='askForClue()'>
+            <!-- TODO : Language -->
+            Indice
+        </button>
         <button id="skip-turn" mat-raised-button [disabled]="!gameClient.currentlyPlaying()" (click)="skipTurn()">
             {{ "game_page.rack.skip_round" | translate }}
         </button>
