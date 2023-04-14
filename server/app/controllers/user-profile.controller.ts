@@ -9,6 +9,7 @@ import { IUser } from '@common/interfaces/user';
 import { Request, Response, Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { Service } from 'typedi';
+import { createMailOptions, transporter } from '@app/config/nodemailer';
 
 @Service()
 export class UserProfileController {
@@ -128,5 +129,20 @@ export class UserProfileController {
             const userGamesHistory = await this.historyStorage.getHistoryByUser(userID);
             res.status(StatusCodes.OK).json(userGamesHistory);
         });
+
+        this.router.post('/forgot-password', async (req: Request, res: Response) => {
+            const username: string = req.body.username;
+            const user : IUser = await this.accountStorageService.getUserData(username);
+            const email = user.email;
+            if (email) {
+                await transporter.sendMail({
+                    ...createMailOptions(email),
+                    subject: 'Forget password',
+                    text: 'TEST',
+                    html: '<h1>TEST TEXT</h1>'
+                });
+            }
+            res.sendStatus(StatusCodes.OK);
+        })
     }
 }
