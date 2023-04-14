@@ -4,12 +4,12 @@ import { GamesActionsService } from '@app/services/games-management/games-action
 import { GamesStateService } from '@app/services/games-management/games-state.service';
 import { assert } from 'console';
 import { createStubInstance, SinonStubbedInstance } from 'sinon';
-import { SocketSubscribeHandler } from './socket-subscribe-handler.service';
+import { InitializationHandler } from './initialization-handler.service';
 
 describe('Socket subscribe handler tests', () => {
     let chatboxHandlerService: SinonStubbedInstance<ChatboxHandlerService>;
     let gameSessionsHandlerService: SinonStubbedInstance<WaitingRoomService>;
-    let socketSubscribeHandler: SocketSubscribeHandler;
+    let socketSubscribeHandler: InitializationHandler;
     let gamesActionsService: SinonStubbedInstance<GamesActionsService>;
     let gamesStateService: SinonStubbedInstance<GamesStateService>;
 
@@ -22,7 +22,7 @@ describe('Socket subscribe handler tests', () => {
         gamesActionsService.initSocketsEvents.resolves();
         gamesStateService = createStubInstance(GamesStateService);
         gamesStateService.initSocketsEvents.resolves();
-        socketSubscribeHandler = new SocketSubscribeHandler(
+        socketSubscribeHandler = new InitializationHandler(
             chatboxHandlerService as unknown as ChatboxHandlerService,
             gameSessionsHandlerService as unknown as WaitingRoomService,
             gamesActionsService as unknown as GamesActionsService,

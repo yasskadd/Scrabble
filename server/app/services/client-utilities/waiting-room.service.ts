@@ -1,6 +1,7 @@
 /* eslint-disable max-lines */
 import { ROOMID_LENGTH, UNAVAILABLE_ELEMENT_INDEX } from '@app/constants/rooms';
 import { VirtualPlayersStorageService } from '@app/services/database/virtual-players-storage.service';
+import { GamesHandlerService } from '@app/services/games-management/games-handler.service';
 import { GamesStateService } from '@app/services/games-management/games-state.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketType } from '@app/types/sockets';
@@ -22,7 +23,7 @@ import { PlayerType } from '@common/models/player-type';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import * as uuid from 'uuid';
-import { GamesHandlerService } from '../games-management/games-handler.service';
+import { ChatHandlerService } from './chat-handler.service';
 
 // const PLAYERS_REJECT_FROM_ROOM_ERROR = "L'adversaire à rejeter votre demande";
 
@@ -34,6 +35,7 @@ export class WaitingRoomService {
         private gameStateService: GamesStateService,
         private virtualPlayerStorageService: VirtualPlayersStorageService,
         private socketManager: SocketManager,
+        private chatHandler: ChatHandlerService,
         private gamesHandler: GamesHandlerService,
     ) {
         this.waitingRooms = [];
@@ -72,6 +74,7 @@ export class WaitingRoomService {
     removeRoom(server: Server, roomId: string): void {
         const roomIndex = this.waitingRooms.findIndex((room: GameRoom) => room.id === roomId);
         this.waitingRooms.splice(roomIndex, 1);
+        this.chatHandler.deleteGameChatRoom(roomId);
 
         console.log(this.waitingRooms.map((wr: GameRoom) => wr.players.map((p: RoomPlayer) => p.type)));
         this.gamesHandler.cleanRooms().forEach((id: string) => {
@@ -82,7 +85,6 @@ export class WaitingRoomService {
     }
 
     private enterRoomLobby(server: Server, socket: Socket): void {
-        this.gamesHandler.cleanRooms();
         socket.join(GAME_LOBBY_ROOM_ID);
         server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
@@ -112,7 +114,9 @@ export class WaitingRoomService {
 
         // TODO : Add user as an observer if room full
         socket.leave(GAME_LOBBY_ROOM_ID);
+
         socket.join(room.id);
+        this.chatHandler.joinGameChatRoom(socket, room.id);
 
         const newPlayer: RoomPlayer = {
             user: joinGameQuery.user,
@@ -245,6 +249,7 @@ export class WaitingRoomService {
         socket.leave(GAME_LOBBY_ROOM_ID);
 
         socket.join(room.id);
+        this.chatHandler.createGameChatRoom(socket, room.id);
         socket.emit(SocketEvents.UpdateWaitingRoom, room);
     }
 
@@ -300,6 +305,7 @@ export class WaitingRoomService {
         if (playerIndex === UNAVAILABLE_ELEMENT_INDEX) return;
         room.players.splice(playerIndex, 1); // remove player from room;
 
+        this.chatHandler.leaveGameChatRoom(socket, room.id);
         socket.leave(player.roomId);
         socket.join(GAME_LOBBY_ROOM_ID);
     }
@@ -340,10 +346,11 @@ export class WaitingRoomService {
             username: user.username,
             password: 'null',
             profilePicture: user.profilePicture,
+            chatRooms: user.chatRooms,
             historyEventList: user.historyEventList,
             theme: user.theme,
             language: user.language,
-        };
+        } as IUser;
     }
 
     private stripPlayerPassword(player: RoomPlayer): RoomPlayer {
@@ -386,6 +393,7 @@ export class WaitingRoomService {
                         isDefaultPicture: true,
                         key: 'f553ba598dbcfc7e9e07f8366b6684b5.jpg',
                     },
+                    chatRooms: [],
                 },
                 socketId: '',
                 roomId,

@@ -86,45 +86,45 @@ export class MainPageComponent {
     }
 
     // TODO : should be in a log-in component
-    logIn(): void {
-        if (this.chatBoxHandlerService.loggedIn) return;
-        this.userNameForm.markAsTouched();
+    // logIn(): void {
+    //     if (this.chatBoxHandlerService.loggedIn) return;
+    //     this.userNameForm.markAsTouched();
 
-        this.userService.user.username = this.userNameForm.value;
-        this.chatBoxHandlerService.joinHomeRoom(this.userService.user.username);
-    }
+    //     this.userService.user.username = this.userNameForm.value;
+    //     this.chatBoxHandlerService.joinHomeRoom(this.userService.user.username);
+    // }
+
+    // // TODO : should be in a log-in component
+    // logOut(): void {
+    //     this.chatBoxHandlerService.leaveHomeRoom(this.userService.user.username);
+    // }
 
     // TODO : should be in a log-in component
-    logOut(): void {
-        this.chatBoxHandlerService.leaveHomeRoom(this.userService.user.username);
-    }
+    // getErrorMessage(): string {
+    //     let message = '';
+    //     switch (this.homeConnectionResponse.socketMessage) {
+    //         case SocketEvents.UsernameTaken: {
+    //             this.languageService.getWord('error.connection.usernameAlreadyExists').subscribe((word: string) => {
+    //                 message = word;
+    //             });
+    //             break;
+    //         }
+    //         case SocketEvents.RoomIsFull: {
+    //             this.languageService.getWord('error.connection.roomFull').subscribe((word: string) => {
+    //                 message = word;
+    //             });
+    //             break;
+    //         }
+    //     }
 
-    // TODO : should be in a log-in component
-    getErrorMessage(): string {
-        let message = '';
-        switch (this.homeConnectionResponse.socketMessage) {
-            case SocketEvents.UsernameTaken: {
-                this.languageService.getWord('error.connection.usernameAlreadyExists').subscribe((word: string) => {
-                    message = word;
-                });
-                break;
-            }
-            case SocketEvents.RoomIsFull: {
-                this.languageService.getWord('error.connection.roomFull').subscribe((word: string) => {
-                    message = word;
-                });
-                break;
-            }
-        }
+    //     if (this.userNameForm.hasError('required')) {
+    //         this.languageService.getWord('error.connection.empty').subscribe((word: string) => {
+    //             message = word;
+    //         });
+    //     }
 
-        if (this.userNameForm.hasError('required')) {
-            this.languageService.getWord('error.connection.empty').subscribe((word: string) => {
-                message = word;
-            });
-        }
-
-        return message;
-    }
+    //     return message;
+    // }
 
     openChat() {
         this.chatIsOpen = true;
@@ -137,7 +137,7 @@ export class MainPageComponent {
     private subscribeConnectionEvents(): void {
         if (this.subscribed) return;
 
-        this.connectionSubject = this.chatBoxHandlerService.subscribeToUserConnection();
+        // this.connectionSubject = this.chatBoxHandlerService.subscribeToUserConnection();
         this.connectionSubject.subscribe((res: SocketResponse) => {
             this.homeConnectionResponse = res;
             if (!res.validity) {
@@ -145,7 +145,7 @@ export class MainPageComponent {
             }
         });
 
-        this.disconnectionSubject = this.chatBoxHandlerService.subscribeToUserDisconnecting();
+        // this.disconnectionSubject = this.chatBoxHandlerService.subscribeToUserDisconnecting();
         this.disconnectionSubject.subscribe(() => {
             this.userService.user.username = '';
             this.userNameForm.setValue('');
