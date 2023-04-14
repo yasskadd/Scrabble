@@ -16,8 +16,12 @@
             <!-- TODO : Language -->
             <mat-error>{{ connectionError }}</mat-error>
             <div>
+                <div>
+
                 <button mat-raised-button color="primary" (click)="login()">Connecter</button>
                 <button mat-raised-button color="primary" (click)="redirectUserPage()">Créer un compte</button>
+                </div>
+                <button mat-raised-button color='primary' (click)='forgot()'>Mot de passe oublié</button>
             </div>
         </form>
     </body>
