@@ -140,7 +140,11 @@
     },
     "chat": {
         "message_box": "Enter a message",
-        "disconnected": "You need to be connected to access the chat rooms"
+        "disconnected": "You need to be connected to access the chat rooms",
+        "input_example": "Ex. Hi!",
+        "joined_chats": "Joined channels",
+        "available_chats": "Available channels",
+        "join": "Join"
     },
     "footer": {
         "team": "Team"

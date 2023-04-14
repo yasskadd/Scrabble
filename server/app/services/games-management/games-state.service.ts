@@ -53,7 +53,7 @@ export class GamesStateService {
     initSocketsEvents(): void {
         // LEAVE GAME
         this.socketManager.io(SocketEvents.Disconnect, (server: Server, socket: Socket) => {
-            this.disconnect(server, socket);
+            this.abandonGame(server, socket);
         });
         this.socketManager.io(SocketEvents.QuitGame, (server: Server, socket: Socket) => {
             this.disconnect(server, socket);
@@ -84,7 +84,6 @@ export class GamesStateService {
         if (!game) return;
 
         const gamePlayers: GamePlayer[] = this.initPlayers(game, room);
-
         await this.setupGameSubscriptions(room, game);
 
         gamePlayers.forEach((player: GamePlayer) => {
@@ -298,6 +297,7 @@ export class GamesStateService {
         this.gamesHandler.removePlayerFromSocketId(socket.id);
         const bot = this.replacePlayerWithBot(gamePlayer as RealPlayer);
 
+        // TODO: LEAVE CHATROOM
         socket.leave(bot.player.roomId);
         this.gamesHandler.addPlayer(bot);
 
@@ -321,6 +321,7 @@ export class GamesStateService {
             return;
         }
         // TODO: What to do if there are still observers in game ?
+        gamePlayer.game.abandon();
     }
 
     private disconnect(server: Server, socket: Socket) {

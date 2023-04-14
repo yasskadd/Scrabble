@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { SocketEvents } from '@common/constants/socket-events';
 import { ChatboxMessage } from '@common/interfaces/chatbox-message';
 // import { CommandInfo } from '@common/interfaces/place-word-command-info';
@@ -8,16 +8,14 @@ import { CommandHandlerService } from '@app/services/command-handler.service';
 import { ClientSocketService } from '@app/services/communication/client-socket.service';
 // import { GameClientService } from '@app/services/game-client.service';
 // import { GameConfigurationService } from '@app/services/game-configuration.service';
-import { SocketResponse } from '@app/interfaces/server-responses';
 import { ChatCommand } from '@app/models/chat-command';
 import { UserService } from '@app/services/user.service';
 import { TimeService } from '@services/time.service';
-import { Subject } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
 })
-export class ChatboxHandlerService implements OnDestroy {
+export class ChatboxHandlerService {
     messages: ChatboxMessage[];
     loggedIn: boolean;
 
@@ -39,9 +37,9 @@ export class ChatboxHandlerService implements OnDestroy {
         });
     }
 
-    ngOnDestroy() {
-        this.leaveHomeRoom(this.userService.user.username);
-    }
+    // ngOnDestroy() {
+    //     this.leaveHomeRoom(this.userService.user.username);
+    // }
 
     submitMessage(userInput: string): void {
         const message: ChatboxMessage = this.configureUserMessage(userInput);
@@ -53,87 +51,79 @@ export class ChatboxHandlerService implements OnDestroy {
         }
     }
 
-    joinHomeRoom(userName: string): void {
-        this.clientSocket.send(SocketEvents.JoinHomeRoom, userName);
-    }
+    // joinHomeRoom(userName: string): void {
+    //     this.clientSocket.send(SocketEvents.JoinHomeRoom, userName);
+    // }
 
-    leaveHomeRoom(userName: string): void {
-        this.clientSocket.send(SocketEvents.UserLeftRoom, userName);
-    }
+    // leaveHomeRoom(userName: string): void {
+    //     this.clientSocket.send(SocketEvents.UserLeftRoom, userName);
+    // }
 
-    subscribeToUserConnection(): Subject<SocketResponse> {
-        const roomJoinedSubject: Subject<SocketResponse> = new Subject<SocketResponse>();
-        this.clientSocket.on(SocketEvents.UserConnected, (userName: string) => {
-            if (userName === this.userService.user.username) {
-                roomJoinedSubject.next({ validity: true });
-                this.loggedIn = true;
-            }
-        });
-        this.clientSocket.on(SocketEvents.UserJoinedRoom, (userName: string) => {
-            if (userName === this.userService.user.username) {
-                roomJoinedSubject.next({ validity: true });
-                this.loggedIn = true;
-            }
-        });
-        this.clientSocket.on(SocketEvents.RoomIsFull, (userName: string) => {
-            if (userName === this.userService.user.username) {
-                roomJoinedSubject.next({ validity: false, socketMessage: SocketEvents.RoomIsFull });
-            }
-        });
-        this.clientSocket.on(SocketEvents.UsernameTaken, (userName: string) => {
-            if (userName === this.userService.user.username) {
-                roomJoinedSubject.next({ validity: false, socketMessage: SocketEvents.UsernameTaken });
-            }
-        });
+    // subscribeToUserConnection(): Subject<SocketResponse> {
+    //     const roomJoinedSubject: Subject<SocketResponse> = new Subject<SocketResponse>();
+    //     this.clientSocket.on(SocketEvents.UserConnected, (userName: string) => {
+    //         if (userName === this.userService.user.username) {
+    //             roomJoinedSubject.next({ validity: true });
+    //             this.loggedIn = true;
+    //         }
+    //     });
+    //     this.clientSocket.on(SocketEvents.UserJoinedRoom, (userName: string) => {
+    //         if (userName === this.userService.user.username) {
+    //             roomJoinedSubject.next({ validity: true });
+    //             this.loggedIn = true;
+    //         }
+    //     });
+    //     this.clientSocket.on(SocketEvents.RoomIsFull, (userName: string) => {
+    //         if (userName === this.userService.user.username) {
+    //             roomJoinedSubject.next({ validity: false, socketMessage: SocketEvents.RoomIsFull });
+    //         }
+    //     });
+    //     this.clientSocket.on(SocketEvents.UsernameTaken, (userName: string) => {
+    //         if (userName === this.userService.user.username) {
+    //             roomJoinedSubject.next({ validity: false, socketMessage: SocketEvents.UsernameTaken });
+    //         }
+    //     });
 
-        return roomJoinedSubject;
-    }
+    //     return roomJoinedSubject;
+    // }
 
-    subscribeToUserDisconnecting(): Subject<void> {
-        const roomLeftSubject: Subject<void> = new Subject<void>();
-        this.clientSocket.on(SocketEvents.UserLeftHomeRoom, (userName: string) => {
-            if (userName === this.userService.user.username) {
-                roomLeftSubject.next();
-                this.loggedIn = false;
-                this.messages = [];
-            }
-        });
+    // subscribeToUserDisconnecting(): Subject<void> {
+    //     const roomLeftSubject: Subject<void> = new Subject<void>();
+    //     this.clientSocket.on(SocketEvents.UserLeftHomeRoom, (userName: string) => {
+    //         if (userName === this.userService.user.username) {
+    //             roomLeftSubject.next();
+    //             this.loggedIn = false;
+    //             this.messages = [];
+    //         }
+    //     });
 
-        return roomLeftSubject;
-    }
+    //     return roomLeftSubject;
+    // }
 
     private configureBaseSocketFeatures(): void {
-        this.clientSocket.on(SocketEvents.GameMessage, (message: ChatboxMessage) => {
-            this.messages.push(message);
-        });
-
-        this.clientSocket.on(SocketEvents.UserJoinedRoom, (userName: string) => {
-            this.messages.push(this.createConnectedUserMessage(userName));
-        });
-
-        this.clientSocket.on(SocketEvents.ReceiveHomeMessage, (message: ChatboxMessage) => {
-            this.messages.push(message);
-        });
-
-        this.clientSocket.on(SocketEvents.UserLeftHomeRoom, (userName: string) => {
-            this.messages.push(this.createDisconnectedUserMessage(userName));
-        });
-
+        // this.clientSocket.on(SocketEvents.GameMessage, (message: ChatboxMessage) => {
+        //     this.messages.push(message);
+        // });
+        // this.clientSocket.on(SocketEvents.UserJoinedRoom, (userName: string) => {
+        //     this.messages.push(this.createConnectedUserMessage(userName));
+        // });
+        // this.clientSocket.on(SocketEvents.ReceiveHomeMessage, (message: ChatboxMessage) => {
+        //     this.messages.push(message);
+        // });
+        // this.clientSocket.on(SocketEvents.UserLeftHomeRoom, (userName: string) => {
+        //     this.messages.push(this.createDisconnectedUserMessage(userName));
+        // });
         // TODO: Implement listeners for new socket events (PlacementSuccess/Failure, ExchangeSuccess/Failure, nextTurn...)
-
         // this.clientSocket.on(SocketEvents.ImpossibleCommandError, (error: string) => {
         //     this.messages.push(this.createImpossibleCommandMessage(error));
         // });
-
         //
         // this.clientSocket.on(SocketEvents.GameEnd, () => {
         //     this.endGameMessage();
         // });
-
         // this.clientSocket.on(SocketEvents.AllReserveLetters, (letterReserveUpdated: Letter[]) => {
         //     this.configureReserveLetterCommand(letterReserveUpdated);
         // });
-
         // this.clientSocket.on(SocketEvents.ClueCommand, (clueCommand: CommandInfo[]) => {
         //     this.configureClueCommand(clueCommand);
         // });
@@ -150,30 +140,30 @@ export class ChatboxHandlerService implements OnDestroy {
         }
     }
 
-    private createConnectedUserMessage(userName: string): ChatboxMessage {
-        return {
-            type: 'system',
-            message: `'${userName}' a join le salon!`,
-            timeStamp: this.timerService.getTimeStampNow(),
-        };
-    }
+    // private createConnectedUserMessage(userName: string): ChatboxMessage {
+    //     return {
+    //         type: 'system',
+    //         message: `'${userName}' a join le salon!`,
+    //         timeStamp: this.timerService.getTimeStampNow(),
+    //     };
+    // }
 
-    private createDisconnectedUserMessage(userName: string): ChatboxMessage {
-        return {
-            type: 'system',
-            message: `'${userName}' a quitté le salon.`,
-            timeStamp: this.timerService.getTimeStampNow(),
-        };
+    // private createDisconnectedUserMessage(userName: string): ChatboxMessage {
+    //     return {
+    //         type: 'system',
+    //         message: `'${userName}' a quitté le salon.`,
+    //         timeStamp: this.timerService.getTimeStampNow(),
+    //     };
 
-        // TODO : Send message when replacing player with virutal one
-        // if (!this.gameClient.isGameFinish) {
-        //     this.messages.push({
-        //         type: 'system-message',
-        //         message: "------L'adversaire à été remplacé par un joueur virtuel Débutant------",
-        //         timeStamp: this.timeService.getTimeStamp(),
-        //     });
-        // }
-    }
+    //     // TODO : Send message when replacing player with virutal one
+    //     // if (!this.gameClient.isGameFinish) {
+    //     //     this.messages.push({
+    //     //         type: 'system-message',
+    //     //         message: "------L'adversaire à été remplacé par un joueur virtuel Débutant------",
+    //     //         timeStamp: this.timeService.getTimeStamp(),
+    //     //     });
+    //     // }
+    // }
 
     private configureUserMessage(userInput: string): ChatboxMessage {
         return {
