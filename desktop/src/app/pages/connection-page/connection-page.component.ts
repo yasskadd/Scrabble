@@ -3,6 +3,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { Router } from '@angular/router';
 import { MAX_TEXT_LENGTH } from '@app/constants/user';
 import { UserService } from '@app/services/user.service';
+import { IUser } from '@common/interfaces/user';
 
 @Component({
     selector: 'app-connection-page',
@@ -40,7 +41,7 @@ export class ConnectionPageComponent {
             _id: '',
             username: this.usernameForm.value,
             password: this.passwordForm.value,
-        });
+        } as IUser);
     }
 
     protected redirectUserPage() {
