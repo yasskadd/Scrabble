@@ -146,6 +146,7 @@ export class UserProfileController {
             }
             res.sendStatus(StatusCodes.CREATED);
         })
+        
         this.router.get('/all', async (req: Request, res: Response) => {
             const userGamesHistory = await this.accountStorageService.getAllUsersData();
             res.status(StatusCodes.OK).json(userGamesHistory);
