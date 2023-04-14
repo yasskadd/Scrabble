@@ -12,8 +12,7 @@ export class UserProfilePageComponent {
     @ViewChild('myChart') canvasRef: ElementRef<HTMLCanvasElement>;
 
     constructor(protected userService: UserService, private router: Router) {
-        console.log(userService.user);
-        console.log(userService.userStats);
+        userService.userStats.averageGameScore = Math.round(userService.userStats.averageGameScore);
     }
 
     ngAfterViewInit() {
