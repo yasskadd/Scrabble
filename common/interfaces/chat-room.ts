@@ -3,8 +3,17 @@ import { Message } from './message';
 
 export interface ChatRoom {
     name: string;
+    creatorId?: string;
     isDeletable: boolean;
     messages: Message[];
+}
+
+export interface ChatRoomInfo {
+    name: string;
+    messageCount: number;
+    creatorId?: string;
+    readingUsers: Set<string>;
+    isDeletable: boolean;
 }
 
 export interface ChatRoomUser {

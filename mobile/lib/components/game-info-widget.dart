@@ -1,18 +1,20 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mobile/components/reserve-widget.dart';
 import 'package:mobile/domain/models/game-model.dart';
-import 'package:mobile/domain/models/player-models.dart';
 import 'package:mobile/domain/models/room-model.dart';
+import 'package:mobile/domain/services/avatar-service.dart';
 import 'package:mobile/domain/services/game-service.dart';
-import 'package:mobile/domain/services/room-service.dart';
 import 'dart:math' as math;
 
 class GameInfoBar extends StatelessWidget {
-  final _gameService = GetIt.I.get<GameService>();
+  final GlobalKey draggableKey;
 
-  GameInfoBar({Key? key}) : super(key: key);
+  GameInfoBar({Key? key, required this.draggableKey}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +26,9 @@ class GameInfoBar extends StatelessWidget {
           const SizedBox(height: 25),
           PlayerInfo(),
           const SizedBox(height: 25),
-          GameInfo(),
+          GameInfo(
+            draggableKey: draggableKey,
+          ),
         ],
       ),
     );
@@ -32,7 +36,9 @@ class GameInfoBar extends StatelessWidget {
 }
 
 class GameInfo extends StatefulWidget {
-  const GameInfo({Key? key}) : super(key: key);
+  final GlobalKey draggableKey;
+
+  const GameInfo({Key? key, required this.draggableKey}) : super(key: key);
 
   @override
   State<GameInfo> createState() => _GameInfoState();
@@ -75,24 +81,15 @@ class _GameInfoState extends State<GameInfo> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          Card(
-                              color: Colors.lightGreen[50],
-                              margin: const EdgeInsets.all(10),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Column(
-                                  children: const [
-                                    Text("Réserve"),
-                                    SizedBox(height: 5),
-                                    Text("100")
-                                  ],
-                                ),
-                              )),
-                          Row(children: [
-                            const Icon(Icons.timer),
-                            Text(
-                                " ${GameService.turnLength - _gameService.game!.turnTimer} secondes")
-                          ]),
+                          LetterReserve(draggableKey: widget.draggableKey),
+                          SizedBox(
+                            width: 125,
+                            child: Row(children: [
+                              const Icon(Icons.timer),
+                              Text(
+                                  " ${_gameService.game!.timerLength - _gameService.game!.turnTimer} ${FlutterI18n.translate(context, "game.second")}s")
+                            ]),
+                          ),
                         ],
                       )
                     ],
@@ -106,14 +103,16 @@ class _GameInfoState extends State<GameInfo> {
                 onPressed: _gameService.pendingLetters.isEmpty
                     ? null
                     : () => {_gameService.confirmWordPlacement()},
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.all(20.0),
-                  child: Text("Placer"),
+                  child: Text(FlutterI18n.translate(context, "game.place")),
                 )),
             const SizedBox(width: 50),
             ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                onPressed: () => {_gameService.skipTurn()},
+                onPressed: _gameService.game!.isCurrentPlayersTurn()
+                    ? () => {_gameService.skipTurn()}
+                    : null,
                 child: const Padding(
                   padding: EdgeInsets.all(17.0),
                   child: Icon(Icons.skip_next_rounded),
@@ -133,8 +132,8 @@ class PlayerInfo extends StatefulWidget {
 }
 
 class _PlayerInfoState extends State<PlayerInfo> {
-  final _roomService = GetIt.I.get<RoomService>();
   final _gameService = GetIt.I.get<GameService>();
+  final _avatarService = GetIt.I.get<AvatarService>();
 
   late StreamSubscription _gameInfoUpdate;
 
@@ -167,6 +166,13 @@ class _PlayerInfoState extends State<PlayerInfo> {
               child: SizedBox(
                   width: 260,
                   child: ListTile(
+                    leading: CircleAvatar(
+                        backgroundImage:
+                        (player.player.playerType == PlayerType.Bot) ? NetworkImage(_avatarService.botImageUrl):
+                        player.player.user.profilePicture?.key != null ? NetworkImage(player.player.user.profilePicture!.key!) : null,
+                        child: player.player.user.profilePicture?.key != null
+                            ? null
+                            : const Icon(CupertinoIcons.profile_circled)),
                     title: Text(player.player.user.username),
                     subtitle: Text("Score: ${player.score}"),
                     trailing: _gameService.game?.activePlayer == player
@@ -174,7 +180,7 @@ class _PlayerInfoState extends State<PlayerInfo> {
                             alignment: Alignment.center,
                             transform: Matrix4.rotationY(math.pi),
                             child: CircularProgressIndicator(
-                              value: 1 - (_gameService.game!.turnTimer / GameService.turnLength),
+                              value: 1 - (_gameService.game!.getTurnProcess()),
                               color: Colors.blue,
                             ))
                         : null,

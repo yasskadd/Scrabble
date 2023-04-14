@@ -1,15 +1,15 @@
 import { GamePlayer } from '@app/classes/player/player.class';
-import { Word } from '@app/classes/word.class';
+import { Word } from '@common/classes/word.class';
 import { RackService } from '@app/services/rack.service';
 import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
 import { Service } from 'typedi';
 
 export enum ErrorType {
     CommandCoordinateOutOfBounds = 'Placement invalide pour la premiere coordonnée',
-    LettersNotInRack = 'Les lettres ne sont pas dans le chavalet',
+    LettersNotInRack = 'game.not_in_rack',
     InvalidFirstWordPlacement = "Le mot doit être attaché à un autre mot (ou passer par la case du milieu si c'est le premier tour)",
     InvalidWordBuild = "Le mot ne possède qu'une lettre OU les lettres en commande sortent du plateau",
-    WrongTurn = 'wrong turn',
+    WrongTurn = 'game.wrong_turn',
     UndefinedGame = 'undefined game',
 }
 
@@ -31,7 +31,7 @@ export class GameValidationService {
 
         if (validationInfo instanceof Word) return validationInfo;
 
-        // Error
+        // TODO : Error
         game.turn.resetSkipCounter();
         return validationInfo;
     }

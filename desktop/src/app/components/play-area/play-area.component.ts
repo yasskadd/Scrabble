@@ -2,16 +2,21 @@ import { Component, HostListener } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import * as constants from '@app/constants/board-view';
 import { Vec2 } from '@app/interfaces/vec2';
+import { RackPosition } from '@app/models/rack-position';
 import { GameClientService } from '@app/services/game-client.service';
 import { GridService } from '@app/services/grid.service';
 import { LetterPlacementService } from '@app/services/letter-placement.service';
+import { PlayerInformation } from '@common/interfaces/player-information';
 import { Subject } from 'rxjs';
+import { PlayerType } from '@common/models/player-type';
+import { ClientSocketService } from '@app/services/communication/client-socket.service';
+import { SocketEvents } from '@common/constants/socket-events';
 
-export enum MouseButton {
-    Left = 0,
-    Right = 2,
-    Back = 3,
-}
+// export enum MouseButton {
+//     Left = 0,
+//     Right = 2,
+//     Back = 3,
+// }
 
 @Component({
     selector: 'app-play-area',
@@ -23,10 +28,14 @@ export class PlayAreaComponent {
     mousePosition: Vec2;
     protected sliderForm: FormControl;
     protected chatIsOpen: boolean;
+    protected selectedPlayer: PlayerInformation;
+
+    protected playerType: typeof PlayerType = PlayerType;
 
     constructor(
         private readonly gridService: GridService,
-        private letterService: LetterPlacementService,
+        protected letterService: LetterPlacementService,
+        private clientSocketService: ClientSocketService,
         public gameClientService: GameClientService,
     ) {
         this.sliderForm = new FormControl(this.gridService.letterSize);
@@ -82,5 +91,17 @@ export class PlayAreaComponent {
 
     updateFontSize(): void {
         this.gridService.letterSize = this.sliderForm.value;
+    }
+
+    selectPlayer(index: number): void {
+        this.selectedPlayer = this.gameClientService.players[index];
+    }
+
+    getPosition(index: number): RackPosition {
+        return Object.values(RackPosition)[index];
+    }
+
+    replaceBot(player: PlayerInformation) {
+        this.clientSocketService.send(SocketEvents.JoinAsObserver, player.player.user._id);
     }
 }

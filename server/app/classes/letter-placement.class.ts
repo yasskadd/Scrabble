@@ -1,5 +1,5 @@
 import { GamePlayer } from '@app/classes/player/player.class';
-import { Word } from '@app/classes/word.class';
+import { Word } from '@common/classes/word.class';
 import { WordPlacementResult } from '@app/interfaces/word-placement-result';
 import { ErrorType } from '@app/services/games-management/game-validation.service';
 import { Gameboard } from '@common/classes/gameboard.class';
@@ -24,7 +24,6 @@ export class LetterPlacement {
 
     placeWord(commandWord: Word, commandInfo: PlaceWordCommandInfo, player: GamePlayer, currentGameboard: Gameboard): WordPlacementResult {
         this.placeNewLettersOnBoard(commandInfo, commandWord, currentGameboard);
-
         const wordValidationResult = this.dictionaryValidation.validateWord(commandWord, currentGameboard);
         if (!wordValidationResult.points) {
             this.removeLettersFromBoard(commandWord, currentGameboard);

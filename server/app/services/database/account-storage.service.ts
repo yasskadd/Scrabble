@@ -162,9 +162,8 @@ export class AccountStorageService {
 
     async addUserEventHistory(id: string, userEvent: string, dateEvent: Date, isWinner?: boolean): Promise<void> {
         const historyEvent = this.createHistoryEvent(userEvent, dateEvent, isWinner);
-        if (historyEvent) {
-            await this.database.users.collection.updateOne({ _id: new ObjectId(id) }, { $push: { historyEventList: historyEvent } });
-        }
+        if (!historyEvent) return;
+        await this.database.users.collection.updateOne({ _id: new ObjectId(id) }, { $push: { historyEventList: historyEvent } });
     }
 
     async addChatRoom(id: string, chatRoom: UserChatRoom) {

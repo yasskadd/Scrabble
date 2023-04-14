@@ -3,21 +3,11 @@ import { AccountStorageService } from '@app/services/database/account-storage.se
 import { ChatRoomsStorageService } from '@app/services/database/chat-rooms-storage.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
-import { ChatRoom } from '@common/interfaces/chat-room';
+import { ChatRoom, ChatRoomInfo } from '@common/interfaces/chat-room';
 import { Message } from '@common/interfaces/message';
 import * as moment from 'moment';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
-
-interface ChatRoomInfo {
-    name: string;
-    messageCount: number;
-    creatorId?: string;
-    readingUsers: Set<string>;
-    isDeletable: boolean;
-}
-
-// const ROOM_LIMIT = 1000;
 
 @Service()
 export class ChatHandlerService {
@@ -38,7 +28,13 @@ export class ChatHandlerService {
             rooms.forEach((room) => {
                 if (this.getChatRoom(room.name)) return;
                 const messageCount = room.messages.length;
-                this.chatRooms.push({ name: room.name, messageCount, readingUsers: new Set(), isDeletable: room.isDeletable });
+                this.chatRooms.push({
+                    name: room.name,
+                    messageCount,
+                    readingUsers: new Set(),
+                    creatorId: room.creatorId,
+                    isDeletable: room.isDeletable,
+                });
             });
         });
     }
@@ -175,7 +171,7 @@ export class ChatHandlerService {
             isDeletable: true,
         };
         this.chatRooms.push(newChatRoom);
-        await this.chatRoomsStorage.createRoom(chatRoomName);
+        await this.chatRoomsStorage.createRoom(newChatRoom);
         await this.joinChatRoom(socket, chatRoomName);
         sio.emit(SocketEvents.CreateChatRoom, newChatRoom);
     }

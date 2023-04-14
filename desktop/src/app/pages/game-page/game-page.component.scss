@@ -16,3 +16,31 @@ app-play-area {
 .load > h1 {
     font-family: revert;
 }
+
+.tile {
+    padding: 2px !important;
+    margin: 4px;
+    height: 36px;
+    width: 36px;
+    border-radius: 2px;
+    box-shadow: none;
+    background-color: #fbd7a3;
+    z-index: 4;
+    position: absolute;
+}
+
+.pending-letter {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+    justify-content: center;
+}
+
+.letter-value {
+    text-align: center;
+    vertical-align: middle;
+    font-size: 20px;
+}
+
+.tile-content {
+    position: absolute;
+    align-items: center;
+}

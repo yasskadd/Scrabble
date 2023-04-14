@@ -6,3 +6,7 @@ body {
     align-items: center;
     height: 100%;
 }
+
+div > button:first-of-type {
+    margin-right: 5px;
+}
