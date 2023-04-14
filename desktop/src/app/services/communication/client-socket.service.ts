@@ -9,6 +9,8 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
 import { WebviewWindow } from '@tauri-apps/api/window';
+import { DialogBoxReconnectionComponent } from '@app/components/dialog-box-reconnection/dialog-box-reconnection.component';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 
 @Injectable({
     providedIn: 'root',
@@ -16,17 +18,20 @@ import { WebviewWindow } from '@tauri-apps/api/window';
 export class ClientSocketService {
     appUpdate: Subject<void>;
     connected: BehaviorSubject<boolean>;
+    reconnect: Subject<void>;
     cancelConnection: Subject<void>;
-
     private socket: Socket;
+    reconnectionDialog: MatDialogRef<DialogBoxReconnectionComponent>;
 
     constructor(
         private snackBarService: SnackBarService,
         private languageService: LanguageService,
         private tauriStateService: TauriStateService, // private dialog: MatDialog,
+        private dialog: MatDialog,
     ) {
         this.appUpdate = new Subject();
         this.connected = new BehaviorSubject<boolean>(false);
+        this.reconnect = new Subject();
         this.cancelConnection = new Subject();
 
         if (this.tauriStateService.useTauri) {
@@ -132,22 +137,16 @@ export class ClientSocketService {
             if (data) {
                 tauri.tauri.invoke(RustCommand.Send, { eventName: event, data: JSON.stringify(data) }).then(() => {
                     tauri.event
-                        .listen(RustEvent.SocketSendFailed, (error: Event<unknown>) => {
-                            this.languageService.getWord('error.socket.send_failed').subscribe((word: string) => {
-                                this.snackBarService.openError((word + ' : ' + error.payload) as string);
-                                // TODO : Propose a reconnection attempt
-                                // this.dialog.open();
-                            });
+                        .listen(RustEvent.SocketSendFailed, () => {
+                            this.launchReconnectionProtocol();
                         })
                         .then();
                 });
             } else {
                 tauri.tauri.invoke(RustCommand.Send, { eventName: event }).then(() => {
                     tauri.event
-                        .listen(RustEvent.SocketSendFailed, (error: Event<unknown>) => {
-                            this.languageService.getWord('error.socket.send_failed').subscribe((word: string) => {
-                                this.snackBarService.openError((word + ' : ' + error.payload) as string);
-                            });
+                        .listen(RustEvent.SocketSendFailed, () => {
+                            this.launchReconnectionProtocol();
                         })
                         .then();
                 });
@@ -159,5 +158,25 @@ export class ClientSocketService {
                 this.socket.emit(event);
             }
         }
+    }
+
+    launchReconnectionProtocol(): void {
+        this.languageService.getWord('error.socket.send_failed').subscribe((word: string) => {
+            // this.snackBarService.openError((word + ' : ' + error.payload) as string);
+
+            if (this.reconnectionDialog) return;
+
+            // TODO : Propose a reconnection attempt
+            this.reconnectionDialog = this.dialog.open(DialogBoxReconnectionComponent, {
+                disableClose: true,
+            });
+            this.reconnectionDialog.afterClosed().subscribe((toReconnect: boolean) => {
+                if (toReconnect) {
+                    this.reconnect.next();
+                    return;
+                }
+                this.cancelConnection.next();
+            });
+        });
     }
 }
