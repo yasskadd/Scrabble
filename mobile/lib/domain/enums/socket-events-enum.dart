@@ -55,7 +55,9 @@ enum GameSocketEvent {
   GameEnded('endGame'),
   PlacementSuccess('placementSuccess'),
   PlacementFailure('placementFailure'),
-  LetterReserveUpdated("letterReserveUpdated");
+  LetterReserveUpdated("letterReserveUpdated"),
+  JoinAsObserver('joinAsObserver'),
+  CannotReplaceBot('cannotReplaceBot');
 
   const GameSocketEvent(this.event);
 
