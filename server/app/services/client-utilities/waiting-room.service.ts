@@ -1,6 +1,7 @@
 /* eslint-disable max-lines */
 import { ROOMID_LENGTH, UNAVAILABLE_ELEMENT_INDEX } from '@app/constants/rooms';
 import { VirtualPlayersStorageService } from '@app/services/database/virtual-players-storage.service';
+import { GamesHandlerService } from '@app/services/games-management/games-handler.service';
 import { GamesStateService } from '@app/services/games-management/games-state.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketType } from '@app/types/sockets';
@@ -35,8 +36,12 @@ export class WaitingRoomService {
         private virtualPlayerStorageService: VirtualPlayersStorageService,
         private socketManager: SocketManager,
         private chatHandler: ChatHandlerService,
+        private gamesHandler: GamesHandlerService,
     ) {
         this.waitingRooms = [];
+        this.gamesHandler.deleteWaitingRoom.subscribe((roomID: string) => {
+            this.clearWaitingRoom(roomID);
+        });
     }
 
     initSocketEvents() {
@@ -369,5 +374,9 @@ export class WaitingRoomService {
         });
 
         return virtualPlayers;
+    }
+
+    clearWaitingRoom(waitingRoomID: string) {
+        this.waitingRooms = this.waitingRooms.filter((waitingRoom: GameRoom) => waitingRoom.id !== waitingRoomID);
     }
 }

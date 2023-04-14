@@ -78,7 +78,6 @@ export class GamesActionsService {
         if (!gamePlayer) return;
 
         const lettersToExchange = letters.length;
-
         if (!this.rackService.areLettersInRack(letters, gamePlayer)) {
             socket.emit(SocketEvents.ExchangeFailure);
             return;
@@ -94,6 +93,10 @@ export class GamesActionsService {
     }
 
     private placeWord(socket: Socket, commandInfo: PlaceWordCommandInfo) {
+        commandInfo = {
+            ...commandInfo,
+            letters: commandInfo.letters.map((letter: string) => letter.toLowerCase())
+        }
         const gamePlayer = this.gamesHandler.getPlayerFromSocketId(socket.id) as RealPlayer;
         if (!gamePlayer) return;
 

@@ -186,8 +186,8 @@ export class GamesStateService {
 
     private async setupGameSubscriptions(room: GameRoom, game: Game) {
         game.turn.endTurn.subscribe(async () => {
-            this.calculateEndGameScore(room.id);
             if (!game.turn.activePlayer) {
+                this.calculateEndGameScore(room.id);
                 await this.broadcastHighScores(room.players, room.id);
             } else this.changeTurn(room.id);
             this.sendPublicViewUpdate(game, room);
@@ -198,41 +198,39 @@ export class GamesStateService {
         });
     }
 
-    private calculateEndGameScore(roomID: string) {
+    private calculateEndGameScore(roomID: string): void {
         const players = this.gamesHandler.getPlayersFromRoomId(roomID);
-        if (!players) return;
-
         const game = players.find((gamePlayer: GamePlayer) => gamePlayer.player.type === PlayerType.User)?.game;
-        if (!game) return;
+        if (!game || !players) return;
 
         if (game.turn.skipCounter === MAX_SKIP) {
             players.forEach((player) => {
                 player.deductPoints();
             });
-            return;
         }
-
-        if (players.filter((player: GamePlayer) => player.rackIsEmpty()).length > 0) {
-            const finishingPlayer = players.find((player: GamePlayer) => player.rackIsEmpty());
-            if (!finishingPlayer) return;
+        const finishingPlayer = players.find((player: GamePlayer) => player.rackIsEmpty());
+        if (finishingPlayer) {
             players.filter((player: GamePlayer) => {
                 if (player.player.user.username !== finishingPlayer.player.user.username) {
                     player.deductPoints();
                     finishingPlayer.addPoints(player.rack);
                 }
             });
-            // TODO: Add GameEvent History to each player
-            const realPlayers = players.filter((player) => player.player.type === PlayerType.User);
-            const winnerPlayer = players.reduce((prev, current) => {
-                return prev.score > current.score ? prev : current;
-            });
-            realPlayers.forEach((player: GamePlayer) => {
-                if (player.player.type === PlayerType.User) {
-                    if (player.player.user.username === winnerPlayer.player.user.username) this.addGameEventHistory(player as RealPlayer, true);
-                    else this.addGameEventHistory(player as RealPlayer, false);
-                }
-            });
         }
+        this.addGameEventToPlayers(players);
+    }
+
+    private addGameEventToPlayers(players: GamePlayer[]) {
+        const realPlayers = players.filter((player) => player.player.type === PlayerType.User);
+        const winnerPlayer = players.reduce((prev, current) => {
+            return prev.score > current.score ? prev : current;
+        });
+        realPlayers.forEach((player: GamePlayer) => {
+            if (player.player.type === PlayerType.User) {
+                if (player.player.user.username === winnerPlayer.player.user.username) this.addGameEventHistory(player as RealPlayer, true);
+                else this.addGameEventHistory(player as RealPlayer, false);
+            }
+        });
     }
 
     private createNewGame(room: GameRoom): Game | undefined {
@@ -269,7 +267,6 @@ export class GamesStateService {
             activePlayer: players[0].game.turn.activePlayer,
         };
 
-        console.log('Next turn');
 
         this.socketManager.emitRoom(roomId, SocketEvents.NextTurn, gameInfo);
     }
@@ -306,7 +303,6 @@ export class GamesStateService {
         // TODO: What to do if there are still observers in game ?
         gamePlayer.game.abandon();
         // this.gameEnded.next(room);
-        this.gamesHandler.removeRoomFromRoomId(room);
     }
 
     // private async switchToSolo(playerToReplace: GamePlayer): Promise<void> {
@@ -553,9 +549,10 @@ export class GamesStateService {
     }
 
     private addGameEventHistory(player: RealPlayer, gameWon: boolean) {
-        const username = player.player.user.username;
+        console.log('ENTERED ADD GAME EVENT HISTORY');
+        const userID = player.player.user._id;
         const gameDate = player.game.beginningTime;
-        this.accountStorage.addUserEventHistory(username, HistoryActions.Game, gameDate, gameWon);
+        this.accountStorage.addUserEventHistory(userID, HistoryActions.Game, gameDate, gameWon);
     }
     // Replace observer and bot in list by observer
     // Add Socket event to let observer join the room (need to verify if its possible to join or not)
