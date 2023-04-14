@@ -8,16 +8,29 @@ import { CommandHandlerService } from '@app/services/command-handler.service';
 import { ClientSocketService } from '@app/services/communication/client-socket.service';
 // import { GameClientService } from '@app/services/game-client.service';
 // import { GameConfigurationService } from '@app/services/game-configuration.service';
+import { ChatRoomClient } from '@app/interfaces/chat-room-client';
 import { ChatCommand } from '@app/models/chat-command';
 import { UserService } from '@app/services/user.service';
+import { ChatRoom, ChatRoomUser } from '@common/interfaces/chat-room';
+import { Message } from '@common/interfaces/message';
 import { TimeService } from '@services/time.service';
+import { HttpHandlerService } from '../communication/http-handler.service';
+
+interface UserChatRoom {
+    username: string;
+    imageUrl: string;
+}
 
 @Injectable({
     providedIn: 'root',
 })
 export class ChatboxHandlerService {
-    messages: ChatboxMessage[];
+    messages: Message[];
     loggedIn: boolean;
+    allChatRooms: ChatRoomClient[];
+    joinedChatRooms: ChatRoomClient[];
+    chatSession: string | undefined;
+    userInfoHashMap: Map<string, UserChatRoom>;
 
     constructor(
         private clientSocket: ClientSocketService,
@@ -26,9 +39,14 @@ export class ChatboxHandlerService {
         private commandHandler: CommandHandlerService,
         private timerService: TimeService,
         private userService: UserService,
+        private httpHandlerService: HttpHandlerService,
     ) {
         this.messages = [];
         this.loggedIn = false;
+        this.allChatRooms = [];
+        this.joinedChatRooms = [];
+        this.chatSession = undefined;
+        this.userInfoHashMap = new Map();
 
         this.clientSocket.connected.subscribe((connected: boolean) => {
             if (connected) {
@@ -101,6 +119,42 @@ export class ChatboxHandlerService {
     // }
 
     private configureBaseSocketFeatures(): void {
+        this.clientSocket.on(SocketEvents.GetAllChatRooms, (chatRooms: ChatRoomClient[]) => {
+            this.allChatRooms = chatRooms;
+        });
+
+        this.clientSocket.on(SocketEvents.SendMessage, (newMessage: any) => {
+            const roomName = newMessage.room;
+            const message = newMessage.newMessage;
+            this.treatReceivedMessage(roomName, message);
+        });
+
+        this.clientSocket.on(SocketEvents.JoinChatRoom, (chatRoom: ChatRoomClient) => {
+            this.joinChatRoom(chatRoom);
+        });
+
+        this.clientSocket.on(SocketEvents.JoinChatRoomSession, (chatRoom: ChatRoom) => {
+            const roomName = chatRoom.name;
+            const newMessages: Message[] = chatRoom.messages;
+            this.joinRoomSession(roomName, newMessages);
+        });
+
+        this.clientSocket.on(SocketEvents.CreateChatRoom, (newChatRoom: ChatRoomClient) => {
+            this.onNewChatRoomCreated(newChatRoom);
+        });
+
+        // this.clientSocket.on(SocketEvents.CreateChatRoomError, (err: string) {
+        //     this.onRoomCreationFail(err);
+        // });
+
+        this.clientSocket.on(SocketEvents.LeaveChatRoom, (chatRoom: ChatRoomClient) => {
+            this.leaveRoom(chatRoom.name);
+        });
+
+        this.clientSocket.on(SocketEvents.DeleteChatRoom, (chatRoom: ChatRoomClient) => {
+            this.deleteChatRoom(chatRoom);
+        });
+
         // this.clientSocket.on(SocketEvents.GameMessage, (message: ChatboxMessage) => {
         //     this.messages.push(message);
         // });
@@ -127,6 +181,71 @@ export class ChatboxHandlerService {
         // this.clientSocket.on(SocketEvents.ClueCommand, (clueCommand: CommandInfo[]) => {
         //     this.configureClueCommand(clueCommand);
         // });
+    }
+
+    private treatReceivedMessage(roomName: string, newMessage: Message) {
+        if (this.chatSession === roomName) {
+            this.messages.push(newMessage);
+        } else {
+            this.sendNotification(roomName, newMessage);
+        }
+    }
+
+    private sendNotification(roomName: string, newMessage: Message) {
+        //TODO: Handle notif
+    }
+
+    private joinChatRoom(chatRoom: ChatRoomClient) {
+        this.joinedChatRooms.push(chatRoom);
+        this.removeRoomFromAllChatRooms(chatRoom.name);
+        this.requestJoinRoomSession(chatRoom.name);
+    }
+
+    private requestJoinRoomSession(chatRoomName: string) {
+        this.clientSocket.send(SocketEvents.JoinChatRoomSession, chatRoomName);
+    }
+
+    private removeRoomFromJoinedChatRooms(chatRoomName: string) {
+        const indexToDelete = this.joinedChatRooms.findIndex((room) => room.name === chatRoomName);
+        this.joinedChatRooms.splice(indexToDelete, 1);
+    }
+
+    private removeRoomFromAllChatRooms(chatRoomName: string) {
+        const indexToDelete = this.allChatRooms.findIndex((room) => room.name === chatRoomName);
+        this.allChatRooms.splice(indexToDelete, 1);
+    }
+
+    private joinRoomSession(chatRoomName: string, newMessage: Message[]) {
+        this.messages = newMessage;
+        this.chatSession = chatRoomName;
+        const currentlyRequested = new Set<string>();
+        for (const message of this.messages) {
+            const id = message.userId;
+            if (!this.userInfoHashMap.has(id) && !currentlyRequested.has(id)) {
+                currentlyRequested.add(id);
+                this.updateUserInfo(id);
+            }
+        }
+    }
+
+    private updateUserInfo(id: string) {
+        this.httpHandlerService.getChatUserInfo(id).then((userInfo: ChatRoomUser) => {
+            this.userInfoHashMap.set(id, userInfo);
+        });
+    }
+
+    private onNewChatRoomCreated(newChatRoom: ChatRoomClient) {
+        this.allChatRooms.push(newChatRoom);
+    }
+
+    private leaveRoom(chatRoomName: string) {
+        this.removeRoomFromJoinedChatRooms(chatRoomName);
+    }
+
+    private deleteChatRoom(chatRoom: ChatRoomClient) {
+        this.requestJoinRoomSession(chatRoom.name);
+        this.removeRoomFromAllChatRooms(chatRoom.name);
+        if (this.chatSession === chatRoom.name) this.chatSession = undefined;
     }
 
     private sendMessage(message: ChatboxMessage): void {

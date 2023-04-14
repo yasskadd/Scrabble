@@ -13,7 +13,6 @@ export class GenericChatComponent implements AfterViewInit, AfterViewChecked {
     @ViewChild('chatbox', { static: false }) chatbox: ElementRef;
     @ViewChild('container') private scrollBox: ElementRef;
     activeTab: string;
-    chatSession: string | undefined;
 
     inputForm: FormControl;
     private lastMessage: ChatboxMessage;
@@ -25,6 +24,10 @@ export class GenericChatComponent implements AfterViewInit, AfterViewChecked {
 
     get messages() {
         return this.chatboxHandler.messages;
+    }
+
+    get chatSession() {
+        return this.chatboxHandler.chatSession;
     }
 
     @HostListener('click')
@@ -63,7 +66,7 @@ export class GenericChatComponent implements AfterViewInit, AfterViewChecked {
     }
 
     selectChatSession(chatRoomName: string | undefined) {
-        this.chatSession = chatRoomName;
+        this.chatboxHandler.chatSession = chatRoomName;
     }
 
     private resetInput() {
