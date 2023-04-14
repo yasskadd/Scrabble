@@ -61,7 +61,7 @@
 <div class="chat-input" *ngIf="chatSession !== undefined">
     <mat-form-field appearance="outline" (keydown.enter)="submit()" class="user-input">
         <mat-label>{{ "chat.message_box" | translate }}</mat-label>
-        <input matInput maxlength="512" type="text" [formControl]="inputForm" placeholder="{{ 'chat.input_example' | translate }}" #chatbox />
+        <input #chatbox matInput maxlength="512" type="text" [formControl]="inputForm" placeholder="{{ 'chat.input_example' | translate }}" />
     </mat-form-field>
     <button mat-mini-fab color="primary" (click)="submit()">
         <mat-icon>send</mat-icon>

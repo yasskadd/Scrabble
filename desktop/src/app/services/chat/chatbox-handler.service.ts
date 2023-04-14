@@ -55,7 +55,8 @@ export class ChatboxHandlerService {
         this.clientSocket.connected.subscribe((connected: boolean) => {
             if (connected) {
                 this.configureBaseSocketFeatures();
-                // this.config(this.userService.user.chatRooms as UserChatRoomWithState[]);
+                console.log(this.userService.user);
+                this.config(this.userService.user.chatRooms as UserChatRoomWithState[]);
             }
         });
     }
@@ -247,7 +248,7 @@ export class ChatboxHandlerService {
     }
 
     private sendNotification(roomName: string, newMessage: Message) {
-        //TODO: Handle notif
+        // TODO: Handle notif
     }
 
     private joinChatRoom(chatRoom: ChatRoomClient) {
