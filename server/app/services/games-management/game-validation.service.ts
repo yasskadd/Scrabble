@@ -31,7 +31,7 @@ export class GameValidationService {
 
         if (validationInfo instanceof Word) return validationInfo;
 
-        // Error
+        // TODO : Error
         game.turn.resetSkipCounter();
         return validationInfo;
     }

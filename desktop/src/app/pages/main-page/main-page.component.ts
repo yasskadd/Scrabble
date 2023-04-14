@@ -26,7 +26,6 @@ export class MainPageComponent {
     protected connectionSubject: Subject<SocketResponse>;
     protected disconnectionSubject: Subject<void>;
     protected multiplayerCreateLink: string;
-    protected multiplayerjoinLink: string;
 
     protected chatIsOpen: boolean;
 
@@ -45,7 +44,6 @@ export class MainPageComponent {
     ) {
         this.subscribed = false;
         this.multiplayerCreateLink = `/${AppRoutes.MultiGameCreationPage}/${GameMode.Multi}`;
-        this.multiplayerjoinLink = `/${AppRoutes.MultiJoinPage}/classique`;
         if (!this.userService.isConnected.getValue()) {
             this.router.navigate([`${AppRoutes.ConnectionPage}`]);
         }
@@ -154,5 +152,10 @@ export class MainPageComponent {
         });
 
         this.subscribed = true;
+    }
+
+    navigateJoinPage() {
+        this.clientSocketService.send(SocketEvents.UpdateGameRooms);
+        this.router.navigate([`/${AppRoutes.MultiJoinPage}/classique`]);
     }
 }

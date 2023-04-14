@@ -1,17 +1,17 @@
-<body class='justified'>
+<div class='justified encapsulating-div'>
 <mat-card class='wrapper'>
-    <div id='title-and-solo-button'>
-        <mat-card-title>{{ gameConfiguration.localGameRoom.state | translate }}</mat-card-title>
-        <button
-            *ngIf='gameConfiguration.isGameCreator()'
-            (click)='joinSoloMode()'
-            class='solo-mode-button'
-            mat-raised-button
-            [disabled]='gameConfiguration.localGameRoom.players.length > 1'
-        >
-            {{ "waiting_page.join.solo" | translate }}
-        </button>
-    </div>
+<!--    <div id='title-and-solo-button'>-->
+<!--        <mat-card-title>{{ gameConfiguration.localGameRoom.state | translate }}</mat-card-title>-->
+<!--        <button-->
+<!--            *ngIf='gameConfiguration.isGameCreator()'-->
+<!--            (click)='joinSoloMode()'-->
+<!--            class='solo-mode-button'-->
+<!--            mat-raised-button-->
+<!--            [disabled]='gameConfiguration.localGameRoom.players.length > 1'-->
+<!--        >-->
+<!--            {{ "waiting_page.join.solo" | translate }}-->
+<!--        </button>-->
+<!--    </div>-->
 
     <mat-card>
         <mat-card-content class='waiting-opponent-container'>
@@ -62,4 +62,4 @@
         </div>
     </div>
 </mat-card>
-</body>
+</div>

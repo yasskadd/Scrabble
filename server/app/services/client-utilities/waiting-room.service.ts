@@ -64,6 +64,7 @@ export class WaitingRoomService {
         });
 
         this.socketManager.io(SocketEvents.UpdateWaitingRoom, (server: Server) => {
+            this.gamesHandler.cleanRooms();
             server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
         });
     }
