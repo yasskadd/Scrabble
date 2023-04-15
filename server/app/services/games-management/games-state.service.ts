@@ -441,8 +441,12 @@ export class GamesStateService {
             .getPlayersInRoom(newPlayer.player.roomId)[0]
             .game.turn.inactivePlayers?.findIndex((p: IUser) => p._id === bot.player.user._id);
         if (!botTurnIndex) return;
-        this.gamesHandler.getPlayersInRoom(newPlayer.player.roomId)[0].game.turn.inactivePlayers?.splice(botTurnIndex, 1);
-        this.gamesHandler.getPlayersInRoom(newPlayer.player.roomId)[0].game.turn.inactivePlayers?.push(observer.player.user);
+        const turnObj = this.gamesHandler.getPlayersInRoom(newPlayer.player.roomId)[0].game.turn;
+        if (turnObj.activePlayer === bot.player.user) turnObj.activePlayer = newPlayer.player.user;
+        else {
+            this.gamesHandler.getPlayersInRoom(newPlayer.player.roomId)[0].game.turn.inactivePlayers?.splice(botTurnIndex, 1);
+            this.gamesHandler.getPlayersInRoom(newPlayer.player.roomId)[0].game.turn.inactivePlayers?.push(observer.player.user);
+        }
         this.gamesHandler.addPlayer(newPlayer);
 
         // TODO: Update room with roomID
