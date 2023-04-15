@@ -1,4 +1,5 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+/* eslint-disable @typescript-eslint/no-magic-numbers */
+import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserService } from '@app/services/user.service';
 import { UserStats } from '@common/interfaces/user-stats';
@@ -9,7 +10,7 @@ import Chart from 'chart.js/auto';
     templateUrl: './user-profile-page.component.html',
     styleUrls: ['./user-profile-page.component.scss'],
 })
-export class UserProfilePageComponent {
+export class UserProfilePageComponent implements AfterViewInit {
     @ViewChild('myChart') canvasRef: ElementRef<HTMLCanvasElement>;
     userStats: UserStats;
 

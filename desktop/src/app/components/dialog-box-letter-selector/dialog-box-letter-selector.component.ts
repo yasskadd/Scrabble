@@ -16,7 +16,7 @@ export class DialogBoxLetterSelectorComponent {
     constructor(private snackBarService: SnackBarService, private dialogRef: MatDialogRef<DialogBoxLetterSelectorComponent>) {
         this.letterForm = new FormControl(AlphabetLetter.None, [Validators.minLength(1), Validators.maxLength(1), Validators.required]);
 
-        this.letterForm.valueChanges.subscribe((value: string) => {
+        this.letterForm.valueChanges.subscribe(() => {
             this.updateValidity();
         });
         this.letterForm.markAsTouched();

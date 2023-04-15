@@ -45,7 +45,6 @@ export class PlayAreaComponent {
     }
 
     get selectedPlayer(): PlayerInformation {
-        console.log(this.gameClientService.selectedPlayer);
         return this.gameClientService.selectedPlayer;
     }
 

@@ -135,12 +135,14 @@ export class UserProfileController {
             const user: IUser = await this.accountStorageService.getUserData(username);
             if (!user) {
                 res.status(StatusCodes.BAD_REQUEST).send({
-                    error : 'Username not found'
+                    error: 'Username not found',
                 });
                 return;
             }
             const email = user.email;
-            const tempPassword = (Math.random() + 1).toString(36).substring(7);
+            const thirdySix = 36;
+            const seven = 7;
+            const tempPassword = (Math.random() + 1).toString(thirdySix).substring(seven);
             if (email) {
                 this.accountStorageService.updatePassword(user._id, tempPassword);
                 await transporter.sendMail({

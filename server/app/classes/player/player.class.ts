@@ -9,7 +9,6 @@ import { IUser } from '@common/interfaces/user';
 import { BeginnerBot } from './beginner-bot.class';
 import * as uuid from 'uuid';
 
-
 export class GamePlayer {
     rack: Letter[];
     score: number;

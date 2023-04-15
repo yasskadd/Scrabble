@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import * as Constant from '@app/constants/bot';
 import { PlayMoves } from '@app/constants/bot';
-import { BotInformation } from '@app/interfaces/bot-information';
-import { RoomPlayer } from '@common/interfaces/room-player';
 import { BeginnerBot } from './beginner-bot.class';
 
 export class ScoreRelatedBot extends BeginnerBot {
@@ -10,10 +8,6 @@ export class ScoreRelatedBot extends BeginnerBot {
     private placeProb: number;
     private exchangeProb: number;
     private skipProb: number;
-
-    constructor(roomPlayer: RoomPlayer, botInfo: BotInformation) {
-        super(roomPlayer, botInfo);
-    }
 
     setupScoreProbs(score: number): void {
         this.opponentScore = score < 1000 ? score : 1000;

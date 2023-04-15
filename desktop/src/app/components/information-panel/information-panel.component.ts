@@ -13,6 +13,7 @@ import { SocketEvents } from '@common/constants/socket-events';
 import { PlayerType } from '@common/models/player-type';
 import { UserService } from '@services/user.service';
 import { RoomPlayer } from '@common/interfaces/room-player';
+import { INVALID_INDEX } from '@common/constants/board-info';
 
 @Component({
     selector: 'app-information-panel',
@@ -60,7 +61,7 @@ export class InformationPanelComponent {
 
     clueAvailable(): boolean {
         if (this.letterService.clueWords.length !== 0) {
-            if (this.clueIndex === -1) {
+            if (this.clueIndex === INVALID_INDEX) {
                 this.clueIndex = 0;
                 this.letterService.showClueWord(this.clueIndex);
             }
@@ -102,5 +103,6 @@ export class InformationPanelComponent {
         this.clientSocketService.send(SocketEvents.JoinAsObserver, player.player.user._id);
     }
 
+    // eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/member-ordering
     protected readonly PlayerType = PlayerType;
 }

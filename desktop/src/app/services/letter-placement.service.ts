@@ -6,7 +6,7 @@ import { BoardTileState, BoardTileType } from '@app/models/board-tile';
 import * as constants from '@common/constants/board-info';
 import { AlphabetLetter } from '@common/models/alphabet-letter';
 // import { Coordinate } from '@common/interfaces/coordinate';
-import { TOTAL_COLUMNS, TOTAL_ROWS } from '@app/constants/board-view';
+import { BOARD_TILE_SIZE, TOTAL_COLUMNS, TOTAL_ROWS } from '@app/constants/board-view';
 import { SelectionPosition } from '@app/interfaces/selection-position';
 import { PlacingState } from '@app/models/placing-state';
 import { PlayDirection } from '@app/models/play-direction';
@@ -98,8 +98,8 @@ export class LetterPlacementService {
 
         coord[0] = Math.max(0, Math.min(coord[0], size[0]));
         coord[1] = Math.max(0, Math.min(coord[1], size[1]));
-        coord[0] -= 18 * windowScale;
-        coord[1] -= 18 * windowScale;
+        coord[0] -= BOARD_TILE_SIZE * windowScale;
+        coord[1] -= BOARD_TILE_SIZE * windowScale;
 
         return coord;
     }
@@ -265,8 +265,6 @@ export class LetterPlacementService {
     }
 
     commitLetter(letter: Letter, boardTile: BoardTileInfo, isStar: boolean, forced: boolean): void {
-        console.log(letter);
-        console.log(boardTile);
         const playedTile: BoardTileInfo = {
             type: boardTile.type,
             state: BoardTileState.Pending,
@@ -408,12 +406,12 @@ export class LetterPlacementService {
         this.placedLetters = [];
         this.clueWords[index].letters.forEach((letter: string, letterIndex: number) => {
             let rackIndex = this.gameClientService.getLocalPlayer()?.rack.findIndex((l) => l.value.toUpperCase() === letter.toUpperCase());
-            if (rackIndex === -1) {
+            if (rackIndex === constants.INVALID_INDEX) {
                 rackIndex = this.gameClientService.getLocalPlayer().rack.findIndex((l: Letter) => {
-                    l.value === AlphabetLetter.Any;
+                    return l.value === AlphabetLetter.Any;
                 });
             }
-            if (rackIndex === -1) {
+            if (rackIndex === constants.INVALID_INDEX) {
                 return;
             }
 
@@ -461,7 +459,7 @@ export class LetterPlacementService {
 
         this.clientSocketService.on(SocketEvents.LetterTaken, (event: SimpleLetterInfos) => {
             if (event.socketId === this.gameClientService.getLocalPlayer()?.player.socketId) return;
-            if (event.coord === -1) return;
+            if (event.coord === constants.INVALID_INDEX) return;
             this.initLiveTile(event.coord);
         });
 
@@ -521,7 +519,6 @@ export class LetterPlacementService {
     // }
 
     private resetBoardState() {
-        console.log('resetting board');
         this.origin = undefined;
         this.selectionPositions = [];
         this.placedLetters = [];
@@ -689,7 +686,6 @@ export class LetterPlacementService {
         }
 
         if (!this.isTileOnSameRow(coord, coord + 1)) {
-            console.log('On same row');
             return { coord: -1, direction: PlayDirection.Right };
         }
         if (this.isTileOutOfBoard(coord + 1)) {

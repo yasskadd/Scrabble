@@ -20,8 +20,8 @@ export class ClientSocketService {
     connected: BehaviorSubject<boolean>;
     reconnect: Subject<void>;
     cancelConnection: Subject<void>;
-    private socket: Socket;
     reconnectionDialog: MatDialogRef<DialogBoxReconnectionComponent>;
+    private socket: Socket;
 
     constructor(
         private snackBarService: SnackBarService,
@@ -161,7 +161,7 @@ export class ClientSocketService {
     }
 
     launchReconnectionProtocol(): void {
-        this.languageService.getWord('error.socket.send_failed').subscribe((word: string) => {
+        this.languageService.getWord('error.socket.send_failed').subscribe(() => {
             // this.snackBarService.openError((word + ' : ' + error.payload) as string);
 
             if (this.reconnectionDialog) return;
