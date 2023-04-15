@@ -2,28 +2,29 @@
     <app-header></app-header>
 
     <body class="mat-app-background">
-        <form [formGroup]="formGroup" class="justified">
-            <mat-form-field appearance="outline">
+        <mat-card style="padding: 16px">
+            <form [formGroup]="formGroup" class="justified">
+                <mat-form-field appearance="outline">
+                    <!-- TODO : Language -->
+                    <mat-label>Nom d'utilisateur</mat-label>
+                    <input type="text" matInput name="username" [formControl]="usernameForm" />
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                    <!-- TODO : Language -->
+                    <mat-label>Mot de passe</mat-label>
+                    <input type="password" matInput [formControl]="passwordForm" />
+                </mat-form-field>
                 <!-- TODO : Language -->
-                <mat-label>Nom d'utilisateur</mat-label>
-                <input type="text" matInput name="username" [formControl]="usernameForm" />
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-                <!-- TODO : Language -->
-                <mat-label>Mot de passe</mat-label>
-                <input type="password" matInput [formControl]="passwordForm" />
-            </mat-form-field>
-            <!-- TODO : Language -->
-            <mat-error>{{ connectionError }}</mat-error>
-            <div>
-                <div>
-
-                <button mat-raised-button color="primary" (click)="login()">Connecter</button>
-                <button mat-raised-button color="primary" (click)="redirectUserPage()">Créer un compte</button>
+                <mat-error>{{ connectionError }}</mat-error>
+                <div class="connection-buttons">
+                    <div>
+                        <button mat-raised-button color="primary" (click)="login()">Connecter</button>
+                        <button mat-raised-button color="primary" (click)="redirectUserPage()">Créer un compte</button>
+                    </div>
+                    <button mat-raised-button color="primary" (click)="forgot()">Mot de passe oublié</button>
                 </div>
-                <button mat-raised-button color='primary' (click)='forgot()'>Mot de passe oublié</button>
-            </div>
-        </form>
+            </form>
+        </mat-card>
     </body>
 
     <app-footer></app-footer>

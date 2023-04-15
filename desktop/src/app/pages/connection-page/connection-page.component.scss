@@ -10,3 +10,16 @@ body {
 div > button:first-of-type {
     margin-right: 5px;
 }
+
+.connection-buttons {
+    display: flex;
+    flex-direction: column;
+
+    > div {
+        margin-bottom: 8px;
+    }
+
+    > button {
+        width: 100%;
+    }
+}
