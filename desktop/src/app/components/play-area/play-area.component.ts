@@ -32,8 +32,6 @@ export class PlayAreaComponent {
 
     protected playerType: typeof PlayerType = PlayerType;
 
-    private clueIndex: number;
-
     constructor(
         private readonly gridService: GridService,
         protected letterService: LetterPlacementService,
@@ -44,7 +42,6 @@ export class PlayAreaComponent {
         this.keyboardParentSubject = new Subject();
         this.mousePosition = { x: 0, y: 0 };
         this.chatIsOpen = false;
-        this.clueIndex = 1;
 
         // this.sliderForm.valueChanges.subscribe(() => {
         //     this.updateFontSize();
@@ -106,23 +103,5 @@ export class PlayAreaComponent {
 
     replaceBot(player: PlayerInformation) {
         this.clientSocketService.send(SocketEvents.JoinAsObserver, player.player.user._id);
-    }
-
-    nextClue(): void {
-        this.letterService.removeClue(this.clueIndex);
-        this.clueIndex = (this.clueIndex + 1) % this.letterService.clueWords.length;
-        this.letterService.showClueWord(this.clueIndex);
-    }
-
-    prevClue(): void {
-        this.letterService.removeClue(this.clueIndex);
-        this.clueIndex = this.clueIndex - 1;
-        if (this.clueIndex < 0) this.clueIndex = this.letterService.clueWords.length - 1;
-
-        this.letterService.showClueWord(this.clueIndex);
-    }
-
-    placeClue(): void {
-        this.letterService.submitClue(this.clueIndex);
     }
 }
