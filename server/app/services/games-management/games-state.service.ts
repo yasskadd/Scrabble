@@ -19,29 +19,27 @@ import { ScoreStorageService } from '@app/services/database/score-storage.servic
 import { UserStatsStorageService } from '@app/services/database/user-stats-storage.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
+import { DragInfos } from '@common/interfaces/drag-infos';
 import { GameHistoryInfo } from '@common/interfaces/game-history-info';
 import { GameRoom } from '@common/interfaces/game-room';
 import { GameInfo } from '@common/interfaces/game-state';
-import { Letter } from '@common/interfaces/letter';
 import { PlayerInformation } from '@common/interfaces/player-information';
 import { RoomPlayer } from '@common/interfaces/room-player';
+import { SimpleLetterInfos } from '@common/interfaces/simple-letter-infos';
+import { IUser } from '@common/interfaces/user';
 import { GameDifficulty } from '@common/models/game-difficulty';
 import { GameMode } from '@common/models/game-mode';
 import { HistoryActions } from '@common/models/history-actions';
 import { PlayerType } from '@common/models/player-type';
-import { Subject } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import { GamesHandlerService } from './games-handler.service';
 
 const MAX_SKIP = 6;
-const SECOND = 1000;
 const ERROR_REPLACING_BOT = 'Error trying to replace the bot';
 
 @Service()
 export class GamesStateService {
-    gameEnded: Subject<string>;
-
     constructor(
         private accountStorage: AccountStorageService,
         private gamesHandler: GamesHandlerService,
@@ -49,29 +47,31 @@ export class GamesStateService {
         private scoreStorage: ScoreStorageService,
         private userStatsStorage: UserStatsStorageService,
         private historyStorageService: HistoryStorageService, // private virtualPlayerStorage: VirtualPlayersStorageService,
-    ) {
-        this.gameEnded = new Subject();
-
-        // this.gameEnded.subscribe((room) => {
-        //     const gameInfo = this.formatGameInfo(room);
-        //     if (!gameInfo) return;
-
-        //     this.historyStorageService.addToHistory(gameInfo).then();
-        // });
-    }
+    ) {}
 
     initSocketsEvents(): void {
-        this.socketManager.on(SocketEvents.Disconnect, (socket: Socket) => {
-            this.disconnect(socket);
+        // LEAVE GAME
+        this.socketManager.io(SocketEvents.Disconnect, (server: Server, socket: Socket) => {
+            this.abandonGame(socket, server);
         });
-        this.socketManager.on(SocketEvents.AbandonGame, async (socket: Socket) => {
-            await this.abandonGame(socket);
+        this.socketManager.io(SocketEvents.AbandonGame, async (server: Server, socket: Socket) => {
+            await this.abandonGame(socket, server);
         });
-        this.socketManager.on(SocketEvents.QuitGame, (socket: Socket) => {
-            this.disconnect(socket);
+
+        // OBSERVER
+        this.socketManager.io(SocketEvents.JoinAsObserver, (server: Server, socket: Socket, botID: string) => {
+            this.joinAsObserver(server, socket, botID);
         });
-        this.socketManager.on(SocketEvents.JoinAsObserver, (socket: Socket, botID: string) => {
-            this.joinAsObserver(socket, botID);
+
+        // SYNCHRONIZATION
+        this.socketManager.io(SocketEvents.SendDrag, (server: Server, socket: Socket, dragInfos: DragInfos) => {
+            server.to(dragInfos.roomId).emit(SocketEvents.DragEvent, dragInfos);
+        });
+        this.socketManager.io(SocketEvents.LetterTaken, (server: Server, socket: Socket, tile: SimpleLetterInfos) => {
+            server.to(tile.roomId).emit(SocketEvents.LetterTaken, tile);
+        });
+        this.socketManager.io(SocketEvents.LetterPlaced, (server: Server, socket: Socket, tile: SimpleLetterInfos) => {
+            server.to(tile.roomId).emit(SocketEvents.LetterPlaced, tile);
         });
     }
 
@@ -83,104 +83,100 @@ export class GamesStateService {
         await this.setupGameSubscriptions(room, game);
 
         gamePlayers.forEach((player: GamePlayer) => {
-            this.gamesHandler.players.push(player);
-            game.letterReserve.generateLetters(MAX_QUANTITY, player.rack);
+            this.gamesHandler.addPlayer(player);
+            if (player.player.type !== PlayerType.Observer) {
+                game.letterReserve.generateLetters(MAX_QUANTITY, player.rack);
+            }
         });
 
         game.turn.determineStartingPlayer(gamePlayers);
 
-        const playersInfo: PlayerInformation[] = this.gamesHandler.players.map((player: GamePlayer) => {
-            return player.getInformation();
-        });
-
-        console.log('Start of game with : ');
-        playersInfo.forEach((playerInfo: PlayerInformation) => {
-            console.log(playerInfo.player.user.username);
-            console.log(
-                playerInfo.rack.map((letter: Letter) => {
-                    return letter.value;
-                }),
-            );
-            console.log('');
-        });
-
         server.to(room.id).emit(SocketEvents.GameAboutToStart, {
             gameboard: game.gameboard.toStringArray(),
-            players: playersInfo,
+            players: this.gamesHandler.getPlayersInfos(room.id),
             activePlayer: game.turn.activePlayer,
         } as GameInfo);
+
         server.to(room.id).emit(SocketEvents.LetterReserveUpdated, game.letterReserve.lettersReserve);
         game.turn.start();
-        if (!game.turn.activePlayer?.email) game.turn.endTurn.next(game.turn.activePlayer?.username);
+
+        // Sketchy bot turn
+        if (game.turn.activePlayer && !game.turn.activePlayer?.email) {
+            game.turn.endTurn.next(game.turn.activePlayer);
+        }
+    }
+
+    addObserver(server: Server, roomId: string, player: RoomPlayer): void {
+        const gamePlayers: GamePlayer[] = this.gamesHandler.getPlayersInRoom(roomId);
+        const socket: Socket | undefined = this.socketManager.getSocketFromId(player.socketId);
+        if (!socket) return;
+
+        const newGamePlayer = new GamePlayer(player);
+        newGamePlayer.game = gamePlayers[0].game;
+
+        this.gamesHandler.addPlayer(newGamePlayer);
+        socket.emit(SocketEvents.GameAboutToStart, {
+            gameboard: newGamePlayer.game.gameboard.toStringArray(),
+            players: this.gamesHandler.getPlayersInfos(roomId),
+            activePlayer: newGamePlayer.game.turn.activePlayer,
+        });
+        server.to(roomId).emit(SocketEvents.PublicViewUpdate, {
+            gameboard: newGamePlayer.game.gameboard.toStringArray(),
+            players: this.gamesHandler.getPlayersInfos(roomId),
+            activePlayer: newGamePlayer.game.turn.activePlayer,
+        });
     }
 
     private initPlayers(game: Game, room: GameRoom): GamePlayer[] {
         const gamePlayers: GamePlayer[] = [];
-
         room.players.forEach((roomPlayer: RoomPlayer) => {
             switch (roomPlayer.type) {
                 case PlayerType.User: {
                     const newPlayer: RealPlayer = new RealPlayer(roomPlayer);
-
-                    gamePlayers.push(newPlayer);
                     newPlayer.game = game;
-
-                    // TODO : Is this usefull?
-                    // if (this.gamesHandler.gamePlayers.get(roomPlayer.roomId) === undefined) {
-                    //     this.gamesHandler.gamePlayers.set(newPlayer.room, { room, players: [] as GamePlayer[] });
-                    //     (this.gamesHandler.gamePlayers.get(newPlayer.room)?.players as GamePlayer[]).push(newPlayer);
-                    // }
-
+                    gamePlayers.push(newPlayer);
                     break;
                 }
                 case PlayerType.Bot: {
                     if (roomPlayer.type !== PlayerType.Bot) return;
-
-                    const dictionaryValidation = (this.gamesHandler.dictionaries.get(room.dictionary) as DictionaryContainer).dictionaryValidation;
-
                     let newBot: Bot;
                     if (room.difficulty === GameDifficulty.Easy) {
                         newBot = new BeginnerBot(roomPlayer, {
                             timer: room.timer,
                             roomId: room.id,
-                            dictionaryValidation: dictionaryValidation as DictionaryValidation,
+                            dictionaryValidation: game.dictionaryValidation as DictionaryValidation,
                         });
                     } else if (room.difficulty === GameDifficulty.Hard) {
                         newBot = new ExpertBot(roomPlayer, {
                             timer: room.timer,
                             roomId: room.id,
-                            dictionaryValidation: dictionaryValidation as DictionaryValidation,
+                            dictionaryValidation: game.dictionaryValidation as DictionaryValidation,
                         });
                     } else {
                         newBot = new ScoreRelatedBot(roomPlayer, {
                             timer: room.timer,
                             roomId: room.id,
-                            dictionaryValidation: dictionaryValidation as DictionaryValidation,
+                            dictionaryValidation: game.dictionaryValidation as DictionaryValidation,
                         });
                     }
                     newBot.game = game;
                     gamePlayers.push(newBot);
-
                     newBot.setGame(game);
                     newBot.start();
-
                     break;
                 }
                 case PlayerType.Observer: {
-                    //     TODO : Implement that
+                    const newGamePlayer = new GamePlayer(roomPlayer);
+                    newGamePlayer.game = game;
+                    gamePlayers.push(newGamePlayer);
                     break;
                 }
                 default: {
                     break;
                 }
             }
-
-            // TODO : Is this still usefull ?
-            //     if (this.gamesHandler.gamePlayers.get(newPlayer.room) === undefined)
-            //         this.gamesHandler.gamePlayers.set(newPlayer.room, { room, players: [] as GamePlayer[] });
-            //     (this.gamesHandler.gamePlayers.get(newPlayer.room)?.players as GamePlayer[]).push(newPlayer);
         });
-
+        if (room.difficulty === GameDifficulty.ScoreBased) this.setUpScoreRelatedBots(gamePlayers);
         return gamePlayers;
     }
 
@@ -188,7 +184,7 @@ export class GamesStateService {
         game.turn.endTurn.subscribe(async () => {
             if (!game.turn.activePlayer) {
                 this.calculateEndGameScore(room.id);
-                await this.broadcastHighScores(room.players, room.id);
+                await this.broadcastHighScores(room.id);
             } else this.changeTurn(room.id);
             this.sendPublicViewUpdate(game, room);
         });
@@ -198,8 +194,27 @@ export class GamesStateService {
         });
     }
 
+    private async setUpScoreRelatedBots(gamePlayers: GamePlayer[]): Promise<void> {
+        // Find average player score
+        let totalScore = 0;
+        let numberOfPlayers = 0;
+        for (const player of gamePlayers) {
+            if (player.player.type === PlayerType.User) {
+                numberOfPlayers += 1;
+                const userStats = await this.userStatsStorage.getUserStats(player.player.user._id);
+                totalScore += userStats.ranking;
+            }
+        }
+        const avgScore = totalScore / numberOfPlayers;
+        for (const player of gamePlayers) {
+            if (player.player.type === PlayerType.Bot) {
+                (player as ScoreRelatedBot).setupScoreProbs(avgScore);
+            }
+        }
+    }
+
     private calculateEndGameScore(roomID: string): void {
-        const players = this.gamesHandler.getPlayersFromRoomId(roomID);
+        const players = this.gamesHandler.getPlayersInRoom(roomID);
         const game = players.find((gamePlayer: GamePlayer) => gamePlayer.player.type === PlayerType.User)?.game;
         if (!game || !players) return;
 
@@ -208,8 +223,10 @@ export class GamesStateService {
                 player.deductPoints();
             });
         }
-        const finishingPlayer = players.find((player: GamePlayer) => player.rackIsEmpty());
-        if (finishingPlayer) {
+
+        if (this.playerHasEmptyRack(players)) {
+            const finishingPlayer = this.returnEmptyRackPlayer(players) as GamePlayer;
+            if (!finishingPlayer) return;
             players.filter((player: GamePlayer) => {
                 if (player.player.user.username !== finishingPlayer.player.user.username) {
                     player.deductPoints();
@@ -218,6 +235,13 @@ export class GamesStateService {
             });
         }
         this.addGameEventToPlayers(players);
+    }
+
+    private playerHasEmptyRack(players: GamePlayer[]): boolean {
+        return players.filter((player) => player.player.type !== PlayerType.Observer && player.rackIsEmpty()).length > 0;
+    }
+    private returnEmptyRackPlayer(players: GamePlayer[]): GamePlayer | undefined {
+        return players.find((player) => player.player.type !== PlayerType.Observer && player.rackIsEmpty());
     }
 
     private addGameEventToPlayers(players: GamePlayer[]) {
@@ -242,7 +266,7 @@ export class GamesStateService {
             new LetterReserve(),
             'classique',
             room.mode === GameMode.Solo,
-            this.gamesHandler.getPlayersFromRoomId(room.id),
+            this.gamesHandler.getPlayersInRoom(room.id),
             dictionaryContainer.dictionaryValidation,
             dictionaryContainer.letterPlacement,
             dictionaryContainer.wordSolver,
@@ -250,7 +274,7 @@ export class GamesStateService {
     }
 
     private changeTurn(roomId: string) {
-        const players = this.gamesHandler.getPlayersFromRoomId(roomId);
+        const players = this.gamesHandler.getPlayersInRoom(roomId);
         const informations: PlayerInformation[] = [];
 
         players.forEach((player: GamePlayer) => {
@@ -267,7 +291,6 @@ export class GamesStateService {
             activePlayer: players[0].game.turn.activePlayer,
         };
 
-
         this.socketManager.emitRoom(roomId, SocketEvents.NextTurn, gameInfo);
     }
 
@@ -275,27 +298,30 @@ export class GamesStateService {
         this.socketManager.emitRoom(roomId, SocketEvents.TimerClientUpdate, timer);
     }
 
-    private async abandonGame(socket: Socket): Promise<void> {
-        console.log(socket.id);
-        const gamePlayer = this.gamesHandler.getPlayerFromSocketId(socket.id);
+    private async abandonGame(socket: Socket, server: Server): Promise<void> {
+        const gamePlayer = this.gamesHandler.getPlayer(socket.id);
         if (!gamePlayer) return;
-        console.log(gamePlayer.player.user.username);
 
         const room = gamePlayer.player.roomId;
-        const gameHistoryInfo = this.formatGameInfo(gamePlayer);
-        await this.userStatsStorage.updatePlayerStats(gameHistoryInfo);
         this.gamesHandler.removePlayerFromSocketId(socket.id);
         socket.leave('game' + gamePlayer.player.roomId); // leave game chat room
         socket.leave(gamePlayer.player.roomId);
         if (
             !gamePlayer.game.isModeSolo &&
-            this.gamesHandler.getPlayersFromRoomId(room).filter((player) => player.player.type === PlayerType.User).length > 0
+            this.gamesHandler.getPlayersInRoom(room).filter((player) => player.player.type === PlayerType.User).length > 0
         ) {
             this.socketManager.emitRoom(room, SocketEvents.UserDisconnect);
             // TODO : Repair and make that better for 4 players and bots
 
-            const bot = this.replacePlayerWithBot(gamePlayer as RealPlayer);
-            this.gamesHandler.players.push(bot);
+            if (gamePlayer.player.type !== PlayerType.Observer) {
+                const bot = this.replacePlayerWithBot(gamePlayer as RealPlayer);
+                this.gamesHandler.addPlayer(bot);
+                server.to(bot.player.roomId).emit(SocketEvents.PublicViewUpdate, {
+                    gameboard: bot.game.gameboard.toStringArray(),
+                    players: this.gamesHandler.getPlayersInfos(bot.player.roomId),
+                    activePlayer: bot.game.turn.activePlayer,
+                });
+            }
 
             // TODO: Update room
             return;
@@ -305,143 +331,35 @@ export class GamesStateService {
         // this.gameEnded.next(room);
     }
 
-    // private async switchToSolo(playerToReplace: GamePlayer): Promise<void> {
-    //     const info = playerToReplace.getInformation();
-    //     if (!info) return;
-    //     const players = this.gamesHandler.getPlayersFromRoomId(playerToReplace.player.roomId);
-    //     if (!players) return;
-    //
-    //     const botName = await this.generateBotName(
-    //         players[1] === playerToReplace ? players[0].player.user.username : players[1].player.user.username,
-    //     );
-    //
-    //     // TODO : Add bot image here
-    //     const botPlayer = new BeginnerBot(
-    //         false,
-    //         {
-    //             user: {
-    //                 username: botName,
-    //                 password: 'null',
-    //                 profilePicture: {
-    //                     name: 'bot-image',
-    //                     isDefaultPicture: true,
-    //                 },
-    //             },
-    //             socketId: '',
-    //             roomId: '',
-    //             type: PlayerType.Bot,
-    //             isCreator: false,
-    //         },
-    //         {
-    //             timer: playerToReplace.game.turn.time,
-    //             roomId: playerToReplace.player.roomId,
-    //             dictionaryValidation: playerToReplace.game.dictionaryValidation,
-    //         },
-    //     );
-    //     botPlayer.score = info.score;
-    //     botPlayer.rack = info.rack;
-    //
-    //     if (playerToReplace.game.turn.activePlayer === playerToReplace.player.user) playerToReplace.game.turn.activePlayer = botPlayer.player.user;
-    //     else {
-    //         this.findAndDeleteElementFromArray(playerToReplace.game.turn.inactivePlayers, playerToReplace.player.user);
-    //         playerToReplace.game.turn.inactivePlayers?.push(botPlayer.player.user);
-    //     }
+    private async endGame(roomId: string) {
+        const gamePlayers = this.gamesHandler.getPlayersInRoom(roomId);
+        if (gamePlayers.length === 0 && gamePlayers[0].game.isGameFinish) return;
 
-    // TODO : Do we still need that?
-    // const gameRoom = this.gamesHandler.gamePlayers.get(playerToReplace.room)?.gameRoom;
-    // if (!gameRoom) return;
-    //
-    // if (players[1] === playerToReplace)
-    //     this.gamesHandler.gamePlayers.set(playerToReplace.gameRoom, {
-    //         gameRoom,
-    //         players: [players[0], botPlayer],
-    //     });
-    // else
-    //     this.gamesHandler.gamePlayers.set(playerToReplace.gameRoom, {
-    //         gameRoom,
-    //         players: [botPlayer, players[1]],
-    //     });
-    //
-    // this.updateNewBot(playerToReplace.game, playerToReplace.gameRoom, botPlayer);
-    // }
-    //
-    // private async generateBotName(oldName: string): Promise<string> {
-    //     const playerBotList = await this.virtualPlayerStorage.getBeginnerBot();
-    //     let botName = oldName;
-    //     while (oldName.toString().toLowerCase() === botName.toString().toLowerCase()) {
-    //         botName = playerBotList[Math.floor(Math.random() * playerBotList.length)].username;
-    //     }
-    //     return botName;
-    // }
-
-    // private updateNewBot(game: Game, roomId: string, botPlayer: GamePlayer) {
-    //     game.isModeSolo = true;
-    //     (botPlayer as BeginnerBot).setGame(game);
-    //     (botPlayer as BeginnerBot).start();
-    //     this.gamesHandler.updatePlayersInfo(roomId, game);
-    // }
-
-    private disconnect(socket: Socket) {
-        const gamePlayer = this.gamesHandler.getPlayerFromSocketId(socket.id);
-        if (!gamePlayer) return;
-
-        if (this.gamesHandler.getPlayersFromRoomId(gamePlayer.player.roomId).length > 0 && !gamePlayer.game.isGameFinish) {
-            const player = this.gamesHandler.players.find((realPlayer) => realPlayer.player.socketId === socket.id);
-            if (player) {
-                const bot = this.replacePlayerWithBot(player as RealPlayer);
-                this.gamesHandler.removePlayerFromSocketId(socket.id);
-                this.gamesHandler.players.push(bot);
-                // TODO: Update room that a new bot has replaced the player
-            }
-            this.waitBeforeDisconnect(socket);
-            return;
-        }
-
-        socket.leave(gamePlayer.player.roomId);
-        this.gamesHandler.removePlayerFromSocketId(socket.id);
-        this.socketManager.emitRoom(gamePlayer.player.roomId, SocketEvents.UserDisconnect);
-    }
-
-    private waitBeforeDisconnect(socket: Socket) {
-        let tempTime = 5;
-        setInterval(async () => {
-            tempTime = tempTime - 1;
-            if (tempTime === 0) {
-                await this.abandonGame(socket);
-            }
-        }, SECOND);
-    }
-    private async endGame(socketId: string) {
-        const gamePlayer = this.gamesHandler.getPlayerFromSocketId(socketId);
-        if (!gamePlayer) return;
-        const gamePlayers = this.gamesHandler.getPlayersFromRoomId(gamePlayer.player.roomId);
-        if (gamePlayers.length === 0 && gamePlayer.game.isGameFinish) return;
-
-        this.gameEnded.next(gamePlayer.player.roomId);
-        gamePlayer.game.isGameFinish = true;
+        gamePlayers[0].game.isGameFinish = true;
         this.updatePlayersStats(gamePlayers);
-        this.socketManager.emitRoom(gamePlayer.player.roomId, SocketEvents.GameEnd);
-        this.gamesHandler.removeRoomFromRoomId(gamePlayer.player.roomId);
+
+        console.log('kicking players');
+        gamePlayers.forEach((g: GamePlayer) => {
+            const socket = this.socketManager.getSocketFromId(g.player.socketId);
+            if (!socket) return;
+
+            socket.emit(SocketEvents.GameEnd);
+        });
+        this.gamesHandler.removeRoom(roomId);
     }
 
-    private async broadcastHighScores(players: RoomPlayer[], roomId: string): Promise<void> {
-        const playersInRoom = players.filter((player: RoomPlayer) => {
-            const gamePlayer = this.gamesHandler.getPlayerFromSocketId(player.socketId);
-            if (!gamePlayer) return;
+    private async broadcastHighScores(roomId: string): Promise<void> {
+        const players = this.gamesHandler.getPlayersInRoom(roomId);
 
-            if (gamePlayer.player.roomId === roomId) return player.socketId;
-            return;
-        });
+        if (players.length > 0) await this.endGame(roomId);
 
-        if (playersInRoom.length !== 0) await this.endGame(playersInRoom[0].socketId);
-
-        for (const player of playersInRoom) {
-            await this.sendHighScore(player);
+        for (const player of players) {
+            await this.sendHighScore(player.player);
         }
     }
 
     private async sendHighScore(player: RoomPlayer) {
-        const gamePlayer = this.gamesHandler.getPlayerFromSocketId(player.socketId);
+        const gamePlayer = this.gamesHandler.getPlayer(player.socketId);
         if (!gamePlayer) return;
 
         await this.scoreStorage.addTopScores({
@@ -469,26 +387,12 @@ export class GamesStateService {
     }
 
     private sendPublicViewUpdate(game: Game, room: GameRoom) {
-        const playersInfo: PlayerInformation[] = this.gamesHandler.players.map((player: GamePlayer) => {
-            return player.getInformation();
-        });
-
         this.socketManager.emitRoom(room.id, SocketEvents.PublicViewUpdate, {
             gameboard: game.gameboard.toStringArray(),
-            players: playersInfo,
+            players: this.gamesHandler.getPlayersInfos(room.id),
             activePlayer: game.turn.activePlayer,
-        } as GameInfo);
+        });
     }
-
-    // private findAndDeleteElementFromArray(array: any[] | undefined, element: any) {
-    //     if (!array) return;
-    //
-    //     const NOT_FOUND = -1;
-    //     const index = array?.indexOf(element);
-    //     if (index !== NOT_FOUND) {
-    //         array.splice(index as number, 1);
-    //     }
-    // }
 
     private formatGameInfo(player: GamePlayer, playerWonGame = false, abandoned = false): GameHistoryInfo {
         // const players = this.gamesHandler.getPlayersFromRoomId(player.player.roomId);
@@ -511,50 +415,70 @@ export class GamesStateService {
         } as GameHistoryInfo;
     }
 
-    private joinAsObserver(socket: Socket, botID: string): void {
+    private joinAsObserver(server: Server, socket: Socket, botID: string): void {
         const socketID = socket.id;
-        const observer = this.gamesHandler.getPlayerFromSocketId(socketID) as GamePlayer;
+        const observer = this.gamesHandler.getPlayer(socketID) as GamePlayer;
         if (!observer) return;
 
-        // const roomID = observer?.player.roomId;
-        const bot = this.gamesHandler.players.find((player) => player.player.user._id === botID);
+        const bot = this.gamesHandler.getBot(botID);
         if (!bot) {
             // TODO: Socket event to notify observer he cannot replace bot
             socket.emit(SocketEvents.CannotReplaceBot, ERROR_REPLACING_BOT);
             return;
         }
 
-        const newPlayer = this.replaceBotWithObserver(observer.player, bot as Bot);
+        observer.player.type = PlayerType.User;
+        const newPlayer: RealPlayer = this.replaceBotWithObserver(observer.player, bot as Bot);
+
         // Update gamesHandler player list
-        this.gamesHandler.players = this.gamesHandler.players.filter(
-            (player) => player.player.user._id !== observer.player.user._id || player.player.user._id !== bot?.player.user._id,
-        );
-        this.gamesHandler.players.push(newPlayer);
+        this.gamesHandler.removePlayerFromId(bot.player.user._id);
+        this.gamesHandler.removePlayerFromId(observer.player.user._id);
+
+        const botTurnIndex: number | undefined = this.gamesHandler
+            .getPlayersInRoom(newPlayer.player.roomId)[0]
+            .game.turn.inactivePlayers?.findIndex((p: IUser) => p._id === bot.player.user._id);
+        if (!botTurnIndex) return;
+        const turnObj = this.gamesHandler.getPlayersInRoom(newPlayer.player.roomId)[0].game.turn;
+        if (turnObj.activePlayer === bot.player.user) turnObj.activePlayer = newPlayer.player.user;
+        else {
+            this.gamesHandler.getPlayersInRoom(newPlayer.player.roomId)[0].game.turn.inactivePlayers?.splice(botTurnIndex, 1);
+            this.gamesHandler.getPlayersInRoom(newPlayer.player.roomId)[0].game.turn.inactivePlayers?.push(observer.player.user);
+        }
+        this.gamesHandler.addPlayer(newPlayer);
 
         // TODO: Update room with roomID
+        server.to(newPlayer.player.roomId).emit(SocketEvents.PublicViewUpdate, {
+            gameboard: newPlayer.game.gameboard.toStringArray(),
+            players: this.gamesHandler.getPlayersInfos(newPlayer.player.roomId),
+            activePlayer: newPlayer.game.turn.activePlayer,
+        });
     }
 
-    private replaceBotWithObserver(observer: RoomPlayer, bot: Bot) {
+    private replaceBotWithObserver(observer: RoomPlayer, bot: Bot): RealPlayer {
         bot.unsubscribeObservables();
         return bot.convertToRealPlayer(observer);
     }
 
     private replacePlayerWithBot(player: RealPlayer): BeginnerBot {
+        const game = player.game;
+        const oldIUser = player.player.user;
         const bot = player.convertPlayerToBot();
         bot.player.socketId = '';
         bot.player.type = PlayerType.Bot;
-        bot.setGame(player.game);
+        bot.setGame(game);
+        if (bot.game.turn.activePlayer?._id === oldIUser._id) bot.game.turn.activePlayer = bot.player.user;
+        else {
+            const indexOfUser = bot.game.turn.inactivePlayers?.indexOf(oldIUser);
+            bot.game.turn.inactivePlayers?.splice(indexOfUser as number, 1, bot.player.user);
+        }
         bot.start();
+        bot.game.turn.endTurn.next(game.turn.activePlayer);
         return bot;
     }
 
     private addGameEventHistory(player: RealPlayer, gameWon: boolean) {
-        console.log('ENTERED ADD GAME EVENT HISTORY');
         const userID = player.player.user._id;
         const gameDate = player.game.beginningTime;
         this.accountStorage.addUserEventHistory(userID, HistoryActions.Game, gameDate, gameWon);
     }
-    // Replace observer and bot in list by observer
-    // Add Socket event to let observer join the room (need to verify if its possible to join or not)
-    // Need method to update all room clients that an observer has joined
 }

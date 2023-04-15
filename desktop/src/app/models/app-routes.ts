@@ -3,6 +3,7 @@ export enum AppRoutes {
     HomePage = 'home',
     GamePage = 'game',
     UserCreationPage = 'user',
+    UserProfilePage = 'profile',
     ConnectionPage = 'login',
     SettingsPage = 'settings',
     SoloGameCreationPage = 'solo',

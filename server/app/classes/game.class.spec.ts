@@ -5,7 +5,7 @@ import { Game } from '@app/classes/game.class';
 import { LetterReserve } from '@app/classes/letter-reserve.class';
 import { GamePlayer } from '@app/classes/player/player.class';
 import { Turn } from '@app/classes/turn.class';
-import { Word } from '@app/classes/word.class';
+import { Word } from '@common/classes/word.class';
 import { Letter } from '@common/interfaces/letter';
 import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
 import { expect } from 'chai';

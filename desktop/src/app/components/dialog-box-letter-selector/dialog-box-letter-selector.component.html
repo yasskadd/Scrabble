@@ -1,0 +1,18 @@
+<h1 mat-dialog-title>
+    <!-- TODO : Language-->
+    Choose a letter
+</h1>
+<div mat-dialog-content>
+    <mat-form-field appearance='outline'>
+        <!-- TODO : Language -->
+        <mat-label>Letter</mat-label>
+        <input matInput [formControl]='letterForm'>
+        <mat-error> {{errorMessage}} </mat-error>
+    </mat-form-field>
+</div>
+<div mat-dialog-actions>
+    <!--  TODO : Language-->
+    <button mat-button mat-dialog-close=''>Cancel</button>
+    <!--  TODO : Language-->
+    <button mat-button (click)='close()'>Ok</button>
+</div>

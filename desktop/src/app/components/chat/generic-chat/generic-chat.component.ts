@@ -59,7 +59,7 @@ export class GenericChatComponent implements AfterViewInit, AfterViewChecked {
 
     selectTab(tabName: string) {
         this.activeTab = tabName;
-        //TODO: Insert get joined & all chat rooms
+        // TODO: Insert get joined & all chat rooms
     }
 
     selectChatSession(chatRoomName: string | undefined) {

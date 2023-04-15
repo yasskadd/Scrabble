@@ -1,4 +1,4 @@
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, CdkDragMove, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component, ElementRef, HostListener, Input } from '@angular/core';
 import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
 import { GameClientService } from '@app/services/game-client.service';
@@ -6,6 +6,14 @@ import { LetterPlacementService } from '@app/services/letter-placement.service';
 import * as board from '@common/constants/board-info';
 import { Letter } from '@common/interfaces/letter';
 import { Subject } from 'rxjs';
+import { PlayerType } from '@common/models/player-type';
+import { PlayerInformation } from '@common/interfaces/player-information';
+import { ClientSocketService } from '@services/communication/client-socket.service';
+import { SocketEvents } from '@common/constants/socket-events';
+import { window as tauriWindow } from '@tauri-apps/api';
+import { GameConfigurationService } from '@services/game-configuration.service';
+
+// import { Socket } from 'socket.io-client';
 
 @Component({
     selector: 'app-player-rack',
@@ -16,6 +24,9 @@ export class PlayerRackComponent {
     @Input()
     keyboardParentSubject: Subject<KeyboardEvent>;
 
+    @Input()
+    player: PlayerInformation;
+
     buttonPressed: string;
     currentSelection: number;
     previousSelection: number;
@@ -25,7 +36,9 @@ export class PlayerRackComponent {
     constructor(
         private chatBoxHandler: ChatboxHandlerService,
         public gameClient: GameClientService,
+        private gameConfigurationService: GameConfigurationService,
         public letterPlacementService: LetterPlacementService,
+        private clientSocketService: ClientSocketService,
         private eRef: ElementRef,
     ) {
         this.buttonPressed = '';
@@ -38,7 +51,7 @@ export class PlayerRackComponent {
     @HostListener('window: click', ['$event'])
     clickOutside(event: { target: unknown; preventDefault: () => void }) {
         if (!this.eRef.nativeElement.contains(event.target)) {
-            this.cancelSelection();
+            this.lettersToExchange = [];
             this.currentSelection = board.INVALID_INDEX;
             this.previousSelection = board.INVALID_INDEX;
         }
@@ -60,6 +73,10 @@ export class PlayerRackComponent {
 
     skipTurn() {
         this.chatBoxHandler.submitMessage('!passer');
+    }
+
+    isCurrentPlayerPlaying(): boolean {
+        return this.gameClient.getLocalPlayer()?.player.type === PlayerType.User;
     }
 
     // findDuplicates() {
@@ -91,12 +108,13 @@ export class PlayerRackComponent {
     }
 
     exchangeLetters(): void {
-        let letters = '';
+        const letters = [];
         for (const i of this.lettersToExchange) {
-            letters += this.gameClient.getLocalPlayer().rack[i].value;
+            letters.push(this.gameClient.getLocalPlayer()?.rack[i].value);
         }
-        this.cancelSelection();
-        this.chatBoxHandler.submitMessage('!échanger ' + letters);
+        this.lettersToExchange = [];
+        this.clientSocketService.send(SocketEvents.Exchange, letters);
+        // this.chatBoxHandler.submitMessage('!échanger ' + letters);
     }
 
     cancelSelection(): void {
@@ -104,18 +122,53 @@ export class PlayerRackComponent {
     }
 
     protected drop(event: CdkDragDrop<Letter[]>): void {
+        this.lettersToExchange = [];
         if (!this.letterPlacementService.isRemoveValid(event.item.data)) {
+            this.letterPlacementService.initSelection();
             return;
         }
 
         if (event.previousContainer === event.container) {
             moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
         } else {
-            this.letterPlacementService.resetTile(event.item.data.coord);
-            this.gameClient.getLocalPlayer().rack.push(event.item.data.letter);
+            this.letterPlacementService.initLiveTile(event.item.data.coord);
+            this.gameClient.getLocalPlayer()?.rack.push(event.item.data.letter);
             this.letterPlacementService.resetSelectionPositions(event.item.data);
         }
 
-        this.letterPlacementService.currentSelection = undefined;
+        this.clientSocketService.send(SocketEvents.LetterPlaced, {
+            roomId: this.gameConfigurationService.localGameRoom.id,
+            socketId: this.gameClient.getLocalPlayer()?.player.socketId,
+            coord: -event.item.data.coord,
+            letter: event.item.data.letter.value.toString(),
+        });
+
+        this.letterPlacementService.initSelection();
+        this.lettersToExchange = [];
+    }
+
+    protected async startedDragging(letter: Letter): Promise<void> {
+        this.lettersToExchange = [];
+        this.letterPlacementService.currentSelection = letter;
+
+        this.clientSocketService.send(SocketEvents.LetterTaken, {
+            roomId: this.gameConfigurationService.localGameRoom.id,
+            socketId: this.gameClient.getLocalPlayer()?.player.socketId,
+            coord: -1,
+            letter: letter.value.toString(),
+        });
+    }
+
+    protected async dragging(event: CdkDragMove, letter: Letter): Promise<void> {
+        if (!this.gameClient.currentlyPlaying()) return;
+
+        const windowSize = await tauriWindow.appWindow.innerSize();
+        this.clientSocketService.send(SocketEvents.SendDrag, {
+            roomId: this.gameConfigurationService.localGameRoom.id,
+            socketId: this.gameClient.getLocalPlayer()?.player.socketId,
+            letter: letter.value.toString(),
+            coord: [(event.event as MouseEvent).clientX, (event.event as MouseEvent).clientY],
+            window: [windowSize.width, windowSize.height],
+        });
     }
 }

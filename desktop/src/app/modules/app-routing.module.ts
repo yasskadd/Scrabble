@@ -9,6 +9,7 @@ import { GameCreationPageComponent } from '@app/pages/multiplayer-create-page/ga
 import { MultiplayerJoinPageComponent } from '@app/pages/multiplayer-join-page/multiplayer-join-page.component';
 import { SettingsPageComponent } from '@app/pages/settings-page/settings-page.component';
 import { UserCreationPageComponent } from '@app/pages/user-creation-page/user-creation-page.component';
+import { UserProfilePageComponent } from '@app/pages/user-profile-page/user-profile-page.component';
 import { WaitingOpponentPageComponent } from '@app/pages/waiting-opponent-page/waiting-opponent-page.component';
 
 const routes: Routes = [
@@ -17,6 +18,7 @@ const routes: Routes = [
     { path: AppRoutes.HomePage, component: MainPageComponent },
     { path: AppRoutes.GamePage, component: GamePageComponent },
     { path: AppRoutes.UserCreationPage, component: UserCreationPageComponent },
+    { path: AppRoutes.UserProfilePage, component: UserProfilePageComponent },
     { path: AppRoutes.ConnectionPage, component: ConnectionPageComponent },
     { path: AppRoutes.SettingsPage, component: SettingsPageComponent },
     { path: `${AppRoutes.SoloGameCreationPage}/:id`, component: GameCreationPageComponent },

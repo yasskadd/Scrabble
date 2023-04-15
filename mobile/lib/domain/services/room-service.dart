@@ -49,11 +49,6 @@ class RoomService {
       notifyRoomMemberList.add(currentRoom);
     });
 
-    _socket.on(RoomSocketEvent.KickedFromWaitingRoom.event, (_) {
-      currentRoom = null;
-      notifyRoomMemberList.add(currentRoom);
-    });
-
     _socket.on(RoomSocketEvent.GameAboutToStart.event, (data) {
       if(data == null) return;
       GameService gameService = GetIt.I.get<GameService>();
@@ -67,6 +62,11 @@ class RoomService {
         RoomSocketEvent.ErrorJoining.event,
         (errorMsg) => notifyError
             .add(parseServerError(ServerError.fromString(errorMsg))));
+
+    _socket.on(RoomSocketEvent.KickedFromWaitingRoom.event, (_) {
+      currentRoom = null;
+      Navigator.pop(GetIt.I.get<GlobalKey<NavigatorState>>().currentContext!);
+    });
   }
 
   // TODO: move to more global service if there's other errors we need to parse
@@ -116,6 +116,7 @@ class RoomService {
   }
 
   void exitRoom() {
+    if (currentRoom == null) return;
     UserRoomQuery exitQuery =
         UserRoomQuery(user: _userService.user!, roomId: currentRoom!.id);
     _socket.emit(RoomSocketEvent.ExitWaitingRoom.event, exitQuery);
@@ -124,5 +125,11 @@ class RoomService {
   void startScrabbleGame() {
     GetIt.I.get<GameService>(); // Init Game Service
     _socket.emit(RoomSocketEvent.StartScrabbleGame.event, currentRoom!.id);
+  }
+
+  void kickPlayerFromWaitingRoom(RoomPlayer player){
+    UserRoomQuery exitQuery =
+    UserRoomQuery(user: player.user, roomId: currentRoom!.id);
+    _socket.emit(RoomSocketEvent.ExitWaitingRoom.event, exitQuery);
   }
 }

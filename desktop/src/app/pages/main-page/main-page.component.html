@@ -14,9 +14,32 @@
                     >
                         <button mat-flat-button color="accent" *ngFor="let letter of ['S', 'C', 'O', 'R', 'E', 'S']">{{ letter }}</button>
                         <button mat-flat-button color="accent">
-                            <mat-icon class="scores-icon">emoji_events</mat-icon>
+                            <mat-icon class="scores-icon justified">emoji_events</mat-icon>
                         </button>
                     </div>
+                    <button
+                        [routerLink]="[multiplayerCreateLink]"
+                        id="multiplayer-create"
+                        class="button multiplayer"
+                        mat-raised-button
+                        color="primary"
+                        mat-dialog-close=""
+                    >
+                        {{ "action.create" | translate }}
+                        <mat-icon class="button-icon">create</mat-icon>
+                    </button>
+
+                    <button
+                        id="multiplayer-join"
+                        class="button multiplayer"
+                        mat-raised-button
+                        color="primary"
+                        mat-dialog-close=""
+                        (click)='navigateJoinPage()'
+                    >
+                        {{ "action.join" | translate }}
+                        <mat-icon class="button-icon">leak_add</mat-icon>
+                    </button>
                     <button
                         id="classique"
                         mat-raised-button
@@ -26,7 +49,8 @@
                         matTooltip="{{ 'main_page.tooltip.play' | translate }}"
                         matTooltipPosition="right"
                         matTooltipClass="toolMainPage"
-                        [disabled]="!userService.isConnected()"
+                        [disabled]="!userService.isConnected.getValue()"
+                        hidden
                     >
                         {{ "main_page.play" | translate }}
                     </button>

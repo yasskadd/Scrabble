@@ -55,6 +55,11 @@ class HttpHandlerService {
         headers: headers);
   }
 
+  Future<http.Response> getBotProfilePicture() {
+    return client.get(Uri.parse("$baseUrl/image/bot/profile-picture"),
+        headers: headers);
+  }
+
   Future<http.StreamedResponse> sendAvatarRequest(
       File image, String key) async {
     final request = http.MultipartRequest(
@@ -114,6 +119,11 @@ class HttpHandlerService {
         body: body, headers: headers);
   }
 
+  Future<http.Response> forgotPassword(Object body) {
+    return client.post(Uri.parse("$baseUrl/profile/forgot-password"),
+        body: body);
+  }
+
   // High Scores requests
   Future<http.Response> fetchHighScoresRequest() {
     return client.get(Uri.parse("$baseUrl/highScore/classique"));
@@ -142,5 +152,9 @@ class HttpHandlerService {
   // Common utilities
   void updateCookie(Cookie cookie) {
     headers['cookie'] = "${cookie.name}=${cookie.value}";
+  }
+
+  void resetCookie() {
+    headers['cookie'] = "";
   }
 }

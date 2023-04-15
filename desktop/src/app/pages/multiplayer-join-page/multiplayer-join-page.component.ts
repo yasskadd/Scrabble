@@ -10,6 +10,8 @@ import { RoomPlayer } from '@common/interfaces/room-player';
 import { PlayerType } from '@common/models/player-type';
 import { GameVisibility } from '@common/models/game-visibility';
 import { GameMode } from '@common/models/game-mode';
+import { ClientSocketService } from '@services/communication/client-socket.service';
+import { SocketEvents } from '@common/constants/socket-events';
 
 @Component({
     selector: 'app-multiplayer-join-page',
@@ -25,6 +27,7 @@ export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
         protected gameConfiguration: GameConfigurationService,
         private activatedRoute: ActivatedRoute,
         private dialog: MatDialog,
+        private clientSocketService: ClientSocketService,
     ) {
         this.gameMode = this.activatedRoute.snapshot.params.id;
         this.roomIdForm = new FormControl('');
@@ -67,6 +70,10 @@ export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
 
     joinRandomRoom(): void {
         this.joinRoom(this.availableRooms[Math.floor(Math.random() * this.availableRooms.length)]);
+    }
+
+    refresh(): void {
+        this.clientSocketService.send(SocketEvents.UpdateGameRooms);
     }
 
     protected getPlayers(room: GameRoom) {

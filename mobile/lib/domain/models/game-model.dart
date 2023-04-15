@@ -1,27 +1,34 @@
+import 'dart:math';
+
+import 'package:get_it/get_it.dart';
 import 'package:mobile/domain/models/board-models.dart';
 import 'package:mobile/domain/models/easel-model.dart';
 import 'package:mobile/domain/models/game-command-models.dart';
 import 'package:mobile/domain/models/user-auth-models.dart';
 import 'package:mobile/domain/models/room-model.dart';
+import 'package:mobile/domain/services/room-service.dart';
 
 class Game {
+  final _roomService = GetIt.I.get<RoomService>();
+
   final Board gameboard = Board(15);
   List<GamePlayer> players;
   late GamePlayer currentPlayer;
   GamePlayer? activePlayer;
+  final int timerLength;
   int turnTimer = 0;
+  int reserveLetterCount = 0;
 
   Game(GameRoom room, IUser currentUser)
       : players = room.players
             .map<GamePlayer>((roomPlayer) => GamePlayer(Easel(7), 0, roomPlayer))
-            .toList() {
+            .toList(), timerLength = room.timer {
     currentPlayer =
         players.firstWhere((player) => player.player.user.username == currentUser.username);
   }
 
-  void nextTurn(GameInfo gameInfo) {
+  void nextTurn() {
     turnTimer = 0;
-    update(gameInfo);
   }
 
   void update(GameInfo gameInfo) {
@@ -30,25 +37,10 @@ class Game {
 
     setActivePlayer(gameInfo.activePlayer);
 
-    List<GamePlayer> unknownPlayer = [];
-    players.forEach((player) {
-      int playerIndex = gameInfo.players
-          .indexWhere((element) => element.player.user.username == player.player.user.username);
-      if (playerIndex >= 0) {
-        player.update(gameInfo.players[playerIndex]);
-        gameInfo.players.removeAt(playerIndex);
-      } else {
-        unknownPlayer.add(player);
-      }
-    });
-
-    // If room player changed
-    while (unknownPlayer.isNotEmpty && gameInfo.players.isNotEmpty) {
-      unknownPlayer[0].player = gameInfo.players[0].player;
-      unknownPlayer[0].update(gameInfo.players[0]);
-      unknownPlayer.removeAt(0);
-      gameInfo.players.removeAt(0);
-    }
+    players.clear();
+    players = gameInfo.players.map((playerInfo) => playerInfo.createGamePlayer()).toList();
+    
+    _roomService.currentRoom!.players = players.map((player) => player.player).toList();
   }
 
   void setActivePlayer(IUser? newActivePlayer) {
@@ -63,6 +55,14 @@ class Game {
       activePlayer = players[activePlayerIndex];
     }
   }
+
+  bool isCurrentPlayersTurn(){
+    return activePlayer != null && currentPlayer.player.user.id == activePlayer!.player.user.id;
+  }
+
+  double getTurnProcess(){
+    return min(turnTimer / timerLength, 1);
+  }
 }
 
 class GamePlayer {
@@ -75,5 +75,6 @@ class GamePlayer {
   void update(PlayerInformation playerInfo) {
     easel.updateFromRack(playerInfo.rack);
     score = playerInfo.score;
+    player.playerType = playerInfo.player.playerType;
   }
 }

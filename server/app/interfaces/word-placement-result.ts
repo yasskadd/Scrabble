@@ -1,4 +1,4 @@
-import { Word } from '@app/classes/word.class';
+import { Word } from '@common/classes/word.class';
 import { Gameboard } from '@common/classes/gameboard.class';
 
 export interface WordPlacementResult {

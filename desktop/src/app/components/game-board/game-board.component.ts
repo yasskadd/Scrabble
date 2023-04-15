@@ -1,4 +1,4 @@
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, CdkDragMove } from '@angular/cdk/drag-drop';
 import { Component } from '@angular/core';
 import { CENTER_TILE } from '@app/constants/board-view';
 import { BoardTileInfo } from '@app/interfaces/board-tile-info';
@@ -11,6 +11,11 @@ import { AlphabetLetter } from '@common/models/alphabet-letter';
 import { WebviewWindow } from '@tauri-apps/api/window';
 import { TauriEvent } from '@tauri-apps/api/event';
 import { TauriStateService } from '@services/tauri-state.service';
+import { ClientSocketService } from '@app/services/communication/client-socket.service';
+import { SocketEvents } from '@common/constants/socket-events';
+import { window as tauriWindow } from '@tauri-apps/api';
+import { GameConfigurationService } from '@app/services/game-configuration.service';
+import { GameClientService } from '@services/game-client.service';
 
 @Component({
     selector: 'app-game-board',
@@ -21,10 +26,16 @@ export class GameBoardComponent {
     protected boardTileStates: typeof BoardTileState = BoardTileState;
     protected playDirection: typeof PlayDirection = PlayDirection;
 
-    constructor(protected letterPlacementService: LetterPlacementService, private tauriStateService: TauriStateService) {
+    constructor(
+        protected letterPlacementService: LetterPlacementService,
+        protected clientSocketService: ClientSocketService,
+        private gameConfigurationService: GameConfigurationService,
+        private gameClientService: GameClientService,
+        private tauriStateService: TauriStateService,
+    ) {
         if (this.tauriStateService.useTauri) {
-            const tauriWindow = WebviewWindow.getByLabel('main');
-            tauriWindow
+            const appWindow = WebviewWindow.getByLabel('main');
+            appWindow
                 .listen(TauriEvent.WINDOW_CLOSE_REQUESTED, () => {
                     alert('Cannot close while in game');
                 })
@@ -37,24 +48,60 @@ export class GameBoardComponent {
             this.letterPlacementService.handleDragPlacement(event.previousIndex, event.previousContainer.data[event.previousIndex], tile);
         }
 
-        this.letterPlacementService.currentSelection = undefined;
+        this.letterPlacementService.initSelection();
     }
 
     protected entered(event: MouseEvent, tile: BoardTileInfo) {
-        if (this.letterPlacementService.boardTiles[tile.coord].state === BoardTileState.Empty) {
-            this.letterPlacementService.boardTiles[tile.coord] = {
+        const liveTile = this.letterPlacementService.liveBoard[tile.coord];
+        if (
+            (liveTile.state === BoardTileState.Empty || liveTile.state === BoardTileState.Temp) &&
+            !this.letterPlacementService.selectionPositions.find((sp: SelectionPosition) => sp.coord === tile.coord)
+        ) {
+            this.letterPlacementService.liveBoard[tile.coord] = {
                 type: BoardTileType.Empty,
                 state: BoardTileState.Temp,
-                letter: this.letterPlacementService.currentSelection,
+                letter: this.letterPlacementService.currentSelection
+                    ? { value: '', quantity: undefined, points: undefined }
+                    : this.letterPlacementService.currentSelection,
                 coord: tile.coord,
             };
         }
     }
 
-    protected exited(event: MouseEvent, tile: BoardTileInfo) {
-        if (this.letterPlacementService.boardTiles[tile.coord].state === BoardTileState.Temp) {
-            this.letterPlacementService.resetTile(tile.coord);
-        }
+    protected exited() {
+        this.letterPlacementService.liveBoard = JSON.parse(JSON.stringify(this.letterPlacementService.confirmedBoard));
+    }
+
+    protected async startedDragging(tile: BoardTileInfo): Promise<void> {
+        if (!this.gameClientService.currentlyPlaying()) return;
+        this.clientSocketService.send(SocketEvents.LetterTaken, {
+            roomId: this.gameConfigurationService.localGameRoom.id,
+            socketId: this.gameClientService.getLocalPlayer()?.player.socketId,
+            coord: tile.coord,
+            letter: tile.letter.value.toString(),
+        });
+    }
+
+    protected stoppedDragging(tile: BoardTileInfo): void {
+        this.clientSocketService.send(SocketEvents.LetterPlaced, {
+            roomId: this.gameConfigurationService.localGameRoom.id,
+            socketId: this.gameClientService.getLocalPlayer()?.player.socketId,
+            coord: tile.coord,
+            letter: tile.letter.value.toString(),
+        });
+    }
+
+    protected async dragging(event: CdkDragMove, tile: BoardTileInfo): Promise<void> {
+        if (!this.gameClientService.currentlyPlaying()) return;
+
+        const windowSize = await tauriWindow.appWindow.innerSize();
+        this.clientSocketService.send(SocketEvents.SendDrag, {
+            roomId: this.gameConfigurationService.localGameRoom.id,
+            socketId: this.gameClientService.getLocalPlayer()?.player.socketId,
+            letter: tile.letter.value.toString(),
+            coord: [(event.event as MouseEvent).clientX, (event.event as MouseEvent).clientY],
+            window: [windowSize.width, windowSize.height],
+        });
     }
 
     protected identify(index: number, item: { coord: number }): number {
@@ -123,5 +170,21 @@ export class GameBoardComponent {
         });
 
         return tile.coord === CENTER_TILE && tile.state === BoardTileState.Empty && show;
+    }
+
+    protected isTempTile(state: BoardTileState) {
+        return state === BoardTileState.Temp;
+    }
+
+    protected isConfirmedTile(state: BoardTileState) {
+        return state === BoardTileState.Confirmed;
+    }
+
+    protected isPendingTile(state: BoardTileState) {
+        return state === BoardTileState.Pending;
+    }
+
+    protected isEmptyTile(state: BoardTileState) {
+        return state === BoardTileState.Empty;
     }
 }

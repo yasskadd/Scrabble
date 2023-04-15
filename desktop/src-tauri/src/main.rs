@@ -22,6 +22,13 @@ struct Http {
 #[derive(Serialize)]
 struct HttpResponse {
     body: String,
+    err: String,
+}
+
+// the payload type must implement `Serialize` and `Clone`.
+#[derive(Clone, serde::Serialize)]
+struct TestPayload {
+    message: String,
 }
 
 enum RustEvent {
@@ -56,6 +63,7 @@ fn socketEstablishConnection(
     cookie: Option<&str>,
     state: tauri::State<SocketClient>,
     window: tauri::Window,
+    handle: tauri::AppHandle,
 ) {
     let mut socket = state.socket.lock().expect("Error locking the socket");
 
@@ -69,15 +77,34 @@ fn socketEstablishConnection(
         None => ClientBuilder::new(address).reconnect(false),
     };
 
-    let socketEventWindow = window.clone();
     let connection = clientBuilder
         .on_any(move |event, payload, _raw_client| {
             // println!("Got event: {:?} {:?}", event, payload);
             if let Payload::String(payload) = payload {
-                println!("Got payload: {}", payload);
-                socketEventWindow
-                    .emit(&String::from(event), payload)
-                    .expect("Couldn't emit the event to Angular");
+                println!("Got event: {}", String::from(event.clone()));
+                // println!("Got payload: {}", payload);
+
+                if payload.to_string() == "\"SuccessfulConnection\""
+                    || payload.to_string() == "\"UserAlreadyConnected\""
+                {
+                    let new_payload = payload
+                        .strip_prefix("\"")
+                        .unwrap()
+                        .strip_suffix("\"")
+                        .unwrap();
+
+                    handle
+                        .emit_all(&String::from(new_payload), payload.clone())
+                        .expect("Couldn't emit the event to Angular");
+                } else {
+                    handle
+                        .emit_all(&String::from(event), payload)
+                        .expect("Couldn't emit the event to Angular");
+                }
+
+                // socketEventWindow
+                //     .emit(&String::from(event), payload)
+                //     .expect("Couldn't emit the event to Angular");
             }
         })
         .connect();
@@ -177,8 +204,14 @@ async fn httpGet(
     let res = req.send().await.unwrap().text().await;
 
     match res {
-        Ok(response) => Ok(HttpResponse { body: response }),
-        Err(error) => Err(error.to_string()),
+        Ok(response) => Ok(HttpResponse {
+            body: response,
+            err: "".to_string(),
+        }),
+        Err(error) => Ok(HttpResponse {
+            body: "".to_string(),
+            err: error.to_string(),
+        }),
     }
 }
 
@@ -201,8 +234,14 @@ async fn httpPost(
     let res: Result<String, reqwest::Error> = req.send().await.unwrap().text().await;
 
     match res {
-        Ok(response) => Ok(HttpResponse { body: response }),
-        Err(error) => Err(error.to_string()),
+        Ok(response) => Ok(HttpResponse {
+            body: response,
+            err: "".to_string(),
+        }),
+        Err(error) => Ok(HttpResponse {
+            body: "".to_string(),
+            err: error.to_string(),
+        }),
     }
 }
 
@@ -243,8 +282,14 @@ async fn httpPut(
     let res: Result<String, reqwest::Error> = req.send().await.unwrap().text().await;
 
     match res {
-        Ok(response) => Ok(HttpResponse { body: response }),
-        Err(error) => Err(error.to_string()),
+        Ok(response) => Ok(HttpResponse {
+            body: response,
+            err: "".to_string(),
+        }),
+        Err(error) => Ok(HttpResponse {
+            body: "".to_string(),
+            err: error.to_string(),
+        }),
     }
 }
 
@@ -265,7 +310,7 @@ async fn httpPatch(
             let mut cache_dir = tauri::api::path::cache_dir().unwrap();
             cache_dir.push(path.to_owned());
 
-            let file = fs::read(tauri::api::path::cache_dir().unwrap().as_path());
+            let file = fs::read(cache_dir.as_path());
             req = req.multipart(
                 reqwest::multipart::Form::new()
                     .part(
@@ -295,8 +340,14 @@ async fn httpPatch(
     let res: Result<String, reqwest::Error> = req.send().await.unwrap().text().await;
 
     match res {
-        Ok(response) => Ok(HttpResponse { body: response }),
-        Err(error) => Err(error.to_string()),
+        Ok(response) => Ok(HttpResponse {
+            body: response,
+            err: "".to_string(),
+        }),
+        Err(error) => Ok(HttpResponse {
+            body: "".to_string(),
+            err: error.to_string(),
+        }),
     }
 }
 
@@ -319,8 +370,14 @@ async fn httpDelete(
     let res: Result<String, reqwest::Error> = req.send().await.unwrap().text().await;
 
     match res {
-        Ok(response) => Ok(HttpResponse { body: response }),
-        Err(error) => Err(error.to_string()),
+        Ok(response) => Ok(HttpResponse {
+            body: response,
+            err: "".to_string(),
+        }),
+        Err(error) => Ok(HttpResponse {
+            body: "".to_string(),
+            err: error.to_string(),
+        }),
     }
 }
 

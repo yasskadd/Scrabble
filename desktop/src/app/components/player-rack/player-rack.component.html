@@ -1,5 +1,5 @@
 <div class="justified-rack">
-    <div class="left-side">
+    <div class="left-side" *ngIf="isCurrentPlayerPlaying()">
         <button id="skip-turn" mat-raised-button [disabled]="!gameClient.currentlyPlaying()" (click)="skipTurn()">
             {{ "game_page.rack.skip_round" | translate }}
         </button>
@@ -22,25 +22,36 @@
         (cdkDropListDropped)="drop($event)"
         cdkDropListOrientation="horizontal"
     >
-        <div
-            cdkDrag
-            [cdkDragData]="letter"
-            (cdkDragStarted)="letterPlacementService.currentSelection = letter"
-            *ngFor="let letter of gameClient.getLocalPlayer()?.rack; index as i"
-            (click)="onSelection($event, i)"
-            class="rack"
-        >
-            <button mat-flat-button color="accent" class="rack-letter letter-shadow" *cdkDragPlaceholder></button>
-            <button mat-raised-button color="accent" class="rack-letter">
-                <div class="letter-value">
-                    {{ letter.value.toUpperCase() }}
-                </div>
-                <div class="letter-points">{{ letter.points }}</div>
-            </button>
+        <div *ngIf="isCurrentPlayerPlaying()" class="rack">
+            <div
+                cdkDrag
+                [cdkDragData]="letter"
+                *ngFor="let letter of gameClient.getLocalPlayer()?.rack; index as i"
+                (click)="onSelection($event, i)"
+                class="rack"
+                (cdkDragStarted)="startedDragging(letter)"
+                (cdkDragMoved)="dragging($event, letter)"
+            >
+                <button mat-flat-button color="accent" class="rack-letter letter-shadow" *cdkDragPlaceholder></button>
+                <button mat-raised-button [color]="lettersToExchange.includes(i) ? 'primary' : 'accent'" class="rack-letter">
+                    <div class="letter-value">{{ letter.value.toUpperCase() }}</div>
+                    <div class="letter-points">{{ letter.points }}</div>
+                </button>
+            </div>
+        </div>
+        <div *ngIf="!isCurrentPlayerPlaying()" class="rack">
+            <div *ngFor="let letter of player?.rack; index as i" class="rack">
+                <button mat-raised-button color="accent" class="rack-letter">
+                    <div class="letter-value">
+                        {{ letter.value.toUpperCase() }}
+                    </div>
+                    <div class="letter-points">{{ letter.points }}</div>
+                </button>
+            </div>
         </div>
     </div>
 
-    <div class="right-side">
+    <div class="right-side" *ngIf="isCurrentPlayerPlaying()">
         <button
             *ngIf="lettersToExchange.length !== 0"
             id="cancel"

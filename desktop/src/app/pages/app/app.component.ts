@@ -16,7 +16,7 @@ export class AppComponent implements OnInit {
         private changeDetector: ChangeDetectorRef,
         private elementRef: ElementRef,
     ) {
-        this.clientSocketService.updateSubject.subscribe(() => {
+        this.clientSocketService.appUpdate.subscribe(() => {
             this.changeDetector.detectChanges();
         });
         this.themeService.isDarkTheme.subscribe((isDarkTheme: boolean) => {

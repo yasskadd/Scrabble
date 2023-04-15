@@ -2,114 +2,163 @@
     <img src="https://bit.ly/3m206ss" width="250" height="50" alt="Logo Scrabble" *ngIf="!gameClientService.isGameFinish" (click)="abandonGame()" />
     <img src="https://bit.ly/3m206ss" width="250" height="50" alt="Logo Scrabble" *ngIf="gameClientService.isGameFinish" (click)="leaveGame()" />
 </div> -->
-<mat-card class="justified">
-    <div class="players">
-        <div class="player" color="accent" *ngFor='let playerInfos of gameClientService.players' [ngClass]="{ active: gameClientService.activePlayer.username === playerInfos.player.user
-         .username}" id="player-1">
-            <mat-card-title-group class="playerInfo">
-                <mat-card-title>{{ playerInfos.player.user.username }}</mat-card-title>
-                <mat-card-subtitle class="score"
-                    >{{ playerInfos.score }} {{ "game_page.informations.points" | translate }}</mat-card-subtitle
-                >
-                <mat-card-subtitle class="rack-letters" *ngIf="playerInfos.rack.length < 7">
+<mat-card class='justified'>
+    <button mat-raised-button
+            [disabled]='!gameClientService.currentlyPlaying() || letterService.placedLetters.length !== 0'
+            *ngIf='!clueAvailable()'
+            (click)='askForClue()'
+            class='clue-buttons'
+            style='width: 50%'>
+        <!-- TODO : Language -->
+        Indice
+    </button>
+    <div *ngIf='clueAvailable()' class='clue-buttons'>
+        <button mat-mini-fab (click)='prevClue()'>
+            <mat-icon>navigate_before</mat-icon>
+        </button>
+        <button mat-raised-button (click)='placeClue()'>Confirm</button>
+        <button mat-mini-fab (click)='nextClue()'>
+            <mat-icon>navigate_next</mat-icon>
+        </button>
+    </div>
+    <div class='players'>
+        <button
+            class='player'
+            *ngFor='let playerInfos of players; index as i'
+            [ngClass]='{ active: gameClientService.activePlayer.username === playerInfos.player.user.username }'
+            id='player-1'
+        >
+            <mat-card-title-group class='playerInfo'>
+                <mat-card-title>
+                    <img *ngIf='gameClientService.getLocalPlayer().player.type !== PlayerType.Observer' [src]='userService.getPlayerImage(playerInfos.player)' class='selector-avatar mat-elevation-z5' />
+                    <img *ngIf='gameClientService.getLocalPlayer().player.type === PlayerType.Observer' [mat-menu-trigger-for]='player_menu' [src]='userService.getPlayerImage(playerInfos.player)' class='selector-avatar mat-elevation-z5' />
+                    <b>
+                        {{ playerInfos.player.user.username }}
+                    </b>
+                </mat-card-title>
+                <mat-card-subtitle
+                    class='score'
+                   >{{ playerInfos.score }} {{ "game_page.informations.points" | translate }}</mat-card-subtitle>
+                <mat-card-subtitle class='rack-letters'
+                                   *ngIf='playerInfos.rack.length < 7'>
                     {{ playerInfos.rack.length }} {{ "game_page.informations.letters_available" | translate }}
                 </mat-card-subtitle>
             </mat-card-title-group>
             <mat-card-content>
-                <div [ngClass]="[gameClientService.timer < 10 ? 'countdown' : 'time']" id="playerOneTimer" *ngIf="gameClientService.activePlayer.username === playerInfos.player.user
-         .username">
+                <div
+                    [ngClass]="[gameClientService.timer < 10 ? 'countdown' : 'time']"
+                    id='playerOneTimer'
+                    *ngIf='gameClientService.activePlayer._id === playerInfos.player.user._id'
+                    class='timer'
+                >
                     <mat-icon>timer</mat-icon>
-                    {{ timer.secondsToMinute(gameClientService.timer) }}:{{ timer.timerToSecond(gameClientService.timer) }}
+                    {{ timer.secondsToMinute(gameClientService.timer) }}
+                    :{{ timer.timerToSecond(gameClientService.timer) }}
                 </div>
             </mat-card-content>
-        </div>
+            <mat-menu #player_menu='matMenu'>
+                <button (click)='selectPlayer(playerInfos.player)' mat-menu-item>
+                    <mat-icon>visibility</mat-icon>
+                    <!-- TODO : Language -->
+                    <span>Voir</span>
+                </button>
+                <button (click)='replaceBot(playerInfos)' *ngIf='playerInfos.player.type === PlayerType.Bot'
+                        mat-menu-item>
+                    <mat-icon>sync</mat-icon>
+                    <!-- TODO : Language-->
+                    <span>Remplacer</span>
+                </button>
+            </mat-menu>
+        </button>
     </div>
 
-<!--    <div class="objectives" *ngIf="gameClientService.playerOne?.objective">-->
-<!--        <mat-expansion-panel [expanded]="true">-->
-<!--            <mat-expansion-panel-header>-->
-<!--                <mat-panel-title>-->
-<!--                    <mat-icon>assignment</mat-icon>-->
-<!--                    {{ "game_page.informations.objectives" | translate }}-->
-<!--                </mat-panel-title>-->
-<!--            </mat-expansion-panel-header>-->
-<!--            <p class="obj-paragraph">En cours</p>-->
-<!--            <tr class="objective-tr" *ngFor="let objective of filterNotCompletedObjectives()">-->
-<!--                <mat-card *ngIf="!objective.complete">-->
-<!--                    <td [ngClass]="{ complete: objective.complete }" [matTooltip]="objective.description" id="td-objective">-->
-<!--                        <p *ngIf="objective.isPublic && !objective.complete" class="isPublic-obj">-->
-<!--                            <mat-icon>people</mat-icon>-->
-<!--                        </p>-->
-<!--                        <p *ngIf="!objective.isPublic && !objective.complete" class="isPublic-obj">-->
-<!--                            <mat-icon>person</mat-icon>-->
-<!--                        </p>-->
-<!--                        {{ objective.name }}-->
-<!--                        <mat-icon [inline]="true">info</mat-icon>-->
-<!--                        <div *ngIf="!objective.multiplier" [ngClass]="{ complete: objective.complete }" class="numberCircle">-->
-<!--                            {{ objective.points }}-->
-<!--                        </div>-->
+    <!--    <div class="objectives" *ngIf="gameClientService.playerOne?.objective">-->
+    <!--        <mat-expansion-panel [expanded]="true">-->
+    <!--            <mat-expansion-panel-header>-->
+    <!--                <mat-panel-title>-->
+    <!--                    <mat-icon>assignment</mat-icon>-->
+    <!--                    {{ "game_page.informations.objectives" | translate }}-->
+    <!--                </mat-panel-title>-->
+    <!--            </mat-expansion-panel-header>-->
+    <!--            <p class="obj-paragraph">En cours</p>-->
+    <!--            <tr class="objective-tr" *ngFor="let objective of filterNotCompletedObjectives()">-->
+    <!--                <mat-card *ngIf="!objective.complete">-->
+    <!--                    <td [ngClass]="{ complete: objective.complete }" [matTooltip]="objective.description" id="td-objective">-->
+    <!--                        <p *ngIf="objective.isPublic && !objective.complete" class="isPublic-obj">-->
+    <!--                            <mat-icon>people</mat-icon>-->
+    <!--                        </p>-->
+    <!--                        <p *ngIf="!objective.isPublic && !objective.complete" class="isPublic-obj">-->
+    <!--                            <mat-icon>person</mat-icon>-->
+    <!--                        </p>-->
+    <!--                        {{ objective.name }}-->
+    <!--                        <mat-icon [inline]="true">info</mat-icon>-->
+    <!--                        <div *ngIf="!objective.multiplier" [ngClass]="{ complete: objective.complete }" class="numberCircle">-->
+    <!--                            {{ objective.points }}-->
+    <!--                        </div>-->
 
-<!--                        <div *ngIf="objective.multiplier" [ngClass]="{ complete: objective.complete }" class="numberCircle">x2</div>-->
-<!--                    </td>-->
-<!--                </mat-card>-->
-<!--            </tr>-->
-<!--            <p class="obj-paragraph">{{ "game_page.informations.completed" | translate }}</p>-->
-<!--            <tr class="objective-tr" *ngFor="let objective of filterCompletedObjectives(true)">-->
-<!--                <mat-card *ngIf="objective.complete && objective.user === gameClientService.playerOne.name" class="objective-completed">-->
-<!--                    <p *ngIf="objective.isPublic && objective.complete" class="isPublic-obj">-->
-<!--                        <mat-icon>people</mat-icon>-->
-<!--                    </p>-->
-<!--                    <p *ngIf="!objective.isPublic && objective.complete" class="isPublic-obj">-->
-<!--                        <mat-icon>person</mat-icon>-->
-<!--                    </p>-->
-<!--                    <td [ngClass]="{ complete: objective.complete }" [matTooltip]="objective.description">-->
-<!--                        {{ objective.name }}-->
-<!--                        <mat-icon [inline]="true">info</mat-icon>-->
-<!--                        <div *ngIf="!objective.multiplier" [ngClass]="{ complete: objective.complete }" class="numberCircle">-->
-<!--                            {{ objective.points }}-->
-<!--                        </div>-->
+    <!--                        <div *ngIf="objective.multiplier" [ngClass]="{ complete: objective.complete }" class="numberCircle">x2</div>-->
+    <!--                    </td>-->
+    <!--                </mat-card>-->
+    <!--            </tr>-->
+    <!--            <p class="obj-paragraph">{{ "game_page.informations.completed" | translate }}</p>-->
+    <!--            <tr class="objective-tr" *ngFor="let objective of filterCompletedObjectives(true)">-->
+    <!--                <mat-card *ngIf="objective.complete && objective.user === gameClientService.playerOne.name" class="objective-completed">-->
+    <!--                    <p *ngIf="objective.isPublic && objective.complete" class="isPublic-obj">-->
+    <!--                        <mat-icon>people</mat-icon>-->
+    <!--                    </p>-->
+    <!--                    <p *ngIf="!objective.isPublic && objective.complete" class="isPublic-obj">-->
+    <!--                        <mat-icon>person</mat-icon>-->
+    <!--                    </p>-->
+    <!--                    <td [ngClass]="{ complete: objective.complete }" [matTooltip]="objective.description">-->
+    <!--                        {{ objective.name }}-->
+    <!--                        <mat-icon [inline]="true">info</mat-icon>-->
+    <!--                        <div *ngIf="!objective.multiplier" [ngClass]="{ complete: objective.complete }" class="numberCircle">-->
+    <!--                            {{ objective.points }}-->
+    <!--                        </div>-->
 
-<!--                        <div *ngIf="objective.multiplier" [ngClass]="{ complete: objective.complete }" class="numberCircle">x2</div>-->
-<!--                    </td>-->
-<!--                </mat-card>-->
-<!--            </tr>-->
-<!--            <p class="obj-paragraph">{{ "game_page.informations.opponent_completed" | translate }}</p>-->
-<!--            <tr class="objective-tr" *ngFor="let objective of filterCompletedObjectives(false)">-->
-<!--                <mat-card *ngIf="objective.complete && objective.user === gameClientService.secondPlayer.name" class="objective-completed">-->
-<!--                    <p *ngIf="objective.isPublic && objective.complete" class="isPublic-obj">-->
-<!--                        <mat-icon>people</mat-icon>-->
-<!--                    </p>-->
-<!--                    <p *ngIf="!objective.isPublic && objective.complete" class="isPublic-obj">-->
-<!--                        <mat-icon>person</mat-icon>-->
-<!--                    </p>-->
-<!--                    <td [ngClass]="{ complete: objective.complete }" [matTooltip]="objective.description">-->
-<!--                        {{ objective.name }}-->
-<!--                        <mat-icon [inline]="true">info</mat-icon>-->
-<!--                        <div *ngIf="!objective.multiplier" [ngClass]="{ complete: objective.complete }" class="numberCircle">-->
-<!--                            {{ objective.points }}-->
-<!--                        </div>-->
+    <!--                        <div *ngIf="objective.multiplier" [ngClass]="{ complete: objective.complete }" class="numberCircle">x2</div>-->
+    <!--                    </td>-->
+    <!--                </mat-card>-->
+    <!--            </tr>-->
+    <!--            <p class="obj-paragraph">{{ "game_page.informations.opponent_completed" | translate }}</p>-->
+    <!--            <tr class="objective-tr" *ngFor="let objective of filterCompletedObjectives(false)">-->
+    <!--                <mat-card *ngIf="objective.complete && objective.user === gameClientService.secondPlayer.name" class="objective-completed">-->
+    <!--                    <p *ngIf="objective.isPublic && objective.complete" class="isPublic-obj">-->
+    <!--                        <mat-icon>people</mat-icon>-->
+    <!--                    </p>-->
+    <!--                    <p *ngIf="!objective.isPublic && objective.complete" class="isPublic-obj">-->
+    <!--                        <mat-icon>person</mat-icon>-->
+    <!--                    </p>-->
+    <!--                    <td [ngClass]="{ complete: objective.complete }" [matTooltip]="objective.description">-->
+    <!--                        {{ objective.name }}-->
+    <!--                        <mat-icon [inline]="true">info</mat-icon>-->
+    <!--                        <div *ngIf="!objective.multiplier" [ngClass]="{ complete: objective.complete }" class="numberCircle">-->
+    <!--                            {{ objective.points }}-->
+    <!--                        </div>-->
 
-<!--                        <div *ngIf="objective.multiplier" [ngClass]="{ complete: objective.complete }" class="numberCircle">x2</div>-->
-<!--                    </td>-->
-<!--                </mat-card>-->
-<!--            </tr>-->
-<!--        </mat-expansion-panel>-->
-<!--    </div>-->
+    <!--                        <div *ngIf="objective.multiplier" [ngClass]="{ complete: objective.complete }" class="numberCircle">x2</div>-->
+    <!--                    </td>-->
+    <!--                </mat-card>-->
+    <!--            </tr>-->
+    <!--        </mat-expansion-panel>-->
+    <!--    </div>-->
 
-    <div id="combined">
-        <button id="abandonButton" *ngIf="!gameClientService.isGameFinish" (click)="abandonGame()" mat-raised-button color="warn">
+    <div id='combined'>
+        <button id='abandonButton' *ngIf='!gameClientService.isGameFinish' (click)='abandonGame()' mat-raised-button
+                color='warn'>
             {{ "action.abandon" | translate }}
         </button>
 
-        <button id="quitGame" *ngIf="gameClientService.isGameFinish" (click)="leaveGame()" mat-raised-button>{{ "action.quit" | translate }}</button>
+        <!--        <button id="quitGame" *ngIf="gameClientService.isGameFinish" (click)="leaveGame()" mat-raised-button>{{ "action.quit" | translate }}</button>-->
         <button
+            hidden
             mat-fab
-            color="accent"
-            (click)="openHelpDialog()"
-            class="help-button"
+            color='accent'
+            (click)='openHelpDialog()'
+            class='help-button'
             matTooltip="{{ 'main_page.tooltip.game_instructions' | translate }}"
-            matTooltipPosition="right"
-            matTooltipClass="toolMainPage"
+            matTooltipPosition='right'
+            matTooltipClass='toolMainPage'
         >
             <mat-icon>help_outline</mat-icon>
         </button>

@@ -1,3 +1,4 @@
+import { createMailOptions, getPasswordResetEmail, transporter } from '@app/config/nodemailer';
 import { verifyToken } from '@app/middlewares/token-verification-middleware';
 import { AccountStorageService } from '@app/services/database/account-storage.service';
 import { HistoryStorageService } from '@app/services/database/history-storage.service';
@@ -128,6 +129,32 @@ export class UserProfileController {
             const userGamesHistory = await this.historyStorage.getHistoryByUser(userID);
             res.status(StatusCodes.OK).json(userGamesHistory);
         });
+
+        this.router.post('/forgot-password', async (req: Request, res: Response) => {
+            const username: string = req.body.username;
+            const user: IUser = await this.accountStorageService.getUserData(username);
+            if (!user) {
+                res.status(StatusCodes.BAD_REQUEST).send({
+                    error: 'Username not found',
+                });
+                return;
+            }
+            const email = user.email;
+            const thirdySix = 36;
+            const seven = 7;
+            const tempPassword = (Math.random() + 1).toString(thirdySix).substring(seven);
+            if (email) {
+                this.accountStorageService.updatePassword(user._id, tempPassword);
+                await transporter.sendMail({
+                    ...createMailOptions(email),
+                    subject: 'PolyScrabble Password Reset',
+                    text: 'Password reset',
+                    html: getPasswordResetEmail(username, tempPassword),
+                });
+            }
+            res.sendStatus(StatusCodes.CREATED);
+        });
+
         this.router.get('/all', async (req: Request, res: Response) => {
             const userGamesHistory = await this.accountStorageService.getAllUsersData();
             res.status(StatusCodes.OK).json(userGamesHistory);
