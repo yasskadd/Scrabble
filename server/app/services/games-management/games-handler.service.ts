@@ -13,7 +13,7 @@ import { SocketEvents } from '@common/constants/socket-events';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
 import { PlayerInformation } from '@common/interfaces/player-information';
 import { PlayerType } from '@common/models/player-type';
-import { ReplaySubject } from 'rxjs';
+import { ReplaySubject, Subject } from 'rxjs';
 import { Service } from 'typedi';
 
 @Service()
@@ -21,6 +21,8 @@ export class GamesHandlerService {
     // gamePlayers: Map<string, { room: GameRoom; players: GamePlayer[] }>;
     dictionaries: Map<string, DictionaryContainer>;
     deleteWaitingRoom: ReplaySubject<string | undefined>;
+    removePlayerWithPlayerID: Subject<string>;
+    removePlayerWithSocketID: Subject<string>;
     private players: GamePlayer[];
 
     constructor(private socketManager: SocketManager, private dictionaryStorage: DictionaryStorageService, private chatHandler: ChatHandlerService) {
@@ -29,6 +31,8 @@ export class GamesHandlerService {
         this.dictionaries = new Map();
         this.setDictionaries().then();
         this.deleteWaitingRoom = new ReplaySubject(1);
+        this.removePlayerWithPlayerID = new Subject();
+        this.removePlayerWithSocketID = new Subject();
     }
 
     updatePlayersInfo(roomId: string, game: Game) {
@@ -65,6 +69,7 @@ export class GamesHandlerService {
         const playerIndex = this.players.findIndex((gamePlayer: GamePlayer) => gamePlayer.player.user._id === playerId);
         if (playerIndex === INVALID_INDEX) return;
 
+        this.removePlayerWithPlayerID.next(playerId);
         this.players.splice(playerIndex, 1);
     }
 
@@ -72,6 +77,7 @@ export class GamesHandlerService {
         const playerIndex = this.players.findIndex((gamePlayer: GamePlayer) => gamePlayer.player.socketId === socketId);
         if (playerIndex === INVALID_INDEX) return;
 
+        this.removePlayerWithSocketID.next(socketId);
         this.players.splice(playerIndex, 1);
     }
 
