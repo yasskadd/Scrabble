@@ -8,6 +8,8 @@ import 'package:mobile/domain/models/game-command-models.dart';
 import 'package:mobile/domain/models/game-model.dart';
 import 'package:mobile/domain/models/letter-synchronisation-model.dart';
 import 'package:mobile/domain/models/room-model.dart';
+import 'package:mobile/domain/services/clue-service.dart';
+import 'package:mobile/domain/services/game-sync-service.dart';
 import 'package:mobile/domain/services/room-service.dart';
 import 'package:mobile/domain/services/user-service.dart';
 import 'package:mobile/screens/end-game-screen.dart';
@@ -81,7 +83,8 @@ class GameService {
     if (game == null) return;
 
     game!.update(gameInfo);
-    game!.currentPlayer = game!.players.firstWhere((element) => element.player.user.id == _userService.user!.id);
+    game!.currentPlayer =
+        game!.players.firstWhere((element) => element.player.user.id == _userService.user!.id);
 
     if (observerView != null && game!.currentPlayer.player.playerType == PlayerType.User) {
       observerView = null;
@@ -119,10 +122,12 @@ class GameService {
     pendingLetters.add(placement);
     pendingLetters.sort((a, b) => a.x.compareTo(b.x) + a.y.compareTo(b.y));
 
-    _socket.emit(
-        GameSocketEvent.LetterPlaced.event,
-        SimpleLetterInfos(_roomService.currentRoom!.id, _socket.id!, letter.character,
-            x + y * game!.gameboard.size));
+    if (_socket.id != null) {
+      _socket.emit(
+          GameSocketEvent.LetterPlaced.event,
+          SimpleLetterInfos(_roomService.currentRoom!.id, _socket.id!, letter.character,
+              x + y * game!.gameboard.size));
+    }
   }
 
   bool _isLetterPlacementValid(int x, int y, Letter letter) {
@@ -245,12 +250,22 @@ class GameService {
   Letter? dragLetterFromEasel(int index) {
     debugPrint("[GAME SERVICE] Start drag from easel");
     draggedLetter = removeLetterFromEaselAt(index);
+
+    if (game!.isCurrentPlayersTurn()) {
+      GetIt.I.get<GameSyncService>().startDragSync();
+    }
+
     return draggedLetter;
   }
 
   Letter? dragLetterFromBoard(int x, int y) {
     debugPrint("[GAME SERVICE] Start drag from board");
     draggedLetter = removeLetterFromBoard(x, y);
+
+    if (game!.isCurrentPlayersTurn()) {
+      GetIt.I.get<GameSyncService>().startDragSync();
+    }
+
     return draggedLetter;
   }
 

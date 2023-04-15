@@ -5,7 +5,10 @@ import { Objective } from '@common/interfaces/objective';
 import { PlayerGameResult } from '@common/interfaces/player-game-result';
 import { PlayerInformation } from '@common/interfaces/player-information';
 import { RoomPlayer } from '@common/interfaces/room-player';
+import { IUser } from '@common/interfaces/user';
 import { BeginnerBot } from './beginner-bot.class';
+import * as uuid from 'uuid';
+
 
 export class GamePlayer {
     rack: Letter[];
@@ -80,6 +83,18 @@ export class GamePlayer {
             dictionaryValidation: this.game.dictionaryValidation,
         };
         const bot = new BeginnerBot(this.player, botInfo); // Where is isPlayerOne in GamePlayer class ?
+        const name: string = this.player.user.username;
+        bot.player.user = {
+            _id: uuid.v4(),
+            username: name + 'Bot',
+            password: 'null',
+            profilePicture: {
+                name: 'bot-image',
+                isDefaultPicture: true,
+                key: 'f553ba598dbcfc7e9e07f8366b6684b5.jpg',
+            },
+            chatRooms: [],
+        } as IUser;
         bot.rack = this.rack;
         bot.score = this.score;
         bot.objectives = this.objectives;
