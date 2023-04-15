@@ -104,40 +104,9 @@ export class LetterPlacementService {
         return coord;
     }
 
-    // resetLiveTile(coord: number): void {
-    //     this.liveBoard[coord] = {
-    //         type: JSON.parse(JSON.stringify(this.confirmedBoard[coord].type)),
-    //         state: JSON.parse(JSON.stringify(this.confirmedBoard[coord].state)),
-    //         letter: JSON.parse(JSON.stringify(this.confirmedBoard[coord].letter)),
-    //         coord: JSON.parse(JSON.stringify(this.confirmedBoard[coord].coord)),
-    //     };
-    // }
-    //
-    // resetConfirmedTile(coord: number): void {
-    //     this.confirmedBoard[coord] = {
-    //         type: JSON.parse(JSON.stringify(this.defaultBoard[coord].type)),
-    //         state: JSON.parse(JSON.stringify(this.defaultBoard[coord].state)),
-    //         letter: JSON.parse(JSON.stringify(this.defaultBoard[coord].letter)),
-    //         coord: JSON.parse(JSON.stringify(this.defaultBoard[coord].coord)),
-    //     };
-    // }
-
     initLiveTile(coord: number): void {
-        // this.liveBoard[coord] = {
-        //     type: JSON.parse(JSON.stringify(this.defaultBoard[coord].type)),
-        //     state: JSON.parse(JSON.stringify(this.defaultBoard[coord].state)),
-        //     letter: JSON.parse(JSON.stringify(this.defaultBoard[coord].letter)),
-        //     coord: JSON.parse(JSON.stringify(this.defaultBoard[coord].coord)),
-        // };
-        // this.confirmedBoard[coord] = {
-        //     type: JSON.parse(JSON.stringify(this.defaultBoard[coord].type)),
-        //     state: JSON.parse(JSON.stringify(this.defaultBoard[coord].state)),
-        //     letter: JSON.parse(JSON.stringify(this.defaultBoard[coord].letter)),
-        //     coord: JSON.parse(JSON.stringify(this.defaultBoard[coord].coord)),
-        // };
         this.liveBoard[coord] = JSON.parse(JSON.stringify(this.defaultBoard[coord]));
         this.confirmedBoard[coord] = JSON.parse(JSON.stringify(this.defaultBoard[coord]));
-        console.log(this.confirmedBoard[coord]);
     }
 
     handleDragPlacement(index: number, letter: Letter, tile: BoardTileInfo): void {
@@ -436,6 +405,30 @@ export class LetterPlacementService {
         this.selectionPositions = [{ coord, direction: this.clueWords[index].isHorizontal ? PlayDirection.Right : PlayDirection.Down }];
         const letterCoords = this.getWordCoords(this.clueWords[index]);
 
+        this.placedLetters = [];
+        this.clueWords[index].letters.forEach((letter: string, letterIndex: number) => {
+            let rackIndex = this.gameClientService.getLocalPlayer()?.rack.findIndex((l) => l.value.toUpperCase() === letter.toUpperCase());
+            if (rackIndex === -1) {
+                rackIndex = this.gameClientService.getLocalPlayer().rack.findIndex((l: Letter) => {
+                    l.value === AlphabetLetter.Any;
+                });
+            }
+            if (rackIndex === -1) {
+                return;
+            }
+            if (
+                this.confirmedBoard[
+                    this.computeCoordFromCoordinate(this.clueWords[index].firstCoordinate) +
+                        (this.clueWords[index].isHorizontal ? letterIndex : letterIndex * TOTAL_ROWS)
+                ].state !== BoardTileState.Confirmed
+            ) {
+                this.confirmedBoard[
+                    this.computeCoordFromCoordinate(this.clueWords[index].firstCoordinate) +
+                        (this.clueWords[index].isHorizontal ? letterIndex : letterIndex * TOTAL_ROWS)
+                ].letter = this.gameClientService.getLocalPlayer()?.rack[rackIndex];
+            }
+        });
+
         this.clueWords[index].letters = this.clueWords[index].letters.filter((letter: string, letterIndex: number) => {
             return this.confirmedBoard[letterCoords[letterIndex]].state !== BoardTileState.Confirmed;
         });
@@ -446,6 +439,7 @@ export class LetterPlacementService {
             }
             return letter.toUpperCase();
         });
+
         this.clientSocketService.send(SocketEvents.PlaceWordCommand, this.clueWords[index]);
 
         this.clueWords = [];
@@ -455,7 +449,6 @@ export class LetterPlacementService {
     private subscribeClue(): void {
         this.clientSocketService.on(SocketEvents.ClueCommand, (words: PlaceWordCommandInfo[]) => {
             this.clueWords = words;
-            console.log(this.clueWords);
             this.showClueWord(0);
         });
     }

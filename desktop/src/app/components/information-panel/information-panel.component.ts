@@ -7,6 +7,9 @@ import { AppRoutes } from '@app/models/app-routes';
 import { GameClientService } from '@app/services/game-client.service';
 import { PlayerInformation } from '@common/interfaces/player-information';
 import { TimeService } from '@services/time.service';
+import { LetterPlacementService } from '@services/letter-placement.service';
+import { ClientSocketService } from '@services/communication/client-socket.service';
+import { SocketEvents } from '@common/constants/socket-events';
 
 @Component({
     selector: 'app-information-panel',
@@ -14,7 +17,18 @@ import { TimeService } from '@services/time.service';
     styleUrls: ['./information-panel.component.scss'],
 })
 export class InformationPanelComponent {
-    constructor(public gameClientService: GameClientService, public timer: TimeService, private dialog: MatDialog, private router: Router) {}
+    private clueIndex: number;
+
+    constructor(
+        public gameClientService: GameClientService,
+        protected letterService: LetterPlacementService,
+        private clientSocketService: ClientSocketService,
+        public timer: TimeService,
+        private dialog: MatDialog,
+        private router: Router,
+    ) {
+        this.clueIndex = -1;
+    }
 
     get players(): PlayerInformation[] {
         return this.gameClientService.players;
@@ -35,5 +49,41 @@ export class InformationPanelComponent {
 
     openHelpDialog() {
         this.dialog.open(DialogGameHelpComponent, { width: '50%' });
+    }
+
+    clueAvailable(): boolean {
+        if (this.letterService.clueWords.length !== 0) {
+            if (this.clueIndex === -1) {
+                this.clueIndex = 0;
+                this.letterService.showClueWord(this.clueIndex);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    askForClue(): void {
+        this.clientSocketService.send(SocketEvents.ClueCommand);
+    }
+
+    nextClue(): void {
+        this.letterService.removeClue(this.clueIndex);
+        this.clueIndex = (this.clueIndex + 1) % this.letterService.clueWords.length;
+        this.letterService.showClueWord(this.clueIndex);
+    }
+
+    prevClue(): void {
+        this.letterService.removeClue(this.clueIndex);
+        this.clueIndex = this.clueIndex - 1;
+        if (this.clueIndex < 0) this.clueIndex = this.letterService.clueWords.length - 1;
+
+        this.letterService.showClueWord(this.clueIndex);
+    }
+
+    placeClue(): void {
+        this.letterService.submitClue(this.clueIndex);
+        this.clueIndex = -1;
     }
 }
