@@ -180,6 +180,7 @@ export class GamesStateService {
                 }
             }
         });
+        if (room.difficulty === GameDifficulty.ScoreBased) this.setUpScoreRelatedBots(gamePlayers);
         return gamePlayers;
     }
 
@@ -195,6 +196,25 @@ export class GamesStateService {
         game.turn.countdown.subscribe((timer: number) => {
             this.sendTimer(room.id, timer);
         });
+    }
+
+    private async setUpScoreRelatedBots(gamePlayers: GamePlayer[]): Promise<void> {
+        // Find average player score
+        let totalScore: number = 0;
+        let numberOfPlayers = 0;
+        for (const player of gamePlayers) {
+            if (player.player.type === PlayerType.User) {
+                numberOfPlayers += 1;
+                const userStats = await this.userStatsStorage.getUserStats(player.player.user._id);
+                totalScore += userStats.ranking;
+            }
+        }
+        const avgScore = totalScore / numberOfPlayers;
+        for (const player of gamePlayers) {
+            if (player.player.type === PlayerType.Bot) {
+                (player as ScoreRelatedBot).setupScoreProbs(avgScore);
+            }
+        }
     }
 
     private calculateEndGameScore(roomID: string): void {
