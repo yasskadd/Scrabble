@@ -7,6 +7,7 @@ import { ClientSocketService } from '@app/services/communication/client-socket.s
 // import { GameClientService } from '@app/services/game-client.service';
 // import { GameConfigurationService } from '@app/services/game-configuration.service';
 import { ChatRoomClient } from '@app/interfaces/chat-room-client';
+import { UserChatRoom } from '@app/interfaces/user-chat-room';
 import { UserService } from '@app/services/user.service';
 import { ChatRoom } from '@common/interfaces/chat-room';
 import { Message } from '@common/interfaces/message';
@@ -14,10 +15,6 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpHandlerService } from '../communication/http-handler.service';
 
 const NOT_FOUND = -1;
-interface UserChatRoom {
-    username: string;
-    imageUrl: string;
-}
 
 interface UserChatRoomWithState {
     name: string;
@@ -48,6 +45,8 @@ export class ChatboxHandlerService {
     joinedRoomsObs: Observable<string[]>;
     _notifsSubject: BehaviorSubject<string[]>;
     notifsObs: Observable<string[]>;
+    _userInfoSubject: BehaviorSubject<Map<string, UserChatRoom>>;
+    userInfoObs: Observable<Map<string, UserChatRoom>>;
 
     constructor(
         private clientSocket: ClientSocketService,
@@ -78,6 +77,8 @@ export class ChatboxHandlerService {
         this.joinedRoomsObs = this._joinedRoomsSubject.asObservable();
         this._notifsSubject = new BehaviorSubject<string[]>(this.notifiedRooms);
         this.notifsObs = this._notifsSubject.asObservable();
+        this._userInfoSubject = new BehaviorSubject<Map<string, UserChatRoom>>(this.userInfoHashMap);
+        this.userInfoObs = this._userInfoSubject.asObservable();
 
         this.clientSocket.connected.subscribe((connected: boolean) => {
             if (connected) {
@@ -279,6 +280,10 @@ export class ChatboxHandlerService {
         }
         console.log('joinsession');
         console.log(this.joinedChatRooms);
+        this.updateUserInfoSet();
+    }
+
+    private updateUserInfoSet() {
         const currentlyRequested = new Set<string>();
         for (const message of this.messages) {
             const id = message.userId;
@@ -287,6 +292,7 @@ export class ChatboxHandlerService {
                 this.updateUserInfo(id);
             }
         }
+        this._userInfoSubject.next(this.userInfoHashMap);
     }
 
     private updateUserInfo(id: string) {
