@@ -25,8 +25,6 @@ import { Service } from 'typedi';
 import * as uuid from 'uuid';
 import { ChatHandlerService } from './chat-handler.service';
 
-// const PLAYERS_REJECT_FROM_ROOM_ERROR = "L'adversaire à rejeter votre demande";
-
 @Service()
 export class WaitingRoomService {
     private waitingRooms: GameRoom[];
@@ -216,6 +214,7 @@ export class WaitingRoomService {
 
         room.state = GameRoomState.Playing;
         await this.gameStateService.createGame(server, room);
+        server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
         // // TODO : Changed GameScrabbleInformation to simply using GameRoom
         // const users: IUser[] = [];
         // const socketIds: string[] = [];
