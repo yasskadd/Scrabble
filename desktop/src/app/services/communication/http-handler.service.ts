@@ -183,6 +183,11 @@ export class HttpHandlerService {
         return JSON.parse(res.body);
     }
 
+    async getBotImage(): Promise<{ url: string }> {
+        const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/image/bot/profile-picture` });
+        return JSON.parse(res.body);
+    }
+
     async modifyProfilePicture(image: AvatarData, isDefault: boolean): Promise<{ userData: IUser }> {
         if (isDefault) {
             const res: HttpResponse = await invoke('httpPatch', {
