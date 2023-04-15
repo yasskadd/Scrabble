@@ -35,14 +35,18 @@ export class ChatboxHandlerService {
     chatSession: string | undefined;
     userInfoHashMap: Map<string, UserChatRoom>;
 
+    _messagesSubject: BehaviorSubject<Message[]>;
+    messagesObs: Observable<Message[]>;
+    _chatSessionSubject: BehaviorSubject<string | undefined>;
+    chatSessionObs: Observable<string | undefined>;
     _activeTabSubject: BehaviorSubject<string>;
     activeTabObs: Observable<string>;
     _allRoomsSubject: BehaviorSubject<ChatRoomClient[]>;
     allRoomsObs: Observable<ChatRoomClient[]>;
     _joinedRoomsSubject: BehaviorSubject<string[]>;
     joinedRoomsObs: Observable<string[]>;
-    _notifsSubject: BehaviorSubject<number>;
-    notifsObs: Observable<number>;
+    _notifsSubject: BehaviorSubject<string[]>;
+    notifsObs: Observable<string[]>;
 
     constructor(
         private clientSocket: ClientSocketService,
@@ -60,13 +64,17 @@ export class ChatboxHandlerService {
         this.chatSession = undefined;
         this.userInfoHashMap = new Map();
 
+        this._messagesSubject = new BehaviorSubject<Message[]>(this.messages);
+        this.messagesObs = this._messagesSubject.asObservable();
+        this._chatSessionSubject = new BehaviorSubject<string | undefined>(this.chatSession);
+        this.chatSessionObs = this._chatSessionSubject.asObservable();
         this._activeTabSubject = new BehaviorSubject<string>('joinedChats');
         this.activeTabObs = this._activeTabSubject.asObservable();
         this._allRoomsSubject = new BehaviorSubject<ChatRoomClient[]>(this.availableRooms());
         this.allRoomsObs = this._allRoomsSubject.asObservable();
         this._joinedRoomsSubject = new BehaviorSubject<string[]>(this.joinedChatRooms);
         this.joinedRoomsObs = this._joinedRoomsSubject.asObservable();
-        this._notifsSubject = new BehaviorSubject<number>(0);
+        this._notifsSubject = new BehaviorSubject<string[]>(this.notifiedRooms);
         this.notifsObs = this._notifsSubject.asObservable();
 
         this.clientSocket.connected.subscribe((connected: boolean) => {
@@ -117,6 +125,7 @@ export class ChatboxHandlerService {
 
         this.clientSocket.on(SocketEvents.LeaveChatRoomSession, (chatRoom: ChatRoom) => {
             this.chatSession = undefined;
+            this._chatSessionSubject.next(this.chatSession);
         });
 
         this.clientSocket.on(SocketEvents.CreateChatRoom, (newChatRoom: ChatRoomClient) => {
@@ -146,6 +155,21 @@ export class ChatboxHandlerService {
             if (joinedRoom.notified) this.notifiedRooms.push(joinedRoom.name);
         }
         this.clientSocket.send(SocketEvents.GetAllChatRooms);
+    }
+
+    resetConfig() {
+        this.messages = [];
+        this.allChatRooms = [];
+        this.joinedChatRooms = [];
+        this.notifiedRooms = [];
+        this.chatSession = undefined;
+
+        this._messagesSubject.next(this.messages);
+        this._chatSessionSubject.next(this.chatSession);
+        this._activeTabSubject.next('joinedChats');
+        this._allRoomsSubject.next(this.allChatRooms);
+        this._joinedRoomsSubject.next(this.joinedChatRooms);
+        this._notifsSubject.next(this.notifiedRooms);
     }
 
     requestLeaveRoom() {
@@ -200,13 +224,15 @@ export class ChatboxHandlerService {
     private treatReceivedMessage(roomName: string, newMessage: Message) {
         if (this.chatSession === roomName) {
             this.messages.push(newMessage);
+            this._messagesSubject.next(this.messages);
         } else {
-            this.sendNotification(roomName, newMessage);
+            this.sendNotification(roomName);
         }
     }
 
-    private sendNotification(roomName: string, newMessage: Message) {
-        // TODO: Handle notif
+    private sendNotification(roomName: string) {
+        this.notifiedRooms.push(roomName);
+        this._notifsSubject.next(this.notifiedRooms);
     }
 
     private joinChatRoom(chatRoom: ChatRoomClient) {
@@ -234,6 +260,12 @@ export class ChatboxHandlerService {
     private joinRoomSession(chatRoomName: string, newMessage: Message[]) {
         this.messages = newMessage;
         this.chatSession = chatRoomName;
+        this._chatSessionSubject.next(this.chatSession);
+        const indexToDelete = this.notifiedRooms.findIndex((roomName) => roomName === chatRoomName);
+        if (indexToDelete !== NOT_FOUND) {
+            this.notifiedRooms.splice(indexToDelete, 1);
+            this._notifsSubject.next(this.notifiedRooms);
+        }
         // const currentlyRequested = new Set<string>();
         // for (const message of this.messages) {
         //     const id = message.userId;
@@ -264,6 +296,9 @@ export class ChatboxHandlerService {
     private deleteChatRoom(chatRoom: ChatRoomClient) {
         this.requestJoinRoomSession(chatRoom.name);
         this.removeRoomFromAllChatRooms(chatRoom.name);
-        if (this.chatSession === chatRoom.name) this.chatSession = undefined;
+        if (this.chatSession === chatRoom.name) {
+            this.chatSession = undefined;
+            this._chatSessionSubject.next(this.chatSession);
+        }
     }
 }
