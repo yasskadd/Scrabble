@@ -37,6 +37,8 @@ enum RustEvent {
     SocketSendFailed,
     SocketAlive,
     SocketNotAlive,
+    WindowEvent,
+    UserData,
 }
 
 impl RustEvent {
@@ -47,6 +49,8 @@ impl RustEvent {
             Self::SocketSendFailed => "socketSendFailed",
             Self::SocketAlive => "socketAlive",
             Self::SocketNotAlive => "socketNotAlive",
+            Self::WindowEvent => "windowEvent",
+            Self::UserData => "userData",
         }
     }
 }
@@ -62,7 +66,6 @@ fn socketEstablishConnection(
     address: &str,
     cookie: Option<&str>,
     state: tauri::State<SocketClient>,
-    window: tauri::Window,
     handle: tauri::AppHandle,
 ) {
     let mut socket = state.socket.lock().expect("Error locking the socket");
@@ -93,10 +96,36 @@ fn socketEstablishConnection(
                         .strip_suffix("\"")
                         .unwrap();
 
+                    let main_window = handle.get_window("main").unwrap();
+                    main_window
+                        .emit_all(&String::from(new_payload.clone()), payload.clone())
+                        .expect("Couldn't emit the event to Angular");
+
+                    let chat_window = handle.get_window("chat");
+                    match chat_window {
+                        Some(w) => w
+                            .emit_all(&String::from(new_payload), payload.clone())
+                            .unwrap(),
+                        None => return,
+                    }
+
                     handle
-                        .emit_all(&String::from(new_payload), payload.clone())
+                        .emit_all(&String::from(new_payload.clone()), payload.clone())
                         .expect("Couldn't emit the event to Angular");
                 } else {
+                    println!("test");
+                    let main_window = handle.get_window("main").unwrap();
+                    main_window
+                        .emit_all(&String::from(event.clone()), payload.clone())
+                        .expect("Couldn't emit the event to Angular");
+
+                    let chat_window = handle.get_window("chat");
+                    match chat_window {
+                        Some(w) => w
+                            .emit_all(&String::from(event.clone()), payload.clone())
+                            .unwrap(),
+                        None => return,
+                    }
                     handle
                         .emit_all(&String::from(event), payload)
                         .expect("Couldn't emit the event to Angular");
@@ -116,12 +145,12 @@ fn socketEstablishConnection(
         }
         Err(error) => {
             println!("Error {error}");
-            window
-                .emit(
-                    RustEvent::SocketConnectionFailed.to_string(),
-                    error.to_string(),
-                )
-                .expect("oups");
+            // window
+            //     .emit(
+            //         RustEvent::SocketConnectionFailed.to_string(),
+            //         error.to_string(),
+            //     )
+            //     .expect("oups");
         }
     }
 }
@@ -381,6 +410,38 @@ async fn httpDelete(
     }
 }
 
+#[tauri::command]
+async fn chatWindowListening(handle: tauri::AppHandle) {
+    let listener = handle.get_window("chat").unwrap();
+
+    let eventEmmitter = handle.get_window("chat").unwrap();
+    listener.listen_global(RustEvent::WindowEvent.to_string(), move |event| {
+        eventEmmitter
+            .emit_all(RustEvent::WindowEvent.to_string(), event.payload())
+            .unwrap();
+    });
+
+    let userDataEmitter = handle.get_window("chat").unwrap();
+    listener.listen_global(RustEvent::UserData.to_string(), move |event| {
+        userDataEmitter
+            .emit_all(RustEvent::UserData.to_string(), event.payload())
+            .unwrap();
+    });
+}
+
+#[tauri::command]
+async fn chatWindowUnlistening(handle: tauri::AppHandle) {
+    let windowHandle = handle.get_window("chat").unwrap();
+    handle
+        .get_window("chat")
+        .unwrap()
+        .listen_global("windowEvent", move |event| {
+            windowHandle
+                .emit_all("windowEvent", event.payload())
+                .unwrap();
+        });
+}
+
 fn main() {
     std::env::set_var("RUST_BACKTRACE", "full");
     tauri::Builder::default()
@@ -420,7 +481,9 @@ fn main() {
             httpPost,
             httpPut,
             httpPatch,
-            httpDelete
+            httpDelete,
+            chatWindowListening,
+            chatWindowUnlistening
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

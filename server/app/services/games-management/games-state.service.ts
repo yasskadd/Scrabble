@@ -13,6 +13,7 @@ import { ScoreRelatedBot } from '@app/classes/player/score-related-bot.class';
 import { Turn } from '@app/classes/turn.class';
 import { MAX_QUANTITY } from '@app/constants/letter-reserve';
 import { DictionaryContainer } from '@app/interfaces/dictionary-container';
+import { ChatHandlerService } from '@app/services/client-utilities/chat-handler.service';
 import { AccountStorageService } from '@app/services/database/account-storage.service';
 import { HistoryStorageService } from '@app/services/database/history-storage.service';
 import { ScoreStorageService } from '@app/services/database/score-storage.service';
@@ -44,6 +45,7 @@ export class GamesStateService {
     constructor(
         private accountStorage: AccountStorageService,
         private gamesHandler: GamesHandlerService,
+        private chatHandler: ChatHandlerService,
         private socketManager: SocketManager,
         private scoreStorage: ScoreStorageService,
         private userStatsStorage: UserStatsStorageService,
@@ -292,6 +294,7 @@ export class GamesStateService {
 
         console.log('user ' + gamePlayer.player.user + ' is abandoning');
 
+        this.chatHandler.leaveGameChatRoom(socket, gamePlayer.player.roomId);
         await this.userStatsStorage.updatePlayerStats(this.formatGameInfo(gamePlayer));
 
         this.gamesHandler.removePlayerFromSocketId(socket.id);
