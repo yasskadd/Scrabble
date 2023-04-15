@@ -11,6 +11,7 @@ import { UserService } from '@app/services/user.service';
 import { ChatRoom } from '@common/interfaces/chat-room';
 import { Message } from '@common/interfaces/message';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpHandlerService } from '../communication/http-handler.service';
 
 const NOT_FOUND = -1;
 interface UserChatRoom {
@@ -54,7 +55,8 @@ export class ChatboxHandlerService {
         // private gameClient: GameClientService,
         // private commandHandler: CommandHandlerService,
         // private timerService: TimeService,
-        private userService: UserService, // private httpHandlerService: HttpHandlerService,
+        private userService: UserService,
+        private httpHandlerService: HttpHandlerService,
     ) {
         this.messages = [];
         this.loggedIn = false;
@@ -252,6 +254,8 @@ export class ChatboxHandlerService {
     private removeRoomFromJoinedChatRooms(chatRoomName: string) {
         const indexToDelete = this.joinedChatRooms.findIndex((roomName) => roomName === chatRoomName);
         this.joinedChatRooms.splice(indexToDelete, 1);
+        console.log('removefromjione');
+        console.log(this.joinedChatRooms);
         this.updateJoinedRooms();
         this.updateAllRooms();
     }
@@ -275,21 +279,24 @@ export class ChatboxHandlerService {
         }
         console.log('joinsession');
         console.log(this.joinedChatRooms);
-        // const currentlyRequested = new Set<string>();
-        // for (const message of this.messages) {
-        //     const id = message.userId;
-        //     if (!this.userInfoHashMap.has(id) && !currentlyRequested.has(id)) {
-        //         currentlyRequested.add(id);
-        //         this.updateUserInfo(id);
-        //     }
-        // }
+        const currentlyRequested = new Set<string>();
+        for (const message of this.messages) {
+            const id = message.userId;
+            if (!this.userInfoHashMap.has(id) && !currentlyRequested.has(id)) {
+                currentlyRequested.add(id);
+                this.updateUserInfo(id);
+            }
+        }
     }
 
-    // private updateUserInfo(id: string) {
-    //     this.httpHandlerService.getChatUserInfo(id).then((userInfo: any) => {
-    //         this.userInfoHashMap.set(id, userInfo);
-    //     });
-    // }
+    private updateUserInfo(id: string) {
+        this.httpHandlerService
+            .getChatUserInfo(id)
+            .then((userInfo: any) => {
+                this.userInfoHashMap.set(id, userInfo);
+            })
+            .catch((e) => console.log(e));
+    }
 
     private onNewChatRoomCreated(newChatRoom: ChatRoomClient) {
         if (this.userService.user._id !== newChatRoom.creatorId) {
