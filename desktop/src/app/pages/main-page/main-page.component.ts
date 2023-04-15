@@ -12,6 +12,7 @@ import { SocketEvents } from '@common/constants/socket-events';
 import { GameMode } from '@common/models/game-mode';
 import { ClientSocketService } from '@services/communication/client-socket.service';
 import { LanguageService } from '@services/language.service';
+import * as tauri from '@tauri-apps/api';
 
 @Component({
     selector: 'app-main-page',
@@ -38,6 +39,7 @@ export class MainPageComponent {
     ) {
         this.multiplayerCreateLink = `/${AppRoutes.MultiGameCreationPage}/${GameMode.Multi}`;
         if (!this.userService.isConnected.getValue()) {
+            if (tauri.window.getCurrent().label === 'chat') return;
             this.router.navigate([`${AppRoutes.ConnectionPage}`]).then();
         }
 

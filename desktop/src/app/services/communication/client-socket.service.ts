@@ -4,11 +4,10 @@ import { LanguageService } from '@services/language.service';
 import { SnackBarService } from '@services/snack-bar.service';
 import { TauriStateService } from '@services/tauri-state.service';
 import * as tauri from '@tauri-apps/api';
-import { Event, TauriEvent } from '@tauri-apps/api/event';
+import { Event } from '@tauri-apps/api/event';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
-import { WebviewWindow } from '@tauri-apps/api/window';
 
 @Injectable({
     providedIn: 'root',
@@ -28,16 +27,6 @@ export class ClientSocketService {
         this.appUpdate = new Subject();
         this.connected = new BehaviorSubject<boolean>(false);
         this.cancelConnection = new Subject();
-
-        if (this.tauriStateService.useTauri) {
-            const appWindow = WebviewWindow.getByLabel('main');
-            appWindow
-                .listen(TauriEvent.WINDOW_CLOSE_REQUESTED, async () => {
-                    await this.disconnect();
-                    await appWindow.close();
-                })
-                .then();
-        }
     }
 
     async isSocketAlive() {
@@ -126,7 +115,7 @@ export class ClientSocketService {
     }
 
     send<T>(event: string, data?: T): void {
-        if (!this.connected.value) return;
+        if (!this.connected.value && tauri.window.appWindow.label !== 'chat') return;
 
         if (this.tauriStateService.useTauri) {
             if (data) {
