@@ -9,6 +9,10 @@ mat-form-field {
     height: 10%;
 }
 
+mat-tab-group {
+    width: 100%;
+}
+
 #tabs-container {
     display: flex;
     justify-content: center;
@@ -17,6 +21,29 @@ mat-form-field {
     top: 0px;
     left: 0px;
     right: 0px;
+}
+
+.createRoom {
+    width: 100%;
+}
+
+.search-control {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: auto;
+    justify-content: center;
+
+    mat-form-field {
+        font-size: 20px;
+        width: 75%;
+        background-color: transparent;
+        border: none;
+    }
+
+    .clear-icon {
+        cursor: pointer;
+    }
 }
 
 .tab {
@@ -134,6 +161,9 @@ mat-form-field {
 
 ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
     border-radius: 5px;
+    .search-control {
+        opacity: 0;
+    }
 }
 
 // .system-message {

@@ -34,6 +34,7 @@ import { GenericChatComponent } from './components/chat/generic-chat/generic-cha
 import { ChatboxComponent } from './components/chatbox/chatbox.component';
 import { DialogBoxAbandonGameComponent } from './components/dialog-box-abandon-game/dialog-box-abandon-game.component';
 import { DialogBoxAvatarSelectorComponent } from './components/dialog-box-avatar-selector/dialog-box-avatar-selector.component';
+import { DialogBoxCreateChatComponent } from './components/dialog-box-create-chat/dialog-box-create-chat.component';
 import { DialogBoxGameTypeComponent } from './components/dialog-box-game-type/dialog-box-game-type.component';
 import { DialogBoxHighScoresComponent } from './components/dialog-box-high-scores/dialog-box-high-scores.component';
 import { DialogBoxLetterSelectorComponent } from './components/dialog-box-letter-selector/dialog-box-letter-selector.component';
@@ -105,6 +106,7 @@ export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(h
         DialogBoxPasswordComponent,
         UserProfilePageComponent,
         DialogBoxLetterSelectorComponent,
+        DialogBoxCreateChatComponent,
     ],
     imports: [
         CommonModule,

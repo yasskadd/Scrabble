@@ -5,6 +5,7 @@ import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketEvents } from '@common/constants/socket-events';
 import { ChatRoom, ChatRoomInfo } from '@common/interfaces/chat-room';
 import { Message } from '@common/interfaces/message';
+import { SendMessage } from '@common/interfaces/send-message';
 import * as moment from 'moment';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
@@ -60,8 +61,8 @@ export class ChatHandlerService {
             await this.leaveChatRoomSession(socket, chatRoomName);
         });
 
-        this.socketManager.on(SocketEvents.SendMessage, async (socket: Socket, chatRoomName: string, msg: string) => {
-            await this.sendMessage(socket, chatRoomName, msg);
+        this.socketManager.on(SocketEvents.SendMessage, async (socket: Socket, sendMessage: SendMessage) => {
+            await this.sendMessage(socket, sendMessage.chatRoomName, sendMessage.msg);
         });
 
         this.socketManager.on(SocketEvents.GetAllChatRooms, (socket: Socket) => {
