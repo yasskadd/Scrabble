@@ -11,9 +11,8 @@ export class ScoreRelatedBot extends BeginnerBot {
     private exchangeProb: number;
     private skipProb: number;
 
-    constructor(roomPlayer: RoomPlayer, botInfo: BotInformation, score: number) {
+    constructor(roomPlayer: RoomPlayer, botInfo: BotInformation) {
         super(roomPlayer, botInfo);
-        this.setupScoreProbs(score);
     }
 
     setupScoreProbs(score: number): void {
