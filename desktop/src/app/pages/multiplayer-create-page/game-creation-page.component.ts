@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Component } from '@angular/core';
+import { FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MIN_PASSWORD_LENGTH } from '@app/constants/user';
 import { Dictionary } from '@app/interfaces/dictionary';
@@ -26,7 +26,7 @@ import { SnackBarService } from '@services/snack-bar.service';
     templateUrl: './game-creation-page.component.html',
     styleUrls: ['./game-creation-page.component.scss'],
 })
-export class GameCreationPageComponent implements OnInit {
+export class GameCreationPageComponent {
     timerList: number[];
     botName: string;
     playerName: string;
@@ -34,7 +34,6 @@ export class GameCreationPageComponent implements OnInit {
     dictionaryList: DictionaryInfo[];
     selectedFile: Dictionary | null;
 
-    form: FormGroup;
     passwordEnableForm: FormControl;
     passwordForm: FormControl;
     timerForm: FormControl;
@@ -54,7 +53,6 @@ export class GameCreationPageComponent implements OnInit {
         private clientSocketService: ClientSocketService,
         private languageService: LanguageService,
         private activatedRoute: ActivatedRoute,
-        private formBuilder: FormBuilder,
         private router: Router,
         private readonly httpHandler: HttpHandlerService,
         private snackBarService: SnackBarService,
@@ -90,15 +88,6 @@ export class GameCreationPageComponent implements OnInit {
             this.timerForm.setValue(defaultTimer);
         });
 
-        this.form = this.formBuilder.group({
-            password: this.passwordForm,
-            timer: this.timerForm,
-            difficultyBot: this.difficultyForm,
-            dictionary: this.dictionaryForm,
-        });
-    }
-
-    ngOnInit(): void {
         this.virtualPlayers.updateBotNames();
         this.gameConfiguration.resetRoomInformations();
 
@@ -121,7 +110,7 @@ export class GameCreationPageComponent implements OnInit {
     }
 
     async createGame(): Promise<void> {
-        const dictionnaryTitleSelected = (this.form.get('dictionary') as AbstractControl).value;
+        const dictionnaryTitleSelected = this.dictionaryForm.value;
 
         if (!this.dictionaryAvailable(dictionnaryTitleSelected)) {
             this.languageService.getWord(DictionaryEvents.UNAVAILABLE).subscribe((word: string) => {
@@ -130,7 +119,7 @@ export class GameCreationPageComponent implements OnInit {
             return;
         }
 
-        const dictionaryTitle = this.getDictionary((this.form.get('dictionary') as AbstractControl).value).title;
+        const dictionaryTitle = this.getDictionary(this.dictionaryForm.value).title;
 
         this.httpHandler.getDictionaries().then((dictionaries: DictionaryInfo[]) => {
             this.dictionaryList = dictionaries;
@@ -155,13 +144,17 @@ export class GameCreationPageComponent implements OnInit {
     setBotName(): void {
         // TODO : Language
         this.botName =
-            (this.form.get('difficultyBot') as AbstractControl).value === 'Débutant'
+            this.difficultyForm.value === 'Débutant'
                 ? this.virtualPlayers.beginnerBotNames[Math.floor(Math.random() * this.virtualPlayers.beginnerBotNames.length)].username
                 : this.virtualPlayers.expertBotNames[Math.floor(Math.random() * this.virtualPlayers.expertBotNames.length)].username;
     }
 
     dictionaryAvailable(dictionaryTitle: string): boolean {
         return this.dictionaryList.some((dictionaryList) => dictionaryList.title === dictionaryTitle);
+    }
+
+    isFormInvalid() {
+        return this.passwordForm.invalid || this.timerForm.invalid || this.difficultyForm.invalid || this.dictionaryForm.invalid;
     }
 
     protected clickPasswordToggle(): void {
@@ -172,8 +165,6 @@ export class GameCreationPageComponent implements OnInit {
         } else {
             this.passwordForm.removeValidators([Validators.required, Validators.minLength(MIN_PASSWORD_LENGTH)]);
         }
-
-        this.form.setControl('password', this.passwordForm);
     }
 
     protected clickVisibilityToggle(): void {
@@ -201,7 +192,7 @@ export class GameCreationPageComponent implements OnInit {
     private initGame(dictionaryTitle: string): void {
         this.clientSocketService.send(SocketEvents.CreateWaitingRoom, {
             user: this.userService.user,
-            timer: (this.form.get('timer') as AbstractControl).value,
+            timer: this.timerForm.value,
             dictionary: dictionaryTitle,
             mode: this.gameMode,
             botDifficulty:
