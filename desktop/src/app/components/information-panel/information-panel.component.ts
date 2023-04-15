@@ -10,6 +10,9 @@ import { TimeService } from '@services/time.service';
 import { LetterPlacementService } from '@services/letter-placement.service';
 import { ClientSocketService } from '@services/communication/client-socket.service';
 import { SocketEvents } from '@common/constants/socket-events';
+import { PlayerType } from '@common/models/player-type';
+import { UserService } from '@services/user.service';
+import { RoomPlayer } from '@common/interfaces/room-player';
 
 @Component({
     selector: 'app-information-panel',
@@ -17,11 +20,13 @@ import { SocketEvents } from '@common/constants/socket-events';
     styleUrls: ['./information-panel.component.scss'],
 })
 export class InformationPanelComponent {
+    protected selectedPlayer: PlayerInformation;
     private clueIndex: number;
 
     constructor(
         public gameClientService: GameClientService,
         protected letterService: LetterPlacementService,
+        protected userService: UserService,
         private clientSocketService: ClientSocketService,
         public timer: TimeService,
         private dialog: MatDialog,
@@ -31,7 +36,9 @@ export class InformationPanelComponent {
     }
 
     get players(): PlayerInformation[] {
-        return this.gameClientService.players;
+        return this.gameClientService.players.filter((p: PlayerInformation) => {
+            return p.player.type !== PlayerType.Observer;
+        });
     }
 
     abandonGame(): void {
@@ -86,4 +93,14 @@ export class InformationPanelComponent {
         this.letterService.submitClue(this.clueIndex);
         this.clueIndex = -1;
     }
+
+    selectPlayer(player: RoomPlayer): void {
+        this.gameClientService.selectedPlayer = this.gameClientService.players.find((p: PlayerInformation) => p.player.user._id === player.user._id);
+    }
+
+    replaceBot(player: PlayerInformation) {
+        this.clientSocketService.send(SocketEvents.JoinAsObserver, player.player.user._id);
+    }
+
+    protected readonly PlayerType = PlayerType;
 }
