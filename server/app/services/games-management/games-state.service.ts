@@ -201,6 +201,7 @@ export class GamesStateService {
     }
 
     private calculateEndGameScore(roomID: string): void {
+        console.log('In calculateEndGameScore');
         const players = this.gamesHandler.getPlayersInRoom(roomID);
         const game = players.find((gamePlayer: GamePlayer) => gamePlayer.player.type === PlayerType.User)?.game;
         if (!game || !players) return;
@@ -292,8 +293,6 @@ export class GamesStateService {
         console.log(gamePlayer.player.user.username);
 
         const room = gamePlayer.player.roomId;
-        const gameHistoryInfo = this.formatGameInfo(gamePlayer);
-        await this.userStatsStorage.updatePlayerStats(gameHistoryInfo);
         this.gamesHandler.removePlayerFromSocketId(socket.id);
         socket.leave('game' + gamePlayer.player.roomId); // leave game chat room
         socket.leave(gamePlayer.player.roomId);
@@ -315,14 +314,11 @@ export class GamesStateService {
         // this.gameEnded.next(room);
     }
 
+    private async endGame(roomId: string) {
+        const gamePlayers = this.gamesHandler.getPlayersInRoom(roomId);
+        if (gamePlayers.length === 0 && gamePlayers[0].game.isGameFinish) return;
 
-    private async endGame(socketId: string) {
-        const gamePlayer = this.gamesHandler.getPlayer(socketId);
-        if (!gamePlayer) return;
-        const gamePlayers = this.gamesHandler.getPlayersInRoom(gamePlayer.player.roomId);
-        if (gamePlayers.length === 0 && gamePlayer.game.isGameFinish) return;
-
-        gamePlayer.game.isGameFinish = true;
+        gamePlayers[0].game.isGameFinish = true;
         this.updatePlayersStats(gamePlayers);
 
         console.log('kicking players');
@@ -332,11 +328,13 @@ export class GamesStateService {
 
             socket.emit(SocketEvents.GameEnd);
         });
-        this.gamesHandler.removeRoom(gamePlayer.player.roomId);
+        this.gamesHandler.removeRoom(roomId);
     }
 
     private async broadcastHighScores(roomId: string): Promise<void> {
         const players = this.gamesHandler.getPlayersInRoom(roomId);
+        console.log('IN broadcastHighScores');
+        console.log(`players : ${players}`);
 
         if (players.length > 0) await this.endGame(roomId);
 
@@ -357,7 +355,9 @@ export class GamesStateService {
     }
 
     private updatePlayersStats(gamePlayers: GamePlayer[]) {
+        console.log('IN updatePlayersStats');
         const gameWinnerPlayer = this.getWinnerPlayer(gamePlayers);
+        console.log(`Winning player : ${gameWinnerPlayer.player}`);
         gamePlayers.forEach(async (player) => {
             if (player.player.type === PlayerType.Bot || player.player.type === PlayerType.Observer) return;
             const playerWonGame = player.player.socketId === gameWinnerPlayer.player.socketId;
