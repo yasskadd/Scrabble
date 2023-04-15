@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { SocketEvents } from '@common/constants/socket-events';
 import { AvatarData } from '@common/interfaces/avatar-data';
+import { HistoryEvent } from '@common/interfaces/history-event';
 import { ImageInfo } from '@common/interfaces/image-info';
 import { IUser } from '@common/interfaces/user';
 import { UserStats } from '@common/interfaces/user-stats';
@@ -19,6 +20,7 @@ import { HttpHandlerService } from './communication/http-handler.service';
 export class UserService {
     user: IUser;
     userStats: UserStats;
+    userHistoryEvents: HistoryEvent[];
     isConnected: BehaviorSubject<boolean>;
 
     private tempUserData: IUser;
@@ -32,6 +34,7 @@ export class UserService {
     ) {
         this.user = undefined;
         this.userStats = undefined;
+        this.userHistoryEvents = undefined;
         this.isConnected = new BehaviorSubject<boolean>(false);
 
         this.subscribeConnectionEvents();
@@ -79,7 +82,10 @@ export class UserService {
                 this.logout();
             },
         );
-        this.setStats();
+        this.setUserStats();
+        console.log(this.userStats);
+        // this.setUserHistoryEvents();
+        // console.log(this.userHistoryEvents);
     }
 
     async logout(): Promise<void> {
@@ -95,11 +101,17 @@ export class UserService {
         });
     }
 
-    setStats() {
+    setUserStats() {
         this.httpHandlerService.getStats().then((result) => {
             this.userStats = result;
         });
     }
+
+    // setUserHistoryEvents() {
+    //     this.httpHandlerService.getUserHistoryEvents().then((result) => {
+    //         this.userHistoryEvents = result;
+    //     });
+    // }
 
     async submitNewProfilePic(avatarData: AvatarData): Promise<boolean> {
         return this.httpHandlerService

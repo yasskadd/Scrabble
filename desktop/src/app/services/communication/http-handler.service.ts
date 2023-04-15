@@ -159,6 +159,11 @@ export class HttpHandlerService {
         return JSON.parse(res.body);
     }
 
+    // async getUserHistoryEvents(): Promise<HistoryEvent[]> {
+    //     const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/profile/history-events` });
+    //     return JSON.parse(res.body);
+    // }
+
     async getDefaultImages(): Promise<Map<string, string[]>> {
         const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/image/default-pictures` });
         return JSON.parse(res.body);

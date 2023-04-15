@@ -1,6 +1,8 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserService } from '@app/services/user.service';
+import { HistoryEvent } from '@common/interfaces/history-event';
+import { UserStats } from '@common/interfaces/user-stats';
 import Chart from 'chart.js/auto';
 
 @Component({
@@ -10,9 +12,12 @@ import Chart from 'chart.js/auto';
 })
 export class UserProfilePageComponent {
     @ViewChild('myChart') canvasRef: ElementRef<HTMLCanvasElement>;
+    games: HistoryEvent[];
+    connections: HistoryEvent[];
 
     constructor(protected userService: UserService, private router: Router) {
         userService.userStats.averageGameScore = Math.round(userService.userStats.averageGameScore);
+        this.setGames();
     }
 
     ngAfterViewInit() {
@@ -41,6 +46,20 @@ export class UserProfilePageComponent {
         });
 
         myChart.update();
+    }
+
+    get userStats(): UserStats {
+        return this.userService.userStats;
+    }
+
+    get userHistoryEvents(): HistoryEvent[] {
+        return this.userService.userHistoryEvents;
+    }
+
+    setGames() {
+        this.userHistoryEvents.forEach((historyEvent: HistoryEvent) => {
+            if (historyEvent.gameWon !== null) this.games.push(historyEvent);
+        });
     }
 
     redirectSettingsPage() {
