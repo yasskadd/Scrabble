@@ -370,12 +370,12 @@ export class LetterPlacementService {
             coords.push(nextCoord);
             if (!word.isHorizontal) {
                 nextCoord += TOTAL_COLUMNS;
-                while (this.confirmedBoard[nextCoord].state === BoardTileState.Confirmed) {
+                while (this.confirmedBoard[nextCoord]?.state === BoardTileState.Confirmed) {
                     nextCoord += TOTAL_COLUMNS;
                 }
             } else {
                 nextCoord++;
-                while (this.confirmedBoard[nextCoord].state === BoardTileState.Confirmed) {
+                while (this.confirmedBoard[nextCoord]?.state === BoardTileState.Confirmed) {
                     nextCoord++;
                 }
             }
@@ -416,16 +416,9 @@ export class LetterPlacementService {
             if (rackIndex === -1) {
                 return;
             }
-            if (
-                this.confirmedBoard[
-                    this.computeCoordFromCoordinate(this.clueWords[index].firstCoordinate) +
-                        (this.clueWords[index].isHorizontal ? letterIndex : letterIndex * TOTAL_ROWS)
-                ].state !== BoardTileState.Confirmed
-            ) {
-                this.confirmedBoard[
-                    this.computeCoordFromCoordinate(this.clueWords[index].firstCoordinate) +
-                        (this.clueWords[index].isHorizontal ? letterIndex : letterIndex * TOTAL_ROWS)
-                ].letter = this.gameClientService.getLocalPlayer()?.rack[rackIndex];
+
+            if (this.confirmedBoard[letterCoords[letterIndex]].state !== BoardTileState.Confirmed) {
+                this.confirmedBoard[letterCoords[letterIndex]].letter = this.gameClientService.getLocalPlayer()?.rack[rackIndex];
             }
         });
 
