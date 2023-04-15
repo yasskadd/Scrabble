@@ -209,10 +209,12 @@ export class ChatboxHandlerService {
     }
 
     private updateJoinedRooms() {
+        console.log('update');
         this._joinedRoomsSubject.next(this.joinedChatRooms);
     }
 
     private updateAllRooms() {
+        console.log('updateall');
         this._allRoomsSubject.next(this.availableRooms());
     }
 
@@ -239,6 +241,8 @@ export class ChatboxHandlerService {
 
     private joinChatRoom(chatRoom: ChatRoomClient) {
         this.joinedChatRooms.push(chatRoom.name);
+        console.log('joinChatRoom');
+        console.log(this.joinedChatRooms);
         this.updateJoinedRooms();
         this.updateAllRooms();
         // this.removeRoomFromAllChatRooms(chatRoom.name);
@@ -262,12 +266,15 @@ export class ChatboxHandlerService {
     private joinRoomSession(chatRoomName: string, newMessage: Message[]) {
         this.messages = newMessage;
         this.chatSession = chatRoomName;
+        this._messagesSubject.next(this.messages);
         this._chatSessionSubject.next(this.chatSession);
         const indexToDelete = this.notifiedRooms.findIndex((roomName) => roomName === chatRoomName);
         if (indexToDelete !== NOT_FOUND) {
             this.notifiedRooms.splice(indexToDelete, 1);
             this._notifsSubject.next(this.notifiedRooms);
         }
+        console.log('joinsession');
+        console.log(this.joinedChatRooms);
         // const currentlyRequested = new Set<string>();
         // for (const message of this.messages) {
         //     const id = message.userId;
