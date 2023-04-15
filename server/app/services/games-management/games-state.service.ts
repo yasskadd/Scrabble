@@ -159,8 +159,7 @@ export class GamesStateService {
                                 timer: room.timer,
                                 roomId: room.id,
                                 dictionaryValidation: game.dictionaryValidation as DictionaryValidation,
-                            },
-                            500,
+                            }
                         );
                     }
                     newBot.game = game;
