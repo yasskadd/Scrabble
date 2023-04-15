@@ -144,7 +144,9 @@
         "input_example": "Ex. Salut!",
         "joined_chats": "Canaux rejoints",
         "available_chats": "Canaux disponibles",
-        "join": "Rejoindre"
+        "join": "REJOINDRE",
+        "leave": "QUITTER",
+        "create": "Créer un nouveau canal"
     },
     "footer": {
         "team": "Équipe"

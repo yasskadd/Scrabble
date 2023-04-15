@@ -1,7 +1,7 @@
 <div class='encapsulating-div'>
     <app-header></app-header>
     <body class='mat-app-background'>
-    <button mat-fab *ngIf='!userService.user.profilePicture' color='primary' (click)='openAvatarSelector()'
+    <button mat-fab *ngIf='userService.isConnected.getValue() && !userService.user.profilePicture' color='primary' (click)='openAvatarSelector()'
             class='avatar-selector' style='margin-bottom: 4px'>
         <mat-icon>person</mat-icon>
     </button>

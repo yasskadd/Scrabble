@@ -1,53 +1,107 @@
-import { AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { AfterContentInit, AfterViewChecked, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogBoxCreateChatComponent } from '@app/components/dialog-box-create-chat/dialog-box-create-chat.component';
+import { AppRoutes } from '@app/models/app-routes';
+import { RustCommand, RustEvent } from '@app/models/rust-command';
 import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
 import { UserService } from '@app/services/user.service';
-import { ChatboxMessage } from '@common/interfaces/chatbox-message';
+import { SocketEvents } from '@common/constants/socket-events';
+import { Message } from '@common/interfaces/message';
+import { IUser } from '@common/interfaces/user';
+import { ClientSocketService } from '@services/communication/client-socket.service';
+import * as tauri from '@tauri-apps/api';
+import { WebviewWindow, WebviewWindowHandle } from '@tauri-apps/api/window';
 
 @Component({
     selector: 'app-generic-chat',
     templateUrl: './generic-chat.component.html',
     styleUrls: ['./generic-chat.component.scss'],
 })
-export class GenericChatComponent implements AfterViewInit, AfterViewChecked {
+export class GenericChatComponent implements AfterViewChecked, AfterContentInit {
     @ViewChild('chatbox', { static: false }) chatbox: ElementRef;
     @ViewChild('container') private scrollBox: ElementRef;
-    activeTab: string;
-    chatSession: string | undefined;
+    // chatSession: string | undefined;
 
     inputForm: FormControl;
-    private lastMessage: ChatboxMessage;
+    searchInput: string;
+    searchAllInput: string;
+    private lastMessage: Message;
 
-    constructor(private chatboxHandler: ChatboxHandlerService, protected userService: UserService) {
+    constructor(
+        public chatboxHandler: ChatboxHandlerService,
+        protected userService: UserService,
+        public dialog: MatDialog,
+        private socket: ClientSocketService,
+    ) {
         this.inputForm = new FormControl('');
-        this.activeTab = 'joinedChats';
+        this.searchInput = '';
+        this.searchAllInput = '';
+        // this.chatSession = undefined;
+        this.inputForm = new FormControl('');
+
+        if (tauri.window.getCurrent().label === 'chat') {
+            tauri.window
+                .getCurrent()
+                .listen(RustEvent.WindowEvent, (payload) => {
+                    console.log(payload);
+                })
+                .then();
+
+            tauri.window.getCurrent().listen(RustEvent.UserData, (payload) => {
+                console.log(payload);
+                this.userService.user = payload as unknown as IUser;
+                this.userService.isConnected.next(true);
+            });
+        }
     }
 
     get messages() {
         return this.chatboxHandler.messages;
     }
 
-    @HostListener('click')
-    clickInside() {
-        this.chatbox.nativeElement.focus();
+    get chatSession() {
+        return this.chatboxHandler.chatSession;
     }
 
-    ngAfterViewInit() {
-        setTimeout(() => {
-            // this.chatboxHandler.resetMessage();
-            this.chatbox.nativeElement.focus();
-        }, 0);
+    get username() {
+        return this.userService.user.username;
+    }
+
+    @HostListener('click')
+    clickInside() {
+        this.chatbox?.nativeElement.focus();
+    }
+
+    test(): void {
+        this.socket.send(SocketEvents.EnterRoomLobby);
+
+        const cw = new WebviewWindowHandle('chat');
+        cw.emit(RustEvent.WindowEvent, 'testasdajhsdkj');
+    }
+
+    ngAfterContentInit() {
+        // this.chatboxHandler.resetMessage();
+        this.chatbox?.nativeElement.focus();
     }
 
     submit() {
-        this.chatboxHandler.submitMessage(this.inputForm.value);
+        if (this.inputForm.value.trim() !== '') this.chatboxHandler.submitMessage(this.inputForm.value);
         this.resetInput();
     }
 
-    submitMessage(message: string) {
-        this.inputForm.setValue(message);
-        this.submit();
+    leaveRoom() {
+        this.chatboxHandler.requestLeaveRoom();
     }
+
+    createRoom(newChatRoomName: string) {
+        this.chatboxHandler.requestCreateChatRoom(newChatRoomName);
+    }
+
+    // submitMessage(message: string) {
+    //     this.inputForm.setValue(message);
+    //     this.submit();
+    // }
 
     ngAfterViewChecked(): void {
         const lastMessage = this.chatboxHandler.messages[this.chatboxHandler.messages.length - 1];
@@ -58,12 +112,62 @@ export class GenericChatComponent implements AfterViewInit, AfterViewChecked {
     }
 
     selectTab(tabName: string) {
-        this.activeTab = tabName;
+        this.chatboxHandler.selectTab(tabName);
         // TODO: Insert get joined & all chat rooms
     }
 
-    selectChatSession(chatRoomName: string | undefined) {
-        this.chatSession = chatRoomName;
+    closeChat() {
+        this.chatboxHandler.onClosingRoom();
+        // this.chatboxHandler.chatSession = undefined;
+        // this.chatSession = undefined;
+    }
+
+    joinChatSession(chatRoomName: string) {
+        this.chatboxHandler.requestJoinRoomSession(chatRoomName);
+    }
+
+    joinChat(chatRoomName: string) {
+        this.chatboxHandler.requestJoinChatRoom(chatRoomName);
+    }
+
+    openCreateChatDialog(): void {
+        const dialogRef = this.dialog.open(DialogBoxCreateChatComponent, {
+            data: '',
+        });
+
+        dialogRef.afterClosed().subscribe((newChatRoomName) => {
+            console.log(newChatRoomName);
+            if (newChatRoomName !== undefined && newChatRoomName.trim() !== '') this.createRoom(newChatRoomName);
+        });
+    }
+
+    onSearch(chatRoomName: string) {
+        return chatRoomName.toLowerCase().startsWith(this.searchInput.toLowerCase());
+    }
+
+    onSearchAll(chatRoomName: string) {
+        return chatRoomName.toLowerCase().startsWith(this.searchAllInput.toLowerCase());
+    }
+
+    resetSearchInput() {
+        this.searchInput = '';
+    }
+
+    resetSearchAllInput() {
+        this.searchAllInput = '';
+    }
+
+    toggleWindow() {
+        if (tauri.window.WebviewWindow.getByLabel('chat')) {
+            this.closeWindow();
+            return;
+        }
+
+        if (this.chatboxHandler.chatSession) {
+            this.invokeChatWindow(`${AppRoutes.Chat}/${this.chatboxHandler.chatSession}`);
+        } else {
+            this.invokeChatWindow(`${AppRoutes.Chat}`);
+        }
     }
 
     private resetInput() {
@@ -72,5 +176,26 @@ export class GenericChatComponent implements AfterViewInit, AfterViewChecked {
 
     private scrollToBottom(): void {
         this.scrollBox.nativeElement.scrollTop = this.scrollBox.nativeElement.scrollHeight;
+    }
+
+    private invokeChatWindow(url: string): void {
+        const chatWindow = new WebviewWindow('chat', {
+            url: '#/' + url,
+        });
+
+        chatWindow
+            .once('tauri://created', () => {
+                console.log('window created');
+                tauri.invoke(RustCommand.ChatWindowListening).then();
+                setTimeout(() => {
+                    tauri.window.getCurrent().emit(RustEvent.UserData, this.userService.user);
+                }, 1000);
+            })
+            .then();
+    }
+
+    private closeWindow(): void {
+        const chatWindow = WebviewWindow.getByLabel('chat');
+        chatWindow.close().then();
     }
 }

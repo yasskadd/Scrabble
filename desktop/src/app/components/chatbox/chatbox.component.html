@@ -1,11 +1,11 @@
-<div id="reserve">
+<!-- <div id="reserve">
     <div id="number-letters">{{ gameClientService.letterReserveLength }}</div>
     {{ "game_page.informations.letters_remaining" | translate }}
 </div>
 
 <mat-card class="container-wrapper">
     <div #container class="message-container">
-        <div *ngFor="let message of messages" [class]="'message ' + message.type">
+        <div *ngFor="let message of messages">
             <span *ngIf="!isPlacementCommand(message.message)">{{ message.message }}</span>
             <span *ngIf="isPlacementCommand(message.message)" class="placement" (click)="submitMessage(message.message)">{{ message.message }}</span>
         </div>
@@ -21,4 +21,4 @@
         align="end"
         >{{ input.value?.length || 0 }}/512
     </mat-hint>
-</mat-form-field>
+</mat-form-field> -->
