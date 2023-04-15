@@ -63,7 +63,7 @@ class _MenuScreenState extends State<MenuScreen> {
         }
         break;
       case DropDownOption.Disconnect:
-        _authService.diconnect();
+        _authService.disconnect();
         {
           Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
@@ -134,7 +134,7 @@ class _MenuScreenState extends State<MenuScreen> {
         notifyParent: () => setState(() {}),
       ),
       endDrawer: const Drawer(
-        child: SafeArea(child: SideChatWidget()),
+        child: SideChatWidget(),
       ),
       body: Stack(children: [
         ChatButtonWidget(scaffoldKey: _scaffoldKey),

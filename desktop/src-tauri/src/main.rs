@@ -22,6 +22,13 @@ struct Http {
 #[derive(Serialize)]
 struct HttpResponse {
     body: String,
+    err: String,
+}
+
+// the payload type must implement `Serialize` and `Clone`.
+#[derive(Clone, serde::Serialize)]
+struct TestPayload {
+    message: String,
 }
 
 enum RustEvent {
@@ -30,6 +37,8 @@ enum RustEvent {
     SocketSendFailed,
     SocketAlive,
     SocketNotAlive,
+    WindowEvent,
+    UserData,
 }
 
 impl RustEvent {
@@ -40,6 +49,8 @@ impl RustEvent {
             Self::SocketSendFailed => "socketSendFailed",
             Self::SocketAlive => "socketAlive",
             Self::SocketNotAlive => "socketNotAlive",
+            Self::WindowEvent => "windowEvent",
+            Self::UserData => "userData",
         }
     }
 }
@@ -55,7 +66,7 @@ fn socketEstablishConnection(
     address: &str,
     cookie: Option<&str>,
     state: tauri::State<SocketClient>,
-    window: tauri::Window,
+    handle: tauri::AppHandle,
 ) {
     let mut socket = state.socket.lock().expect("Error locking the socket");
 
@@ -69,15 +80,60 @@ fn socketEstablishConnection(
         None => ClientBuilder::new(address).reconnect(false),
     };
 
-    let socketEventWindow = window.clone();
     let connection = clientBuilder
         .on_any(move |event, payload, _raw_client| {
             // println!("Got event: {:?} {:?}", event, payload);
             if let Payload::String(payload) = payload {
-                println!("Got payload: {}", payload);
-                socketEventWindow
-                    .emit(&String::from(event), payload)
-                    .expect("Couldn't emit the event to Angular");
+                println!("Got event: {}", String::from(event.clone()));
+                // println!("Got payload: {}", payload);
+
+                if payload.to_string() == "\"SuccessfulConnection\""
+                    || payload.to_string() == "\"UserAlreadyConnected\""
+                {
+                    let new_payload = payload
+                        .strip_prefix("\"")
+                        .unwrap()
+                        .strip_suffix("\"")
+                        .unwrap();
+
+                    let main_window = handle.get_window("main").unwrap();
+                    main_window
+                        .emit_all(&String::from(new_payload.clone()), payload.clone())
+                        .expect("Couldn't emit the event to Angular");
+
+                    let chat_window = handle.get_window("chat");
+                    match chat_window {
+                        Some(w) => w
+                            .emit_all(&String::from(new_payload), payload.clone())
+                            .unwrap(),
+                        None => return,
+                    }
+
+                    handle
+                        .emit_all(&String::from(new_payload.clone()), payload.clone())
+                        .expect("Couldn't emit the event to Angular");
+                } else {
+                    println!("test");
+                    let main_window = handle.get_window("main").unwrap();
+                    main_window
+                        .emit_all(&String::from(event.clone()), payload.clone())
+                        .expect("Couldn't emit the event to Angular");
+
+                    let chat_window = handle.get_window("chat");
+                    match chat_window {
+                        Some(w) => w
+                            .emit_all(&String::from(event.clone()), payload.clone())
+                            .unwrap(),
+                        None => return,
+                    }
+                    handle
+                        .emit_all(&String::from(event), payload)
+                        .expect("Couldn't emit the event to Angular");
+                }
+
+                // socketEventWindow
+                //     .emit(&String::from(event), payload)
+                //     .expect("Couldn't emit the event to Angular");
             }
         })
         .connect();
@@ -89,12 +145,12 @@ fn socketEstablishConnection(
         }
         Err(error) => {
             println!("Error {error}");
-            window
-                .emit(
-                    RustEvent::SocketConnectionFailed.to_string(),
-                    error.to_string(),
-                )
-                .expect("oups");
+            // window
+            //     .emit(
+            //         RustEvent::SocketConnectionFailed.to_string(),
+            //         error.to_string(),
+            //     )
+            //     .expect("oups");
         }
     }
 }
@@ -177,8 +233,14 @@ async fn httpGet(
     let res = req.send().await.unwrap().text().await;
 
     match res {
-        Ok(response) => Ok(HttpResponse { body: response }),
-        Err(error) => Err(error.to_string()),
+        Ok(response) => Ok(HttpResponse {
+            body: response,
+            err: "".to_string(),
+        }),
+        Err(error) => Ok(HttpResponse {
+            body: "".to_string(),
+            err: error.to_string(),
+        }),
     }
 }
 
@@ -201,8 +263,14 @@ async fn httpPost(
     let res: Result<String, reqwest::Error> = req.send().await.unwrap().text().await;
 
     match res {
-        Ok(response) => Ok(HttpResponse { body: response }),
-        Err(error) => Err(error.to_string()),
+        Ok(response) => Ok(HttpResponse {
+            body: response,
+            err: "".to_string(),
+        }),
+        Err(error) => Ok(HttpResponse {
+            body: "".to_string(),
+            err: error.to_string(),
+        }),
     }
 }
 
@@ -243,8 +311,14 @@ async fn httpPut(
     let res: Result<String, reqwest::Error> = req.send().await.unwrap().text().await;
 
     match res {
-        Ok(response) => Ok(HttpResponse { body: response }),
-        Err(error) => Err(error.to_string()),
+        Ok(response) => Ok(HttpResponse {
+            body: response,
+            err: "".to_string(),
+        }),
+        Err(error) => Ok(HttpResponse {
+            body: "".to_string(),
+            err: error.to_string(),
+        }),
     }
 }
 
@@ -265,7 +339,7 @@ async fn httpPatch(
             let mut cache_dir = tauri::api::path::cache_dir().unwrap();
             cache_dir.push(path.to_owned());
 
-            let file = fs::read(tauri::api::path::cache_dir().unwrap().as_path());
+            let file = fs::read(cache_dir.as_path());
             req = req.multipart(
                 reqwest::multipart::Form::new()
                     .part(
@@ -295,8 +369,14 @@ async fn httpPatch(
     let res: Result<String, reqwest::Error> = req.send().await.unwrap().text().await;
 
     match res {
-        Ok(response) => Ok(HttpResponse { body: response }),
-        Err(error) => Err(error.to_string()),
+        Ok(response) => Ok(HttpResponse {
+            body: response,
+            err: "".to_string(),
+        }),
+        Err(error) => Ok(HttpResponse {
+            body: "".to_string(),
+            err: error.to_string(),
+        }),
     }
 }
 
@@ -319,9 +399,47 @@ async fn httpDelete(
     let res: Result<String, reqwest::Error> = req.send().await.unwrap().text().await;
 
     match res {
-        Ok(response) => Ok(HttpResponse { body: response }),
-        Err(error) => Err(error.to_string()),
+        Ok(response) => Ok(HttpResponse {
+            body: response,
+            err: "".to_string(),
+        }),
+        Err(error) => Ok(HttpResponse {
+            body: "".to_string(),
+            err: error.to_string(),
+        }),
     }
+}
+
+#[tauri::command]
+async fn chatWindowListening(handle: tauri::AppHandle) {
+    let listener = handle.get_window("chat").unwrap();
+
+    let eventEmmitter = handle.get_window("chat").unwrap();
+    listener.listen_global(RustEvent::WindowEvent.to_string(), move |event| {
+        eventEmmitter
+            .emit_all(RustEvent::WindowEvent.to_string(), event.payload())
+            .unwrap();
+    });
+
+    let userDataEmitter = handle.get_window("chat").unwrap();
+    listener.listen_global(RustEvent::UserData.to_string(), move |event| {
+        userDataEmitter
+            .emit_all(RustEvent::UserData.to_string(), event.payload())
+            .unwrap();
+    });
+}
+
+#[tauri::command]
+async fn chatWindowUnlistening(handle: tauri::AppHandle) {
+    let windowHandle = handle.get_window("chat").unwrap();
+    handle
+        .get_window("chat")
+        .unwrap()
+        .listen_global("windowEvent", move |event| {
+            windowHandle
+                .emit_all("windowEvent", event.payload())
+                .unwrap();
+        });
 }
 
 fn main() {
@@ -363,7 +481,9 @@ fn main() {
             httpPost,
             httpPut,
             httpPatch,
-            httpDelete
+            httpDelete,
+            chatWindowListening,
+            chatWindowUnlistening
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

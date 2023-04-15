@@ -1,0 +1,132 @@
+<!-- TABS -->
+<!-- <button mat-raised-button (click)='toggleWindow()'> Toggle  window</button> -->
+<div id="tabs-container">
+    <button
+        class="tab"
+        mat-button
+        [ngClass]="[(chatboxHandler.activeTabObs | async) === 'joinedChats' ? 'activeTab' : '']"
+        [ngStyle]="{ 'background-color': (chatboxHandler.activeTabObs | async) === 'joinedChats' ? 'primary' : '' }"
+        (click)="selectTab('joinedChats')"
+        *ngIf="(chatboxHandler.chatSessionObs | async) === undefined"
+    >
+        {{ "chat.joined_chats" | translate }}
+    </button>
+    <button
+        class="tab"
+        mat-button
+        [ngClass]="[(chatboxHandler.activeTabObs | async) === 'allChats' ? 'activeTab' : '']"
+        [ngStyle]="{ 'background-color': (chatboxHandler.activeTabObs | async) === 'allChats' ? 'primary' : '' }"
+        (click)="selectTab('allChats')"
+        *ngIf="(chatboxHandler.chatSessionObs | async) === undefined"
+    >
+        {{ "chat.available_chats" | translate }}
+    </button>
+    <!-- <mat-tab-group *ngIf="chatSession === undefined">
+        <mat-tab label="First">
+            <mat-card *ngFor="let room of chatboxHandler.joinedRoomsObs | async">
+                <div class="chat-rooms">
+                    <div>{{ room }}</div>
+                    <button class="join" mat-button mat-stroked-button color="primary" (click)="joinChatSession(room)">
+                        {{ "chat.join" | translate }}
+                    </button>
+                </div>
+            </mat-card>
+        </mat-tab>
+        <mat-tab label="Second">
+            <mat-card *ngFor="let room of chatboxHandler.allRoomsObs | async">
+                <div class="chat-rooms">
+                    <div>{{ room.name }}</div>
+                    <button class="join" mat-button mat-stroked-button color="primary" (click)="joinChat(room.name)">
+                        {{ "chat.join" | translate }}
+                    </button>
+                </div>
+            </mat-card>
+        </mat-tab>
+    </mat-tab-group> -->
+    <div class="chat-room-session-header" mat-button *ngIf="(chatboxHandler.chatSessionObs | async) !== undefined" background-color="primary">
+        <mat-icon (click)="closeChat()">keyboard_backspace</mat-icon>
+        <div>{{ chatSession }}</div>
+        <button class="leaveRoom" (click)="leaveRoom()">{{ "chat.leave" | translate }}</button>
+    </div>
+</div>
+<!-- TABS -->
+
+<div
+    class="chat-rooms-container"
+    *ngIf="(chatboxHandler.activeTabObs | async) === 'joinedChats' && (chatboxHandler.chatSessionObs | async) === undefined"
+>
+    <button mat-button class="createRoom" mat-raised-button color="primary" (click)="openCreateChatDialog()">
+        {{ "chat.create" | translate }}
+        <mat-icon>add</mat-icon>
+    </button>
+    <mat-card>
+        <div class="search-control">
+            <mat-icon class="search-icon">search</mat-icon>
+            <mat-form-field>
+                <input matInput type="text" placeholder="Search" [(ngModel)]="searchInput" />
+            </mat-form-field>
+            <mat-icon class="clear-icon" (click)="resetSearchInput()">clear</mat-icon>
+        </div>
+    </mat-card>
+
+    <ng-container *ngFor="let room of chatboxHandler.joinedRoomsObs | async">
+        <mat-card *ngIf="onSearch(room)" background-color="primary">
+            <div class="chat-rooms">
+                <div>{{ room }}</div>
+                <button class="join" mat-button mat-stroked-button color="primary" (click)="joinChatSession(room)">
+                    <div [matBadge]="(chatboxHandler.notifsObs | async).includes(room) ? '&#8288;' : null" matBadgeSize="small" class="demo-section">
+                        {{ "chat.join" | translate }}
+                    </div>
+                </button>
+            </div>
+        </mat-card>
+    </ng-container>
+</div>
+<div
+    class="chat-rooms-container"
+    *ngIf="(chatboxHandler.activeTabObs | async) === 'allChats' && (chatboxHandler.chatSessionObs | async) === undefined"
+>
+    <mat-card>
+        <div class="search-control">
+            <mat-icon class="search-icon">search</mat-icon>
+            <mat-form-field>
+                <input matInput type="text" placeholder="Search" [(ngModel)]="searchAllInput" />
+            </mat-form-field>
+            <mat-icon class="clear-icon" (click)="resetSearchAllInput()">clear</mat-icon>
+        </div>
+    </mat-card>
+
+    <ng-container *ngFor="let room of chatboxHandler.allRoomsObs | async">
+        <mat-card *ngIf="onSearchAll(room.name)">
+            <div class="chat-rooms">
+                <div>{{ room.name }}</div>
+                <button class="join" mat-button mat-stroked-button color="primary" (click)="joinChat(room.name)">
+                    {{ "chat.join" | translate }}
+                </button>
+            </div>
+        </mat-card>
+    </ng-container>
+</div>
+
+<!-- CHAT SESSION -->
+<div #container class="message-container" *ngIf="(chatboxHandler.chatSessionObs | async) !== undefined">
+    <mat-card *ngFor="let message of chatboxHandler.messagesObs | async">
+        <div class="chat-metadata">
+            <img src="../../../assets/images/1.jpg" class="avatar" />
+            <strong>{{ message.username }}</strong>
+            <p>{{ message.date }}</p>
+        </div>
+        <div class="message">{{ message.message }}</div>
+    </mat-card>
+</div>
+
+<div class="chat-input" *ngIf="(chatboxHandler.chatSessionObs | async) !== undefined">
+    <mat-form-field appearance="outline" (keydown.enter)="submit()" class="user-input">
+        <mat-label>{{ "chat.message_box" | translate }}</mat-label>
+        <input #chatbox matInput maxlength="512" type="text" [formControl]="inputForm" placeholder="{{ 'chat.input_example' | translate }}" />
+    </mat-form-field>
+    <button mat-mini-fab color="primary" (click)="submit()">
+        <mat-icon>send</mat-icon>
+    </button>
+</div>
+<!-- CHAT SESSION -->

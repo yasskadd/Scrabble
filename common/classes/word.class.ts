@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { Gameboard } from '@common/classes/gameboard.class';
-import { Coordinate } from '@common/interfaces/coordinate';
-import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
+import { Gameboard } from './gameboard.class';
+import { Coordinate } from '../interfaces/coordinate';
+import { PlaceWordCommandInfo } from '../interfaces/place-word-command-info';
 
 const SEVEN_LETTERS = 7;
 const SEVEN_LETTER_BONUS = 50;
@@ -188,14 +188,14 @@ export class Word {
 
     private addLetterPointsWithMultiplier(gameboard: Gameboard, coord: Coordinate) {
         const letter = gameboard.getLetterTile(coord).letter;
-        let point = LETTER_POINTS.get(letter);
+        let point = gameboard.getLetterTile(coord).points != 0 ? LETTER_POINTS.get(letter) : undefined;
         if (point === undefined) point = 0;
         this.points += point * gameboard.getLetterTile(coord).multiplier.number;
     }
 
     private addLetterPointsWithoutMultiplier(gameboard: Gameboard, coord: Coordinate) {
         const letter = gameboard.getLetterTile(coord).letter;
-        let point = LETTER_POINTS.get(letter);
+        let point = gameboard.getLetterTile(coord).points != 0 ? LETTER_POINTS.get(letter) : undefined;
         if (point === undefined) point = 0;
         this.points += point;
     }

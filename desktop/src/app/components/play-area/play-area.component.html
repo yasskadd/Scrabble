@@ -1,28 +1,67 @@
-<div class="encapsulating-div">
-    <b id="winning-message" *ngIf="gameClientService.isGameFinish">
+<div class='encapsulating-div'>
+    <b id='winning-message' *ngIf='gameClientService.isGameFinish'>
         {{ gameClientService.winningMessage | translate : { playerName: gameClientService.winner } }}
     </b>
 
     <mat-drawer-container>
-        <div class="always-visible">
-            <app-information-panel></app-information-panel>
-
-            <div class="middle" cdkDropListGroup>
+        <mat-drawer-content>
+            <div class='always-visible' cdkDropListGroup>
+                <app-information-panel></app-information-panel>
                 <app-game-board></app-game-board>
 
-                <app-player-rack [keyboardParentSubject]="keyboardParentSubject" class="player-rack"></app-player-rack>
-                <button *ngIf="chatIsOpen" class="open-chat-button" mat-button color="primary" (click)="drawer.toggle()" (click)="closeChat()">
+
+                <div *ngIf='gameClientService.getLocalPlayer().player.type === playerType.Observer'
+                     class='rack-container'>
+
+                    <app-player-rack [keyboardParentSubject]='keyboardParentSubject' [player]='selectedPlayer'
+                                     class='player-rack'></app-player-rack>
+<!--                    <div class='player-selector'>-->
+<!--                        <div *ngFor='let player of gameClientService.players; index as i'>-->
+<!--                            <img-->
+<!--                                [mat-menu-trigger-for]='player_menu'-->
+<!--                                [src]='player.player.user.profilePicture.key'-->
+<!--                                class='player-choice mat-elevation-z5'-->
+<!--                            />-->
+<!--                            <mat-menu #player_menu='matMenu'>-->
+<!--                                <button (click)='selectPlayer(i)' mat-menu-item>-->
+<!--                                    <mat-icon>visibility</mat-icon>-->
+<!--                                    &lt;!&ndash; TODO : Language &ndash;&gt;-->
+<!--                                    <span>Voir</span>-->
+<!--                                </button>-->
+<!--                                <button (click)='replaceBot(player)' *ngIf='player.player.type === playerType.Bot'-->
+<!--                                        mat-menu-item>-->
+<!--                                    <mat-icon>sync</mat-icon>-->
+<!--                                    &lt;!&ndash; TODO : Language&ndash;&gt;-->
+<!--                                    <span>Remplacer</span>-->
+<!--                                </button>-->
+<!--                            </mat-menu>-->
+<!--                        </div>-->
+<!--                    </div>-->
+                </div>
+
+                <div *ngIf='gameClientService.getLocalPlayer().player.type === playerType.User' class='rack-container'>
+
+                    <app-player-rack
+                        [keyboardParentSubject]='keyboardParentSubject'
+                        [player]='gameClientService.getLocalPlayer()'
+                        class='player-rack'
+                    ></app-player-rack>
+                </div>
+
+                <button *ngIf='chatIsOpen' class='open-chat-button' mat-button color='primary' (click)='drawer.toggle()'
+                        (click)='closeChat()'>
                     {{ "main_page.chat.close" | translate }}
                     <mat-icon>keyboard_arrow_right</mat-icon>
                 </button>
-                <button *ngIf="!chatIsOpen" class="open-chat-button" mat-button color="primary" (click)="drawer.toggle()" (click)="openChat()">
+                <button *ngIf='!chatIsOpen' class='open-chat-button' mat-button color='primary'
+                        (click)='drawer.toggle()' (click)='openChat()'>
                     <mat-icon>chat_bubble_outline</mat-icon>
                     {{ "main_page.chat.open" | translate }}
                 </button>
             </div>
-        </div>
+        </mat-drawer-content>
 
-        <mat-drawer #drawer class="chat-sidenav" mode="side" position="end">
+        <mat-drawer #drawer class='chat-sidenav' mode='side' position='end'>
             <app-generic-chat></app-generic-chat>
         </mat-drawer>
     </mat-drawer-container>

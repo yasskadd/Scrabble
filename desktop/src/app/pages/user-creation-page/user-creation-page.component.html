@@ -1,61 +1,66 @@
-<div class="encapsulating-div">
+<div class='encapsulating-div'>
     <app-header></app-header>
 
-    <body class="mat-app-background">
-        <form [formGroup]="formGroup" class="justified connection-form">
-            <button #avatarSelector *ngIf="profilePicForm.invalid" mat-fab color="primary" (click)="openAvatarSelector()" class="avatar-selector">
-                <mat-icon>person</mat-icon>
-            </button>
-            <img
-                mat-fab-button
-                *ngIf="profilePicForm.valid && profilePicForm.value.type === imageTypes.Url"
-                [src]="profilePicForm.value.url"
-                (click)="openAvatarSelector()"
-                class="selector-avatar mat-elevation-z5"
-            />
-            <img
-                mat-fab-button
-                *ngIf="profilePicForm.valid && profilePicForm.value.type === imageTypes.ImageData"
-                [src]="profilePicForm.value.rawData"
-                (click)="openAvatarSelector()"
-                class="selector-avatar mat-elevation-z5"
-            />
-            <mat-form-field appearance="outline">
-                <!-- TODO : Language -->
-                <mat-label>Nom d'utilisateur</mat-label>
-                <input type="text" matInput name="username" [formControl]="usernameForm" />
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-                <!-- TODO : Language -->
-                <mat-label>Email</mat-label>
-                <input matInput type="email" [formControl]="emailForm" />
-                <mat-error *ngIf="emailForm.hasError('email') && !emailForm.hasError('required')">
-                    <!-- TODO : Language -->
-                    Please enter a valid email address
-                </mat-error>
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-                <!-- TODO : Language -->
-                <mat-label>Mot de passe</mat-label>
-                <input type="password" matInput [formControl]="passwordForm" />
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-                <!-- TODO : Language -->
-                <mat-label>Confirmation de mot de passe</mat-label>
-                <input type="password" matInput [formControl]="passwordCopyForm" />
-                <mat-error *ngIf="passwordCopyForm.hasError('equalString')">
-                    <!-- TODO : Language -->
-                    Passwords aren't equal
-                </mat-error>
-            </mat-form-field>
-            <ngx-recaptcha2 #captchaElem [siteKey]="siteKey" [useGlobalDomain]="false" formControlName="recaptcha"> </ngx-recaptcha2>
-            <!-- TODO : something to choose theme -->
-            <mat-error>{{ connectionError }}</mat-error>
+    <body class='mat-app-background'>
+    <div class='justified connection-form'>
+        <button #avatarSelector *ngIf='profilePicForm.invalid' mat-fab color='primary' (click)='openAvatarSelector()'
+                class='avatar-selector'>
+            <mat-icon>person</mat-icon>
+        </button>
+        <img
+            style='cursor: pointer;'
+            *ngIf='profilePicForm.valid && profilePicForm.value.type === imageTypes.Url'
+            [src]='profilePicForm.value.url'
+            (click)='openAvatarSelector()'
+            class='selector-avatar mat-elevation-z5'
+        />
+        <img
+            style='cursor: pointer;'
+            *ngIf='profilePicForm.valid && profilePicForm.value.type === imageTypes.ImageData'
+            [src]='profilePicForm.value.rawData'
+            (click)='openAvatarSelector()'
+            class='selector-avatar mat-elevation-z5'
+        />
+        <mat-form-field appearance='outline'>
             <!-- TODO : Language -->
-            <button mat-raised-button *ngIf="formGroup.valid" (click)="submitNewAccount()">Connecter</button>
+            <mat-label>Nom d'utilisateur</mat-label>
+            <input type='text' matInput name='username' [formControl]='usernameForm' />
+            <mat-error>
+                {{getErrorMessage(usernameForm)}}
+            </mat-error>
+        </mat-form-field>
+        <mat-form-field appearance='outline'>
+            <mat-label>Email</mat-label>
+            <input matInput type='email' [formControl]='emailForm' />
+            <mat-error>
+                {{getErrorMessage(emailForm)}}
+            </mat-error>
+        </mat-form-field>
+        <mat-form-field appearance='outline'>
             <!-- TODO : Language -->
-            <button mat-raised-button *ngIf="formGroup.invalid" disabled>Connecter</button>
-        </form>
+            <mat-label>Mot de passe</mat-label>
+            <input type='password' matInput [formControl]='passwordForm' />
+            <mat-error>
+                {{getErrorMessage(passwordForm)}}
+            </mat-error>
+        </mat-form-field>
+        <mat-form-field appearance='outline'>
+            <!-- TODO : Language -->
+            <mat-label>Confirmation de mot de passe</mat-label>
+            <input type='password' matInput [formControl]='passwordCopyForm' />
+            <mat-error>
+                {{getErrorMessage(passwordCopyForm)}}
+            </mat-error>
+        </mat-form-field>
+        <ngx-recaptcha2 #captchaElem [siteKey]='siteKey' [useGlobalDomain]='false'
+                        [formControl]='recaptchaForm'></ngx-recaptcha2>
+        <!-- TODO : something to choose theme -->
+        <mat-error>{{ connectionError }}</mat-error>
+        <!-- TODO : Language -->
+        <button mat-raised-button *ngIf='formValid()' (click)='submitNewAccount()'>Connecter</button>
+        <!-- TODO : Language -->
+        <button mat-raised-button *ngIf='!formValid()' disabled>Connecter</button>
+    </div>
     </body>
 
     <app-footer></app-footer>

@@ -32,7 +32,7 @@
             "@services/*": ["./src/app/services/*"]
         }
     },
-    "exclude": ["node_modules", "target", "src-tauri/target"],
+    "exclude": ["node_modules", "target", "src-tauri/target", "src-tauri/build.rs", "src-tauri/Cargo.*"],
     "angularCompilerOptions": {
         "enableI18nLegacyMessageIdFormat": false,
         "strictInjectionParameters": true,

@@ -1,23 +1,33 @@
-// import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
+import { RustEvent } from '@app/models/rust-command';
+import { SocketEvents } from '@common/constants/socket-events';
 import { AvatarData } from '@common/interfaces/avatar-data';
 import { ImageInfo } from '@common/interfaces/image-info';
+import { RoomPlayer } from '@common/interfaces/room-player';
 import { IUser } from '@common/interfaces/user';
+import { UserStats } from '@common/interfaces/user-stats';
 import { ImageType } from '@common/models/image-type';
+import { PlayerType } from '@common/models/player-type';
 import { ClientSocketService } from '@services/communication/client-socket.service';
-import { Subject } from 'rxjs';
+import { SnackBarService } from '@services/snack-bar.service';
+import * as tauri from '@tauri-apps/api';
+import { WebviewWindowHandle } from '@tauri-apps/api/window';
+import { BehaviorSubject } from 'rxjs';
 import { AppCookieService } from './communication/app-cookie.service';
 import { HttpHandlerService } from './communication/http-handler.service';
-import { SocketEvents } from '@common/constants/socket-events';
-import { SnackBarService } from '@services/snack-bar.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class UserService {
     user: IUser;
+    userStats: UserStats;
+    isConnected: BehaviorSubject<boolean>;
+
+    private tempUserData: IUser;
+    private botImageUrl: string;
 
     constructor(
         private httpHandlerService: HttpHandlerService,
@@ -26,47 +36,92 @@ export class UserService {
         private snackBarService: SnackBarService,
         private router: Router,
     ) {
-        this.initUser();
+        this.isConnected = new BehaviorSubject<boolean>(false);
+        this.user = undefined;
+
+        this.initUserStats();
+        this.subscribeConnectionEvents();
+        this.clientSocketService.reconnect.subscribe(() => {
+            this.clientSocketService.reconnectionDialog = undefined;
+            this.login(this.tempUserData);
+        });
+        this.clientSocketService.cancelConnection.subscribe(() => {
+            this.clientSocketService.reconnectionDialog = undefined;
+            this.logout().then();
+        });
+        this.initBotImage().then();
     }
 
-    isConnected(): boolean {
-        return this.user.username && this.user.password ? true : false;
-    }
-
-    login(user: IUser): Subject<string> {
-        const subject = new Subject<string>();
-
+    login(user: IUser): void {
+        this.user = user;
         this.httpHandlerService.login(user).then(
             (loginRes: { userData: IUser; sessionToken: string }) => {
-                this.clientSocketService.on(SocketEvents.UserAlreadyConnected, async () => {
-                    // TODO : Language
-                    this.snackBarService.openError('User already connected');
-                    await this.logout();
-                });
-
-                this.cookieService.updateUserSessionCookie(loginRes.sessionToken).then(() => {
-                    this.user = loginRes.userData;
-                    // TODO : Language
-                    this.snackBarService.openInfo('Connection successful');
-                    this.updateUserWithImageUrl(loginRes.userData);
-                    subject.next('');
-                });
+                this.tempUserData = loginRes.userData;
+                this.cookieService.updateUserSessionCookie(loginRes.sessionToken).then();
             },
-            (error: any) => {
+            () => {
                 // TODO : Language
-                subject.next(error.error.message);
+                this.isConnected.next(false);
+                this.logout().then();
             },
         );
-
-        return subject;
     }
 
     async logout(): Promise<void> {
         this.httpHandlerService.logout(this.user).then(async () => {
-            this.initUser();
+            this.user = undefined;
+            this.tempUserData = undefined;
+            this.initUserStats();
+
             this.cookieService.removeSessionCookie();
             await this.clientSocketService.disconnect();
+
+            this.isConnected.next(false);
+            if (tauri.window.getCurrent().label === 'chat') return;
             this.router.navigate([AppRoutes.ConnectionPage]).then();
+        });
+    }
+
+    subscribeConnectionEvents(): void {
+        this.clientSocketService.on(SocketEvents.SuccessfulConnection, () => {
+            if (tauri.window.getCurrent().label === 'main') {
+                const switcher: IUser = JSON.parse(JSON.stringify(this.user));
+                this.user = JSON.parse(JSON.stringify(this.tempUserData));
+                this.tempUserData = switcher;
+
+                // TODO : Language
+                this.snackBarService.openInfo('Connection successful');
+                this.updateUserWithImageUrl(this.user);
+                const chatWindow = new WebviewWindowHandle('chat');
+                chatWindow.emit(RustEvent.UserData, this.user).then();
+            }
+            this.isConnected.next(true);
+
+            if (tauri.window.getCurrent().label === 'chat') return;
+            this.router.navigate([AppRoutes.HomePage]).then();
+        });
+        this.clientSocketService.on(SocketEvents.UserAlreadyConnected, () => {
+            // TODO : Language
+            this.snackBarService.openError('User already connected');
+            this.logout().then();
+        });
+    }
+
+    getUser(): IUser {
+        return this.user;
+    }
+
+    getPlayerImage(player: RoomPlayer): string {
+        if (player.type === PlayerType.Bot) {
+            return this.botImageUrl;
+        }
+
+        return player.user.profilePicture.key;
+    }
+
+    async getStats(): Promise<UserStats> {
+        return this.httpHandlerService.getStats().then((result) => {
+            return result.userStats;
         });
     }
 
@@ -75,6 +130,7 @@ export class UserService {
             .modifyProfilePicture(avatarData, this.avatarDataToImageInfo(avatarData).isDefaultPicture)
             .then((data: { userData: IUser }) => {
                 if (data.userData) {
+                    this.user = data.userData;
                     this.updateUserWithImageUrl(data.userData);
                     return true;
                 }
@@ -82,16 +138,17 @@ export class UserService {
             });
     }
 
-    private initUser(): void {
-        this.user = {
-            _id: '',
-            email: '',
-            username: '',
-            password: '',
-            profilePicture: undefined,
-            historyEventList: [],
-            language: 'fr', // TODO: To change if necessary
-            theme: null, // TODO: to change
+    private initUserStats(): void {
+        this.userStats = {
+            userIdRef: '',
+            ranking: 0,
+            gameCount: 0,
+            win: 0,
+            loss: 0,
+            totalGameTime: 0,
+            totalGameScore: 0,
+            averageGameTime: '',
+            averageGameScore: 0,
         };
     }
 
@@ -131,5 +188,11 @@ export class UserService {
                 user.profilePicture.key = res.url;
             });
         }
+    }
+
+    private async initBotImage(): Promise<void> {
+        await this.httpHandlerService.getBotImage().then((res) => {
+            this.botImageUrl = res.url;
+        });
     }
 }

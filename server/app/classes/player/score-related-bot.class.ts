@@ -31,7 +31,6 @@ export class ScoreRelatedBot extends BeginnerBot {
     placeLetters(): void {
         const commandInfoMap = this.processWordSolver();
         const commandInfoList = [...commandInfoMap.keys()].sort((a, b) => (commandInfoMap.get(a) as number) - (commandInfoMap.get(b) as number));
-
         if (commandInfoList.length === 0) {
             setTimeout(() => this.skipTurn(), Constant.SECOND_3 - this.countUp * Constant.SECOND_1);
             return;
@@ -43,7 +42,7 @@ export class ScoreRelatedBot extends BeginnerBot {
         const uncertainty: number = 0.05 * commandInfoList.length;
         const randomIndex = Math.floor(Math.random() * (index + uncertainty - (index - uncertainty) + 1)) + (index - uncertainty);
         index = randomIndex < commandInfoList.length && randomIndex > 0 ? randomIndex : index;
-        const randomCommandInfo = commandInfoList[index];
+        const randomCommandInfo = commandInfoList[Math.floor(index)];
         if (this.countUp >= 3 && this.countUp < Constant.TIME_SKIP) this.placeWord(randomCommandInfo);
         else if (this.countUp < 3) setTimeout(() => this.placeWord(randomCommandInfo), Constant.SECOND_3 - this.countUp * Constant.SECOND_1);
     }

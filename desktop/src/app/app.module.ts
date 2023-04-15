@@ -3,16 +3,6 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatListModule } from '@angular/material/list';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSelectModule } from '@angular/material/select';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatStepperModule } from '@angular/material/stepper';
-import { MatTabsModule } from '@angular/material/tabs';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { DialogGameHelpComponent } from '@app/components/dialog-game-help/dialog-game-help.component';
@@ -30,16 +20,20 @@ import { AdminDictionariesComponent } from './components/admin-dictionaries/admi
 import { AdminGameHistoryComponent } from './components/admin-game-history/admin-game-history.component';
 import { AdminHighScoresComponent } from './components/admin-high-scores/admin-high-scores.component';
 import { AdminVirtualPlayersComponent } from './components/admin-virtual-players/admin-virtual-players.component';
+import { GenericChatComponent } from './components/chat/generic-chat/generic-chat.component';
 import { ChatboxComponent } from './components/chatbox/chatbox.component';
 import { DialogBoxAbandonGameComponent } from './components/dialog-box-abandon-game/dialog-box-abandon-game.component';
 import { DialogBoxAvatarSelectorComponent } from './components/dialog-box-avatar-selector/dialog-box-avatar-selector.component';
+import { DialogBoxCreateChatComponent } from './components/dialog-box-create-chat/dialog-box-create-chat.component';
 import { DialogBoxGameTypeComponent } from './components/dialog-box-game-type/dialog-box-game-type.component';
 import { DialogBoxHighScoresComponent } from './components/dialog-box-high-scores/dialog-box-high-scores.component';
+import { DialogBoxLetterSelectorComponent } from './components/dialog-box-letter-selector/dialog-box-letter-selector.component';
 import { DialogBoxModifyBotNamesComponent } from './components/dialog-box-modify-bot-names/dialog-box-modify-bot-names.component';
 import { DialogBoxModifyDictionaryComponent } from './components/dialog-box-modify-dictionary/dialog-box-modify-dictionary.component';
+import { DialogBoxPasswordComponent } from './components/dialog-box-password/dialog-box-password.component';
+import { DialogBoxReconnectionComponent } from './components/dialog-box-reconnection/dialog-box-reconnection.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { GameBoardComponent } from './components/game-board/game-board.component';
-import { GenericChatComponent } from './components/generic-chat/generic-chat.component';
 import { HeaderComponent } from './components/header/header.component';
 import { ImportDictionaryComponent } from './components/import-dictionary/import-dictionary.component';
 import { InformationPanelComponent } from './components/information-panel/information-panel.component';
@@ -53,8 +47,8 @@ import { GameCreationPageComponent } from './pages/multiplayer-create-page/game-
 import { MultiplayerJoinPageComponent } from './pages/multiplayer-join-page/multiplayer-join-page.component';
 import { SettingsPageComponent } from './pages/settings-page/settings-page.component';
 import { UserCreationPageComponent } from './pages/user-creation-page/user-creation-page.component';
+import { UserProfilePageComponent } from './pages/user-profile-page/user-profile-page.component';
 import { WaitingOpponentPageComponent } from './pages/waiting-opponent-page/waiting-opponent-page.component';
-import { DialogBoxPasswordComponent } from './components/dialog-box-password/dialog-box-password.component';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(http, '../assets/i18n/', '.json');
@@ -101,6 +95,10 @@ export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(h
         SettingsPageComponent,
         GameBoardComponent,
         DialogBoxPasswordComponent,
+        UserProfilePageComponent,
+        DialogBoxLetterSelectorComponent,
+        DialogBoxCreateChatComponent,
+        DialogBoxReconnectionComponent,
     ],
     imports: [
         CommonModule,
@@ -108,22 +106,12 @@ export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(h
         AppMaterialModule,
         AppRoutingModule,
         DragDropModule,
-        MatSnackBarModule,
-        MatInputModule,
-        MatTabsModule,
-        MatFormFieldModule,
-        MatListModule,
-        MatSelectModule,
         NgxCaptchaModule,
         ReactiveFormsModule,
         BrowserAnimationsModule,
         BrowserModule,
         FormsModule,
         HttpClientModule,
-        MatProgressSpinnerModule,
-        MatStepperModule,
-        MatAutocompleteModule,
-        MatSidenavModule,
         TranslateModule.forRoot({
             loader: {
                 provide: TranslateLoader,

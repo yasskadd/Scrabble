@@ -1,32 +1,28 @@
-<body class='justified'>
+<div class='justified encapsulating-div'>
 <mat-card class='wrapper'>
-    <div id='title-and-solo-button'>
-        <mat-card-title>{{ gameConfiguration.localGameRoom.state | translate }}</mat-card-title>
-        <button
-            *ngIf='gameConfiguration.isGameCreator()'
-            (click)='joinSoloMode()'
-            class='solo-mode-button'
-            mat-raised-button
-            [disabled]='gameConfiguration.localGameRoom.players.length > 1'
-        >
-            {{ "waiting_page.join.solo" | translate }}
-        </button>
-    </div>
+<!--    <div id='title-and-solo-button'>-->
+<!--        <mat-card-title>{{ gameConfiguration.localGameRoom.state | translate }}</mat-card-title>-->
+<!--        <button-->
+<!--            *ngIf='gameConfiguration.isGameCreator()'-->
+<!--            (click)='joinSoloMode()'-->
+<!--            class='solo-mode-button'-->
+<!--            mat-raised-button-->
+<!--            [disabled]='gameConfiguration.localGameRoom.players.length > 1'-->
+<!--        >-->
+<!--            {{ "waiting_page.join.solo" | translate }}-->
+<!--        </button>-->
+<!--    </div>-->
 
     <mat-card>
         <mat-card-content class='waiting-opponent-container'>
             <div class='pending-player' *ngFor='let player of gameConfiguration.localGameRoom.players; index as i'>
                 <!-- TODO : Language -->
                 <span class='player-infos'>
-                    <button *ngIf="!player.user.profilePicture" mat-fab color="primary" class="avatar-selector">
-                        <mat-icon>person</mat-icon>
-                    </button>
-                    <img [src]='player.user.profilePicture.key' *ngIf='player.user.profilePicture' class='selecter-avatar' alt='player.user profile picture' />
+                    <img [src]='userService.getPlayerImage(player)' class='selecter-avatar' alt='player.user profile picture' />
                     {{ player.user.username }}
                     </span>
                 <button
-                    *ngIf='gameConfiguration.isGameCreator() && player.user.username !== userService.user.username && player.user
-.profilePicture.name !== userService.user.profilePicture.name && player.type === playerType.User'
+                    *ngIf='gameConfiguration.isGameCreator() && player.user._id !== userService.user._id && player.type === playerType.User'
                     class='rejectButton'
                     (click)='gameConfiguration.rejectOpponent(player)'
                     mat-raised-button
@@ -62,4 +58,4 @@
         </div>
     </div>
 </mat-card>
-</body>
+</div>

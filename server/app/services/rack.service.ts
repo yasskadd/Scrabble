@@ -13,8 +13,8 @@ export class RackService {
     updatePlayerRack(letters: string[], playerRack: Letter[]): void {
         const INDEX_NOT_FOUND = -1;
         letters.forEach((letter) => {
-            if (letter !== letter.toUpperCase()) letter = '*';
-            const itemInRack = playerRack.filter((item: Letter) => item.value === letter)[0];
+            if (letter === letter.toUpperCase()) letter = '*';
+            const itemInRack = playerRack.filter((item: Letter) => item.value.toLowerCase() === letter)[0];
             const index = playerRack.indexOf(itemInRack);
             if (index > INDEX_NOT_FOUND) playerRack.splice(index, 1);
         });

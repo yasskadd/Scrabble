@@ -140,7 +140,13 @@
     },
     "chat": {
         "message_box": "Entrez un message",
-        "disconnected": "Vous devez vous connecter afin d'avoir accès au clavardage"
+        "disconnected": "Vous devez vous connecter afin d'avoir accès au clavardage",
+        "input_example": "Ex. Salut!",
+        "joined_chats": "Canaux rejoints",
+        "available_chats": "Canaux disponibles",
+        "join": "REJOINDRE",
+        "leave": "QUITTER",
+        "create": "Créer un nouveau canal"
     },
     "footer": {
         "team": "Équipe"

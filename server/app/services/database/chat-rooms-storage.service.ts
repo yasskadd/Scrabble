@@ -1,4 +1,4 @@
-import { ChatRoom } from '@common/interfaces/chat-room';
+import { ChatRoom, ChatRoomInfo } from '@common/interfaces/chat-room';
 import { Message } from '@common/interfaces/message';
 import { Document } from 'mongodb';
 import { Service } from 'typedi';
@@ -23,8 +23,8 @@ export class ChatRoomsStorageService {
         return messages as unknown as ChatRoom;
     }
 
-    async createRoom(roomName: string) {
-        const room: ChatRoom = { name: roomName, messages: [], isDeletable: true };
+    async createRoom(roomInfo: ChatRoomInfo) {
+        const room: ChatRoom = { name: roomInfo.name, messages: [], isDeletable: roomInfo.isDeletable, creatorId: roomInfo.creatorId };
         await this.databaseService.chatRooms.addDocument(room);
     }
 

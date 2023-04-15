@@ -1,6 +1,7 @@
 /* eslint-disable max-lines */
 import { ROOMID_LENGTH, UNAVAILABLE_ELEMENT_INDEX } from '@app/constants/rooms';
 import { VirtualPlayersStorageService } from '@app/services/database/virtual-players-storage.service';
+import { GamesHandlerService } from '@app/services/games-management/games-handler.service';
 import { GamesStateService } from '@app/services/games-management/games-state.service';
 import { SocketManager } from '@app/services/socket/socket-manager.service';
 import { SocketType } from '@app/types/sockets';
@@ -22,9 +23,7 @@ import { PlayerType } from '@common/models/player-type';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import * as uuid from 'uuid';
-import { GamesHandlerService } from '../games-management/games-handler.service';
-
-// const PLAYERS_REJECT_FROM_ROOM_ERROR = "L'adversaire à rejeter votre demande";
+import { ChatHandlerService } from './chat-handler.service';
 
 @Service()
 export class WaitingRoomService {
@@ -34,12 +33,13 @@ export class WaitingRoomService {
         private gameStateService: GamesStateService,
         private virtualPlayerStorageService: VirtualPlayersStorageService,
         private socketManager: SocketManager,
+        private chatHandler: ChatHandlerService,
         private gamesHandler: GamesHandlerService,
     ) {
         this.waitingRooms = [];
         this.gamesHandler.deleteWaitingRoom.subscribe((roomID: string) => {
-            this.clearWaitingRoom(roomID);
-        })
+            this.removeRoom(this.socketManager.server, roomID);
+        });
     }
 
     initSocketEvents() {
@@ -62,13 +62,23 @@ export class WaitingRoomService {
         this.socketManager.io(SocketEvents.StartScrabbleGame, async (server: Server, socket: SocketType, roomId: string) => {
             await this.startScrabbleGame(server, roomId);
         });
+
+        this.socketManager.on(SocketEvents.UpdateGameRooms, (socket: Socket) => {
+            this.gamesHandler.cleanRooms();
+            socket.emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
+        });
     }
 
     removeRoom(server: Server, roomId: string): void {
         const roomIndex = this.waitingRooms.findIndex((room: GameRoom) => room.id === roomId);
         this.waitingRooms.splice(roomIndex, 1);
+        this.chatHandler.deleteGameChatRoom(roomId);
 
-        server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
+        this.gamesHandler.cleanRooms().forEach((id: string) => {
+            this.waitingRooms = this.waitingRooms.filter((wr: GameRoom) => wr.id === id);
+        });
+
+        server.emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
 
     private enterRoomLobby(server: Server, socket: Socket): void {
@@ -87,10 +97,12 @@ export class WaitingRoomService {
     private joinGameRoom(server: Server, socket: SocketType, joinGameQuery: UserRoomQuery): void {
         const room: GameRoom | undefined = this.getRoom(joinGameQuery.roomId);
         if (this.userAlreadyConnected(joinGameQuery)) {
+            // console.log('ALREADY CONNECTED');
             socket.emit(SocketEvents.ErrorJoining, ServerErrors.RoomSameUser);
             return;
         }
         if (!room) {
+            // console.log('room not found');
             socket.emit(SocketEvents.ErrorJoining, ServerErrors.RoomNotAvailable);
             return;
         }
@@ -101,7 +113,9 @@ export class WaitingRoomService {
 
         // TODO : Add user as an observer if room full
         socket.leave(GAME_LOBBY_ROOM_ID);
-        socket.join(joinGameQuery.roomId);
+
+        socket.join(room.id);
+        this.chatHandler.joinGameChatRoom(socket, room.id);
 
         const newPlayer: RoomPlayer = {
             user: joinGameQuery.user,
@@ -110,20 +124,27 @@ export class WaitingRoomService {
             type: PlayerType.User,
             isCreator: false,
         };
-        if (room.players.filter((player: RoomPlayer) => player.type === PlayerType.User).length === NUMBER_OF_PLAYERS) {
+        if (
+            room.players.filter((player: RoomPlayer) => player.type === PlayerType.User).length === NUMBER_OF_PLAYERS ||
+            room.state === GameRoomState.Playing
+        ) {
             newPlayer.type = PlayerType.Observer;
-        }
-        const botIndex = room.players.findIndex((player: RoomPlayer) => player.type === PlayerType.Bot);
-        if (botIndex !== INVALID_INDEX) {
-            room.players.splice(botIndex, 1);
+        } else {
+            const botIndex = room.players.findIndex((player: RoomPlayer) => player.type === PlayerType.Bot);
+            if (botIndex !== INVALID_INDEX) {
+                room.players.splice(botIndex, 1);
+            }
         }
         room.players.push(newPlayer);
 
         // server.to(joinGameQuery.roomId).emit(SocketEvents.PlayerJoinedWaitingRoom, this.stripPlayerPassword(newPlayer));
-        server.to(joinGameQuery.roomId).emit(SocketEvents.UpdateWaitingRoom, room);
+        server.to(room.id).emit(SocketEvents.UpdateWaitingRoom, room);
         socket.emit(SocketEvents.JoinedValidWaitingRoom, this.stripPlayersPassword(room));
-
         server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
+
+        if (room.state === GameRoomState.Playing) {
+            this.gameStateService.addObserver(server, joinGameQuery.roomId, newPlayer);
+        }
     }
 
     private exitWaitingRoom(server: Server, socket: SocketType, userQuery: UserRoomQuery): void {
@@ -131,23 +152,23 @@ export class WaitingRoomService {
         const room: GameRoom | undefined = this.getRoom(userQuery.roomId);
         if (!room) return;
 
-        if (!this.getPlayerFromQuery(userQuery)?.isCreator) {
-            const player = this.getPlayerFromQuery(userQuery);
-            // TODO : Tell client the rejection failed
-            if (!player) return;
-            if (room.players.filter((playerElement: RoomPlayer) => playerElement.type === PlayerType.User).length === 0) {
-                this.removeRoom(server, userQuery.roomId);
+        if (
+            (room.state === GameRoomState.Waiting && this.getPlayerFromQuery(userQuery)?.isCreator) ||
+            (room.state === GameRoomState.Playing && !this.gamesHandler.usersRemaining(room.id))
+        ) {
+            for (const p of room.players) {
+                this.rejectOpponent(server, socket, p);
             }
+            this.removeRoom(server, userQuery.roomId);
 
-            this.rejectOpponent(server, socket, player);
             return;
         }
 
-        for (const player of room.players) {
-            this.rejectOpponent(server, socket, player);
-        }
+        const player = this.getPlayerFromQuery(userQuery);
+        // TODO : Tell client the rejection failed
+        if (!player) return;
 
-        this.removeRoom(server, userQuery.roomId);
+        this.rejectOpponent(server, socket, player);
     }
 
     private rejectOpponent(server: Server, socket: Socket, player: RoomPlayer): void {
@@ -171,12 +192,19 @@ export class WaitingRoomService {
         server.to(player.roomId).emit(SocketEvents.UpdateWaitingRoom, this.getRoom(player.roomId));
     }
 
-    private exitRoom(server: Server, socket: SocketType, userQuery: UserRoomQuery): void {
+    private async exitRoom(server: Server, socket: SocketType, userQuery: UserRoomQuery): Promise<void> {
         const player: RoomPlayer | undefined = this.getPlayerFromQuery(userQuery);
         if (!player) return;
 
         this.removePlayerFromGameRoom(socket, player);
+        if (this.getRoom(userQuery.roomId) !== undefined && this.getRoom(userQuery.roomId)?.state !== GameRoomState.Playing) {
+            const waitingRoom = this.getRoom(userQuery.roomId) as GameRoom;
+            const bot = await this.createReplacementBot(waitingRoom?.difficulty as GameDifficulty, userQuery.roomId);
+            waitingRoom?.players.push(bot as unknown as RoomPlayer);
+            server.to(waitingRoom.id).emit(SocketEvents.UpdateWaitingRoom, waitingRoom);
+        }
 
+        this.gamesHandler.cleanRooms();
         server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
 
@@ -186,6 +214,7 @@ export class WaitingRoomService {
 
         room.state = GameRoomState.Playing;
         await this.gameStateService.createGame(server, room);
+        server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
         // // TODO : Changed GameScrabbleInformation to simply using GameRoom
         // const users: IUser[] = [];
         // const socketIds: string[] = [];
@@ -210,6 +239,10 @@ export class WaitingRoomService {
     }
 
     private async createWaitingRoom(server: Server, socket: SocketType, gameQuery: GameCreationQuery): Promise<void> {
+        this.waitingRooms = this.waitingRooms.filter((r: GameRoom) => {
+            return this.gamesHandler.usersRemaining(r.id);
+        });
+
         const room: GameRoom = await this.setupNewGameRoom(gameQuery, socket.id);
         this.waitingRooms.push(room);
 
@@ -217,6 +250,7 @@ export class WaitingRoomService {
         socket.leave(GAME_LOBBY_ROOM_ID);
 
         socket.join(room.id);
+        this.chatHandler.createGameChatRoom(socket, room.id);
         socket.emit(SocketEvents.UpdateWaitingRoom, room);
     }
 
@@ -226,7 +260,7 @@ export class WaitingRoomService {
 
     private async setupNewGameRoom(parameters: GameCreationQuery, socketId: string): Promise<GameRoom> {
         const roomId = this.generateRoomId();
-        const bots = await this.makeThreeBots(parameters.botDifficulty, roomId);
+        const bots = await this.makeBots(parameters.botDifficulty, roomId, 3);
 
         return {
             id: roomId,
@@ -272,6 +306,7 @@ export class WaitingRoomService {
         if (playerIndex === UNAVAILABLE_ELEMENT_INDEX) return;
         room.players.splice(playerIndex, 1); // remove player from room;
 
+        this.chatHandler.leaveGameChatRoom(socket, room.id);
         socket.leave(player.roomId);
         socket.join(GAME_LOBBY_ROOM_ID);
     }
@@ -344,10 +379,10 @@ export class WaitingRoomService {
         return this.getRoom(userQuery.roomId)?.players.find((playerElement: RoomPlayer) => this.areUsersTheSame(playerElement.user, userQuery.user));
     }
 
-    private async makeThreeBots(difficulty: GameDifficulty, roomId: string): Promise<RoomPlayer[]> {
+    private async makeBots(difficulty: GameDifficulty, roomId: string, numberOfBots: number): Promise<RoomPlayer[]> {
         const virtualPlayers: RoomPlayer[] = [];
 
-        const botNames: string[] = await this.virtualPlayerStorageService.getBotName(3, difficulty);
+        const botNames: string[] = await this.virtualPlayerStorageService.getBotName(numberOfBots, difficulty);
         botNames.forEach((name: string) => {
             virtualPlayers.push({
                 user: {
@@ -371,7 +406,28 @@ export class WaitingRoomService {
         return virtualPlayers;
     }
 
-    clearWaitingRoom(waitingRoomID: string) {
-        this.waitingRooms = this.waitingRooms.filter((waitingRoom: GameRoom) => waitingRoom.id !== waitingRoomID);
+    private async createReplacementBot(difficulty: GameDifficulty, roomId: string): Promise<RoomPlayer> {
+        const botNames = await this.virtualPlayerStorageService.getBotName(3, difficulty);
+        const waitingRoom = this.getRoom(roomId);
+        const currentRoomBotNames: string[] | undefined = waitingRoom?.players
+            .filter((player) => player.type === PlayerType.Bot)
+            .map((player) => player.user.username);
+        const validBotName = botNames.find((name: string) => !currentRoomBotNames?.includes(name));
+        return {
+            user: {
+                _id: uuid.v4(),
+                username: validBotName as string,
+                password: 'null',
+                profilePicture: {
+                    name: 'bot-image',
+                    isDefaultPicture: true,
+                    key: 'f553ba598dbcfc7e9e07f8366b6684b5.jpg',
+                },
+            },
+            socketId: '',
+            roomId,
+            type: PlayerType.Bot,
+            isCreator: false,
+        } as RoomPlayer;
     }
 }

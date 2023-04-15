@@ -1,4 +1,4 @@
-import { Word } from '@app/classes/word.class';
+import { Word } from '@common/classes/word.class';
 
 export interface ValidateWordReturn {
     points: number;

@@ -9,9 +9,9 @@ import { IUser } from '@common/interfaces/user';
 import { UserService } from '@services/user.service';
 import { ReplaySubject, Subject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
+import { SnackBarService } from '@services/snack-bar.service';
+import { Word } from '@common/classes/word.class';
 
-// type CompletedObjective = { objective: Objective; name: string };
-// type InitObjective = { objectives1: Objective[]; objectives2: Objective[]; playerName: string };
 const TIMEOUT_PASS = 30;
 
 @Injectable({
@@ -29,8 +29,16 @@ export class GameClientService {
     quitGameSubject: Subject<void>;
     nextTurnSubject: Subject<void>;
     turnFinish: ReplaySubject<boolean>;
+    selectedPlayer: PlayerInformation;
 
-    constructor(private clientSocketService: ClientSocketService, private userService: UserService, private router: Router) {
+    constructor(
+        private clientSocketService: ClientSocketService,
+        private userService: UserService,
+        private snackBarService: SnackBarService,
+        private router: Router,
+    ) {
+        this.players = [];
+
         this.gameboardUpdated = new Subject<string[]>();
         this.quitGameSubject = new Subject<void>();
         this.nextTurnSubject = new Subject<void>();
@@ -70,10 +78,6 @@ export class GameClientService {
             this.gameEndEvent();
         });
 
-        this.clientSocketService.on(SocketEvents.OpponentGameLeave, () => {
-            this.opponentLeaveGameEvent();
-        });
-
         this.clientSocketService.on(SocketEvents.PublicViewUpdate, (info: GameInfo) => {
             this.viewUpdateEvent(info);
         });
@@ -83,30 +87,21 @@ export class GameClientService {
             this.nextTurnSubject.next();
         });
 
-        this.clientSocketService.on(SocketEvents.GameAboutToStart, (info: GameInfo) => {
-            this.viewUpdateEvent(info);
-
-            // console.log('Received new game with :');
-            // this.players.forEach((player: PlayerInformation) => {
-            // console.log(player.player);
-            // console.log(
-            // player.rack.map((letter: Letter) => {
-            // return letter.value;
-            // }),
-            // );
-            // console.log('');
-            // });
-
-            this.router.navigate([`${AppRoutes.GamePage}`]).then();
+        this.clientSocketService.on(SocketEvents.PlacementSuccess, () => {
+            // TODO : Language
+            this.snackBarService.openInfo('Word placed successfully!');
         });
 
-        // this.clientSocketService.on('CompletedObjective', (completedObjective: CompletedObjective) => {
-        // this.completeObjective(completedObjective);
-        // });
+        this.clientSocketService.on(SocketEvents.PlacementFailure, (word: Word) => {
+            if (!word.isValid) {
+                this.snackBarService.openError(word as unknown as string);
+            }
+        });
 
-        // this.clientSocketService.on('InitObjective', (objective: InitObjective) => {
-        // this.setObjectives(objective);
-        // });
+        this.clientSocketService.on(SocketEvents.GameAboutToStart, (info: GameInfo) => {
+            this.viewUpdateEvent(info);
+            this.router.navigate([`${AppRoutes.GamePage}`]).then();
+        });
 
         this.clientSocketService.on(SocketEvents.Skip, (gameInfo: GameInfo) => {
             setTimeout(() => {
@@ -133,38 +128,13 @@ export class GameClientService {
         this.quitGameSubject.next();
     }
 
-    getLocalPlayer(): PlayerInformation {
-        return this.players.find((info: PlayerInformation) => info.player.user.username === this.userService.user.username);
+    getLocalPlayer(): PlayerInformation | undefined {
+        return this.players.find((info: PlayerInformation) => info.player.user._id === this.userService.user._id);
     }
 
     currentlyPlaying(): boolean {
-        return this.activePlayer?.username === this.userService.user.username;
+        return this.activePlayer?._id === this.userService.user._id;
     }
-
-    // private completeObjective(completedObjective: CompletedObjective) {
-    //     if (this.playerOne.objective === undefined || this.secondPlayer.objective === undefined) return;
-    //     const indexPlayerOne = this.playerOne.objective.findIndex((element) => element.user.username === completedObjective.objective.name);
-    //     const indexSecondPlayer = this.secondPlayer.objective.findIndex((element) => element.name === completedObjective.objective.name);
-    //     if (indexPlayerOne !== constants.INVALID_INDEX && !this.playerOne.objective[indexPlayerOne].complete) {
-    //         this.playerOne.objective[indexPlayerOne].complete = true;
-    //         this.playerOne.objective[indexPlayerOne].user = completedObjective.name;
-    //         this.openSnackBar(`L'objectif ${this.playerOne.objective[indexPlayerOne].name} a été complété`);
-    //     }
-    //     if (indexSecondPlayer !== constants.INVALID_INDEX && !this.secondPlayer.objective[indexSecondPlayer].complete) {
-    //         this.secondPlayer.objective[indexSecondPlayer].complete = true;
-    //         this.secondPlayer.objective[indexSecondPlayer].user = completedObjective.name;
-    //     }
-    // }
-
-    // private setObjectives(objective: InitObjective) {
-    //     if (objective.playerName === this.playerOne.name) {
-    //         this.playerOne.objective = objective.objectives1;
-    //         this.secondPlayer.objective = objective.objectives2;
-    //         return;
-    //     }
-    //     this.secondPlayer.objective = objective.objectives1;
-    //     this.playerOne.objective = objective.objectives2;
-    // }
 
     private updateOpponentInformationEvent(players: PlayerInformation[]) {
         this.players = players;
@@ -200,11 +170,11 @@ export class GameClientService {
             else dictionaryLetter.counter++;
         });
 
-        const resultingRack = [] as Letter[];
-        this.getLocalPlayer().rack.forEach((letter) => {
+        const resultingRack: Letter[] = [];
+        this.getLocalPlayer()?.rack.forEach((letter) => {
             const dictionaryLetter = dictionary.get(letter.value);
             if (dictionaryLetter !== undefined && dictionaryLetter.counter > 0) {
-                resultingRack.push(letter);
+                resultingRack.push(JSON.parse(JSON.stringify(letter)));
                 dictionaryLetter.counter--;
             }
         });
@@ -223,15 +193,14 @@ export class GameClientService {
             this.findWinnerByScore();
             this.isGameFinish = true;
         }
-    }
-
-    private opponentLeaveGameEvent() {
-        this.isGameFinish = true;
-        this.winningMessage = "Bravo vous avez gagné la partie, l'adversaire a quitté la partie";
+        this.quitGameSubject.next();
+        this.router.navigate([`${AppRoutes.HomePage}`]);
     }
 
     private skipEvent(gameInfo: GameInfo) {
-        this.getLocalPlayer().rack = this.updateRack(this.getLocalPlayer().rack);
+        if (this.getLocalPlayer()) {
+            this.getLocalPlayer().rack = this.updateRack(this.getLocalPlayer().rack);
+        }
         this.updateGameboard(gameInfo.gameboard);
     }
 

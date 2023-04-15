@@ -6,7 +6,10 @@ import 'package:get_it/get_it.dart';
 import 'package:mobile/domain/enums/socket-events-enum.dart';
 import 'package:mobile/domain/models/game-command-models.dart';
 import 'package:mobile/domain/models/game-model.dart';
+import 'package:mobile/domain/models/letter-synchronisation-model.dart';
 import 'package:mobile/domain/models/room-model.dart';
+import 'package:mobile/domain/services/clue-service.dart';
+import 'package:mobile/domain/services/game-sync-service.dart';
 import 'package:mobile/domain/services/room-service.dart';
 import 'package:mobile/domain/services/user-service.dart';
 import 'package:mobile/screens/end-game-screen.dart';
@@ -17,21 +20,25 @@ import 'package:socket_io_client/socket_io_client.dart';
 class LetterPlacement {
   final int x, y;
   final Letter letter;
+  final bool isStar;
 
-  const LetterPlacement(this.x, this.y, this.letter);
+  const LetterPlacement(this.x, this.y, this.letter, this.isStar);
 }
 
 class GameService {
   final _socket = GetIt.I.get<Socket>();
   final _userService = GetIt.I.get<UserService>();
+  final _roomService = GetIt.I.get<RoomService>();
 
   Subject<bool> notifyGameInfoChange = PublishSubject();
+  Subject<String> notifyGameError = PublishSubject();
+  Subject<int> notifyEaselChanged = PublishSubject();
 
   GameRoom? _gameRoom;
   Letter? draggedLetter;
   List<LetterPlacement> pendingLetters = [];
 
-  static const turnLength = 60;
+  GamePlayer? observerView;
 
   Game? game;
 
@@ -45,9 +52,13 @@ class GameService {
 
     _publicViewUpdate(initialGameInfo);
 
+    if (game!.currentPlayer.player.playerType == PlayerType.Observer) {
+      observerView = game!.players.firstWhere((element) => element.player.isCreator == true);
+    }
+
     while (game != null) {
       game!.turnTimer += 1;
-      notifyGameInfoChange.add(true);
+      notifyGameInfoChange.add(false);
       await Future.delayed(const Duration(seconds: 1));
     }
   }
@@ -58,19 +69,36 @@ class GameService {
 
     _socket.on(GameSocketEvent.NextTurn.event, (data) => _nextTurn(GameInfo.fromJson(data)));
     _socket.on(GameSocketEvent.GameEnded.event, (_) => _endGame());
+    _socket.on(GameSocketEvent.LetterReserveUpdated.event, (letters) {
+      if (game == null) return;
+      game!.reserveLetterCount =
+          letters.map((letter) => letter['quantity']).toList().reduce((a, b) => a + b);
+    });
+    _socket.on(GameSocketEvent.PlacementSuccess.event, (_) => _successfulWordPlacement());
+    _socket.on(GameSocketEvent.PlacementFailure.event, (error) => _invalidWordPlacement(error));
+    _socket.on(GameSocketEvent.CannotReplaceBot.event, (_) => _cannotReplaceBot());
   }
 
   void _publicViewUpdate(GameInfo gameInfo) {
     if (game == null) return;
 
-
     game!.update(gameInfo);
+    game!.currentPlayer =
+        game!.players.firstWhere((element) => element.player.user.id == _userService.user!.id);
+
+    if (observerView != null && game!.currentPlayer.player.playerType == PlayerType.User) {
+      observerView = null;
+    }
+
     notifyGameInfoChange.add(true);
   }
 
   void _nextTurn(GameInfo gameInfo) {
-    game!.nextTurn(gameInfo);
-    notifyGameInfoChange.add(true);
+    if (game == null) return;
+
+    game!.nextTurn();
+    pendingLetters.clear();
+    _publicViewUpdate(gameInfo);
   }
 
   void _endGame() {
@@ -80,7 +108,9 @@ class GameService {
     game = null;
   }
 
-  void placeLetterOnBoard(int x, int y, Letter letter) {
+  void placeLetterOnBoard(int x, int y, Letter letter, bool isStarLetter) {
+    if (!game!.isCurrentPlayersTurn()) return;
+
     debugPrint("[GAME SERVICE] Place letter to the board: board[$x][$y] = $letter");
     if (!_isLetterPlacementValid(x, y, letter)) {
       if (draggedLetter != null) cancelDragLetter(); // Wrong move
@@ -88,10 +118,16 @@ class GameService {
     }
 
     game!.gameboard.placeLetter(x, y, letter);
-    pendingLetters.add(LetterPlacement(x, y, letter));
+    LetterPlacement placement = LetterPlacement(x, y, letter, isStarLetter);
+    pendingLetters.add(placement);
     pendingLetters.sort((a, b) => a.x.compareTo(b.x) + a.y.compareTo(b.y));
 
-    //TODO: CALL SERVER IMPLEMENTATION FOR SYNC
+    if (_socket.id != null) {
+      _socket.emit(
+          GameSocketEvent.LetterPlaced.event,
+          SimpleLetterInfos(_roomService.currentRoom!.id, _socket.id!, letter.character,
+              x + y * game!.gameboard.size));
+    }
   }
 
   bool _isLetterPlacementValid(int x, int y, Letter letter) {
@@ -147,12 +183,25 @@ class GameService {
     //TODO: CALL SERVER IMPLEMENTATION FOR SYNC
 
     if (isPlacedLetterRemovalValid(x, y)) {
-      pendingLetters.removeWhere((placement) => placement.x == x && placement.y == y);
+      LetterPlacement placement =
+          pendingLetters.firstWhere((placement) => placement.x == x && placement.y == y);
+      pendingLetters.remove(placement);
 
       debugPrint(
           "[GAME SERVICE] Remove letter from the board: board[$x][$y] = ${game!.gameboard.getSlot(x, y)}");
 
-      return game!.gameboard.removeLetter(x, y);
+      Letter? removedLetter = game!.gameboard.removeLetter(x, y);
+
+      _socket.emit(
+          GameSocketEvent.LetterPlaced.event,
+          SimpleLetterInfos(_roomService.currentRoom!.id, _socket.id!, removedLetter!.character,
+              -x + -y * game!.gameboard.size));
+
+      if (placement.isStar) {
+        removedLetter = Letter.STAR;
+      }
+
+      return removedLetter;
     } else {
       return null;
     }
@@ -201,12 +250,22 @@ class GameService {
   Letter? dragLetterFromEasel(int index) {
     debugPrint("[GAME SERVICE] Start drag from easel");
     draggedLetter = removeLetterFromEaselAt(index);
+
+    if (game!.isCurrentPlayersTurn()) {
+      GetIt.I.get<GameSyncService>().startDragSync();
+    }
+
     return draggedLetter;
   }
 
   Letter? dragLetterFromBoard(int x, int y) {
     debugPrint("[GAME SERVICE] Start drag from board");
     draggedLetter = removeLetterFromBoard(x, y);
+
+    if (game!.isCurrentPlayersTurn()) {
+      GetIt.I.get<GameSyncService>().startDragSync();
+    }
+
     return draggedLetter;
   }
 
@@ -230,26 +289,74 @@ class GameService {
     Coordinate firstCoordonate = Coordinate(pendingLetters[0].x, pendingLetters[0].y);
     bool? isHorizontal =
         pendingLetters.length > 1 ? pendingLetters[0].y == pendingLetters[1].y : null;
-    List<String> letters =
-        List.generate(pendingLetters.length, (index) => pendingLetters[index].letter.character);
+    List<String> letters = List.generate(
+        pendingLetters.length,
+        (index) => pendingLetters[index].isStar
+            ? pendingLetters[index].letter.character.toLowerCase()
+            : pendingLetters[index].letter.character);
 
+    debugPrint("[Game Service] Confirm word placement ${letters.toString()}");
     _socket.emit(GameSocketEvent.PlaceWordCommand.event,
         PlaceWordCommandInfo(firstCoordonate, isHorizontal, letters));
 
-    pendingLetters = [];
     game!.gameboard.notifyBoardChanged.add(true);
   }
 
+  void _successfulWordPlacement() {
+    if (pendingLetters.isEmpty) return;
+
+    debugPrint("[Game Service] Placement success");
+    pendingLetters.clear();
+    game!.gameboard.notifyBoardChanged.add(true);
+  }
+
+  void _invalidWordPlacement(error) {
+    debugPrint("[Game Service] Invalid word placement");
+
+    var gameboardMatrix = game!.gameboard.getBoardMatrix();
+
+    for (var placement in pendingLetters) {
+      gameboardMatrix[placement.x][placement.y] = null;
+      game!.currentPlayer.easel.addLetter(placement.letter);
+    }
+
+    pendingLetters.clear();
+    game!.gameboard.notifyBoardChanged.add(true);
+
+    if (error is! String) {
+      error = error['stringFormat'];
+    }
+
+    notifyGameError.add(error);
+  }
+
   void skipTurn() {
-    _socket.emit("skip");
+    _socket.emit(GameSocketEvent.Skip.event);
   }
 
   void abandonGame() {
-    _socket.emit("AbandonGame");
+    _socket.emit(GameSocketEvent.AbandonGame.event);
+
     game = null;
   }
 
   void quitGame() {
-    _socket.emit("quitGame");
+    _socket.emit(GameSocketEvent.QuitGame.event);
   }
+
+  void exchangeLetters(List<Letter> lettersToExchange) {
+    List<String> sLetters = lettersToExchange.map((letter) => letter.character).toList();
+    _socket.emit(GameSocketEvent.Exchange.event, [sLetters]);
+  }
+
+  switchToPlayerView(GamePlayer player) {
+    if (player.player.playerType == PlayerType.Bot) {
+      _socket.emit(GameSocketEvent.JoinAsObserver.event, player.player.user.id);
+    } else {
+      observerView = player;
+      notifyEaselChanged.add(0);
+    }
+  }
+
+  _cannotReplaceBot() {}
 }

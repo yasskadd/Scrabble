@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mobile/domain/enums/socket-events-enum.dart';
+import 'package:mobile/domain/services/audio_service.dart';
 import 'package:mobile/domain/services/http-handler-service.dart';
 import 'package:mobile/domain/services/user-service.dart';
 import 'package:rxdart/rxdart.dart';
@@ -17,6 +18,7 @@ class ChatService {
   Socket socket = GetIt.I.get<Socket>();
   final _userService = GetIt.I.get<UserService>();
   final _httpService = GetIt.I.get<HttpHandlerService>();
+  final _audioService = GetIt.I.get<AudioService>();
 
   // DataStructures
   ChatRoom? currentRoom; // Might change type
@@ -29,8 +31,7 @@ class ChatService {
 
   // Observables
   final PublishSubject<ChatRoom> notifyJoinRoom = PublishSubject();
-  final PublishSubject<bool> notifyLeftRoom =
-      PublishSubject(); // TODO: maybe use this, maybe not
+  final PublishSubject<String> notifyError = PublishSubject();
   final PublishSubject<ChatRoom> notifyKickedOut = PublishSubject();
   final PublishSubject<bool> notifyUpdatedChatrooms = PublishSubject();
   final PublishSubject<List<ChatMessage>> notifyUpdateMessages =
@@ -52,6 +53,10 @@ class ChatService {
     socket.emit(ChatRoomSocketEvents.GetAllChatRooms.event);
   }
 
+  void playNotifSound() {
+    if (_notifiedRooms.isNotEmpty) _audioService.playNotificationSound();
+  }
+
   void reset() {
     _chatRooms = [];
     usersInfo.clear();
@@ -71,7 +76,6 @@ class ChatService {
   get notifsCount => _notifiedRooms.length;
 
   void initSocketListeners() {
-    // TODO: Implement
     socket.on(ChatRoomSocketEvents.GetAllChatRooms.event, (data) {
       final chatrooms =
           (data as List).map((e) => ChatRoom.fromJson(e)).toList();
@@ -86,7 +90,7 @@ class ChatService {
 
     socket.on(ChatRoomSocketEvents.JoinChatRoom.event, (data) {
       final room = ChatRoom.fromJson(data);
-      _joinChatRoom(room.name);
+      _joinChatRoom(room);
     });
 
     socket.on(ChatRoomSocketEvents.JoinChatRoomSession.event, (data) {
@@ -116,6 +120,36 @@ class ChatService {
       final room = ChatRoom.fromJson(data);
       _deleteChatRoom(room);
     });
+
+    socket.on(ChatRoomSocketEvents.DeleteChatRoomNotFoundError.event, (_) {
+      debugPrint('DeleteChatRoomNotFoundError');
+      notifyError.add("chat.errors.delete_not_found");
+    });
+
+    socket.on(ChatRoomSocketEvents.SendMessageError.event, (_) {
+      debugPrint('SendMessageError');
+      notifyError.add("chat.errors.message");
+    });
+
+    socket.on(ChatRoomSocketEvents.JoinChatRoomSessionNotFoundError.event, (_) {
+      debugPrint('JoinChatRoomSessionNotFoundError');
+      notifyError.add("chat.errors.join_session");
+    });
+
+    socket.on(ChatRoomSocketEvents.JoinChatRoomNotFoundError.event, (_) {
+      debugPrint('JoinChatRoomNotFoundError');
+      notifyError.add("chat.errors.join_room");
+    });
+
+    socket.on(ChatRoomSocketEvents.CreateChatRoomError.event, (_) {
+      debugPrint('CreateChatRoomError');
+      notifyError.add("chat.errors.create");
+    });
+
+    socket.on(ChatRoomSocketEvents.LeaveChatRoomNotFoundError.event, (_) {
+      debugPrint('LeaveChatRoomNotFoundError');
+      notifyError.add("chat.errors.leave_room");
+    });
   }
 
   void requestLeaveRoom(String name) {
@@ -126,11 +160,14 @@ class ChatService {
 
   void _leaveRoom(String name) {
     _joinedRooms.remove(name);
+    _notifiedRooms.remove(name);
     notifyUpdatedChatrooms.add(true);
   }
 
   void _deleteChatRoom(ChatRoom room) {
+    debugPrint("Chat Room destroyed : ${room.name}");
     _joinedRooms.remove(room.name);
+    _notifiedRooms.remove(room.name);
     _chatRooms.removeWhere((chatRoom) => chatRoom.name == room.name);
     if (currentRoom?.name == room.name) notifyKickedOut.add(room);
     notifyUpdatedChatrooms.add(true);
@@ -147,6 +184,7 @@ class ChatService {
 
   void _onNewChatRoomCreated(ChatRoom newRoom) {
     _chatRooms.add(newRoom);
+    debugPrint("New chatRoom received : ${newRoom.name}");
     notifyUpdatedChatrooms.add(true);
   }
 
@@ -160,6 +198,7 @@ class ChatService {
   }
 
   void _joinRoomSession(String roomName, List<ChatMessage> newMessages) {
+    debugPrint("Joining Room session : $roomName");
     currentRoom = _chatRooms.firstWhere((element) => element.name == roomName);
     messages = newMessages;
     final currentlyRequested = Set();
@@ -195,29 +234,21 @@ class ChatService {
     usersInfo.clear();
   }
 
-  // TODO: Maybe remove this if it's not useful
-  void _leaveRoomSession() {
-    notifyLeftRoom.add(true);
-  }
-
   void requestJoinChatRoom(String roomName) {
-    // TODO: Implement
     socket.emit(ChatRoomSocketEvents.JoinChatRoom.event, roomName);
   }
 
-  void _joinChatRoom(String roomName) {
-    _joinedRooms.add(roomName);
+  void _joinChatRoom(ChatRoom room) {
+    if (!_chatRooms.any((curRoom) => curRoom.name == room.name)) return;
+    debugPrint("Joining Room : ${room.name}");
+    _joinedRooms.add(room.name);
     notifyUpdatedChatrooms.add(true);
-  }
-
-  void leaveChatRoom() {
-    // TODO: Implement
-    socket.emit(ChatRoomSocketEvents.JoinChatRoom.event, currentRoom!.name);
+    requestJoinRoomSession(room);
   }
 
   void submitMessage(String msg) {
-    socket
-        .emit(ChatRoomSocketEvents.SendMessage.event, [currentRoom?.name, msg]);
+    socket.emit(ChatRoomSocketEvents.SendMessage.event,
+        SentMessage(currentRoom!.name, msg));
   }
 
   void _treatReceivedMessage(String roomName, ChatMessage message) {
@@ -230,7 +261,10 @@ class ChatService {
       notifyUpdateMessages.add(messages);
       return;
     }
-    if (_joinedRooms.contains(roomName)) _notifiedRooms.add(roomName);
+    if (!_joinedRooms.contains(roomName) || _notifiedRooms.contains(roomName))
+      return;
+    _notifiedRooms.add(roomName);
+    _audioService.playNotificationSound();
     notifyUpdatedNotifications.add(true);
     debugPrint("notification count : $notifsCount");
   }

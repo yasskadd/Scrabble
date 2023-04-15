@@ -166,7 +166,7 @@ export class GameConfigurationService {
         this.clientSocket.send(SocketEvents.ExitWaitingRoom, {
             roomId: this.localGameRoom.id,
             user: this.userService.user,
-        } as RoomPlayer);
+        });
 
         this.resetRoomInformations();
     }

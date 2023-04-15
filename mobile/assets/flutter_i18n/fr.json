@@ -38,7 +38,9 @@
         "game_visibility": "Visibilité de la partie",
         "private": "Privée",
         "public": "Public",
-        "create_game": "Créer une partie"
+        "create_game": "Créer une partie",
+        "yes": "Oui",
+        "no": "Non"
     },
     "waiting_room": {
         "screen_name": "Salle d'attente",
@@ -93,6 +95,7 @@
             "button": "S'identifier",
             "success": "Succès d'identification!",
             "failure": "Erreur lors de l'identification!",
+            "user_taken" : "L'utilisateur est déja connecté!",
             "button_sign_up": "Créer un nouveau compte"
         },
         "signup": {
@@ -130,10 +133,33 @@
         "double_letter": "DOUBLE\nLETTRE",
         "triple_letter": "TRIPLE\nLETTRE",
         "double_word": "DOUBLE\nMOT",
-        "triple_word": "TRIPLE\nMOT"
+        "triple_word": "TRIPLE\nMOT",
+        "letter_prompt": {
+            "dialog_title": "Entrez la lettre de votre choix",
+            "invalid_letter": "La lettre devrait être un caractère de l'alphabet",
+            "confirm": "Confirmer"
+        }
     },
     "chat": {
         "create_room_label": "Creer un nouveau canal",
+        "create_room": {
+            "label": "Création de canal",
+            "hint": "Nom du canal",
+            "error": "Entrez un nom pour le canal",
+            "note_1": "Note",
+            "note_2": "Les canaux doivent avoir des",
+            "note_3": "nom uniques",
+            "note_4": "et ne doivent pas commencer par",
+            "note_5": "game"
+        },
+        "errors": {
+            "delete_not_found": "Le canal à effacer n'a pas été trouver",
+            "message": "Une erreur est survenue sur le message envoyé",
+            "join_session": "Le canal a été enlever",
+            "join_room": "Le canal que vous rejoignez n'a pas été trouver",
+            "create": "Echéc lors de la création du canal",
+            "leave_room": "Echéc pour quitter le canal"
+        },
         "create_room_dialog_label": "Création de canal",
         "create_room_name_label": "Nom du canal",
         "join_label": "REJOINDRE",
@@ -212,5 +238,17 @@
         "close": "Fermer",
         "error": "Erreur lors du chargement des images. Veuillez réessayer.",
         "take_image": "Prendre une photo"
+    },
+    "game": {
+        "invalid_word": "n'est pas un mot valide",
+        "not_in_rack": "Les lettres ne sont pas dans le chavalet",
+        "wrong_turn": "Mauvais tour",
+        "reserve": "Réserve",
+        "second": "seconde",
+        "letter": "lettre",
+        "place": "Placer",
+        "exchange_letter_prompt": "Êtes vous sûr de vouloir échanger ces lettres?",
+        "abandon_prompt": "Êtes vous sûr de vouloir abandonner?",
+        "clue": "Incide",
     }
 }

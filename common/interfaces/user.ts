@@ -1,4 +1,4 @@
-import { UserChatRoom } from '@app/interfaces/user-chat-room';
+import { UserChatRoom, UserChatRoomWithState } from '../../server/app/interfaces/user-chat-room';
 import { HistoryEvent } from './history-event';
 import { ImageInfo } from './image-info';
 import { Theme } from './theme';
@@ -9,7 +9,7 @@ export interface IUser {
     username: string;
     password: string;
     profilePicture?: ImageInfo;
-    chatRooms: UserChatRoom[];
+    chatRooms: UserChatRoom[] | UserChatRoomWithState[];
     historyEventList?: HistoryEvent[];
     language?: 'en' | 'fr';
     theme?: Theme;
