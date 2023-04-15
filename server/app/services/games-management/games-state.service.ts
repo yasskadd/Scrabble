@@ -54,9 +54,6 @@ export class GamesStateService {
         this.socketManager.io(SocketEvents.Disconnect, (server: Server, socket: Socket) => {
             this.abandonGame(socket);
         });
-        this.socketManager.io(SocketEvents.QuitGame, (server: Server, socket: Socket) => {
-            this.abandonGame(socket);
-        });
         this.socketManager.io(SocketEvents.AbandonGame, async (server: Server, socket: Socket) => {
             await this.abandonGame(socket);
         });
@@ -286,10 +283,8 @@ export class GamesStateService {
     }
 
     private async abandonGame(socket: Socket): Promise<void> {
-        console.log(socket.id);
         const gamePlayer = this.gamesHandler.getPlayer(socket.id);
         if (!gamePlayer) return;
-        console.log(gamePlayer.player.user.username);
 
         const room = gamePlayer.player.roomId;
         const gameHistoryInfo = this.formatGameInfo(gamePlayer);
@@ -443,11 +438,19 @@ export class GamesStateService {
     }
 
     private replacePlayerWithBot(player: RealPlayer): BeginnerBot {
+        const game = player.game;
+        const oldIUser = player.player.user;
         const bot = player.convertPlayerToBot();
         bot.player.socketId = '';
         bot.player.type = PlayerType.Bot;
-        bot.setGame(player.game);
+        bot.setGame(game);
+        if (bot.game.turn.activePlayer?._id === oldIUser._id) bot.game.turn.activePlayer = bot.player.user;
+        else {
+            const indexOfUser = bot.game.turn.inactivePlayers?.indexOf(oldIUser);
+            bot.game.turn.inactivePlayers?.splice(indexOfUser as number, 1, bot.player.user);
+        }
         bot.start();
+        console.log(bot.game.turn);
         return bot;
     }
 

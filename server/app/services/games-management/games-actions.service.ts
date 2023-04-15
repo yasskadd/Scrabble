@@ -51,7 +51,6 @@ export class GamesActionsService {
         .sort((a, b) => b[1] - a[1])
         .slice(0, CLUE_COUNT_PER_COMMAND_CALL)
         .map(([key]) => key);
-        console.log(bestCommandInfos);
         return bestCommandInfos;
     }
 
