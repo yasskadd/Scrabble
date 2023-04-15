@@ -71,7 +71,9 @@
             <div class="chat-rooms">
                 <div>{{ room }}</div>
                 <button class="join" mat-button mat-stroked-button color="primary" (click)="joinChatSession(room)">
-                    {{ "chat.join" | translate }}
+                    <div [matBadge]="(chatboxHandler.notifsObs | async).includes(room) ? '&#8288;' : null" matBadgeSize="small" class="demo-section">
+                        {{ "chat.join" | translate }}
+                    </div>
                 </button>
             </div>
         </mat-card>

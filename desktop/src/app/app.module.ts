@@ -4,6 +4,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatBadgeModule } from '@angular/material/badge';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
@@ -113,6 +114,7 @@ export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(h
         CookieModule.withOptions(),
         AppMaterialModule,
         AppRoutingModule,
+        MatBadgeModule,
         DragDropModule,
         MatSnackBarModule,
         MatInputModule,
