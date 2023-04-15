@@ -4,11 +4,9 @@ import { AppRoutes } from '@app/models/app-routes';
 import { RustEvent } from '@app/models/rust-command';
 import { SocketEvents } from '@common/constants/socket-events';
 import { AvatarData } from '@common/interfaces/avatar-data';
-import { HistoryEvent } from '@common/interfaces/history-event';
 import { ImageInfo } from '@common/interfaces/image-info';
 import { RoomPlayer } from '@common/interfaces/room-player';
 import { IUser } from '@common/interfaces/user';
-import { UserStats } from '@common/interfaces/user-stats';
 import { ImageType } from '@common/models/image-type';
 import { PlayerType } from '@common/models/player-type';
 import { ClientSocketService } from '@services/communication/client-socket.service';
@@ -24,8 +22,6 @@ import { HttpHandlerService } from './communication/http-handler.service';
 })
 export class UserService {
     user: IUser;
-    userStats: UserStats;
-    userHistoryEvents: HistoryEvent[];
     isConnected: BehaviorSubject<boolean>;
 
     private tempUserData: IUser;
@@ -97,7 +93,6 @@ export class UserService {
     async logout(): Promise<void> {
         this.httpHandlerService.logout(this.user).then(async () => {
             this.user = undefined;
-            this.userStats = undefined;
             this.tempUserData = undefined;
 
             this.cookieService.removeSessionCookie();
