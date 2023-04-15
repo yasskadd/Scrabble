@@ -86,6 +86,8 @@ export class ChatboxHandlerService {
         this.userService.isConnected.subscribe((connected: boolean) => {
             if (connected) {
                 this.config(this.userService.user.chatRooms as UserChatRoomWithState[]);
+            } else {
+                this.resetConfig();
             }
         });
     }
