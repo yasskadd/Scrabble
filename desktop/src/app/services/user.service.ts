@@ -58,6 +58,8 @@ export class UserService {
             const switcher: IUser = JSON.parse(JSON.stringify(this.user));
             this.user = JSON.parse(JSON.stringify(this.tempUserData));
             this.tempUserData = switcher;
+            this.setUserStats();
+            console.log(this.userStats);
 
             // TODO : Language
             this.snackBarService.openInfo('Connection successful');
@@ -86,15 +88,12 @@ export class UserService {
                 this.logout().then();
             },
         );
-        this.setUserStats();
-        console.log(this.userStats);
-        // this.setUserHistoryEvents();
-        // console.log(this.userHistoryEvents);
     }
 
     async logout(): Promise<void> {
         this.httpHandlerService.logout(this.user).then(async () => {
             this.user = undefined;
+            this.userStats = undefined;
             this.tempUserData = undefined;
 
             this.cookieService.removeSessionCookie();
@@ -129,11 +128,11 @@ export class UserService {
         return player.user.profilePicture.key;
     }
 
-    async getStats(): Promise<UserStats> {
-        return this.httpHandlerService.getStats().then((result) => {
-            return result.userStats;
-        });
-    }
+    // async getStats(): Promise<UserStats> {
+    //     return this.httpHandlerService.getStats().then((result) => {
+    //         return result.userStats;
+    //     });
+    // }
 
     async submitNewProfilePic(avatarData: AvatarData): Promise<boolean> {
         return this.httpHandlerService
