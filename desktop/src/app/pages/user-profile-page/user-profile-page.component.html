@@ -15,34 +15,30 @@
         <div class="user-stats">
             <mat-card class="justified">
                 <h4>Stastiques</h4>
-                <div>Temps moy : {{ userService.userStats.averageGameTime }}</div>
-                <div>Score moy : {{ userService.userStats.averageGameScore }}</div>
-                <div>Jeux joués : {{ userService.userStats.gameCount }}</div>
-                <!-- <div>Temps moy : {{ userStats.averageGameTime }}</div>
+                <div>Temps moy : {{ userStats.averageGameTime }}</div>
                 <div>Score moy : {{ userStats.averageGameScore }}</div>
-                <div>Jeux joués : {{ userStats.gameCount }}</div> -->
+                <div>Jeux joués : {{ userStats.gameCount }}</div>
                 <canvas #myChart width="160" height="160"></canvas>
             </mat-card>
             <mat-card class="justified">
                 <h4>Historique</h4>
                 <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
                     <mat-tab label="Parties">
-                        <!-- <mat-expansion-panel *ngFor="let game of games" role="list"> -->
-                        <mat-expansion-panel-header>
-                            <mat-panel-title>
+                        <mat-expansion-panel role="list">
+                            <mat-expansion-panel-header>
+                                <mat-panel-title>
+                                    <!-- TODO: language -->
+                                    <div>Status</div>
+                                    <div>Date</div>
+                                </mat-panel-title>
+                            </mat-expansion-panel-header>
+                            <p>
                                 <!-- TODO: language -->
-                                <div>Status</div>
-                                <div>Date</div>
-                            </mat-panel-title>
-                        </mat-expansion-panel-header>
-                        <!-- TODO: language -->
-                        <!-- <p *ngIf="game.gameWon">Victoire</p> -->
-                        <!-- <p *ngIf="!game.gameWon">Défaite</p> -->
-                        <!-- <p>Date</p> -->
-                        <!-- </mat-expansion-panel> -->
+                            </p>
+                        </mat-expansion-panel>
                     </mat-tab>
                     <mat-tab label="Connexions">
-                        <mat-expansion-panel *ngFor="let historyEvent of userHistoryEvents" role="list">
+                        <mat-expansion-panel role="list">
                             <mat-expansion-panel-header>
                                 <mat-panel-title>
                                     <!-- TODO: language -->
@@ -62,4 +58,3 @@
 
     <app-footer></app-footer>
 </div>
-<!-- TODO: LANGUAGE!! -->

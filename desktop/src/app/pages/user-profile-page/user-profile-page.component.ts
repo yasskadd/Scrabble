@@ -13,12 +13,15 @@ import Chart from 'chart.js/auto';
 })
 export class UserProfilePageComponent implements AfterViewInit {
     @ViewChild('myChart') canvasRef: ElementRef<HTMLCanvasElement>;
+    userStats: UserStats;
     games: HistoryEvent[];
     connections: HistoryEvent[];
+    httpHandlerService: any;
 
     constructor(protected userService: UserService, private router: Router) {
-        userService.userStats.averageGameScore = Math.round(userService.userStats.averageGameScore);
-        this.setGames();
+        this.setUserStats();
+        console.log(this.userStats + 'profile-page');
+        // this.setGames();
     }
 
     ngAfterViewInit() {
@@ -49,19 +52,24 @@ export class UserProfilePageComponent implements AfterViewInit {
         myChart.update();
     }
 
-    get userStats(): UserStats {
-        return this.userService.userStats;
-    }
-
-    get userHistoryEvents(): HistoryEvent[] {
-        return this.userService.userHistoryEvents;
-    }
-
-    setGames() {
-        this.userHistoryEvents.forEach((historyEvent: HistoryEvent) => {
-            if (historyEvent.gameWon !== null) this.games.push(historyEvent);
+    setUserStats() {
+        this.httpHandlerService.getStats().then((userStats: UserStats) => {
+            Math.round(userStats.averageGameScore);
+            this.userStats = userStats;
         });
     }
+
+    // get userHistoryEvents(): HistoryEvent[] {
+    //     return this.httpHandlerService.getUserHistoryEvents().then((userHistoryEvents: HistoryEvent[]) => {
+    //         return userHistoryEvents;
+    //     });
+    // }
+
+    // setGames() {
+    //     this.userHistoryEvents.forEach((historyEvent: HistoryEvent) => {
+    //         if (historyEvent.gameWon != null) this.games.push(historyEvent);
+    //     });
+    // }
 
     redirectSettingsPage() {
         this.router.navigate(['/settings']).then();
