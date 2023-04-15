@@ -1,382 +1,313 @@
 /* eslint-disable max-lines */
 import { Injectable } from '@angular/core';
 import { SocketEvents } from '@common/constants/socket-events';
-import { ChatboxMessage } from '@common/interfaces/chatbox-message';
 // import { CommandInfo } from '@common/interfaces/place-word-command-info';
 // import { Letter } from '@common/interfaces/letter';
-import { CommandHandlerService } from '@app/services/command-handler.service';
 import { ClientSocketService } from '@app/services/communication/client-socket.service';
 // import { GameClientService } from '@app/services/game-client.service';
 // import { GameConfigurationService } from '@app/services/game-configuration.service';
-import { ChatCommand } from '@app/models/chat-command';
+import { ChatRoomClient } from '@app/interfaces/chat-room-client';
 import { UserService } from '@app/services/user.service';
-import { TimeService } from '@services/time.service';
+import { ChatRoom } from '@common/interfaces/chat-room';
+import { Message } from '@common/interfaces/message';
+import { BehaviorSubject, Observable } from 'rxjs';
+
+const NOT_FOUND = -1;
+interface UserChatRoom {
+    username: string;
+    imageUrl: string;
+}
+
+interface UserChatRoomWithState {
+    name: string;
+    notified: boolean;
+}
 
 @Injectable({
     providedIn: 'root',
 })
 export class ChatboxHandlerService {
-    messages: ChatboxMessage[];
+    messages: Message[];
     loggedIn: boolean;
+    allChatRooms: ChatRoomClient[];
+    joinedChatRooms: string[];
+    notifiedRooms: string[];
+    chatSession: string | undefined;
+    userInfoHashMap: Map<string, UserChatRoom>;
+
+    _messagesSubject: BehaviorSubject<Message[]>;
+    messagesObs: Observable<Message[]>;
+    _chatSessionSubject: BehaviorSubject<string | undefined>;
+    chatSessionObs: Observable<string | undefined>;
+    _activeTabSubject: BehaviorSubject<string>;
+    activeTabObs: Observable<string>;
+    _allRoomsSubject: BehaviorSubject<ChatRoomClient[]>;
+    allRoomsObs: Observable<ChatRoomClient[]>;
+    _joinedRoomsSubject: BehaviorSubject<string[]>;
+    joinedRoomsObs: Observable<string[]>;
+    _notifsSubject: BehaviorSubject<string[]>;
+    notifsObs: Observable<string[]>;
 
     constructor(
         private clientSocket: ClientSocketService,
         // private gameConfiguration: GameConfigurationService,
         // private gameClient: GameClientService,
-        private commandHandler: CommandHandlerService,
-        private timerService: TimeService,
-        private userService: UserService,
+        // private commandHandler: CommandHandlerService,
+        // private timerService: TimeService,
+        private userService: UserService, // private httpHandlerService: HttpHandlerService,
     ) {
         this.messages = [];
         this.loggedIn = false;
+        this.allChatRooms = [];
+        this.joinedChatRooms = [];
+        this.notifiedRooms = [];
+        this.chatSession = undefined;
+        this.userInfoHashMap = new Map();
+
+        this._messagesSubject = new BehaviorSubject<Message[]>(this.messages);
+        this.messagesObs = this._messagesSubject.asObservable();
+        this._chatSessionSubject = new BehaviorSubject<string | undefined>(this.chatSession);
+        this.chatSessionObs = this._chatSessionSubject.asObservable();
+        this._activeTabSubject = new BehaviorSubject<string>('joinedChats');
+        this.activeTabObs = this._activeTabSubject.asObservable();
+        this._allRoomsSubject = new BehaviorSubject<ChatRoomClient[]>(this.availableRooms());
+        this.allRoomsObs = this._allRoomsSubject.asObservable();
+        this._joinedRoomsSubject = new BehaviorSubject<string[]>(this.joinedChatRooms);
+        this.joinedRoomsObs = this._joinedRoomsSubject.asObservable();
+        this._notifsSubject = new BehaviorSubject<string[]>(this.notifiedRooms);
+        this.notifsObs = this._notifsSubject.asObservable();
 
         this.clientSocket.connected.subscribe((connected: boolean) => {
             if (connected) {
                 this.configureBaseSocketFeatures();
             }
         });
+
+        this.userService.isConnected.subscribe((connected: boolean) => {
+            if (connected) {
+                this.config(this.userService.user.chatRooms as UserChatRoomWithState[]);
+            } else {
+                this.resetConfig();
+            }
+        });
     }
 
-    // ngOnDestroy() {
-    //     this.leaveHomeRoom(this.userService.user.username);
-    // }
-
-    submitMessage(userInput: string): void {
-        const message: ChatboxMessage = this.configureUserMessage(userInput);
-        if (this.isCommand(userInput)) {
-            this.sendCommand(userInput);
-        } else {
-            this.messages.push(message);
-            this.sendMessage(message);
-        }
+    get chatCurrentSession() {
+        return this.chatSession;
     }
 
-    // joinHomeRoom(userName: string): void {
-    //     this.clientSocket.send(SocketEvents.JoinHomeRoom, userName);
-    // }
-
-    // leaveHomeRoom(userName: string): void {
-    //     this.clientSocket.send(SocketEvents.UserLeftRoom, userName);
-    // }
-
-    // subscribeToUserConnection(): Subject<SocketResponse> {
-    //     const roomJoinedSubject: Subject<SocketResponse> = new Subject<SocketResponse>();
-    //     this.clientSocket.on(SocketEvents.UserConnected, (userName: string) => {
-    //         if (userName === this.userService.user.username) {
-    //             roomJoinedSubject.next({ validity: true });
-    //             this.loggedIn = true;
-    //         }
+    // get joinedRooms(): ChatRoomClient[] {
+    //     return this.allChatRooms.filter((allRoom) => {
+    //         const indexToDelete = this.joinedChatRooms.findIndex((joinedRoom) => joinedRoom === allRoom.name);
+    //         return indexToDelete !== NOT_FOUND;
     //     });
-    //     this.clientSocket.on(SocketEvents.UserJoinedRoom, (userName: string) => {
-    //         if (userName === this.userService.user.username) {
-    //             roomJoinedSubject.next({ validity: true });
-    //             this.loggedIn = true;
-    //         }
-    //     });
-    //     this.clientSocket.on(SocketEvents.RoomIsFull, (userName: string) => {
-    //         if (userName === this.userService.user.username) {
-    //             roomJoinedSubject.next({ validity: false, socketMessage: SocketEvents.RoomIsFull });
-    //         }
-    //     });
-    //     this.clientSocket.on(SocketEvents.UsernameTaken, (userName: string) => {
-    //         if (userName === this.userService.user.username) {
-    //             roomJoinedSubject.next({ validity: false, socketMessage: SocketEvents.UsernameTaken });
-    //         }
-    //     });
-
-    //     return roomJoinedSubject;
-    // }
-
-    // subscribeToUserDisconnecting(): Subject<void> {
-    //     const roomLeftSubject: Subject<void> = new Subject<void>();
-    //     this.clientSocket.on(SocketEvents.UserLeftHomeRoom, (userName: string) => {
-    //         if (userName === this.userService.user.username) {
-    //             roomLeftSubject.next();
-    //             this.loggedIn = false;
-    //             this.messages = [];
-    //         }
-    //     });
-
-    //     return roomLeftSubject;
     // }
 
     private configureBaseSocketFeatures(): void {
-        // this.clientSocket.on(SocketEvents.GameMessage, (message: ChatboxMessage) => {
-        //     this.messages.push(message);
+        this.clientSocket.on(SocketEvents.GetAllChatRooms, (chatRooms: ChatRoomClient[]) => {
+            this.allChatRooms = chatRooms;
+            this.updateAllRooms();
+        });
+
+        this.clientSocket.on(SocketEvents.SendMessage, (newMessage: any) => {
+            const roomName = newMessage.room;
+            const message = newMessage.newMessage;
+            this.treatReceivedMessage(roomName, message);
+        });
+
+        this.clientSocket.on(SocketEvents.JoinChatRoom, (chatRoom: ChatRoomClient) => {
+            this.joinChatRoom(chatRoom);
+        });
+
+        this.clientSocket.on(SocketEvents.JoinChatRoomSession, (chatRoom: ChatRoom) => {
+            const roomName = chatRoom.name;
+            const newMessages: Message[] = chatRoom.messages;
+            this.joinRoomSession(roomName, newMessages);
+        });
+
+        this.clientSocket.on(SocketEvents.LeaveChatRoomSession, (chatRoom: ChatRoom) => {
+            this.chatSession = undefined;
+            this._chatSessionSubject.next(this.chatSession);
+        });
+
+        this.clientSocket.on(SocketEvents.CreateChatRoom, (newChatRoom: ChatRoomClient) => {
+            this.onNewChatRoomCreated(newChatRoom);
+        });
+
+        // this.clientSocket.on(SocketEvents.CreateChatRoomError, (err: string) {
+        //     this.onRoomCreationFail(err);
         // });
-        // this.clientSocket.on(SocketEvents.UserJoinedRoom, (userName: string) => {
-        //     this.messages.push(this.createConnectedUserMessage(userName));
-        // });
-        // this.clientSocket.on(SocketEvents.ReceiveHomeMessage, (message: ChatboxMessage) => {
-        //     this.messages.push(message);
-        // });
-        // this.clientSocket.on(SocketEvents.UserLeftHomeRoom, (userName: string) => {
-        //     this.messages.push(this.createDisconnectedUserMessage(userName));
-        // });
-        // TODO: Implement listeners for new socket events (PlacementSuccess/Failure, ExchangeSuccess/Failure, nextTurn...)
-        // this.clientSocket.on(SocketEvents.ImpossibleCommandError, (error: string) => {
-        //     this.messages.push(this.createImpossibleCommandMessage(error));
-        // });
-        //
-        // this.clientSocket.on(SocketEvents.GameEnd, () => {
-        //     this.endGameMessage();
-        // });
-        // this.clientSocket.on(SocketEvents.AllReserveLetters, (letterReserveUpdated: Letter[]) => {
-        //     this.configureReserveLetterCommand(letterReserveUpdated);
-        // });
-        // this.clientSocket.on(SocketEvents.ClueCommand, (clueCommand: CommandInfo[]) => {
-        //     this.configureClueCommand(clueCommand);
-        // });
+
+        this.clientSocket.on(SocketEvents.LeaveChatRoom, (chatRoom: ChatRoomClient) => {
+            this.leaveRoom(chatRoom.name);
+        });
+
+        this.clientSocket.on(SocketEvents.DeleteChatRoom, (chatRoom: ChatRoomClient) => {
+            this.deleteChatRoom(chatRoom);
+        });
     }
 
-    private sendMessage(message: ChatboxMessage): void {
-        this.clientSocket.send(SocketEvents.SendMessageHome, message);
+    selectTab(tabName: string) {
+        this._activeTabSubject.next(tabName);
     }
 
-    private sendCommand(command: string): void {
-        if (this.isValidCommand(command)) {
-            this.commandHandler.sendCommand(command);
-            this.messages.push({ type: 'system', message: command });
+    config(joinedChatRooms: UserChatRoomWithState[]) {
+        for (const joinedRoom of joinedChatRooms) {
+            this.joinedChatRooms.push(joinedRoom.name);
+            if (joinedRoom.notified) this.notifiedRooms.push(joinedRoom.name);
+        }
+        this.clientSocket.send(SocketEvents.GetAllChatRooms);
+    }
+
+    resetConfig() {
+        this.messages = [];
+        this.allChatRooms = [];
+        this.joinedChatRooms = [];
+        this.notifiedRooms = [];
+        this.chatSession = undefined;
+
+        this._messagesSubject.next(this.messages);
+        this._chatSessionSubject.next(this.chatSession);
+        this._activeTabSubject.next('joinedChats');
+        this._allRoomsSubject.next(this.allChatRooms);
+        this._joinedRoomsSubject.next(this.joinedChatRooms);
+        this._notifsSubject.next(this.notifiedRooms);
+    }
+
+    requestLeaveRoom() {
+        this.requestLeaveRoomSession();
+        this.clientSocket.send(SocketEvents.LeaveChatRoom, this.chatSession);
+    }
+
+    requestLeaveRoomSession() {
+        this.clientSocket.send(SocketEvents.LeaveChatRoomSession, this.chatSession);
+    }
+
+    requestJoinChatRoom(chatRoomName: string) {
+        this.clientSocket.send(SocketEvents.JoinChatRoom, chatRoomName);
+    }
+
+    requestJoinRoomSession(chatRoomName: string) {
+        this.clientSocket.send(SocketEvents.JoinChatRoomSession, chatRoomName);
+    }
+
+    requestCreateChatRoom(chatRoomName: string) {
+        this.clientSocket.send(SocketEvents.CreateChatRoom, chatRoomName);
+    }
+
+    leaveChatRoom(chatRoomName: string) {
+        this.clientSocket.send(SocketEvents.LeaveChatRoom, chatRoomName);
+    }
+
+    submitMessage(msg: String) {
+        // TODO : Revoir si ca marche
+        this.clientSocket.send(SocketEvents.SendMessage, { chatRoomName: this.chatSession, msg });
+    }
+
+    onClosingRoom() {
+        this.requestLeaveRoomSession();
+    }
+
+    private updateJoinedRooms() {
+        console.log('update');
+        this._joinedRoomsSubject.next(this.joinedChatRooms);
+    }
+
+    private updateAllRooms() {
+        console.log('updateall');
+        this._allRoomsSubject.next(this.availableRooms());
+    }
+
+    private availableRooms(): ChatRoomClient[] {
+        return this.allChatRooms.filter((allRoom) => {
+            const indexToDelete = this.joinedChatRooms.findIndex((joinedRoom) => joinedRoom === allRoom.name);
+            return indexToDelete === NOT_FOUND;
+        });
+    }
+
+    private treatReceivedMessage(roomName: string, newMessage: Message) {
+        if (this.chatSession === roomName) {
+            this.messages.push(newMessage);
+            this._messagesSubject.next(this.messages);
+        } else {
+            this.sendNotification(roomName);
         }
     }
 
-    // private createConnectedUserMessage(userName: string): ChatboxMessage {
-    //     return {
-    //         type: 'system',
-    //         message: `'${userName}' a join le salon!`,
-    //         timeStamp: this.timerService.getTimeStampNow(),
-    //     };
-    // }
-
-    // private createDisconnectedUserMessage(userName: string): ChatboxMessage {
-    //     return {
-    //         type: 'system',
-    //         message: `'${userName}' a quitté le salon.`,
-    //         timeStamp: this.timerService.getTimeStampNow(),
-    //     };
-
-    //     // TODO : Send message when replacing player with virutal one
-    //     // if (!this.gameClient.isGameFinish) {
-    //     //     this.messages.push({
-    //     //         type: 'system-message',
-    //     //         message: "------L'adversaire à été remplacé par un joueur virtuel Débutant------",
-    //     //         timeStamp: this.timeService.getTimeStamp(),
-    //     //     });
-    //     // }
-    // }
-
-    private configureUserMessage(userInput: string): ChatboxMessage {
-        return {
-            username: this.userService.user.username,
-            type: 'client',
-            message: userInput,
-            timeStamp: this.timerService.getTimeStampNow(),
-        };
+    private sendNotification(roomName: string) {
+        this.notifiedRooms.push(roomName);
+        this._notifsSubject.next(this.notifiedRooms);
     }
 
-    // endGameMessage(): void {
-    //     setTimeout(() => {
-    //         const myLetterLeft = this.getAllLetter(this.gameClient.playerOne.rack as never);
-    //         const opponentLetterLeft = this.getAllLetter(this.gameClient.secondPlayer.rack as never);
-    //         this.messages.push({
-    //             type: 'system-message',
-    //             message: 'Fin de la partie : lettres restantes',
-    //             timeStamp: this.timeService.getTimeStamp(),
-    //         });
-    //         this.messages.push({
-    //             type: 'system-message',
-    //             message: `${this.gameClient.playerOne.name} : ${myLetterLeft}`,
-    //             timeStamp: this.timeService.getTimeStamp(),
-    //         });
-    //         this.messages.push({
-    //             type: 'system-message',
-    //             message: `${this.gameClient.secondPlayer.name} : ${opponentLetterLeft}`,
-    //             timeStamp: this.timeService.getTimeStamp(),
-    //         });
-    //     }, TIMEOUT);
-    // }
-
-    // private configureClueCommand(clueCommand: CommandInfo[]): void {
-    //     if (clueCommand.length !== 0) {
-    //         this.addClueCommand(clueCommand);
-    //         return;
-    //     }
-    //     this.messages.push({
-    //         type: 'system',
-    //         message: "Il n'y a pas de possibilité de formation de mot possible",
-    //         timeStamp: this.timeService.getTimeStamp(),
-    //     });
-    // }
-
-    // private addClueCommand(clueCommand: CommandInfo[]): void {
-    //     clueCommand.forEach((clue) => {
-    //         this.messages.push({
-    //             userName: undefined,
-    //             type: 'system',
-    //             message: `!placer ${String.fromCharCode(CHAR_ASCII + clue.firstCoordinate.y)}${clue.firstCoordinate.x}${
-    //                 clue.isHorizontal ? 'h' : 'v'
-    //             } ${clue.letters.join('')}`,
-    //             timeStamp: this.timeService.getTimeStamp(),
-    //         });
-    //     });
-    //     if (clueCommand.length < 3)
-    //         this.messages.push({
-    //             type: 'system-message',
-    //             message: 'Aucune autre possibilité possible',
-    //             timeStamp: this.timeService.getTimeStamp(),
-    //         });
-    // }
-
-    private isCommand(userInput: string): boolean {
-        return userInput.split(ChatCommand.Flag)[0] === '';
+    private joinChatRoom(chatRoom: ChatRoomClient) {
+        this.joinedChatRooms.push(chatRoom.name);
+        console.log('joinChatRoom');
+        console.log(this.joinedChatRooms);
+        this.updateJoinedRooms();
+        this.updateAllRooms();
+        // this.removeRoomFromAllChatRooms(chatRoom.name);
+        this.requestJoinRoomSession(chatRoom.name);
     }
 
-    private isValidCommand(userCommand: string): boolean {
-        userCommand = userCommand.split(ChatCommand.Flag)[1];
-
-        return (
-            Object.values(ChatCommand).find((command: string) => {
-                return command === userCommand;
-            }) !== undefined
-        );
+    private removeRoomFromJoinedChatRooms(chatRoomName: string) {
+        const indexToDelete = this.joinedChatRooms.findIndex((roomName) => roomName === chatRoomName);
+        this.joinedChatRooms.splice(indexToDelete, 1);
+        this.updateJoinedRooms();
+        this.updateAllRooms();
     }
 
-    // private isHelpCommand(userCommand: string): boolean {
-    //     const validReserveCommand = '^!aide$';
-    //     const validReserveCommandRegex = new RegExp(validReserveCommand);
-    //     if (validReserveCommandRegex.test(userCommand)) {
-    //         this.messages.push({
-    //             type: 'system-message',
-    //             message: 'VOICI LES COMMANDES VALIDES',
-    //             timeStamp: this.timeService.getTimeStamp(),
-    //         });
-    //         this.messages.push({
-    //             type: 'system-message',
-    //             message: '!passer  : Passer son tour',
-    //             timeStamp: this.timeService.getTimeStamp(),
-    //         });
-    //         this.messages.push({
-    //             type: 'system-message',
-    //             message: '!réserve : Affiche toutes les lettres disponibles dans la réserve',
-    //             timeStamp: this.timeService.getTimeStamp(),
-    //         });
-    //         this.messages.push({
-    //             type: 'system-message',
-    //             message: "!indice  : Envoie jusqu'à 3 possibilités de placement possible sur la planche de jeu",
-    //             timeStamp: this.timeService.getTimeStamp(),
-    //         });
-    //         this.messages.push({
-    //             type: 'system-message',
-    //             message:
-    //                 '!echanger <lettre>:  Échanger des lettres sur ton chevalet (celles-ci doivent être écritent en minuscule ou' +
-    //                 ' mettre " * " pour les lettres blanches (ex: !echanger e*a)',
-    //             timeStamp: this.timeService.getTimeStamp(),
-    //         });
-    //         this.messages.push({
-    //             userName: '',
-    //             type: 'system',
-    //             message:
-    //                 '!placer <ligne><colonne>[(h|v)] <lettres>:  Placer un mot en utilisant les lettres de notre chevalet' +
-    //                 '(Mettre la lettre en majuscule lorsque vous utilisez une lettre blanche) (ex: !placer g9h adanT)',
-    //             timeStamp: this.timeService.getTimeStamp(),
-    //         });
-    //         return true;
-    //     }
-    //     return false;
-    // }
+    private removeRoomFromAllChatRooms(chatRoomName: string) {
+        const indexToDelete = this.allChatRooms.findIndex((room) => room.name === chatRoomName);
+        this.allChatRooms.splice(indexToDelete, 1);
+        this.updateJoinedRooms();
+        this.updateAllRooms();
+    }
 
-    // private validCommandSyntax(userCommand: string): boolean {
-    //     if (this.validSyntax(userCommand)) return this.validCommandParameters(userCommand);
-    //     this.messages.push(this.configureSyntaxError());
-    //     return false;
-    // }
+    private joinRoomSession(chatRoomName: string, newMessage: Message[]) {
+        this.messages = newMessage;
+        this.chatSession = chatRoomName;
+        this._messagesSubject.next(this.messages);
+        this._chatSessionSubject.next(this.chatSession);
+        const indexToDelete = this.notifiedRooms.findIndex((roomName) => roomName === chatRoomName);
+        if (indexToDelete !== NOT_FOUND) {
+            this.notifiedRooms.splice(indexToDelete, 1);
+            this._notifsSubject.next(this.notifiedRooms);
+        }
+        console.log('joinsession');
+        console.log(this.joinedChatRooms);
+        // const currentlyRequested = new Set<string>();
+        // for (const message of this.messages) {
+        //     const id = message.userId;
+        //     if (!this.userInfoHashMap.has(id) && !currentlyRequested.has(id)) {
+        //         currentlyRequested.add(id);
+        //         this.updateUserInfo(id);
+        //     }
+        // }
+    }
 
-    // private validCommandParameters(userCommand: string): boolean {
-    //     if (this.validParameters(userCommand)) return this.isCommandExchangePossible(userCommand);
-    //
-    //     this.messages.push(this.configureInvalidError());
-    //     return false;
-    // }
-
-    // private isCommandExchangePossible(userCommand: string): boolean {
-    //     if (this.exchangePossible(userCommand)) return this.isPlayerTurn();
-    //     this.messages.push(this.configureImpossibleToExchangeMessage());
-    //     return false;
-    // }
-
-    // private isPlayerTurn() {
-    //     if (this.gameClient.playerOneTurn) return true;
-    //     this.messages.push({
-    //         type: 'system-message',
-    //         message: "Ce n'est pas votre tour",
-    //         timeStamp: this.timeService.getTimeStamp(),
-    //     });
-    //     return false;
-    // }
-
-    // private isReserveCommand(userInput: string): boolean {
-    //     const validReserveCommand = '^!r(é|e)serve$';
-    //     const validReserveCommandRegex = new RegExp(validReserveCommand);
-    //     return validReserveCommandRegex.test(userInput);
-    // }
-
-    // private validSyntax(userInput: string): boolean {
-    //     return this.validSyntaxRegex.test(userInput);
-    // }
-
-    // private validParameters(userInput: string): boolean {
-    //     return VALID_COMMAND_REGEX.test(userInput);
-    // }
-
-    // private exchangePossible(userInput: string): boolean {
-    //     const validReserveCommand = '^!(é|e)changer';
-    //     const validReserveCommandRegex = new RegExp(validReserveCommand);
-    //     return !(this.gameClient.letterReserveLength < EXCHANGE_ALLOWED_MINIMUM && validReserveCommandRegex.test(userInput));
-    // }
-
-    // private configureImpossibleToExchangeMessage(): ChatboxMessage {
-    //     return {
-    //         type: 'system-message',
-    //         message: "[Erreur] Impossible d'échanger à cause qu'il reste moins de 7 lettres dans la réserve",
-    //         timeStamp: this.timeService.getTimeStamp(),
-    //     };
-    // }
-
-    // private configureSyntaxError(): ChatboxMessage {
-    //     return {
-    //         type: 'system-message',
-    //         message: '[Erreur] Erreur de syntaxe',
-    //         timeStamp: this.timeService.getTimeStamp(),
-    //     };
-    // }
-
-    // private configureInvalidError(): ChatboxMessage {
-    //     return {
-    //         type: 'system-message',
-    //         message: '[Erreur] La commande saisie est invalide',
-    //         timeStamp: this.timeService.getTimeStamp(),
-    //     };
-    // }
-
-    // private createImpossibleCommandMessage(error: string): ChatboxMessage {
-    //     return { type: 'system-message', message: `[Erreur] ${error}`, timeStamp: this.timeService.getTimeStamp() };
-    // }
-
-    // private getAllLetter(letters: Letter[]): string {
-    //     let letterString = '';
-    //     letters.forEach((letter) => {
-    //         letterString = letterString + letter.value;
-    //     });
-    //     return letterString;
-    // }
-
-    // private configureReserveLetterCommand(letterReserve: Letter[]): void {
-    //     letterReserve.forEach((letter) => {
-    //         this.messages.push({
-    //             type: 'system-message',
-    //             message: `${letter.value}: ${letter.quantity}`,
-    //             timeStamp: this.timeService.getTimeStamp(),
-    //         });
+    // private updateUserInfo(id: string) {
+    //     this.httpHandlerService.getChatUserInfo(id).then((userInfo: any) => {
+    //         this.userInfoHashMap.set(id, userInfo);
     //     });
     // }
+
+    private onNewChatRoomCreated(newChatRoom: ChatRoomClient) {
+        if (this.userService.user._id !== newChatRoom.creatorId) {
+            this.allChatRooms.push(newChatRoom);
+            this.updateAllRooms();
+        }
+    }
+
+    private leaveRoom(chatRoomName: string) {
+        this.removeRoomFromJoinedChatRooms(chatRoomName);
+    }
+
+    private deleteChatRoom(chatRoom: ChatRoomClient) {
+        this.requestJoinRoomSession(chatRoom.name);
+        this.removeRoomFromAllChatRooms(chatRoom.name);
+        if (this.chatSession === chatRoom.name) {
+            this.chatSession = undefined;
+            this._chatSessionSubject.next(this.chatSession);
+        }
+    }
 }

@@ -1,19 +1,22 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
+import { RustEvent } from '@app/models/rust-command';
 import { SocketEvents } from '@common/constants/socket-events';
 import { AvatarData } from '@common/interfaces/avatar-data';
 import { ImageInfo } from '@common/interfaces/image-info';
+import { RoomPlayer } from '@common/interfaces/room-player';
 import { IUser } from '@common/interfaces/user';
 import { UserStats } from '@common/interfaces/user-stats';
 import { ImageType } from '@common/models/image-type';
+import { PlayerType } from '@common/models/player-type';
 import { ClientSocketService } from '@services/communication/client-socket.service';
 import { SnackBarService } from '@services/snack-bar.service';
+import * as tauri from '@tauri-apps/api';
+import { WebviewWindowHandle } from '@tauri-apps/api/window';
 import { BehaviorSubject } from 'rxjs';
 import { AppCookieService } from './communication/app-cookie.service';
 import { HttpHandlerService } from './communication/http-handler.service';
-import { PlayerType } from '@common/models/player-type';
-import { RoomPlayer } from '@common/interfaces/room-player';
 
 @Injectable({
     providedIn: 'root',
@@ -74,21 +77,27 @@ export class UserService {
             await this.clientSocketService.disconnect();
 
             this.isConnected.next(false);
+            if (tauri.window.getCurrent().label === 'chat') return;
             this.router.navigate([AppRoutes.ConnectionPage]).then();
         });
     }
 
     subscribeConnectionEvents(): void {
         this.clientSocketService.on(SocketEvents.SuccessfulConnection, () => {
-            const switcher: IUser = JSON.parse(JSON.stringify(this.user));
-            this.user = JSON.parse(JSON.stringify(this.tempUserData));
-            this.tempUserData = switcher;
+            if (tauri.window.getCurrent().label === 'main') {
+                const switcher: IUser = JSON.parse(JSON.stringify(this.user));
+                this.user = JSON.parse(JSON.stringify(this.tempUserData));
+                this.tempUserData = switcher;
 
-            // TODO : Language
-            this.snackBarService.openInfo('Connection successful');
-            this.updateUserWithImageUrl(this.user);
+                // TODO : Language
+                this.snackBarService.openInfo('Connection successful');
+                this.updateUserWithImageUrl(this.user);
+                const chatWindow = new WebviewWindowHandle('chat');
+                chatWindow.emit(RustEvent.UserData, this.user).then();
+            }
             this.isConnected.next(true);
 
+            if (tauri.window.getCurrent().label === 'chat') return;
             this.router.navigate([AppRoutes.HomePage]).then();
         });
         this.clientSocketService.on(SocketEvents.UserAlreadyConnected, () => {
