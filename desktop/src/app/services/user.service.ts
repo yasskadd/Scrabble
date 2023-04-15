@@ -39,8 +39,6 @@ export class UserService {
         private router: Router,
     ) {
         this.user = undefined;
-        this.userStats = undefined;
-        this.userHistoryEvents = undefined;
         this.isConnected = new BehaviorSubject<boolean>(false);
 
         this.subscribeConnectionEvents();
@@ -111,18 +109,6 @@ export class UserService {
         });
     }
 
-    setUserStats() {
-        this.httpHandlerService.getStats().then((result) => {
-            this.userStats = result;
-        });
-    }
-
-    // setUserHistoryEvents() {
-    //     this.httpHandlerService.getUserHistoryEvents().then((result) => {
-    //         this.userHistoryEvents = result;
-    //     });
-    // }
-
     getUser(): IUser {
         return this.user;
     }
@@ -134,12 +120,6 @@ export class UserService {
 
         return player.user.profilePicture.key;
     }
-
-    // async getStats(): Promise<UserStats> {
-    //     return this.httpHandlerService.getStats().then((result) => {
-    //         return result.userStats;
-    //     });
-    // }
 
     async submitNewProfilePic(avatarData: AvatarData): Promise<boolean> {
         return this.httpHandlerService
