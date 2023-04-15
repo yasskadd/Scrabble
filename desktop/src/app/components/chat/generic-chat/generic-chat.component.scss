@@ -95,15 +95,24 @@ mat-tab-group {
     .person {
         margin-bottom: 2%;
     }
+}
 
+.other {
     strong {
         flex: 2;
         margin-left: 5%;
     }
+}
 
+.me {
+    strong {
+        flex: 2;
+        margin-left: 35%;
+    }
     p {
+        margin-bottom: 2%;
         flex: 5;
-        text-align: right;
+        text-align: left;
     }
 }
 

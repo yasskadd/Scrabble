@@ -54,7 +54,7 @@ export class ChatboxHandlerService {
         // private gameClient: GameClientService,
         // private commandHandler: CommandHandlerService,
         // private timerService: TimeService,
-        private userService: UserService,
+        public userService: UserService,
         private httpHandlerService: HttpHandlerService,
     ) {
         this.messages = [];
