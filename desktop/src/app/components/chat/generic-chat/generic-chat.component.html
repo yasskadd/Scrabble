@@ -111,9 +111,35 @@
 <!-- CHAT SESSION -->
 <div #container class="message-container" *ngIf="(chatboxHandler.chatSessionObs | async) !== undefined">
     <mat-card *ngFor="let message of chatboxHandler.messagesObs | async">
-        <div class="chat-metadata">
-            <img src="../../../assets/images/1.jpg" class="avatar" />
-            <strong>{{ message.username }}</strong>
+        <div class="chat-metadata me" *ngIf="chatboxHandler.userService.user._id === message.userId">
+            <p>{{ message.date }}</p>
+            <strong *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) !== undefined">
+                {{ (chatboxHandler.userInfoObs | async).get(message.userId).username }}
+            </strong>
+            <strong *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) === undefined">...</strong>
+            <img
+                *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) !== undefined"
+                [src]="(chatboxHandler.userInfoObs | async).get(message.userId).imageUrl"
+                class="avatar"
+            />
+            <button class="person" mat-fab color="primary" *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) === undefined">
+                <mat-icon>person</mat-icon>
+            </button>
+        </div>
+        <div class="chat-metadata other" *ngIf="chatboxHandler.userService.user._id !== message.userId">
+            <img
+                *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) !== undefined"
+                [src]="(chatboxHandler.userInfoObs | async).get(message.userId).imageUrl"
+                class="avatar"
+            />
+            <button class="person" mat-fab color="primary" *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) === undefined">
+                <mat-icon>person</mat-icon>
+            </button>
+
+            <strong *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) !== undefined">
+                {{ (chatboxHandler.userInfoObs | async).get(message.userId).username }}
+            </strong>
+            <strong *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) === undefined">...</strong>
             <p>{{ message.date }}</p>
         </div>
         <div class="message">{{ message.message }}</div>
