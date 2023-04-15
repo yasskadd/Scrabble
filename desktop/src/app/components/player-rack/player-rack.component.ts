@@ -6,7 +6,6 @@ import { LetterPlacementService } from '@app/services/letter-placement.service';
 import * as board from '@common/constants/board-info';
 import { Letter } from '@common/interfaces/letter';
 import { Subject } from 'rxjs';
-import { RackPosition } from '@app/models/rack-position';
 import { PlayerType } from '@common/models/player-type';
 import { PlayerInformation } from '@common/interfaces/player-information';
 import { ClientSocketService } from '@services/communication/client-socket.service';
@@ -33,8 +32,6 @@ export class PlayerRackComponent {
     previousSelection: number;
     lettersToExchange: number[];
     duplicates: number[];
-
-    protected rackPosition: typeof RackPosition = RackPosition;
 
     constructor(
         private chatBoxHandler: ChatboxHandlerService,
@@ -173,9 +170,5 @@ export class PlayerRackComponent {
             coord: [(event.event as MouseEvent).clientX, (event.event as MouseEvent).clientY],
             window: [windowSize.width, windowSize.height],
         });
-    }
-
-    protected askForClue(): void {
-        this.clientSocketService.send(SocketEvents.ClueCommand);
     }
 }

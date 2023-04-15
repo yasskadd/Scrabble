@@ -5,9 +5,11 @@ import { SocketEvents } from '@common/constants/socket-events';
 import { AvatarData } from '@common/interfaces/avatar-data';
 import { HistoryEvent } from '@common/interfaces/history-event';
 import { ImageInfo } from '@common/interfaces/image-info';
+import { RoomPlayer } from '@common/interfaces/room-player';
 import { IUser } from '@common/interfaces/user';
 import { UserStats } from '@common/interfaces/user-stats';
 import { ImageType } from '@common/models/image-type';
+import { PlayerType } from '@common/models/player-type';
 import { ClientSocketService } from '@services/communication/client-socket.service';
 import { SnackBarService } from '@services/snack-bar.service';
 import { BehaviorSubject } from 'rxjs';
@@ -24,6 +26,7 @@ export class UserService {
     isConnected: BehaviorSubject<boolean>;
 
     private tempUserData: IUser;
+    private botImageUrl: string;
 
     constructor(
         private httpHandlerService: HttpHandlerService,
@@ -45,8 +48,9 @@ export class UserService {
         });
         this.clientSocketService.cancelConnection.subscribe(() => {
             this.clientSocketService.reconnectionDialog = undefined;
-            this.logout();
+            this.logout().then();
         });
+        this.initBotImage().then();
     }
 
     subscribeConnectionEvents(): void {
@@ -79,7 +83,7 @@ export class UserService {
             () => {
                 // TODO : Language
                 this.isConnected.next(false);
-                this.logout();
+                this.logout().then();
             },
         );
         this.setUserStats();
@@ -112,6 +116,24 @@ export class UserService {
     //         this.userHistoryEvents = result;
     //     });
     // }
+
+    getUser(): IUser {
+        return this.user;
+    }
+
+    getPlayerImage(player: RoomPlayer): string {
+        if (player.type === PlayerType.Bot) {
+            return this.botImageUrl;
+        }
+
+        return player.user.profilePicture.key;
+    }
+
+    async getStats(): Promise<UserStats> {
+        return this.httpHandlerService.getStats().then((result) => {
+            return result.userStats;
+        });
+    }
 
     async submitNewProfilePic(avatarData: AvatarData): Promise<boolean> {
         return this.httpHandlerService
@@ -162,5 +184,11 @@ export class UserService {
                 user.profilePicture.key = res.url;
             });
         }
+    }
+
+    private async initBotImage(): Promise<void> {
+        await this.httpHandlerService.getBotImage().then((res) => {
+            this.botImageUrl = res.url;
+        });
     }
 }

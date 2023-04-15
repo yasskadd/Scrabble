@@ -65,7 +65,6 @@ export class GamesHandlerService {
         const playerIndex = this.players.findIndex((gamePlayer: GamePlayer) => gamePlayer.player.user._id === playerId);
         if (playerIndex === INVALID_INDEX) return;
 
-        console.log('removing player ' + this.players[playerIndex].player.user.username + ' from his game room');
         this.players.splice(playerIndex, 1);
     }
 
@@ -73,7 +72,6 @@ export class GamesHandlerService {
         const playerIndex = this.players.findIndex((gamePlayer: GamePlayer) => gamePlayer.player.socketId === socketId);
         if (playerIndex === INVALID_INDEX) return;
 
-        console.log('removing player ' + this.players[playerIndex].player.user.username + ' from his game room');
         this.players.splice(playerIndex, 1);
     }
 

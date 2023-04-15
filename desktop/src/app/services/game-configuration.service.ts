@@ -90,7 +90,6 @@ export class GameConfigurationService {
         });
 
         this.clientSocket.on(SocketEvents.UpdateGameRooms, (gamesToJoin: GameRoom[]) => {
-            console.log(gamesToJoin.map((g: GameRoom) => g.id));
             this.availableRooms = gamesToJoin;
         });
 

@@ -134,6 +134,11 @@ export class MainPageComponent {
         this.chatIsOpen = false;
     }
 
+    navigateJoinPage() {
+        this.clientSocketService.send(SocketEvents.UpdateGameRooms);
+        this.router.navigate([`/${AppRoutes.MultiJoinPage}/classique`]);
+    }
+
     private subscribeConnectionEvents(): void {
         if (this.subscribed) return;
 
@@ -152,10 +157,5 @@ export class MainPageComponent {
         });
 
         this.subscribed = true;
-    }
-
-    navigateJoinPage() {
-        this.clientSocketService.send(SocketEvents.UpdateGameRooms);
-        this.router.navigate([`/${AppRoutes.MultiJoinPage}/classique`]);
     }
 }

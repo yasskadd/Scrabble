@@ -76,7 +76,6 @@ export class WaitingRoomService {
         this.waitingRooms.splice(roomIndex, 1);
         this.chatHandler.deleteGameChatRoom(roomId);
 
-        console.log(this.waitingRooms.map((wr: GameRoom) => wr.players.map((p: RoomPlayer) => p.type)));
         this.gamesHandler.cleanRooms().forEach((id: string) => {
             this.waitingRooms = this.waitingRooms.filter((wr: GameRoom) => wr.id === id);
         });
@@ -100,10 +99,12 @@ export class WaitingRoomService {
     private joinGameRoom(server: Server, socket: SocketType, joinGameQuery: UserRoomQuery): void {
         const room: GameRoom | undefined = this.getRoom(joinGameQuery.roomId);
         if (this.userAlreadyConnected(joinGameQuery)) {
+            // console.log('ALREADY CONNECTED');
             socket.emit(SocketEvents.ErrorJoining, ServerErrors.RoomSameUser);
             return;
         }
         if (!room) {
+            // console.log('room not found');
             socket.emit(SocketEvents.ErrorJoining, ServerErrors.RoomNotAvailable);
             return;
         }
@@ -125,15 +126,16 @@ export class WaitingRoomService {
             type: PlayerType.User,
             isCreator: false,
         };
-        if (room.players.filter((player: RoomPlayer) => player.type === PlayerType.User).length === NUMBER_OF_PLAYERS) {
+        if (
+            room.players.filter((player: RoomPlayer) => player.type === PlayerType.User).length === NUMBER_OF_PLAYERS ||
+            room.state === GameRoomState.Playing
+        ) {
             newPlayer.type = PlayerType.Observer;
-        }
-        if (room.state === GameRoomState.Playing) {
-            newPlayer.type = PlayerType.Observer;
-        }
-        const botIndex = room.players.findIndex((player: RoomPlayer) => player.type === PlayerType.Bot);
-        if (botIndex !== INVALID_INDEX) {
-            room.players.splice(botIndex, 1);
+        } else {
+            const botIndex = room.players.findIndex((player: RoomPlayer) => player.type === PlayerType.Bot);
+            if (botIndex !== INVALID_INDEX) {
+                room.players.splice(botIndex, 1);
+            }
         }
         room.players.push(newPlayer);
 

@@ -6,11 +6,9 @@ import { RackPosition } from '@app/models/rack-position';
 import { GameClientService } from '@app/services/game-client.service';
 import { GridService } from '@app/services/grid.service';
 import { LetterPlacementService } from '@app/services/letter-placement.service';
-import { PlayerInformation } from '@common/interfaces/player-information';
 import { Subject } from 'rxjs';
 import { PlayerType } from '@common/models/player-type';
-import { ClientSocketService } from '@app/services/communication/client-socket.service';
-import { SocketEvents } from '@common/constants/socket-events';
+import { PlayerInformation } from '@common/interfaces/player-information';
 
 // export enum MouseButton {
 //     Left = 0,
@@ -28,27 +26,26 @@ export class PlayAreaComponent {
     mousePosition: Vec2;
     protected sliderForm: FormControl;
     protected chatIsOpen: boolean;
-    protected selectedPlayer: PlayerInformation;
 
     protected playerType: typeof PlayerType = PlayerType;
-
-    private clueIndex: number;
 
     constructor(
         private readonly gridService: GridService,
         protected letterService: LetterPlacementService,
-        private clientSocketService: ClientSocketService,
         public gameClientService: GameClientService,
     ) {
         this.sliderForm = new FormControl(this.gridService.letterSize);
         this.keyboardParentSubject = new Subject();
         this.mousePosition = { x: 0, y: 0 };
         this.chatIsOpen = false;
-        this.clueIndex = 1;
 
         // this.sliderForm.valueChanges.subscribe(() => {
         //     this.updateFontSize();
         // });
+    }
+
+    get selectedPlayer(): PlayerInformation {
+        return this.gameClientService.selectedPlayer;
     }
 
     get width(): number {
@@ -92,37 +89,7 @@ export class PlayAreaComponent {
         this.chatIsOpen = false;
     }
 
-    updateFontSize(): void {
-        this.gridService.letterSize = this.sliderForm.value;
-    }
-
-    selectPlayer(index: number): void {
-        this.selectedPlayer = this.gameClientService.players[index];
-    }
-
     getPosition(index: number): RackPosition {
         return Object.values(RackPosition)[index];
-    }
-
-    replaceBot(player: PlayerInformation) {
-        this.clientSocketService.send(SocketEvents.JoinAsObserver, player.player.user._id);
-    }
-
-    nextClue(): void {
-        this.letterService.removeClue(this.clueIndex);
-        this.clueIndex = (this.clueIndex + 1) % this.letterService.clueWords.length;
-        this.letterService.showClueWord(this.clueIndex);
-    }
-
-    prevClue(): void {
-        this.letterService.removeClue(this.clueIndex);
-        this.clueIndex = this.clueIndex - 1;
-        if (this.clueIndex < 0) this.clueIndex = this.letterService.clueWords.length - 1;
-
-        this.letterService.showClueWord(this.clueIndex);
-    }
-
-    placeClue(): void {
-        this.letterService.submitClue(this.clueIndex);
     }
 }
