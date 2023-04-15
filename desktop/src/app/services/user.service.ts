@@ -12,6 +12,8 @@ import { SnackBarService } from '@services/snack-bar.service';
 import { BehaviorSubject } from 'rxjs';
 import { AppCookieService } from './communication/app-cookie.service';
 import { HttpHandlerService } from './communication/http-handler.service';
+import { PlayerType } from '@common/models/player-type';
+import { RoomPlayer } from '@common/interfaces/room-player';
 
 @Injectable({
     providedIn: 'root',
@@ -22,6 +24,7 @@ export class UserService {
     isConnected: BehaviorSubject<boolean>;
 
     private tempUserData: IUser;
+    private botImageUrl: string;
 
     constructor(
         private httpHandlerService: HttpHandlerService,
@@ -41,8 +44,9 @@ export class UserService {
         });
         this.clientSocketService.cancelConnection.subscribe(() => {
             this.clientSocketService.reconnectionDialog = undefined;
-            this.logout();
+            this.logout().then();
         });
+        this.initBotImage().then();
     }
 
     login(user: IUser): void {
@@ -55,7 +59,7 @@ export class UserService {
             () => {
                 // TODO : Language
                 this.isConnected.next(false);
-                this.logout();
+                this.logout().then();
             },
         );
     }
@@ -96,6 +100,14 @@ export class UserService {
 
     getUser(): IUser {
         return this.user;
+    }
+
+    getPlayerImage(player: RoomPlayer): string {
+        if (player.type === PlayerType.Bot) {
+            return this.botImageUrl;
+        }
+
+        return player.user.profilePicture.key;
     }
 
     async getStats(): Promise<UserStats> {
@@ -167,5 +179,11 @@ export class UserService {
                 user.profilePicture.key = res.url;
             });
         }
+    }
+
+    private async initBotImage(): Promise<void> {
+        await this.httpHandlerService.getBotImage().then((res) => {
+            this.botImageUrl = res.url;
+        });
     }
 }

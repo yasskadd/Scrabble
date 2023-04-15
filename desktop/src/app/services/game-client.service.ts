@@ -29,6 +29,7 @@ export class GameClientService {
     quitGameSubject: Subject<void>;
     nextTurnSubject: Subject<void>;
     turnFinish: ReplaySubject<boolean>;
+    selectedPlayer: PlayerInformation;
 
     constructor(
         private clientSocketService: ClientSocketService,

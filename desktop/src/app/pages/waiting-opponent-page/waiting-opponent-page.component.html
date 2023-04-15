@@ -18,15 +18,11 @@
             <div class='pending-player' *ngFor='let player of gameConfiguration.localGameRoom.players; index as i'>
                 <!-- TODO : Language -->
                 <span class='player-infos'>
-                    <button *ngIf="!player.user.profilePicture" mat-fab color="primary" class="avatar-selector">
-                        <mat-icon>person</mat-icon>
-                    </button>
-                    <img [src]='player.user.profilePicture.key' *ngIf='player.user.profilePicture' class='selecter-avatar' alt='player.user profile picture' />
+                    <img [src]='userService.getPlayerImage(player)' class='selecter-avatar' alt='player.user profile picture' />
                     {{ player.user.username }}
                     </span>
                 <button
-                    *ngIf='gameConfiguration.isGameCreator() && player.user.username !== userService.user.username && player.user
-.profilePicture.name !== userService.user.profilePicture.name && player.type === playerType.User'
+                    *ngIf='gameConfiguration.isGameCreator() && player.user._id !== userService.user._id && player.type === playerType.User'
                     class='rejectButton'
                     (click)='gameConfiguration.rejectOpponent(player)'
                     mat-raised-button
