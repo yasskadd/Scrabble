@@ -39,6 +39,7 @@ export class GenericChatComponent implements AfterViewChecked, AfterContentInit 
             tauri.window.getCurrent().listen(RustEvent.UserData, (payload) => {
                 console.log(payload);
                 this.userService.user = payload as unknown as IUser;
+                this.userService.isConnected.next(true);
             });
         }
     }

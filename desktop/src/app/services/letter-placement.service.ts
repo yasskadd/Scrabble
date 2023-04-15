@@ -485,7 +485,6 @@ export class LetterPlacementService {
     }
 
     private subscribeDrag(): void {
-        console.log('subscribing');
         this.clientSocketService.on(SocketEvents.DragEvent, async (event: DragInfos) => {
             if (event.socketId === this.gameClientService.getLocalPlayer()?.player.socketId) return;
 

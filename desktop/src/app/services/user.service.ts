@@ -44,7 +44,6 @@ export class UserService {
         this.user = user;
         this.httpHandlerService.login(user).then(
             (loginRes: { userData: IUser; sessionToken: string }) => {
-                console.log(loginRes);
                 this.tempUserData = loginRes.userData;
                 this.cookieService.updateUserSessionCookie(loginRes.sessionToken).then();
             },
@@ -81,7 +80,7 @@ export class UserService {
                 this.snackBarService.openInfo('Connection successful');
                 this.updateUserWithImageUrl(this.user);
                 const chatWindow = new WebviewWindowHandle('chat');
-                chatWindow.emit(RustEvent.UserData, this.user);
+                chatWindow.emit(RustEvent.UserData, this.user).then();
             }
             this.isConnected.next(true);
 
