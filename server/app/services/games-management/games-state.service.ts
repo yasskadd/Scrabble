@@ -317,13 +317,15 @@ export class GamesStateService {
             this.socketManager.emitRoom(room, SocketEvents.UserDisconnect);
             // TODO : Repair and make that better for 4 players and bots
 
-            const bot = this.replacePlayerWithBot(gamePlayer as RealPlayer);
-            this.gamesHandler.addPlayer(bot);
-            server.to(bot.player.roomId).emit(SocketEvents.PublicViewUpdate, {
+            if (gamePlayer.player.type !== PlayerType.Observer) {
+                const bot = this.replacePlayerWithBot(gamePlayer as RealPlayer);
+                this.gamesHandler.addPlayer(bot);
+                server.to(bot.player.roomId).emit(SocketEvents.PublicViewUpdate, {
                 gameboard: bot.game.gameboard.toStringArray(),
                 players: this.gamesHandler.getPlayersInfos(bot.player.roomId),
                 activePlayer: bot.game.turn.activePlayer,
             });
+            }
 
             // TODO: Update room
             return;
