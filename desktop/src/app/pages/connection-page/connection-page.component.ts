@@ -4,6 +4,8 @@ import { Router } from '@angular/router';
 import { MAX_TEXT_LENGTH } from '@app/constants/user';
 import { UserService } from '@app/services/user.service';
 import { IUser } from '@common/interfaces/user';
+import { HttpHandlerService } from '@services/communication/http-handler.service';
+import { SnackBarService } from '@services/snack-bar.service';
 
 @Component({
     selector: 'app-connection-page',
@@ -16,7 +18,13 @@ export class ConnectionPageComponent {
     protected passwordForm: FormControl;
     protected connectionError: string;
 
-    constructor(private formBuilder: FormBuilder, private userService: UserService, private router: Router) {
+    constructor(
+        private httpHandlerService: HttpHandlerService,
+        private formBuilder: FormBuilder,
+        private userService: UserService,
+        private snackBarService: SnackBarService,
+        private router: Router,
+    ) {
         this.usernameForm = new FormControl('', [Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]);
         this.passwordForm = new FormControl('', [Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]);
         this.connectionError = '';
@@ -46,5 +54,14 @@ export class ConnectionPageComponent {
 
     protected redirectUserPage() {
         this.router.navigate(['/user']).then();
+    }
+
+    protected forgot(): void {
+        if (this.usernameForm.invalid) {
+            this.snackBarService.openError('Please enter a valid username');
+            return;
+        }
+
+        this.httpHandlerService.forgotPassword(this.usernameForm.value).then();
     }
 }

@@ -42,6 +42,7 @@ import { DialogBoxLetterSelectorComponent } from './components/dialog-box-letter
 import { DialogBoxModifyBotNamesComponent } from './components/dialog-box-modify-bot-names/dialog-box-modify-bot-names.component';
 import { DialogBoxModifyDictionaryComponent } from './components/dialog-box-modify-dictionary/dialog-box-modify-dictionary.component';
 import { DialogBoxPasswordComponent } from './components/dialog-box-password/dialog-box-password.component';
+import { DialogBoxReconnectionComponent } from './components/dialog-box-reconnection/dialog-box-reconnection.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { GameBoardComponent } from './components/game-board/game-board.component';
 import { HeaderComponent } from './components/header/header.component';
@@ -108,6 +109,7 @@ export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(h
         UserProfilePageComponent,
         DialogBoxLetterSelectorComponent,
         DialogBoxCreateChatComponent,
+        DialogBoxReconnectionComponent,
     ],
     imports: [
         CommonModule,

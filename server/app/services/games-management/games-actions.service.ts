@@ -42,16 +42,15 @@ export class GamesActionsService {
         });
 
         const commandInfoScoreMap = player.game.wordSolver.commandInfoScore(player.game.wordSolver.findAllOptions(letterString));
-        const clueCommandInfos = this.reduceClueOptions(commandInfoScoreMap)
+        const clueCommandInfos = this.reduceClueOptions(commandInfoScoreMap);
         socket.emit(SocketEvents.ClueCommand, clueCommandInfos);
     }
 
     private reduceClueOptions(commandInfoMap: Map<PlaceWordCommandInfo, number>): PlaceWordCommandInfo[] {
         const bestCommandInfos = Array.from(commandInfoMap)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, CLUE_COUNT_PER_COMMAND_CALL)
-        .map(([key]) => key);
-        console.log(bestCommandInfos);
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, CLUE_COUNT_PER_COMMAND_CALL)
+            .map(([key]) => key);
         return bestCommandInfos;
     }
 

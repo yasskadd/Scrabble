@@ -190,6 +190,11 @@ export class HttpHandlerService {
         return JSON.parse(res.body);
     }
 
+    async getBotImage(): Promise<{ url: string }> {
+        const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/image/bot/profile-picture` });
+        return JSON.parse(res.body);
+    }
+
     async modifyProfilePicture(image: AvatarData, isDefault: boolean): Promise<{ userData: IUser }> {
         if (isDefault) {
             const res: HttpResponse = await invoke('httpPatch', {
@@ -211,6 +216,14 @@ export class HttpHandlerService {
                 resolve(JSON.parse(res.body));
             };
         });
+    }
+
+    async forgotPassword(username: string): Promise<void> {
+        const res: HttpResponse = await invoke('httpPost', {
+            url: `${this.baseUrl}/profile/forgot-password`,
+            onceToldMe: JSON.stringify({ username }),
+        });
+        return JSON.parse(res.body);
     }
 
     // private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {

@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { DialogBoxReconnectionComponent } from '@app/components/dialog-box-reconnection/dialog-box-reconnection.component';
 import { RustCommand, RustEvent } from '@app/models/rust-command';
 import { LanguageService } from '@services/language.service';
 import { SnackBarService } from '@services/snack-bar.service';
@@ -6,7 +8,7 @@ import { TauriStateService } from '@services/tauri-state.service';
 import * as tauri from '@tauri-apps/api';
 import { Event } from '@tauri-apps/api/event';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { io, Socket } from 'socket.io-client';
+import { Socket, io } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -15,17 +17,20 @@ import { environment } from 'src/environments/environment';
 export class ClientSocketService {
     appUpdate: Subject<void>;
     connected: BehaviorSubject<boolean>;
+    reconnect: Subject<void>;
     cancelConnection: Subject<void>;
-
+    reconnectionDialog: MatDialogRef<DialogBoxReconnectionComponent>;
     private socket: Socket;
 
     constructor(
         private snackBarService: SnackBarService,
         private languageService: LanguageService,
         private tauriStateService: TauriStateService, // private dialog: MatDialog,
+        private dialog: MatDialog,
     ) {
         this.appUpdate = new Subject();
         this.connected = new BehaviorSubject<boolean>(false);
+        this.reconnect = new Subject();
         this.cancelConnection = new Subject();
     }
 
@@ -121,22 +126,16 @@ export class ClientSocketService {
             if (data) {
                 tauri.tauri.invoke(RustCommand.Send, { eventName: event, data: JSON.stringify(data) }).then(() => {
                     tauri.event
-                        .listen(RustEvent.SocketSendFailed, (error: Event<unknown>) => {
-                            this.languageService.getWord('error.socket.send_failed').subscribe((word: string) => {
-                                this.snackBarService.openError((word + ' : ' + error.payload) as string);
-                                // TODO : Propose a reconnection attempt
-                                // this.dialog.open();
-                            });
+                        .listen(RustEvent.SocketSendFailed, () => {
+                            this.launchReconnectionProtocol();
                         })
                         .then();
                 });
             } else {
                 tauri.tauri.invoke(RustCommand.Send, { eventName: event }).then(() => {
                     tauri.event
-                        .listen(RustEvent.SocketSendFailed, (error: Event<unknown>) => {
-                            this.languageService.getWord('error.socket.send_failed').subscribe((word: string) => {
-                                this.snackBarService.openError((word + ' : ' + error.payload) as string);
-                            });
+                        .listen(RustEvent.SocketSendFailed, () => {
+                            this.launchReconnectionProtocol();
                         })
                         .then();
                 });
@@ -148,5 +147,25 @@ export class ClientSocketService {
                 this.socket.emit(event);
             }
         }
+    }
+
+    launchReconnectionProtocol(): void {
+        this.languageService.getWord('error.socket.send_failed').subscribe(() => {
+            // this.snackBarService.openError((word + ' : ' + error.payload) as string);
+
+            if (this.reconnectionDialog) return;
+
+            // TODO : Propose a reconnection attempt
+            this.reconnectionDialog = this.dialog.open(DialogBoxReconnectionComponent, {
+                disableClose: true,
+            });
+            this.reconnectionDialog.afterClosed().subscribe((toReconnect: boolean) => {
+                if (toReconnect) {
+                    this.reconnect.next();
+                    return;
+                }
+                this.cancelConnection.next();
+            });
+        });
     }
 }

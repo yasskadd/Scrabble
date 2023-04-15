@@ -1,18 +1,16 @@
 import { createTransport } from 'nodemailer';
 import { MailOptions } from 'nodemailer/lib/json-transport';
 
-
 const EMAIL = 'scrabble922@gmail.com';
 const PASSWORD = 'obnyjbqhlwyamlgn';
 
-
 export const transporter = createTransport({
     service: 'gmail',
-    host: "smtp.gmail.com", // SMTP server address (usually mail.your-domain.com)
+    host: 'smtp.gmail.com', // SMTP server address (usually mail.your-domain.com)
     port: 465, // Port for SMTP (usually 465)
     secure: true, // Usually true if connecting to port 465
     auth: {
-        user : EMAIL,
+        user: EMAIL,
         pass: PASSWORD,
     },
     from: EMAIL,
@@ -46,5 +44,4 @@ export const getPasswordResetEmail = (username: string, temporaryPassword: strin
       </html>
     `;
     return emailTemplate;
-  }
-  
+};

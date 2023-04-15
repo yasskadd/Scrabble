@@ -12,36 +12,35 @@
 
                 <div *ngIf='gameClientService.getLocalPlayer().player.type === playerType.Observer'
                      class='rack-container'>
-                    <app-player-rack
-                        [keyboardParentSubject]='keyboardParentSubject'
-                        [player]='selectedPlayer'
-                        class='player-rack'
-                    ></app-player-rack>
-                    <div class='player-selector'>
-                        <div *ngFor='let player of gameClientService.players; index as i'>
-                            <img
-                                [mat-menu-trigger-for]='player_menu'
-                                [src]='player.player.user.profilePicture.key'
-                                class='player-choice mat-elevation-z5'
-                            />
-                            <mat-menu #player_menu='matMenu'>
-                                <button (click)='selectPlayer(i)' mat-menu-item>
-                                    <mat-icon>visibility</mat-icon>
-                                    <!-- TODO : Language -->
-                                    <span>Voir</span>
-                                </button>
-                                <button (click)='replaceBot(player)' *ngIf='player.player.type === playerType.Bot'
-                                        mat-menu-item>
-                                    <mat-icon>sync</mat-icon>
-                                    <!-- TODO : Language-->
-                                    <span>Remplacer</span>
-                                </button>
-                            </mat-menu>
-                        </div>
-                    </div>
+
+                    <app-player-rack [keyboardParentSubject]='keyboardParentSubject' [player]='selectedPlayer'
+                                     class='player-rack'></app-player-rack>
+<!--                    <div class='player-selector'>-->
+<!--                        <div *ngFor='let player of gameClientService.players; index as i'>-->
+<!--                            <img-->
+<!--                                [mat-menu-trigger-for]='player_menu'-->
+<!--                                [src]='player.player.user.profilePicture.key'-->
+<!--                                class='player-choice mat-elevation-z5'-->
+<!--                            />-->
+<!--                            <mat-menu #player_menu='matMenu'>-->
+<!--                                <button (click)='selectPlayer(i)' mat-menu-item>-->
+<!--                                    <mat-icon>visibility</mat-icon>-->
+<!--                                    &lt;!&ndash; TODO : Language &ndash;&gt;-->
+<!--                                    <span>Voir</span>-->
+<!--                                </button>-->
+<!--                                <button (click)='replaceBot(player)' *ngIf='player.player.type === playerType.Bot'-->
+<!--                                        mat-menu-item>-->
+<!--                                    <mat-icon>sync</mat-icon>-->
+<!--                                    &lt;!&ndash; TODO : Language&ndash;&gt;-->
+<!--                                    <span>Remplacer</span>-->
+<!--                                </button>-->
+<!--                            </mat-menu>-->
+<!--                        </div>-->
+<!--                    </div>-->
                 </div>
 
                 <div *ngIf='gameClientService.getLocalPlayer().player.type === playerType.User' class='rack-container'>
+
                     <app-player-rack
                         [keyboardParentSubject]='keyboardParentSubject'
                         [player]='gameClientService.getLocalPlayer()'
@@ -49,8 +48,8 @@
                     ></app-player-rack>
                 </div>
 
-                <button *ngIf='chatIsOpen' class='open-chat-button' mat-button color='primary'
-                        (click)='drawer.toggle()' (click)='closeChat()'>
+                <button *ngIf='chatIsOpen' class='open-chat-button' mat-button color='primary' (click)='drawer.toggle()'
+                        (click)='closeChat()'>
                     {{ "main_page.chat.close" | translate }}
                     <mat-icon>keyboard_arrow_right</mat-icon>
                 </button>

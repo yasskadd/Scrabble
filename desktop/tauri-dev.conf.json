@@ -69,13 +69,13 @@
         "windows": [
             {
                 "fullscreen": false,
-                "height": 800,
                 "resizable": true,
                 "title": "PolyScrabble - dev - 1",
-                "width": 1000,
                 "focus": false,
-                "minWidth": 1000,
-                "minHeight": 800,
+                "width": 1460,
+                "height": 950,
+                "minWidth": 1460,
+                "minHeight": 950,
                 "label": "main"
             }
         ]
