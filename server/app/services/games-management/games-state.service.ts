@@ -36,7 +36,6 @@ import { Service } from 'typedi';
 import { GamesHandlerService } from './games-handler.service';
 
 const MAX_SKIP = 6;
-const SECOND = 1000;
 const ERROR_REPLACING_BOT = 'Error trying to replace the bot';
 
 @Service()
@@ -53,13 +52,13 @@ export class GamesStateService {
     initSocketsEvents(): void {
         // LEAVE GAME
         this.socketManager.io(SocketEvents.Disconnect, (server: Server, socket: Socket) => {
-            this.abandonGame(server, socket);
+            this.abandonGame(socket);
         });
         this.socketManager.io(SocketEvents.QuitGame, (server: Server, socket: Socket) => {
-            this.disconnect(server, socket);
+            this.abandonGame(socket);
         });
         this.socketManager.io(SocketEvents.AbandonGame, async (server: Server, socket: Socket) => {
-            await this.abandonGame(server, socket);
+            await this.abandonGame(socket);
         });
 
         // OBSERVER
@@ -286,74 +285,37 @@ export class GamesStateService {
         this.socketManager.emitRoom(roomId, SocketEvents.TimerClientUpdate, timer);
     }
 
-    private async abandonGame(server: Server, socket: Socket): Promise<void> {
+    private async abandonGame(socket: Socket): Promise<void> {
+        console.log(socket.id);
         const gamePlayer = this.gamesHandler.getPlayer(socket.id);
         if (!gamePlayer) return;
+        console.log(gamePlayer.player.user.username);
 
-        console.log('user ' + gamePlayer.player.user + ' is abandoning');
-
-        await this.userStatsStorage.updatePlayerStats(this.formatGameInfo(gamePlayer));
-
+        const room = gamePlayer.player.roomId;
+        const gameHistoryInfo = this.formatGameInfo(gamePlayer);
+        await this.userStatsStorage.updatePlayerStats(gameHistoryInfo);
         this.gamesHandler.removePlayerFromSocketId(socket.id);
-        const bot = this.replacePlayerWithBot(gamePlayer as RealPlayer);
+        socket.leave('game' + gamePlayer.player.roomId); // leave game chat room
+        socket.leave(gamePlayer.player.roomId);
+        if (
+            !gamePlayer.game.isModeSolo &&
+            this.gamesHandler.getPlayersInRoom(room).filter((player) => player.player.type === PlayerType.User).length > 0
+        ) {
+            this.socketManager.emitRoom(room, SocketEvents.UserDisconnect);
+            // TODO : Repair and make that better for 4 players and bots
 
-        // TODO: LEAVE CHATROOM
-        socket.leave(bot.player.roomId);
-        this.gamesHandler.addPlayer(bot);
+            const bot = this.replacePlayerWithBot(gamePlayer as RealPlayer);
+            this.gamesHandler.addPlayer(bot);
 
-        server.to(bot.player.roomId).emit(SocketEvents.PublicViewUpdate, {
-            gameboard: bot.game.gameboard.toStringArray(),
-            players: this.gamesHandler.getPlayersInRoom(bot.player.roomId).map((p: GamePlayer) => {
-                return p.getInformation();
-            }),
-            activePlayer: bot.game.turn.activePlayer,
-        });
-
-        if (gamePlayer.game.isModeSolo || !this.gamesHandler.usersRemaining(gamePlayer.player.roomId)) {
-            console.log('removing room');
-            gamePlayer.game.abandon();
-            this.gamesHandler.getPlayersInRoom(gamePlayer.player.roomId).forEach((player: GamePlayer) => {
-                this.socketManager.getSocketFromId(player.player.socketId)?.leave(bot.player.roomId);
-            });
-            this.gamesHandler.removeRoom(gamePlayer.player.roomId);
-            gamePlayer.game.abandon();
-
+            // TODO: Update room
             return;
         }
         // TODO: What to do if there are still observers in game ?
         gamePlayer.game.abandon();
+        // this.gameEnded.next(room);
     }
 
-    private disconnect(server: Server, socket: Socket) {
-        const gamePlayer = this.gamesHandler.getPlayer(socket.id);
-        if (!gamePlayer) return;
 
-        if (this.gamesHandler.getPlayersInRoom(gamePlayer.player.roomId).length > 0 && !gamePlayer.game.isGameFinish) {
-            const player = this.gamesHandler.getPlayer(socket.id);
-            if (player) {
-                const bot = this.replacePlayerWithBot(player as RealPlayer);
-                this.gamesHandler.removePlayerFromSocketId(socket.id);
-                this.gamesHandler.addPlayer(bot);
-                // TODO: Update room that a new bot has replaced the player
-            }
-            this.waitBeforeDisconnect(server, socket);
-            return;
-        }
-
-        socket.leave(gamePlayer.player.roomId);
-        this.gamesHandler.removePlayerFromSocketId(socket.id);
-        this.socketManager.emitRoom(gamePlayer.player.roomId, SocketEvents.UserDisconnect);
-    }
-
-    private waitBeforeDisconnect(server: Server, socket: Socket) {
-        let tempTime = 5;
-        setInterval(async () => {
-            tempTime = tempTime - 1;
-            if (tempTime === 0) {
-                await this.abandonGame(server, socket);
-            }
-        }, SECOND);
-    }
     private async endGame(socketId: string) {
         const gamePlayer = this.gamesHandler.getPlayer(socketId);
         if (!gamePlayer) return;
