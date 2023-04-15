@@ -4,6 +4,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatBadgeModule } from '@angular/material/badge';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
@@ -34,12 +35,14 @@ import { GenericChatComponent } from './components/chat/generic-chat/generic-cha
 import { ChatboxComponent } from './components/chatbox/chatbox.component';
 import { DialogBoxAbandonGameComponent } from './components/dialog-box-abandon-game/dialog-box-abandon-game.component';
 import { DialogBoxAvatarSelectorComponent } from './components/dialog-box-avatar-selector/dialog-box-avatar-selector.component';
+import { DialogBoxCreateChatComponent } from './components/dialog-box-create-chat/dialog-box-create-chat.component';
 import { DialogBoxGameTypeComponent } from './components/dialog-box-game-type/dialog-box-game-type.component';
 import { DialogBoxHighScoresComponent } from './components/dialog-box-high-scores/dialog-box-high-scores.component';
 import { DialogBoxLetterSelectorComponent } from './components/dialog-box-letter-selector/dialog-box-letter-selector.component';
 import { DialogBoxModifyBotNamesComponent } from './components/dialog-box-modify-bot-names/dialog-box-modify-bot-names.component';
 import { DialogBoxModifyDictionaryComponent } from './components/dialog-box-modify-dictionary/dialog-box-modify-dictionary.component';
 import { DialogBoxPasswordComponent } from './components/dialog-box-password/dialog-box-password.component';
+import { DialogBoxReconnectionComponent } from './components/dialog-box-reconnection/dialog-box-reconnection.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { GameBoardComponent } from './components/game-board/game-board.component';
 import { HeaderComponent } from './components/header/header.component';
@@ -57,7 +60,6 @@ import { SettingsPageComponent } from './pages/settings-page/settings-page.compo
 import { UserCreationPageComponent } from './pages/user-creation-page/user-creation-page.component';
 import { UserProfilePageComponent } from './pages/user-profile-page/user-profile-page.component';
 import { WaitingOpponentPageComponent } from './pages/waiting-opponent-page/waiting-opponent-page.component';
-import { DialogBoxReconnectionComponent } from './components/dialog-box-reconnection/dialog-box-reconnection.component';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(http, '../assets/i18n/', '.json');
@@ -106,6 +108,7 @@ export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(h
         DialogBoxPasswordComponent,
         UserProfilePageComponent,
         DialogBoxLetterSelectorComponent,
+        DialogBoxCreateChatComponent,
         DialogBoxReconnectionComponent,
     ],
     imports: [
@@ -113,6 +116,7 @@ export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(h
         CookieModule.withOptions(),
         AppMaterialModule,
         AppRoutingModule,
+        MatBadgeModule,
         DragDropModule,
         MatSnackBarModule,
         MatInputModule,

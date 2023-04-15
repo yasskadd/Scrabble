@@ -144,7 +144,9 @@
         "input_example": "Ex. Hi!",
         "joined_chats": "Joined channels",
         "available_chats": "Available channels",
-        "join": "Join"
+        "join": "JOIN",
+        "leave": "LEAVE",
+        "create": "Create a new room"
     },
     "footer": {
         "team": "Team"

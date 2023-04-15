@@ -34,7 +34,7 @@ export class ConnectionPageComponent {
             passwordForm: this.passwordForm,
         });
 
-        this.userService.isConnected.subscribe((connected: false) => {
+        this.userService.isConnected.subscribe((connected: boolean) => {
             if (connected) {
                 // TODO : Language
                 // this.connectionError = res;

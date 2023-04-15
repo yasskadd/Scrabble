@@ -3,7 +3,7 @@
     <body class="mat-app-background">
         <button
             mat-fab
-            *ngIf="!userService.user.profilePicture"
+            *ngIf="userService.isConnected.getValue() && !userService.user.profilePicture"
             color="primary"
             (click)="openAvatarSelector()"
             class="avatar-selector"
@@ -13,7 +13,7 @@
         </button>
         <img
             *ngIf="userService.user.profilePicture && !profilePicForm.value"
-            [src]="userService.user.profilePicture.key"
+            [src]="userService.getUser().profilePicture.key"
             (click)="openAvatarSelector()"
             class="selecter-avatar mat-elevation-z5"
         />

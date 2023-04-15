@@ -10,4 +10,5 @@ export enum AppRoutes {
     MultiJoinPage = 'multi/join',
     MultiGameCreationPage = 'multi/create',
     MultiWaitingPage = 'multi/waiting',
+    Chat = 'chat',
 }

@@ -3,6 +3,8 @@ export enum RustCommand {
     Disconnect = 'socketDisconnect',
     Send = 'socketSend',
     IsSocketAlive = 'isSocketAlive',
+    ChatWindowListening = 'chatWindowListening',
+    ChatWindowUnlistening = 'chatWindowUnlistening',
 }
 
 export enum RustEvent {
@@ -11,4 +13,6 @@ export enum RustEvent {
     SocketSendFailed = 'socketSendFailed',
     SocketAlive = 'socketAlive',
     SocketNotAlive = 'socketNotAlive',
+    WindowEvent = 'windowEvent',
+    UserData = 'userData',
 }

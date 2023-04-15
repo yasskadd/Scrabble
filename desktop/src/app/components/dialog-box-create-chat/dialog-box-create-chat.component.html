@@ -1,0 +1,18 @@
+<h1 mat-dialog-title>Create room</h1>
+<div mat-dialog-content>
+    <mat-form-field>
+        <mat-label>Room name</mat-label>
+        <input type="text" matInput maxlength="20" [(ngModel)]="data" />
+        <mat-hint
+            [ngClass]="{
+                max: data.length === 20
+            }"
+            align="end"
+            >{{ data.length || 0 }}/20
+        </mat-hint>
+    </mat-form-field>
+</div>
+<div mat-dialog-actions>
+    <button mat-button (click)="onNoClick()">No Thanks</button>
+    <button mat-button [mat-dialog-close]="data" cdkFocusInitial>Ok</button>
+</div>

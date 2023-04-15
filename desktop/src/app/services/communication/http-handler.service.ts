@@ -5,6 +5,7 @@ import { HighScores } from '@app/interfaces/high-score-parameters';
 import { AvatarData } from '@common/interfaces/avatar-data';
 import { Bot } from '@common/interfaces/bot';
 import { BotNameSwitcher } from '@common/interfaces/bot-name-switcher';
+import { ChatRoomUser } from '@common/interfaces/chat-room';
 import { GameHistoryInfo } from '@common/interfaces/game-history-info';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
 import { IUser } from '@common/interfaces/user';
@@ -49,6 +50,12 @@ export class HttpHandlerService {
     async deleteHistory(): Promise<GameHistoryInfo[]> {
         const res: HttpResponse = await invoke('httpDelete', { url: `${this.baseUrl}/history` });
 
+        return JSON.parse(res.body);
+    }
+
+    async getChatUserInfo(id: string): Promise<ChatRoomUser> {
+        const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/chat/user/${id}` });
+        console.log(res.body);
         return JSON.parse(res.body);
     }
 
