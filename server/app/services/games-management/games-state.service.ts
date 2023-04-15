@@ -286,14 +286,10 @@ export class GamesStateService {
     }
 
     private async abandonGame(socket: Socket): Promise<void> {
-        console.log(socket.id);
         const gamePlayer = this.gamesHandler.getPlayer(socket.id);
         if (!gamePlayer) return;
-        console.log(gamePlayer.player.user.username);
 
         const room = gamePlayer.player.roomId;
-        const gameHistoryInfo = this.formatGameInfo(gamePlayer);
-        await this.userStatsStorage.updatePlayerStats(gameHistoryInfo);
         this.gamesHandler.removePlayerFromSocketId(socket.id);
         socket.leave('game' + gamePlayer.player.roomId); // leave game chat room
         socket.leave(gamePlayer.player.roomId);
@@ -315,14 +311,11 @@ export class GamesStateService {
         // this.gameEnded.next(room);
     }
 
+    private async endGame(roomId: string) {
+        const gamePlayers = this.gamesHandler.getPlayersInRoom(roomId);
+        if (gamePlayers.length === 0 && gamePlayers[0].game.isGameFinish) return;
 
-    private async endGame(socketId: string) {
-        const gamePlayer = this.gamesHandler.getPlayer(socketId);
-        if (!gamePlayer) return;
-        const gamePlayers = this.gamesHandler.getPlayersInRoom(gamePlayer.player.roomId);
-        if (gamePlayers.length === 0 && gamePlayer.game.isGameFinish) return;
-
-        gamePlayer.game.isGameFinish = true;
+        gamePlayers[0].game.isGameFinish = true;
         this.updatePlayersStats(gamePlayers);
 
         console.log('kicking players');
@@ -332,7 +325,7 @@ export class GamesStateService {
 
             socket.emit(SocketEvents.GameEnd);
         });
-        this.gamesHandler.removeRoom(gamePlayer.player.roomId);
+        this.gamesHandler.removeRoom(roomId);
     }
 
     private async broadcastHighScores(roomId: string): Promise<void> {
