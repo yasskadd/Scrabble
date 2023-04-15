@@ -52,10 +52,10 @@ export class GamesStateService {
     initSocketsEvents(): void {
         // LEAVE GAME
         this.socketManager.io(SocketEvents.Disconnect, (server: Server, socket: Socket) => {
-            this.abandonGame(socket);
+            this.abandonGame(socket, server);
         });
         this.socketManager.io(SocketEvents.AbandonGame, async (server: Server, socket: Socket) => {
-            await this.abandonGame(socket);
+            await this.abandonGame(socket, server);
         });
 
         // OBSERVER
@@ -282,7 +282,7 @@ export class GamesStateService {
         this.socketManager.emitRoom(roomId, SocketEvents.TimerClientUpdate, timer);
     }
 
-    private async abandonGame(socket: Socket): Promise<void> {
+    private async abandonGame(socket: Socket, server: Server): Promise<void> {
         const gamePlayer = this.gamesHandler.getPlayer(socket.id);
         if (!gamePlayer) return;
 
@@ -299,6 +299,11 @@ export class GamesStateService {
 
             const bot = this.replacePlayerWithBot(gamePlayer as RealPlayer);
             this.gamesHandler.addPlayer(bot);
+            server.to(bot.player.roomId).emit(SocketEvents.PublicViewUpdate, {
+                gameboard: bot.game.gameboard.toStringArray(),
+                players: this.gamesHandler.getPlayersInfos(bot.player.roomId),
+                activePlayer: bot.game.turn.activePlayer,
+            });
 
             // TODO: Update room
             return;
@@ -445,7 +450,7 @@ export class GamesStateService {
             bot.game.turn.inactivePlayers?.splice(indexOfUser as number, 1, bot.player.user);
         }
         bot.start();
-        console.log(bot.game.turn);
+        bot.game.turn.endTurn.next(game.turn.activePlayer);
         return bot;
     }
 
