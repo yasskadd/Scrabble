@@ -201,7 +201,6 @@ export class GamesStateService {
     }
 
     private calculateEndGameScore(roomID: string): void {
-        console.log('In calculateEndGameScore');
         const players = this.gamesHandler.getPlayersInRoom(roomID);
         const game = players.find((gamePlayer: GamePlayer) => gamePlayer.player.type === PlayerType.User)?.game;
         if (!game || !players) return;
@@ -287,10 +286,8 @@ export class GamesStateService {
     }
 
     private async abandonGame(socket: Socket): Promise<void> {
-        console.log(socket.id);
         const gamePlayer = this.gamesHandler.getPlayer(socket.id);
         if (!gamePlayer) return;
-        console.log(gamePlayer.player.user.username);
 
         const room = gamePlayer.player.roomId;
         this.gamesHandler.removePlayerFromSocketId(socket.id);
@@ -333,8 +330,6 @@ export class GamesStateService {
 
     private async broadcastHighScores(roomId: string): Promise<void> {
         const players = this.gamesHandler.getPlayersInRoom(roomId);
-        console.log('IN broadcastHighScores');
-        console.log(`players : ${players}`);
 
         if (players.length > 0) await this.endGame(roomId);
 
@@ -355,9 +350,7 @@ export class GamesStateService {
     }
 
     private updatePlayersStats(gamePlayers: GamePlayer[]) {
-        console.log('IN updatePlayersStats');
         const gameWinnerPlayer = this.getWinnerPlayer(gamePlayers);
-        console.log(`Winning player : ${gameWinnerPlayer.player}`);
         gamePlayers.forEach(async (player) => {
             if (player.player.type === PlayerType.Bot || player.player.type === PlayerType.Observer) return;
             const playerWonGame = player.player.socketId === gameWinnerPlayer.player.socketId;
