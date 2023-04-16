@@ -44,23 +44,3 @@ app-play-area {
     position: absolute;
     align-items: center;
 }
-
-#reserve {
-    display: flex;
-    align-items: center;
-    color: #23501f;
-}
-
-#number-letters {
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #fbd7a3;
-    border-radius: 3px;
-    margin: 10px;
-    width: 30px;
-    height: 30px;
-    box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
-    text-align: center;
-}

@@ -4,10 +4,7 @@
 </div>
 <div *ngIf="!isLoading" class="encapsulating-div mat-app-background">
     <app-header></app-header>
-    <div id="reserve">
-        <div id="number-letters">{{ this.gameClientService.letterReserveLength }}</div>
-        lettres disponibles dans la réserve
-    </div>
+
     <app-play-area class="play-area justified mat-app-background" tabindex="0"></app-play-area>
 
     <div
