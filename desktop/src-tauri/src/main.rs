@@ -417,14 +417,14 @@ async fn chatWindowListening(handle: tauri::AppHandle) {
     let eventEmmitter = handle.get_window("chat").unwrap();
     listener.listen_global(RustEvent::WindowEvent.to_string(), move |event| {
         eventEmmitter
-            .emit_all(RustEvent::WindowEvent.to_string(), event.payload())
+            .emit(RustEvent::WindowEvent.to_string(), event.payload())
             .unwrap();
     });
 
     let userDataEmitter = handle.get_window("chat").unwrap();
     listener.listen_global(RustEvent::UserData.to_string(), move |event| {
         userDataEmitter
-            .emit_all(RustEvent::UserData.to_string(), event.payload())
+            .emit(RustEvent::UserData.to_string(), event.payload())
             .unwrap();
     });
 }
@@ -436,9 +436,7 @@ async fn chatWindowUnlistening(handle: tauri::AppHandle) {
         .get_window("chat")
         .unwrap()
         .listen_global("windowEvent", move |event| {
-            windowHandle
-                .emit_all("windowEvent", event.payload())
-                .unwrap();
+            windowHandle.emit("windowEvent", event.payload()).unwrap();
         });
 }
 

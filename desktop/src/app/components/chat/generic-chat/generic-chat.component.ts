@@ -27,6 +27,7 @@ export class GenericChatComponent implements AfterViewChecked, AfterContentInit 
     inputForm: FormControl;
     searchForm: FormControl;
     searchAllForm: FormControl;
+    focus: boolean;
 
     private lastMessage: string;
 
@@ -38,6 +39,7 @@ export class GenericChatComponent implements AfterViewChecked, AfterContentInit 
         private snackBarService: SnackBarService,
         private languageService: LanguageService,
     ) {
+        this.focus = false;
         this.inputForm = new FormControl('');
         this.searchForm = new FormControl('');
         this.searchAllForm = new FormControl('');
@@ -78,6 +80,18 @@ export class GenericChatComponent implements AfterViewChecked, AfterContentInit 
         this.chatbox?.nativeElement.focus();
     }
 
+    write(event: KeyboardEvent): void {
+        if (event.key === 'Backspace') {
+            event.preventDefault();
+            let newMessage = this.inputForm.value;
+            newMessage = newMessage.substring(0, this.inputForm.value.length - 1);
+            this.inputForm.setValue(newMessage);
+        } else if (event.key !== 'Enter') {
+            event.preventDefault();
+            this.inputForm.setValue(this.inputForm.value + event.key);
+        }
+    }
+
     test(): void {
         this.socket.send(SocketEvents.EnterRoomLobby);
 
@@ -93,6 +107,7 @@ export class GenericChatComponent implements AfterViewChecked, AfterContentInit 
     submit() {
         if (this.inputForm.value.trim() !== '') this.chatboxHandler.submitMessage(this.inputForm.value);
         this.resetInput();
+        this.scrollToBottom();
     }
 
     leaveRoom() {
@@ -129,10 +144,12 @@ export class GenericChatComponent implements AfterViewChecked, AfterContentInit 
 
     joinChatSession(chatRoomName: string) {
         this.chatboxHandler.requestJoinRoomSession(chatRoomName);
+        this.scrollToBottom();
     }
 
     joinChat(chatRoomName: string) {
         this.chatboxHandler.requestJoinChatRoom(chatRoomName);
+        this.scrollToBottom();
     }
 
     openCreateChatDialog(): void {
@@ -215,6 +232,7 @@ export class GenericChatComponent implements AfterViewChecked, AfterContentInit 
                 setTimeout(() => {
                     tauri.window.getCurrent().emit(RustEvent.UserData, this.userService.user);
                 }, 1000);
+                this.chatboxHandler.chatWindowOpened.next(true);
             })
             .then();
     }
