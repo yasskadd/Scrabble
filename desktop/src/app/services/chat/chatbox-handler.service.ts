@@ -238,6 +238,7 @@ export class ChatboxHandlerService {
         if (this.chatSession === roomName) {
             this.messages.push(newMessage);
             this._messagesSubject.next(this.messages);
+            if (!this.userInfoHashMap.has(newMessage.userId)) this.updateUserInfoSet();
         } else {
             this.sendNotification(roomName);
         }
