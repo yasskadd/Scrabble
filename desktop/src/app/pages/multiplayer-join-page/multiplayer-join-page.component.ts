@@ -1,7 +1,7 @@
-import { AfterViewInit, Component, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, NgZone, OnDestroy } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DialogBoxPasswordComponent } from '@app/components/dialog-box-password/dialog-box-password.component';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
 import { SocketEvents } from '@common/constants/socket-events';
@@ -13,6 +13,7 @@ import { GameVisibility } from '@common/models/game-visibility';
 import { PlayerType } from '@common/models/player-type';
 import { ClientSocketService } from '@services/communication/client-socket.service';
 import { TimeService } from '@services/time.service';
+import { AppRoutes } from '@app/models/app-routes';
 
 @Component({
     selector: 'app-multiplayer-join-page',
@@ -29,6 +30,8 @@ export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
         private activatedRoute: ActivatedRoute,
         private dialog: MatDialog,
         private clientSocketService: ClientSocketService,
+        private router: Router,
+        private ngZone: NgZone,
     ) {
         this.gameMode = this.activatedRoute.snapshot.params.id;
         this.roomIdForm = new FormControl('');
@@ -99,5 +102,11 @@ export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
 
     protected getGameCreator(gameRoom: GameRoom): RoomPlayer {
         return gameRoom.players.find((player: RoomPlayer) => player.isCreator);
+    }
+
+    protected navigateHome() {
+        this.ngZone.run(() => {
+            this.router.navigate([AppRoutes.HomePage]);
+        });
     }
 }
