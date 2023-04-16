@@ -197,6 +197,7 @@
         "joined_chats": "Joined Rooms",
         "available_chats": "Available Rooms",
         "join": "JOIN",
+        "delete": "DELETE",
         "leave": "LEAVE",
         "create_room": {
             "label": "Room creation",

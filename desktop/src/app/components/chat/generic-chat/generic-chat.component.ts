@@ -180,6 +180,16 @@ export class GenericChatComponent implements AfterViewChecked, AfterContentInit 
         }
     }
 
+    checkLeaveButton(chatSession: string) {
+        const chatRoom = this.chatboxHandler.getChatRoom(chatSession);
+        return chatSession !== 'main' && !chatSession.startsWith('game') && chatRoom?.creatorId !== this.chatboxHandler.userService?.user._id;
+    }
+
+    checkDeleteButton(chatSession: string) {
+        const chatRoom = this.chatboxHandler.getChatRoom(chatSession);
+        return chatSession !== 'main' && !chatSession.startsWith('game') && chatRoom?.creatorId === this.chatboxHandler.userService?.user._id;
+    }
+
     private resetInput() {
         this.inputForm.setValue('');
     }
