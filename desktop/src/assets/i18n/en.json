@@ -341,5 +341,12 @@
         "history": "History",
         "win": "Win",
         "loss": "Loss"
+    },
+
+    "reconnection": {
+        "title": "Connection Failed",
+        "question": "Attempt a reconnection?",
+        "no": "No",
+        "yes": "Yes"
     }
 }
