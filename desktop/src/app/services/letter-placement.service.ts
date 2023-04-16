@@ -6,25 +6,25 @@ import { BoardTileState, BoardTileType } from '@app/models/board-tile';
 import * as constants from '@common/constants/board-info';
 import { AlphabetLetter } from '@common/models/alphabet-letter';
 // import { Coordinate } from '@common/interfaces/coordinate';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogBoxLetterSelectorComponent } from '@app/components/dialog-box-letter-selector/dialog-box-letter-selector.component';
 import { BOARD_TILE_SIZE, TOTAL_COLUMNS, TOTAL_ROWS } from '@app/constants/board-view';
 import { SelectionPosition } from '@app/interfaces/selection-position';
 import { PlacingState } from '@app/models/placing-state';
 import { PlayDirection } from '@app/models/play-direction';
 import { SocketEvents } from '@common/constants/socket-events';
 import { Coordinate } from '@common/interfaces/coordinate';
+import { DragInfos } from '@common/interfaces/drag-infos';
 import { Letter } from '@common/interfaces/letter';
 import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
-import { ClientSocketService } from './communication/client-socket.service';
-import { GameClientService } from './game-client.service';
-import { first } from 'rxjs/operators';
-import { DragInfos } from '@common/interfaces/drag-infos';
-import { window as tauriWindow } from '@tauri-apps/api';
 import { SimpleLetterInfos } from '@common/interfaces/simple-letter-infos';
 import { GameConfigurationService } from '@services/game-configuration.service';
 import { SnackBarService } from '@services/snack-bar.service';
-import { DialogBoxLetterSelectorComponent } from '@app/components/dialog-box-letter-selector/dialog-box-letter-selector.component';
+import { window as tauriWindow } from '@tauri-apps/api';
 import { Observable } from 'rxjs';
-import { MatDialog } from '@angular/material/dialog';
+import { delay, first } from 'rxjs/operators';
+import { ClientSocketService } from './communication/client-socket.service';
+import { GameClientService } from './game-client.service';
 
 // const ASCII_ALPHABET_START = 96;
 
@@ -41,6 +41,7 @@ export class LetterPlacementService {
     dragLetter: DragInfos;
     clueWords: PlaceWordCommandInfo[];
     placedLetters: BoardTileInfo[];
+    raceConditionChecker: boolean;
 
     private placingMode: PlacingState;
     private hasPlacingEnded: boolean;
@@ -446,7 +447,7 @@ export class LetterPlacementService {
 
     private subscribeDrag(): void {
         this.clientSocketService.on(SocketEvents.DragEvent, async (event: DragInfos) => {
-            if (event.socketId === this.gameClientService.getLocalPlayer()?.player.socketId) return;
+            if (event.socketId === this.gameClientService.getLocalPlayer()?.player.socketId || this.raceConditionChecker) return;
 
             this.dragLetter = {
                 roomId: event.roomId,
@@ -465,6 +466,7 @@ export class LetterPlacementService {
 
         this.clientSocketService.on(SocketEvents.LetterPlaced, async (event: SimpleLetterInfos) => {
             if (event.socketId === this.gameClientService.getLocalPlayer()?.player.socketId) return;
+            this.raceConditionChecker = true;
             this.dragLetter = undefined;
 
             // eslint-disable-next-line @typescript-eslint/no-magic-numbers
@@ -475,6 +477,9 @@ export class LetterPlacementService {
                 this.liveBoard[-event.coord].state = BoardTileState.Empty;
                 this.liveBoard[-event.coord].letter.value = AlphabetLetter.None;
             }
+
+            await delay(2000);
+            this.raceConditionChecker = false;
         });
     }
 
