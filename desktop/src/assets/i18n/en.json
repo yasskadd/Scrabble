@@ -20,6 +20,38 @@
             "solo": "Solo"
         }
     },
+    "auth": {
+        "login": {
+            "title": "Account authentification",
+            "username_label": "Username",
+            "username_error": "Enter a username",
+            "password_label": "Password",
+            "password_error": "Enter a password",
+            "button": "Sign in",
+            "success": "Successful sign in!",
+            "failure": "Error while signing in!",
+            "user_taken": "The user is already logged in!",
+            "button_sign_up": "Create a new account"
+        },
+        "signup": {
+            "title": "Account Creation",
+            "username_label": "Username",
+            "username_error": "Please enter a username",
+            "email_label": "Email",
+            "email_error": "Please enter a valid email",
+            "password_label": "Password",
+            "password_error": "Please enter a password",
+            "password_confirm_label": "Password Confirmation",
+            "password_confirm_empty": "Please enter a password",
+            "password_confirm_error": "The passwords do not match",
+            "button": "Register",
+            "success": "Successful sign up!",
+            "failure": "Error while signing up!"
+        },
+        "recaptcha": {
+            "error": "Error in captcha verification"
+        }
+    },
     "new_game_page": {
         "game_settings": "Game's settings",
         "opponent_name": "Opponent name",
@@ -67,6 +99,12 @@
         "rack": {
             "skip_round": "Skip",
             "switch_letters": "Swap"
+        },
+        "play": {
+            "wrong_placement": "Cannot place letter here",
+            "wrong_turn": "Please wait for you turn",
+            "wrong_tile": "Cannot place over a used tile",
+            "wrong_cannot_place_tile": "You cannot place a tile here"
         }
     },
     "difficulty": {
@@ -169,7 +207,10 @@
             "note_5": "game",
             "create": "Create a new room",
             "create_action": "Create",
-            "cancel_action": "Cancel"
+            "cancel_action": "Cancel",
+            "invalid": "Invalid room name",
+            "already_exist": "Error while creating room : the room already exist",
+            "success": "Room created successfully"
         }
     },
     "footer": {

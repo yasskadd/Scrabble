@@ -92,8 +92,9 @@ export class UserService {
                 this.user = JSON.parse(JSON.stringify(this.tempUserData));
                 this.tempUserData = switcher;
 
-                // TODO : Language
-                this.snackBarService.openInfo('Connection successful');
+                this.languageService.getWord('auth.login.success').subscribe((word: string) => {
+                    this.snackBarService.openInfo(word);
+                });
                 this.updateUserWithImageUrl(this.user);
                 if (tauri.window.getAll().filter((webView: WebviewWindowHandle) => webView.label === 'chat').length !== 0) {
                     const chatWindow = new WebviewWindowHandle('chat');
@@ -109,8 +110,9 @@ export class UserService {
             });
         });
         this.clientSocketService.on(SocketEvents.UserAlreadyConnected, () => {
-            // TODO : Language
-            this.snackBarService.openError('User already connected');
+            this.languageService.getWord('auth.login.user_taken').subscribe((word: string) => {
+                this.snackBarService.openInfo(word);
+            });
             this.logout().then();
         });
     }

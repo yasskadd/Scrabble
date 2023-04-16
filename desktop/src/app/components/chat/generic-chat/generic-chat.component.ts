@@ -5,6 +5,7 @@ import { DialogBoxCreateChatComponent } from '@app/components/dialog-box-create-
 import { AppRoutes } from '@app/models/app-routes';
 import { RustCommand, RustEvent } from '@app/models/rust-command';
 import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
+import { LanguageService } from '@app/services/language.service';
 import { SnackBarService } from '@app/services/snack-bar.service';
 import { UserService } from '@app/services/user.service';
 import { SocketEvents } from '@common/constants/socket-events';
@@ -35,6 +36,7 @@ export class GenericChatComponent implements AfterViewChecked, AfterContentInit 
         public dialog: MatDialog,
         private socket: ClientSocketService,
         private snackBarService: SnackBarService,
+        private languageService: LanguageService,
     ) {
         this.inputForm = new FormControl('');
         this.searchForm = new FormControl('');
@@ -140,7 +142,9 @@ export class GenericChatComponent implements AfterViewChecked, AfterContentInit 
 
         dialogRef.afterClosed().subscribe((newChatRoomName) => {
             if (newChatRoomName.trim() === '') {
-                this.snackBarService.openError('Invalid room name');
+                this.languageService.getWord('chat.create_room.invalid').subscribe((word: string) => {
+                    this.snackBarService.openError(word);
+                });
                 return;
             }
             if (newChatRoomName !== undefined) this.createRoom(newChatRoomName);
