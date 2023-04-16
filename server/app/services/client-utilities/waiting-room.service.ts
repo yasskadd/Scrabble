@@ -26,6 +26,8 @@ import * as uuid from 'uuid';
 import { ChatHandlerService } from './chat-handler.service';
 import { BeginnerBot } from '@app/classes/player/beginner-bot.class';
 
+const INDEX_NOT_FOUND = -1;
+
 @Service()
 export class WaitingRoomService {
     private waitingRooms: GameRoom[];
@@ -393,19 +395,17 @@ export class WaitingRoomService {
     }
 
     private removePlayerFromId(playerID: string) {
-        console.log('IN removePlayerFromID');
         for (const room of this.waitingRooms) {
             const index = room.players.findIndex((player) => player.user._id === playerID);
-            if (index !== -1) room.players.splice(index, 1);
+            if (index !== INDEX_NOT_FOUND) room.players.splice(index, 1);
         }
         this.socketManager.server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
 
     private removePlayerFromSocketID(socketID: string) {
-        console.log('IN removePlayerFromSocketID');
         for (const room of this.waitingRooms) {
             const index = room.players.findIndex((player) => player.socketId === socketID);
-            if (index !== -1) room.players.splice(index, 1);
+            if (index !== INDEX_NOT_FOUND) room.players.splice(index, 1);
         }
         this.socketManager.server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
