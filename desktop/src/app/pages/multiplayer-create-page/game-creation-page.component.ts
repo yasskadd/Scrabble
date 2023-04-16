@@ -1,7 +1,6 @@
 import { Component, NgZone } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MIN_PASSWORD_LENGTH } from '@app/constants/user';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
 import { AppRoutes } from '@app/models/app-routes';
@@ -169,10 +168,10 @@ export class GameCreationPageComponent {
         this.isGameLocked = !this.isGameLocked;
 
         if (this.isGameLocked) {
-            this.passwordForm.addValidators([Validators.required, Validators.minLength(MIN_PASSWORD_LENGTH)]);
+            this.passwordForm.addValidators([Validators.required]);
             this.passwordForm.updateValueAndValidity();
         } else {
-            this.passwordForm.removeValidators([Validators.required, Validators.minLength(MIN_PASSWORD_LENGTH)]);
+            this.passwordForm.removeValidators([Validators.required]);
             this.passwordForm.updateValueAndValidity();
         }
     }
@@ -188,6 +187,12 @@ export class GameCreationPageComponent {
         }
 
         return '';
+    }
+
+    protected redirectHome() {
+        this.ngZone.run(() => {
+            this.router.navigate([AppRoutes.HomePage]).then();
+        });
     }
 
     private getDictionary(title: string): DictionaryInfo {
