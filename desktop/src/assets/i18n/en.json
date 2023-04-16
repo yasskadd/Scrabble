@@ -259,6 +259,15 @@
         "close": "Close"
     },
     "user_settings": {
+        "profile_section_title": "Click to modify your profile photo",
+        "credential_section_title": "Modify your credentials",
+        "param_section_title": "Choose your default settings",
+
+        "username_title": "Username",
+        "password_title": "Password",
+        "language_title": "Language",
+        "theme_title": "Theme",
+
         "submit_button": "Submit",
         "modify_avatar": {
             "success": "Avatar modified successfully",
@@ -283,11 +292,11 @@
             "input_error_empty": "Enter a password",
             "input_error_match": "Passwords do not match"
         },
-        "modify_language": "New language",
-        "modify_theme_dynamic": "New static or dynamic",
-        "modify_main_theme": "New main theme",
-        "modify_light_theme": "New light mode theme",
-        "modify_dark_theme": "New dark mode theme",
+        "modify_language": "New Language",
+        "modify_theme_dynamic": "Dynamic Mode",
+        "modify_main_theme": "Main Theme",
+        "modify_light_theme": "Light Mode theme",
+        "modify_dark_theme": "Dark Mode Theme",
         "yes": "Yes",
         "no": "No",
         "light": "Light",
@@ -299,7 +308,7 @@
             "change_password": "Change password"
         },
         "snackbar_modify_success": "Modified successfully",
-        "snackbar_modify_err_username": "Error while trying to modify username",
+        "snackbar_modify_err_username": "Error while trying to modify username : username already taken",
         "snackbar_modify_err_password": "Error while trying to modify password",
         "snackbar_modify_err_language": "Error while trying to modify language",
         "snackbar_modify_err_theme": "Error while trying to modify theme"
@@ -312,5 +321,12 @@
         "dark_mode": "Dark Mode",
         "light_mode": "Light Mode",
         "profile": "Profile"
+    },
+
+    "blank_letter": {
+        "title": "Choose a Letter",
+        "letter": "Letter",
+        "cancel": "Cancel",
+        "ok": "Ok"
     }
 }

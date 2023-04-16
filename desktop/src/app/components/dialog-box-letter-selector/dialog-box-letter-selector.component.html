@@ -1,18 +1,14 @@
 <h1 mat-dialog-title>
-    <!-- TODO : Language-->
-    Choose a letter
+    {{ "blank_letter.title" | translate }}
 </h1>
 <div mat-dialog-content>
-    <mat-form-field appearance='outline'>
-        <!-- TODO : Language -->
-        <mat-label>Letter</mat-label>
-        <input matInput [formControl]='letterForm'>
-        <mat-error> {{errorMessage}} </mat-error>
+    <mat-form-field appearance="outline">
+        <mat-label> {{ "blank_letter.letter" | translate }} </mat-label>
+        <input matInput [formControl]="letterForm" />
+        <mat-error> {{ errorMessage }} </mat-error>
     </mat-form-field>
 </div>
 <div mat-dialog-actions>
-    <!--  TODO : Language-->
-    <button mat-button mat-dialog-close=''>Cancel</button>
-    <!--  TODO : Language-->
-    <button mat-button (click)='close()'>Ok</button>
+    <button mat-button mat-dialog-close="">{{ "blank_letter.cancel" | translate }}</button>
+    <button mat-button (click)="close()">{{ "blank_letter.ok" | translate }}</button>
 </div>

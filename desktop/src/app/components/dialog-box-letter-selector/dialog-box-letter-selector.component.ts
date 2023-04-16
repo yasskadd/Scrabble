@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
 import { FormControl, Validators } from '@angular/forms';
+import { MatDialogRef } from '@angular/material/dialog';
+import { LanguageService } from '@app/services/language.service';
 import { AlphabetLetter } from '@common/models/alphabet-letter';
 import { SnackBarService } from '@services/snack-bar.service';
 
@@ -13,7 +14,11 @@ export class DialogBoxLetterSelectorComponent {
     protected letterForm: FormControl;
     protected errorMessage: string;
 
-    constructor(private snackBarService: SnackBarService, private dialogRef: MatDialogRef<DialogBoxLetterSelectorComponent>) {
+    constructor(
+        protected languageService: LanguageService,
+        private snackBarService: SnackBarService,
+        private dialogRef: MatDialogRef<DialogBoxLetterSelectorComponent>,
+    ) {
         this.letterForm = new FormControl(AlphabetLetter.None, [Validators.minLength(1), Validators.maxLength(1), Validators.required]);
 
         this.letterForm.valueChanges.subscribe(() => {

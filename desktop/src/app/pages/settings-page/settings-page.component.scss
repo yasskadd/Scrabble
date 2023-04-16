@@ -7,6 +7,15 @@ body {
     height: 100%;
 }
 
+mat-card {
+    margin-inline: 20%;
+    height: 94%;
+    margin-block: 1%;
+    justify-content: flex-start;
+    padding: 16px;
+    padding-top: 0px;
+}
+
 .settings-form {
     align-items: normal;
     margin-bottom: 16px;
@@ -14,6 +23,11 @@ body {
 
 .avatar-selector {
     align-self: center;
+}
+
+.theme-selector {
+    align-self: center;
+    margin-bottom: 10px;
 }
 
 .selecter-avatar {
@@ -36,6 +50,24 @@ body {
     }
 }
 
+.username-password {
+    display: flex;
+    flex-direction: row;
+}
+
 mat-form-field {
     margin-bottom: 5%;
+}
+
+.input-pair {
+    margin: 5px;
+}
+
+h2,
+h5 {
+    text-align: center;
+}
+
+h4 {
+    margin-top: 0px;
 }
