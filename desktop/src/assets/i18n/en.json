@@ -29,7 +29,7 @@
             "name": "Player name",
             "players": "Players",
             "host": "Host",
-            "difficulty": "Difficulty",
+            "state": "état",
             "timer": "Timer",
             "dictionary": "Dictionary"
         },

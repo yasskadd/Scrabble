@@ -29,7 +29,7 @@
             "name": "Nom de joueur",
             "players": "Joueurs",
             "host": "Hôte",
-            "difficulty": "Difficulté",
+            "state": "État",
             "timer": "Minuterie",
             "dictionary": "Dictionnaire"
         },

@@ -78,11 +78,11 @@ export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
     }
 
     protected getPlayers(room: GameRoom) {
-        console.log(room.players.filter((player: RoomPlayer) => player.type === PlayerType.User));
         return room.players.filter((player: RoomPlayer) => player.type === PlayerType.User);
     }
 
     protected getBots(room: GameRoom): RoomPlayer[] | undefined {
+        console.log(room.players);
         return room.players.filter((player: RoomPlayer) => player.type === PlayerType.Bot);
     }
 
