@@ -11,9 +11,9 @@ mat-drawer-container {
 }
 
 .always-visible {
-  display: grid;
-  grid-template-columns: 1fr 3fr;
   height: 100%;
+  display: flex;
+  justify-content: space-between;
 }
 
 mat-drawer {
@@ -39,16 +39,19 @@ mat-drawer {
     width: -webkit-fill-available;
   }
 
-  app-generic-chat {
-    display: grid;
-    height: 100%;
-    grid-template-rows: 1fr max-content;
-    align-content: space-between;
+}
 
-    ::ng-deep label {
-      overflow: unset;
-      right: auto;
-    }
+app-generic-chat {
+  display: grid;
+  right: 0px;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 250px;
+  grid-template-rows: 64px 1fr 64px;
+
+  ::ng-deep label {
+    overflow: unset;
+    right: auto;
   }
 }
 
@@ -65,11 +68,10 @@ mat-drawer {
 }
 
 app-information-panel {
+  display: flex;
   height: 100%;
   left: 0px;
-  width: 250;
-  padding: 10px;
-  display: flex;
+  width: 250px;
   flex-direction: column;
   justify-content: space-evenly;
   align-items: flex-start;
@@ -90,7 +92,6 @@ app-game-board {
   height: 600px;
   width: 600px;
 }
-
 
 
 .player-rack {
@@ -132,3 +133,4 @@ app-game-board {
 ::ng-deep .mat-drawer-content {
   width: 100%;
 }
+

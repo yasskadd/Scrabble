@@ -72,7 +72,7 @@
         <div class="search-control">
             <mat-icon class="search-icon">search</mat-icon>
             <mat-form-field>
-                <input matInput type="text" placeholder="Search" [(ngModel)]="searchInput" />
+                <input matInput type="text" placeholder="Search" [formControl]='searchForm' />
             </mat-form-field>
             <mat-icon class="clear-icon" (click)="resetSearchInput()">clear</mat-icon>
         </div>
@@ -99,7 +99,7 @@
         <div class="search-control">
             <mat-icon class="search-icon">search</mat-icon>
             <mat-form-field>
-                <input matInput type="text" placeholder="Search" [(ngModel)]="searchAllInput" />
+                <input matInput type="text" placeholder="Search" [formControl]="searchAllForm" />
             </mat-form-field>
             <mat-icon class="clear-icon" (click)="resetSearchAllInput()">clear</mat-icon>
         </div>
@@ -159,9 +159,9 @@
     <mat-form-field appearance="outline" (keydown.enter)="submit()" class="user-input">
         <mat-label>{{ "chat.message_box" | translate }}</mat-label>
         <input #chatbox matInput maxlength="512" type="text" [formControl]="inputForm" placeholder="{{ 'chat.input_example' | translate }}" />
+        <button mat-icon-button matSuffix color='primary' (click)="submit()">
+                <mat-icon> send </mat-icon>
+            </button>
     </mat-form-field>
-    <button mat-mini-fab color="primary" (click)="submit()">
-        <mat-icon>send</mat-icon>
-    </button>
 </div>
 <!-- CHAT SESSION -->
