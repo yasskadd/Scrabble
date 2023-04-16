@@ -1,107 +1,120 @@
 <div class="encapsulating-div">
     <app-header></app-header>
     <body class="mat-app-background">
-        <button
-            mat-fab
-            *ngIf="userService.isConnected.getValue() && !userService.user.profilePicture"
-            color="primary"
-            (click)="openAvatarSelector()"
-            class="avatar-selector"
-            style="margin-bottom: 4px"
-        >
-            <mat-icon>person</mat-icon>
-        </button>
-        <img
-            *ngIf="userService.user.profilePicture && !profilePicForm.value"
-            [src]="userService.getUser().profilePicture.key"
-            (click)="openAvatarSelector()"
-            class="selecter-avatar mat-elevation-z5"
-        />
-        <img
-            *ngIf="profilePicForm.value && profilePicForm.value.type === imageTypes.Url"
-            [src]="profilePicForm.value.url"
-            (click)="openAvatarSelector()"
-            class="selecter-avatar mat-elevation-z5"
-        />
-        <img
-            *ngIf="profilePicForm.value && profilePicForm.value.type === imageTypes.ImageData"
-            [src]="profilePicForm.value.rawData"
-            (click)="openAvatarSelector()"
-            class="selecter-avatar mat-elevation-z5"
-        />
-        <div class="configs-container">
-            <div class="username-config">
-                <mat-form-field appearance="outline">
-                    <mat-label>{{ "user_settings.modify_username.hint" | translate }}</mat-label>
-                    <input matInput [formControl]="newUsername" />
-                </mat-form-field>
-                <mat-form-field appearance="outline">
-                    <mat-label>{{ "user_settings.modify_username.confirm_username" | translate }}</mat-label>
-                    <input matInput [formControl]="newUsernameConfirmation" />
-                </mat-form-field>
-                <button mat-raised-button (click)="submitUsername()" class="username-confirmation">
-                    {{ "user_settings.submit_button" | translate }}
-                </button>
+        <mat-card class="justified">
+            <button
+                mat-fab
+                *ngIf="userService.isConnected.getValue() && !userService.user.profilePicture"
+                color="primary"
+                (click)="openAvatarSelector()"
+                class="avatar-selector"
+                style="margin-bottom: 4px"
+            >
+                <mat-icon>person</mat-icon>
+            </button>
+            <img
+                *ngIf="userService.user.profilePicture && !profilePicForm.value"
+                [src]="userService.getUser().profilePicture.key"
+                (click)="openAvatarSelector()"
+                class="selecter-avatar mat-elevation-z5"
+            />
+            <img
+                *ngIf="profilePicForm.value && profilePicForm.value.type === imageTypes.Url"
+                [src]="profilePicForm.value.url"
+                (click)="openAvatarSelector()"
+                class="selecter-avatar mat-elevation-z5"
+            />
+            <img
+                *ngIf="profilePicForm.value && profilePicForm.value.type === imageTypes.ImageData"
+                [src]="profilePicForm.value.rawData"
+                (click)="openAvatarSelector()"
+                class="selecter-avatar mat-elevation-z5"
+            />
+            <div class="configs-container">
+                <div class="username-password">
+                    <h2>Modifier vos informations</h2>
+                    <div style="display: flex; flex-direction: row">
+                        <div class="username-config">
+                            <mat-form-field appearance="outline">
+                                <mat-label>{{ "user_settings.modify_username.hint" | translate }}</mat-label>
+                                <input matInput [formControl]="newUsername" />
+                            </mat-form-field>
+                            <mat-form-field appearance="outline">
+                                <mat-label>{{ "user_settings.modify_username.confirm_username" | translate }}</mat-label>
+                                <input matInput [formControl]="newUsernameConfirmation" />
+                            </mat-form-field>
+                            <button mat-raised-button (click)="submitUsername()" class="username-confirmation">
+                                {{ "user_settings.submit_button" | translate }}
+                            </button>
+                        </div>
+                        <div class="password-config">
+                            <mat-form-field appearance="outline">
+                                <mat-label>{{ "user_settings.modify_password.hint" | translate }}</mat-label>
+                                <input matInput [formControl]="newPassword" />
+                            </mat-form-field>
+                            <mat-form-field appearance="outline">
+                                <mat-label>{{ "user_settings.modify_password.confirm_password" | translate }}</mat-label>
+                                <input matInput [formControl]="newPasswordConfirmation" />
+                            </mat-form-field>
+                            <button mat-raised-button (click)="submitPassword()" class="password-confirmation">
+                                {{ "user_settings.submit_button" | translate }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <mat-divider vertical></mat-divider>
+                <div class="params">
+                    <h2>Modifier vos paramètres</h2>
+                    <div style="display: flex; flex-direction: row">
+                        <div class="language-config">
+                            <mat-form-field appearance="outline" class="language-selector">
+                                <mat-label>{{ "user_settings.modify_language" | translate }}</mat-label>
+                                <mat-select [(value)]="selectedLanguage">
+                                    <mat-option value="fr">FR</mat-option>
+                                    <mat-option value="en">EN</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <button mat-raised-button (click)="submitLanguage()" class="language-confirmation">
+                                {{ "user_settings.submit_button" | translate }}
+                            </button>
+                        </div>
+                        <div class="theme-config">
+                            <mat-form-field appearance="outline" class="theme-selector">
+                                <mat-label>{{ "user_settings.modify_theme_dynamic" | translate }}</mat-label>
+                                <mat-select [(value)]="selectedDynamic">
+                                    <mat-option value="true">{{ "user_settings.yes" | translate }}</mat-option>
+                                    <mat-option value="false">{{ "user_settings.no" | translate }}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" class="theme-selector">
+                                <mat-label>{{ "user_settings.modify_main_theme" | translate }}</mat-label>
+                                <mat-select [(value)]="selectedMainTheme">
+                                    <mat-option value="setting.light">{{ "user_settings.light" | translate }}</mat-option>
+                                    <mat-option value="setting.dark">{{ "user_settings.dark" | translate }}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" class="theme-selector">
+                                <mat-label>{{ "user_settings.modify_light_theme" | translate }}</mat-label>
+                                <mat-select [(value)]="selectedLightTheme">
+                                    <mat-option value="setting.light">{{ "user_settings.light" | translate }}</mat-option>
+                                    <mat-option value="setting.dark">{{ "user_settings.dark" | translate }}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" class="theme-selector">
+                                <mat-label>{{ "user_settings.modify_dark_theme" | translate }}</mat-label>
+                                <mat-select [(value)]="selectedDarkTheme">
+                                    <mat-option value="setting.light">{{ "user_settings.light" | translate }}</mat-option>
+                                    <mat-option value="setting.dark">{{ "user_settings.dark" | translate }}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <button mat-raised-button (click)="submitTheme()" class="theme-confirmation">
+                                {{ "user_settings.submit_button" | translate }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="password-config">
-                <mat-form-field appearance="outline">
-                    <mat-label>{{ "user_settings.modify_password.hint" | translate }}</mat-label>
-                    <input matInput [formControl]="newPassword" />
-                </mat-form-field>
-                <mat-form-field appearance="outline">
-                    <mat-label>{{ "user_settings.modify_password.confirm_password" | translate }}</mat-label>
-                    <input matInput [formControl]="newPasswordConfirmation" />
-                </mat-form-field>
-                <button mat-raised-button (click)="submitPassword()" class="password-confirmation">
-                    {{ "user_settings.submit_button" | translate }}
-                </button>
-            </div>
-            <div class="language-config">
-                <mat-form-field appearance="outline" class="language-selector">
-                    <mat-label>{{ "user_settings.modify_language" | translate }}</mat-label>
-                    <mat-select [(value)]="selectedLanguage">
-                        <mat-option value="fr">FR</mat-option>
-                        <mat-option value="en">EN</mat-option>
-                    </mat-select>
-                </mat-form-field>
-                <button mat-raised-button (click)="submitLanguage()" class="language-confirmation">
-                    {{ "user_settings.submit_button" | translate }}
-                </button>
-            </div>
-            <div class="theme-config">
-                <mat-form-field appearance="outline" class="theme-selector">
-                    <mat-label>{{ "user_settings.modify_theme_dynamic" | translate }}</mat-label>
-                    <mat-select [(value)]="selectedDynamic">
-                        <mat-option value="true">{{ "user_settings.yes" | translate }}</mat-option>
-                        <mat-option value="false">{{ "user_settings.no" | translate }}</mat-option>
-                    </mat-select>
-                </mat-form-field>
-                <mat-form-field appearance="outline" class="theme-selector">
-                    <mat-label>{{ "user_settings.modify_main_theme" | translate }}</mat-label>
-                    <mat-select [(value)]="selectedMainTheme">
-                        <mat-option value="setting.light">{{ "user_settings.light" | translate }}</mat-option>
-                        <mat-option value="setting.dark">{{ "user_settings.dark" | translate }}</mat-option>
-                    </mat-select>
-                </mat-form-field>
-                <mat-form-field appearance="outline" class="theme-selector">
-                    <mat-label>{{ "user_settings.modify_light_theme" | translate }}</mat-label>
-                    <mat-select [(value)]="selectedLightTheme">
-                        <mat-option value="setting.light">{{ "user_settings.light" | translate }}</mat-option>
-                        <mat-option value="setting.dark">{{ "user_settings.dark" | translate }}</mat-option>
-                    </mat-select>
-                </mat-form-field>
-                <mat-form-field appearance="outline" class="theme-selector">
-                    <mat-label>{{ "user_settings.modify_dark_theme" | translate }}</mat-label>
-                    <mat-select [(value)]="selectedDarkTheme">
-                        <mat-option value="setting.light">{{ "user_settings.light" | translate }}</mat-option>
-                        <mat-option value="setting.dark">{{ "user_settings.dark" | translate }}</mat-option>
-                    </mat-select>
-                </mat-form-field>
-                <button mat-raised-button (click)="submitTheme()" class="theme-confirmation">
-                    {{ "user_settings.submit_button" | translate }}
-                </button>
-            </div>
-        </div>
+        </mat-card>
     </body>
     <app-footer></app-footer>
 </div>

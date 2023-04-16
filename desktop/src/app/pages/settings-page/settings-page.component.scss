@@ -7,6 +7,14 @@ body {
     height: 100%;
 }
 
+mat-card {
+    margin-inline: 20%;
+    height: 94%;
+    margin-block: 1%;
+    justify-content: flex-start;
+    padding: 16px;
+}
+
 .settings-form {
     align-items: normal;
     margin-bottom: 16px;
@@ -34,6 +42,11 @@ body {
         display: flex;
         flex-direction: column;
     }
+}
+
+.username-password {
+    display: flex;
+    flex-direction: row;
 }
 
 mat-form-field {
