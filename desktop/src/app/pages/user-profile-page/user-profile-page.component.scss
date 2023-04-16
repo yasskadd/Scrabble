@@ -1,13 +1,18 @@
 .user-info {
     margin-inline: 20%;
-    height: 96%;
+    //height: 96%;
     margin-block: 1%;
     justify-content: space-evenly;
+    padding: 0px 16px 16px 16px;
 }
 
 h2 {
     margin-bottom: 10px;
     margin-top: 0px;
+}
+
+.justified button {
+    margin: 8px;
 }
 
 .selector-avatar {
@@ -20,9 +25,10 @@ h2 {
 
 .user-stats {
     display: flex;
-    height: 65%;
+    //height: 65%;
     justify-content: space-around;
     width: 100%;
+    padding: 16px;
 }
 
 .user-stats > div {
@@ -38,11 +44,11 @@ canvas {
     margin-bottom: 10px;
 }
 
-mat-card > div {
-    transform: scale(0.9);
-}
+//mat-card > div {
+//    transform: scale(0.9);
+//}
 
 mat-tab-group {
-    height: 85%;
+    height: 600px;
     margin-bottom: 5px;
 }
