@@ -82,8 +82,10 @@ export class ClientSocketService {
     listenToTauriEvents(): void {
         tauri.event
             .listen(RustEvent.SocketConnectionFailed, (event: Event<unknown>) => {
-                this.languageService.getWord('error.socket.connection_failed').subscribe((word: string) => {
-                    this.snackBarService.openError(('Connection error! ' + word + ' : ' + event.payload) as string);
+                this.ngZone.run(() => {
+                    this.languageService.getWord('error.socket.connection_failed').subscribe((word: string) => {
+                        this.snackBarService.openError(('Connection error! ' + word + ' : ' + event.payload) as string);
+                    });
                 });
             })
             .then();
@@ -94,8 +96,10 @@ export class ClientSocketService {
             await tauri.tauri.invoke(RustCommand.Disconnect).then(() => {
                 tauri.event
                     .listen(RustEvent.SocketDisconnectionFailed, (error: Event<unknown>) => {
-                        this.languageService.getWord('error.socket.disconnection_failed').subscribe((word: string) => {
-                            this.snackBarService.openError(('Disconnection error! ' + word + ' : ' + error.payload) as string);
+                        this.ngZone.run(() => {
+                            this.languageService.getWord('error.socket.disconnection_failed').subscribe((word: string) => {
+                                this.snackBarService.openError(('Disconnection error! ' + word + ' : ' + error.payload) as string);
+                            });
                         });
                     })
                     .then();
@@ -129,7 +133,9 @@ export class ClientSocketService {
                 tauri.tauri.invoke(RustCommand.Send, { eventName: event, data: JSON.stringify(data) }).then(() => {
                     tauri.event
                         .listen(RustEvent.SocketSendFailed, () => {
-                            this.launchReconnectionProtocol();
+                            this.ngZone.run(() => {
+                                this.launchReconnectionProtocol();
+                            });
                         })
                         .then();
                 });
@@ -137,7 +143,9 @@ export class ClientSocketService {
                 tauri.tauri.invoke(RustCommand.Send, { eventName: event }).then(() => {
                     tauri.event
                         .listen(RustEvent.SocketSendFailed, () => {
-                            this.launchReconnectionProtocol();
+                            this.ngZone.run(() => {
+                                this.launchReconnectionProtocol();
+                            });
                         })
                         .then();
                 });
