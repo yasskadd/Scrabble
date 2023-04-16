@@ -4,14 +4,15 @@ import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 import { DialogBoxPasswordComponent } from '@app/components/dialog-box-password/dialog-box-password.component';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
-import { GameRoom } from '@common/interfaces/game-room';
-import { TimeService } from '@services/time.service';
-import { RoomPlayer } from '@common/interfaces/room-player';
-import { PlayerType } from '@common/models/player-type';
-import { GameVisibility } from '@common/models/game-visibility';
-import { GameMode } from '@common/models/game-mode';
-import { ClientSocketService } from '@services/communication/client-socket.service';
 import { SocketEvents } from '@common/constants/socket-events';
+import { GameRoom } from '@common/interfaces/game-room';
+import { RoomPlayer } from '@common/interfaces/room-player';
+import { GameMode } from '@common/models/game-mode';
+import { GameRoomState } from '@common/models/game-room-state';
+import { GameVisibility } from '@common/models/game-visibility';
+import { PlayerType } from '@common/models/player-type';
+import { ClientSocketService } from '@services/communication/client-socket.service';
+import { TimeService } from '@services/time.service';
 
 @Component({
     selector: 'app-multiplayer-join-page',
@@ -77,6 +78,7 @@ export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
     }
 
     protected getPlayers(room: GameRoom) {
+        console.log(room.players.filter((player: RoomPlayer) => player.type === PlayerType.User));
         return room.players.filter((player: RoomPlayer) => player.type === PlayerType.User);
     }
 
@@ -90,6 +92,10 @@ export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
 
     protected isGameRoomLocked(gameRoom: GameRoom) {
         return gameRoom.visibility === GameVisibility.Locked;
+    }
+
+    protected isGameRoomStarted(gameRoom: GameRoom) {
+        return gameRoom.state === GameRoomState.Playing;
     }
 
     protected getGameCreator(gameRoom: GameRoom): RoomPlayer {
