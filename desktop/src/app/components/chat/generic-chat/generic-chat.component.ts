@@ -5,9 +5,9 @@ import { DialogBoxCreateChatComponent } from '@app/components/dialog-box-create-
 import { AppRoutes } from '@app/models/app-routes';
 import { RustCommand, RustEvent } from '@app/models/rust-command';
 import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
+import { SnackBarService } from '@app/services/snack-bar.service';
 import { UserService } from '@app/services/user.service';
 import { SocketEvents } from '@common/constants/socket-events';
-import { Message } from '@common/interfaces/message';
 import { IUser } from '@common/interfaces/user';
 import { ClientSocketService } from '@services/communication/client-socket.service';
 import * as tauri from '@tauri-apps/api';
@@ -26,19 +26,22 @@ export class GenericChatComponent implements AfterViewChecked, AfterContentInit 
     inputForm: FormControl;
     searchInput: string;
     searchAllInput: string;
-    private lastMessage: Message;
+
+    private lastMessage: string;
 
     constructor(
         public chatboxHandler: ChatboxHandlerService,
         protected userService: UserService,
         public dialog: MatDialog,
         private socket: ClientSocketService,
+        private snackBarService: SnackBarService,
     ) {
         this.inputForm = new FormControl('');
         this.searchInput = '';
         this.searchAllInput = '';
         // this.chatSession = undefined;
         this.inputForm = new FormControl('');
+        this.lastMessage = '';
 
         if (tauri.window.getCurrent().label === 'chat') {
             tauri.window
@@ -104,8 +107,8 @@ export class GenericChatComponent implements AfterViewChecked, AfterContentInit 
     // }
 
     ngAfterViewChecked(): void {
-        const lastMessage = this.chatboxHandler.messages[this.chatboxHandler.messages.length - 1];
-        if (this.lastMessage !== lastMessage) {
+        const lastMessage = this.chatboxHandler.messages[this.chatboxHandler.messages.length - 1]?.date;
+        if (lastMessage != undefined && this.lastMessage !== lastMessage) {
             this.lastMessage = lastMessage;
             this.scrollToBottom();
         }
@@ -136,8 +139,11 @@ export class GenericChatComponent implements AfterViewChecked, AfterContentInit 
         });
 
         dialogRef.afterClosed().subscribe((newChatRoomName) => {
-            console.log(newChatRoomName);
-            if (newChatRoomName !== undefined && newChatRoomName.trim() !== '') this.createRoom(newChatRoomName);
+            if (newChatRoomName.trim() === '') {
+                this.snackBarService.openError('Invalid room name');
+                return;
+            }
+            if (newChatRoomName !== undefined) this.createRoom(newChatRoomName);
         });
     }
 

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
 import { UserService } from '@app/services/user.service';
@@ -19,7 +19,12 @@ export class UserProfilePageComponent implements AfterViewInit {
     connections: HistoryEvent[];
     games: HistoryEvent[];
 
-    constructor(protected userService: UserService, private readonly httpHandlerService: HttpHandlerService, private router: Router) {
+    constructor(
+        protected userService: UserService,
+        private readonly httpHandlerService: HttpHandlerService,
+        private router: Router,
+        private ngZone: NgZone,
+    ) {
         this.connections = [];
         this.games = [];
 
@@ -81,6 +86,8 @@ export class UserProfilePageComponent implements AfterViewInit {
     }
 
     redirectSettingsPage() {
-        this.router.navigate(['/settings']).then();
+        this.ngZone.run(() => {
+            this.router.navigate(['/settings']).then();
+        });
     }
 }

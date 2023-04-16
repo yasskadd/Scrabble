@@ -40,6 +40,14 @@ export class WaitingRoomService {
         this.gamesHandler.deleteWaitingRoom.subscribe((roomID: string) => {
             this.removeRoom(this.socketManager.server, roomID);
         });
+
+        this.gamesHandler.removePlayerWithPlayerID.subscribe((playerID: string) => {
+            this.removePlayerFromId(playerID);
+        });
+
+        this.gamesHandler.removePlayerWithSocketID.subscribe((socketID: string) => {
+            this.removePlayerFromSocketID(socketID);
+        });
     }
 
     initSocketEvents() {
@@ -377,6 +385,24 @@ export class WaitingRoomService {
 
     private getPlayerFromQuery(userQuery: UserRoomQuery): RoomPlayer | undefined {
         return this.getRoom(userQuery.roomId)?.players.find((playerElement: RoomPlayer) => this.areUsersTheSame(playerElement.user, userQuery.user));
+    }
+
+    private removePlayerFromId(playerID: string) {
+        console.log('IN removePlayerFromID');
+        for (const room of this.waitingRooms) {
+            const index = room.players.findIndex((player) => player.user._id === playerID);
+            if (index !== -1) room.players.splice(index, 1);
+        }
+        this.socketManager.server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
+    }
+
+    private removePlayerFromSocketID(socketID: string) {
+        console.log('IN removePlayerFromSocketID');
+        for (const room of this.waitingRooms) {
+            const index = room.players.findIndex((player) => player.socketId === socketID);
+            if (index !== -1) room.players.splice(index, 1);
+        }
+        this.socketManager.server.to(GAME_LOBBY_ROOM_ID).emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
     }
 
     private async makeBots(difficulty: GameDifficulty, roomId: string, numberOfBots: number): Promise<RoomPlayer[]> {

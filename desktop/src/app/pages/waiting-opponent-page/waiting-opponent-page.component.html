@@ -15,7 +15,7 @@
 
     <mat-card>
         <mat-card-content class='waiting-opponent-container'>
-            <div class='pending-player' *ngFor='let player of gameConfiguration.localGameRoom.players; index as i'>
+            <div class='pending-player' *ngFor='let player of getRoomPlayers(); index as i'>
                 <!-- TODO : Language -->
                 <span class='player-infos'>
                     <img [src]='userService.getPlayerImage(player)' class='selecter-avatar' alt='player.user profile picture' />

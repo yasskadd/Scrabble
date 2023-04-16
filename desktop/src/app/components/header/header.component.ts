@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { LanguageService } from '@app/services/language.service';
@@ -12,9 +12,11 @@ import { UserService } from '@app/services/user.service';
 })
 export class HeaderComponent {
     isHomePage: boolean;
+
     constructor(
         protected userService: UserService,
         private router: Router,
+        private ngZone: NgZone,
         private languageService: LanguageService,
         protected themeService: ThemeService,
     ) {
@@ -27,29 +29,41 @@ export class HeaderComponent {
 
     redirectHome() {
         if (!this.isGamePage()) {
-            this.router.navigate([`${AppRoutes.HomePage}`]).then();
+            this.ngZone.run(() => {
+                this.router.navigate([`${AppRoutes.HomePage}`]).then();
+            });
         }
     }
 
     redirectProfilePage() {
-        this.router.navigate(['/profile']).then();
+        this.ngZone.run(() => {
+            this.router.navigate(['/profile']).then();
+        });
     }
 
     redirectSettingsPage() {
-        this.router.navigate(['/settings']).then();
+        this.ngZone.run(() => {
+            this.router.navigate(['/settings']).then();
+        });
     }
 
     redirectUserPage() {
-        this.router.navigate(['/user']).then();
+        this.ngZone.run(() => {
+            this.router.navigate(['/user']).then();
+        });
     }
 
     redirectLoginPage() {
-        this.router.navigate(['/login']).then();
+        this.ngZone.run(() => {
+            this.router.navigate(['/login']).then();
+        });
     }
 
     redirectAdmin() {
         this.isHomePage = false;
-        this.router.navigate([`${AppRoutes.AdminPage}`]).then();
+        this.ngZone.run(() => {
+            this.router.navigate([`${AppRoutes.AdminPage}`]).then();
+        });
     }
 
     getLetters(translation: string): string[] {

@@ -91,18 +91,28 @@ mat-tab-group {
 
     strong,
     img,
-    p {
+    p,
+    .person {
         margin-bottom: 2%;
     }
+}
 
+.other {
     strong {
         flex: 2;
         margin-left: 5%;
     }
+}
 
+.me {
+    strong {
+        flex: 2;
+        margin-left: 35%;
+    }
     p {
+        margin-bottom: 2%;
         flex: 5;
-        text-align: right;
+        text-align: left;
     }
 }
 
@@ -150,12 +160,22 @@ mat-tab-group {
     text-align: center;
 
     mat-icon {
+        flex: 1;
         margin-top: 1%;
+        text-align: left;
         cursor: pointer;
     }
 
     div {
-        margin-left: 4%;
+        text-align: left;
+        flex: 1;
+        // margin-left: 4%;
+    }
+
+    .leave-room {
+        flex: 1;
+        float: right;
+        // justify-content: right;
     }
 }
 
@@ -198,6 +218,26 @@ mat-tab-group {
     border-radius: 50%;
     aspect-ratio: 1;
     object-fit: cover;
+}
+
+.person {
+    align-self: center;
+    height: 45px;
+    width: 45px;
+    border-radius: 50%;
+    aspect-ratio: 1;
+    box-shadow: none;
+    border: none;
+    outline: none;
+    cursor: none;
+    background-color: primary;
+}
+
+.person:hover {
+    cursor: default;
+    box-shadow: none;
+    border: none;
+    outline: none;
 }
 
 .demo-section + .demo-section {

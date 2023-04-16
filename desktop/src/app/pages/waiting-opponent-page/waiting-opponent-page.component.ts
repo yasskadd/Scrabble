@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, NgZone, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
@@ -22,9 +22,14 @@ export class WaitingOpponentPageComponent implements OnDestroy {
         protected gameConfiguration: GameConfigurationService,
         protected userService: UserService,
         private router: Router,
+        private ngZone: NgZone,
         private activatedRoute: ActivatedRoute,
     ) {
         this.gameMode = this.activatedRoute.snapshot.params.id;
+    }
+
+    getRoomPlayers(): RoomPlayer[] {
+        return this.gameConfiguration.localGameRoom.players;
     }
 
     ngOnDestroy() {
@@ -32,14 +37,20 @@ export class WaitingOpponentPageComponent implements OnDestroy {
     }
 
     protected joinSoloMode(): void {
-        this.router.navigate([`${AppRoutes.SoloGameCreationPage}/${this.gameMode}`]).then();
+        this.ngZone.run(() => {
+            this.router.navigate([`${AppRoutes.SoloGameCreationPage}/${this.gameMode}`]).then();
+        });
     }
 
     protected exitWaitingRoom(): void {
         if (this.gameConfiguration.isGameCreator()) {
-            this.router.navigate([`${AppRoutes.MultiGameCreationPage}/${this.gameMode}`]).then();
+            this.ngZone.run(() => {
+                this.router.navigate([`${AppRoutes.MultiGameCreationPage}/${this.gameMode}`]).then();
+            });
         } else {
-            this.router.navigate([`${AppRoutes.MultiJoinPage}/${this.gameMode}`]).then();
+            this.ngZone.run(() => {
+                this.router.navigate([`${AppRoutes.MultiJoinPage}/${this.gameMode}`]).then();
+            });
         }
         this.gameConfiguration.exitWaitingRoom();
     }

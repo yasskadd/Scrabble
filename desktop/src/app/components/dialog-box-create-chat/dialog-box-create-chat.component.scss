@@ -1,3 +1,20 @@
 .max {
     color: red;
 }
+
+.actions {
+    justify-content: center;
+}
+
+.note {
+    display: flex;
+    word-wrap: break-word;
+    font-size: 10px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+p {
+    margin: 0;
+}

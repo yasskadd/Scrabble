@@ -56,7 +56,6 @@ export class HttpHandlerService {
 
     async getChatUserInfo(id: string): Promise<ChatRoomUser> {
         const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/chat/user/${id}` });
-        console.log(res.body);
         return JSON.parse(res.body);
     }
 

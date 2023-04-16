@@ -7,16 +7,15 @@ import { ClientSocketService } from '@app/services/communication/client-socket.s
 // import { GameClientService } from '@app/services/game-client.service';
 // import { GameConfigurationService } from '@app/services/game-configuration.service';
 import { ChatRoomClient } from '@app/interfaces/chat-room-client';
+import { UserChatRoom } from '@app/interfaces/user-chat-room';
 import { UserService } from '@app/services/user.service';
 import { ChatRoom } from '@common/interfaces/chat-room';
 import { Message } from '@common/interfaces/message';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpHandlerService } from '../communication/http-handler.service';
+import { SnackBarService } from '../snack-bar.service';
 
 const NOT_FOUND = -1;
-interface UserChatRoom {
-    username: string;
-    imageUrl: string;
-}
 
 interface UserChatRoomWithState {
     name: string;
@@ -47,6 +46,8 @@ export class ChatboxHandlerService {
     joinedRoomsObs: Observable<string[]>;
     _notifsSubject: BehaviorSubject<string[]>;
     notifsObs: Observable<string[]>;
+    _userInfoSubject: BehaviorSubject<Map<string, UserChatRoom>>;
+    userInfoObs: Observable<Map<string, UserChatRoom>>;
 
     constructor(
         private clientSocket: ClientSocketService,
@@ -54,7 +55,9 @@ export class ChatboxHandlerService {
         // private gameClient: GameClientService,
         // private commandHandler: CommandHandlerService,
         // private timerService: TimeService,
-        private userService: UserService, // private httpHandlerService: HttpHandlerService,
+        public userService: UserService,
+        private httpHandlerService: HttpHandlerService,
+        private snackBarService: SnackBarService,
     ) {
         this.messages = [];
         this.loggedIn = false;
@@ -76,6 +79,8 @@ export class ChatboxHandlerService {
         this.joinedRoomsObs = this._joinedRoomsSubject.asObservable();
         this._notifsSubject = new BehaviorSubject<string[]>(this.notifiedRooms);
         this.notifsObs = this._notifsSubject.asObservable();
+        this._userInfoSubject = new BehaviorSubject<Map<string, UserChatRoom>>(this.userInfoHashMap);
+        this.userInfoObs = this._userInfoSubject.asObservable();
 
         this.clientSocket.connected.subscribe((connected: boolean) => {
             if (connected) {
@@ -134,9 +139,9 @@ export class ChatboxHandlerService {
             this.onNewChatRoomCreated(newChatRoom);
         });
 
-        // this.clientSocket.on(SocketEvents.CreateChatRoomError, (err: string) {
-        //     this.onRoomCreationFail(err);
-        // });
+        this.clientSocket.on(SocketEvents.CreateChatRoomError, (err: string) => {
+            this.createChatRoomError();
+        });
 
         this.clientSocket.on(SocketEvents.LeaveChatRoom, (chatRoom: ChatRoomClient) => {
             this.leaveRoom(chatRoom.name);
@@ -208,6 +213,10 @@ export class ChatboxHandlerService {
         this.requestLeaveRoomSession();
     }
 
+    private createChatRoomError() {
+        this.snackBarService.openError('Error while creating room : the room already exist');
+    }
+
     private updateJoinedRooms() {
         console.log('update');
         this._joinedRoomsSubject.next(this.joinedChatRooms);
@@ -228,6 +237,7 @@ export class ChatboxHandlerService {
         if (this.chatSession === roomName) {
             this.messages.push(newMessage);
             this._messagesSubject.next(this.messages);
+            if (!this.userInfoHashMap.has(newMessage.userId)) this.updateUserInfoSet();
         } else {
             this.sendNotification(roomName);
         }
@@ -251,6 +261,8 @@ export class ChatboxHandlerService {
     private removeRoomFromJoinedChatRooms(chatRoomName: string) {
         const indexToDelete = this.joinedChatRooms.findIndex((roomName) => roomName === chatRoomName);
         this.joinedChatRooms.splice(indexToDelete, 1);
+        console.log('removefromjione');
+        console.log(this.joinedChatRooms);
         this.updateJoinedRooms();
         this.updateAllRooms();
     }
@@ -274,26 +286,36 @@ export class ChatboxHandlerService {
         }
         console.log('joinsession');
         console.log(this.joinedChatRooms);
-        // const currentlyRequested = new Set<string>();
-        // for (const message of this.messages) {
-        //     const id = message.userId;
-        //     if (!this.userInfoHashMap.has(id) && !currentlyRequested.has(id)) {
-        //         currentlyRequested.add(id);
-        //         this.updateUserInfo(id);
-        //     }
-        // }
+        this.updateUserInfoSet();
     }
 
-    // private updateUserInfo(id: string) {
-    //     this.httpHandlerService.getChatUserInfo(id).then((userInfo: any) => {
-    //         this.userInfoHashMap.set(id, userInfo);
-    //     });
-    // }
+    private updateUserInfoSet() {
+        const currentlyRequested = new Set<string>();
+        for (const message of this.messages) {
+            const id = message.userId;
+            if (!this.userInfoHashMap.has(id) && !currentlyRequested.has(id)) {
+                currentlyRequested.add(id);
+                this.updateUserInfo(id);
+            }
+        }
+        this._userInfoSubject.next(this.userInfoHashMap);
+    }
+
+    private updateUserInfo(id: string) {
+        this.httpHandlerService
+            .getChatUserInfo(id)
+            .then((userInfo: any) => {
+                this.userInfoHashMap.set(id, userInfo);
+            })
+            .catch((e) => console.log(e));
+    }
 
     private onNewChatRoomCreated(newChatRoom: ChatRoomClient) {
         if (this.userService.user._id !== newChatRoom.creatorId) {
             this.allChatRooms.push(newChatRoom);
             this.updateAllRooms();
+        } else {
+            this.snackBarService.openInfo('Room created successfully');
         }
     }
 

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { ServerErrors } from '@common/constants/server-errors';
@@ -36,6 +36,7 @@ export class GameConfigurationService {
         private clientSocket: ClientSocketService,
         private gameClientService: GameClientService,
         private router: Router,
+        private ngZone: NgZone,
         private tauriStateService: TauriStateService,
         private languageService: LanguageService,
     ) {
@@ -178,13 +179,17 @@ export class GameConfigurationService {
     private kickedFromGameRoom(): void {
         this.resetRoomInformations();
 
-        this.router.navigate([`${AppRoutes.MultiJoinPage}/multi`]).then();
+        this.ngZone.run(() => {
+            this.router.navigate([`${AppRoutes.MultiJoinPage}/multi`]).then();
+        });
         // TODO : Language
         this.snackBarService.openError('Rejected by other player');
     }
 
     private joinedValidGame(gameRoom: GameRoom): void {
         this.localGameRoom = gameRoom;
-        this.router.navigate([`${AppRoutes.MultiWaitingPage}/${gameRoom.mode}`]).then();
+        this.ngZone.run(() => {
+            this.router.navigate([`${AppRoutes.MultiWaitingPage}/${gameRoom.mode}`]).then();
+        });
     }
 }

@@ -101,16 +101,16 @@ export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(h
         DialogBoxReconnectionComponent,
     ],
     imports: [
-        CommonModule,
-        CookieModule.withOptions(),
         AppMaterialModule,
         AppRoutingModule,
-        DragDropModule,
-        NgxCaptchaModule,
-        ReactiveFormsModule,
-        BrowserAnimationsModule,
         BrowserModule,
+        BrowserAnimationsModule,
+        DragDropModule,
+        CommonModule,
+        CookieModule.withOptions(),
         FormsModule,
+        ReactiveFormsModule,
+        NgxCaptchaModule,
         HttpClientModule,
         TranslateModule.forRoot({
             loader: {
@@ -121,7 +121,7 @@ export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(h
             defaultLanguage: 'fr',
         }),
     ],
-    providers: [ImportDictionaryComponent],
+    providers: [],
     bootstrap: [AppComponent],
 })
 export class AppModule {}

@@ -146,7 +146,19 @@
         "available_chats": "Canaux disponibles",
         "join": "REJOINDRE",
         "leave": "QUITTER",
-        "create": "Créer un nouveau canal"
+        "create_room": {
+            "create": "Creer un nouveau canal",
+            "label": "Création de canal",
+            "hint": "Nom du canal",
+            "error": "Entrez un nom pour le canal",
+            "note_1": "Note",
+            "note_2": "Les canaux doivent avoir des",
+            "note_3": "nom uniques",
+            "note_4": "et ne doivent pas commencer par",
+            "note_5": "game",
+            "create_action": "Créer",
+            "cancel_action": "Annuler"
+        }
     },
     "footer": {
         "team": "Équipe"

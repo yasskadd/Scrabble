@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 
@@ -8,9 +8,11 @@ import { AppRoutes } from '@app/models/app-routes';
     styleUrls: ['./dialog-box-abandon-game.component.scss'],
 })
 export class DialogBoxAbandonGameComponent {
-    constructor(private router: Router) {}
+    constructor(private ngZone: NgZone, private router: Router) {}
 
     abandonGame() {
-        this.router.navigate([`${AppRoutes.HomePage}`]).then();
+        this.ngZone.run(() => {
+            this.router.navigate([`${AppRoutes.HomePage}`]).then();
+        });
     }
 }

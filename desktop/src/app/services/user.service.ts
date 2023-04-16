@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { RustEvent } from '@app/models/rust-command';
@@ -33,6 +33,7 @@ export class UserService {
         private cookieService: AppCookieService,
         private snackBarService: SnackBarService,
         private router: Router,
+        private ngZone: NgZone,
     ) {
         this.user = undefined;
         this.isConnected = new BehaviorSubject<boolean>(false);
@@ -48,31 +49,6 @@ export class UserService {
             this.logout().then();
         });
         this.initBotImage().then();
-    }
-
-    subscribeConnectionEvents(): void {
-        this.clientSocketService.on(SocketEvents.SuccessfulConnection, () => {
-            if (tauri.window.getCurrent().label === 'main') {
-                const switcher: IUser = JSON.parse(JSON.stringify(this.user));
-                this.user = JSON.parse(JSON.stringify(this.tempUserData));
-                this.tempUserData = switcher;
-
-                // TODO : Language
-                this.snackBarService.openInfo('Connection successful');
-                this.updateUserWithImageUrl(this.user);
-                const chatWindow = new WebviewWindowHandle('chat');
-                chatWindow.emit(RustEvent.UserData, this.user).then();
-            }
-            this.isConnected.next(true);
-
-            if (tauri.window.getCurrent().label === 'chat') return;
-            this.router.navigate([AppRoutes.HomePage]).then();
-        });
-        this.clientSocketService.on(SocketEvents.UserAlreadyConnected, () => {
-            // TODO : Language
-            this.snackBarService.openError('User already connected');
-            this.logout().then();
-        });
     }
 
     login(user: IUser): void {
@@ -100,7 +76,36 @@ export class UserService {
 
             this.isConnected.next(false);
             if (tauri.window.getCurrent().label === 'chat') return;
-            this.router.navigate([AppRoutes.ConnectionPage]).then();
+            this.ngZone.run(() => {
+                this.router.navigate([AppRoutes.ConnectionPage]).then();
+            });
+        });
+    }
+
+    subscribeConnectionEvents(): void {
+        this.clientSocketService.on(SocketEvents.SuccessfulConnection, () => {
+            if (tauri.window.getCurrent().label === 'main') {
+                const switcher: IUser = JSON.parse(JSON.stringify(this.user));
+                this.user = JSON.parse(JSON.stringify(this.tempUserData));
+                this.tempUserData = switcher;
+
+                // TODO : Language
+                this.snackBarService.openInfo('Connection successful');
+                this.updateUserWithImageUrl(this.user);
+                const chatWindow = new WebviewWindowHandle('chat');
+                chatWindow.emit(RustEvent.UserData, this.user).then();
+            }
+            this.isConnected.next(true);
+
+            if (tauri.window.getCurrent().label === 'chat') return;
+            this.ngZone.run(() => {
+                this.router.navigate([AppRoutes.HomePage]).then();
+            });
+        });
+        this.clientSocketService.on(SocketEvents.UserAlreadyConnected, () => {
+            // TODO : Language
+            this.snackBarService.openError('User already connected');
+            this.logout().then();
         });
     }
 
