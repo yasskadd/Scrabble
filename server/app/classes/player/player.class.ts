@@ -6,8 +6,9 @@ import { PlayerGameResult } from '@common/interfaces/player-game-result';
 import { PlayerInformation } from '@common/interfaces/player-information';
 import { RoomPlayer } from '@common/interfaces/room-player';
 import { IUser } from '@common/interfaces/user';
-import { BeginnerBot } from './beginner-bot.class';
+import { PlayerType } from '@common/models/player-type';
 import * as uuid from 'uuid';
+import { BeginnerBot } from './beginner-bot.class';
 
 export class GamePlayer {
     rack: Letter[];
@@ -38,7 +39,8 @@ export class GamePlayer {
     getGameResult(): PlayerGameResult {
         return {
             // eslint-disable-next-line no-underscore-dangle
-            playerId: this.player.user._id,
+            playerId: this.player.type === PlayerType.Bot ? this.player.user.username : this.player.user._id,
+            playerType: this.player.type,
             score: this.score,
         };
     }
