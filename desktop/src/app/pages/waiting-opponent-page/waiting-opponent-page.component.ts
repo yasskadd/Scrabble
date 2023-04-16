@@ -28,6 +28,10 @@ export class WaitingOpponentPageComponent implements OnDestroy {
         this.gameMode = this.activatedRoute.snapshot.params.id;
     }
 
+    getRoomPlayers(): RoomPlayer[] {
+        return this.gameConfiguration.localGameRoom.players;
+    }
+
     ngOnDestroy() {
         this.gameConfiguration.isRoomJoinable.unsubscribe();
     }

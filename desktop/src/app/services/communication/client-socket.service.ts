@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { DialogBoxReconnectionComponent } from '@app/components/dialog-box-reconnection/dialog-box-reconnection.component';
 import { RustCommand, RustEvent } from '@app/models/rust-command';
@@ -8,7 +8,7 @@ import { TauriStateService } from '@services/tauri-state.service';
 import * as tauri from '@tauri-apps/api';
 import { Event } from '@tauri-apps/api/event';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { Socket, io } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -27,6 +27,7 @@ export class ClientSocketService {
         private languageService: LanguageService,
         private tauriStateService: TauriStateService, // private dialog: MatDialog,
         private dialog: MatDialog,
+        private ngZone: NgZone,
     ) {
         this.appUpdate = new Subject();
         this.connected = new BehaviorSubject<boolean>(false);
@@ -110,7 +111,9 @@ export class ClientSocketService {
         if (this.tauriStateService.useTauri) {
             tauri.event
                 .listen(eventName, (event: Event<unknown>) => {
-                    action(JSON.parse(event.payload as string));
+                    this.ngZone.run(() => {
+                        action(JSON.parse(event.payload as string));
+                    });
                 })
                 .then();
         } else {
