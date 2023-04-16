@@ -1,18 +1,33 @@
-<h1 mat-dialog-title>Create room</h1>
-<div mat-dialog-content>
-    <mat-form-field>
-        <mat-label>Room name</mat-label>
-        <input type="text" matInput maxlength="20" [(ngModel)]="data" />
-        <mat-hint
-            [ngClass]="{
-                max: data.length === 20
-            }"
-            align="end"
-            >{{ data.length || 0 }}/20
-        </mat-hint>
-    </mat-form-field>
+<h1 mat-dialog-title>{{ "chat.create_room.label" | translate }}</h1>
+<div class="dialog-container">
+    <div mat-dialog-content>
+        <mat-form-field>
+            <mat-label>{{ "chat.create_room.hint" | translate }}</mat-label>
+            <input type="text" matInput maxlength="20" [(ngModel)]="data" />
+            <mat-hint
+                [ngClass]="{
+                    max: data.length === 20
+                }"
+                align="end"
+                >{{ data.length || 0 }}/20
+            </mat-hint>
+        </mat-form-field>
+    </div>
+    <div class="note">
+        <p>
+            <b>{{ "chat.create_room.note_1" | translate }}:</b> {{ "chat.create_room.note_2" | translate }}
+            <b>{{ "chat.create_room.note_3" | translate }}</b>
+        </p>
+    </div>
+    <div class="note">
+        <p>
+            {{ "chat.create_room.note_4" | translate }} <b>{{ "chat.create_room.note_5" | translate }}</b>
+        </p>
+    </div>
 </div>
-<div mat-dialog-actions>
-    <button mat-button (click)="onNoClick()">No Thanks</button>
-    <button mat-button [mat-dialog-close]="data" cdkFocusInitial>Ok</button>
+<div class="actions" mat-dialog-actions>
+    <button mat-button (click)="onNoClick()">{{ "chat.create_room.cancel_action" | translate }}</button>
+    <button mat-button mat-raised-button color="primary" [mat-dialog-close]="data" cdkFocusInitial>
+        {{ "chat.create_room.create_action" | translate }}
+    </button>
 </div>

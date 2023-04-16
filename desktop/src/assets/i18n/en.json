@@ -139,14 +139,26 @@
         "welcome": "WELCOME"
     },
     "chat": {
-        "message_box": "Enter a message",
+        "message_box": "Write your message here",
         "disconnected": "You need to be connected to access the chat rooms",
         "input_example": "Ex. Hi!",
-        "joined_chats": "Joined channels",
-        "available_chats": "Available channels",
+        "joined_chats": "Joined Rooms",
+        "available_chats": "Available Rooms",
         "join": "JOIN",
         "leave": "LEAVE",
-        "create": "Create a new room"
+        "create_room": {
+            "label": "Room creation",
+            "hint": "Room name",
+            "error": "Enter a room name",
+            "note_1": "Note",
+            "note_2": "Rooms should have",
+            "note_3": "unique names",
+            "note_4": "and they can't start with",
+            "note_5": "game",
+            "create": "Create a new room",
+            "create_action": "Create",
+            "cancel_action": "Cancel"
+        }
     },
     "footer": {
         "team": "Team"

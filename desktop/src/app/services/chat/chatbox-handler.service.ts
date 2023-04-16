@@ -13,6 +13,7 @@ import { ChatRoom } from '@common/interfaces/chat-room';
 import { Message } from '@common/interfaces/message';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpHandlerService } from '../communication/http-handler.service';
+import { SnackBarService } from '../snack-bar.service';
 
 const NOT_FOUND = -1;
 
@@ -56,6 +57,7 @@ export class ChatboxHandlerService {
         // private timerService: TimeService,
         public userService: UserService,
         private httpHandlerService: HttpHandlerService,
+        private snackBarService: SnackBarService,
     ) {
         this.messages = [];
         this.loggedIn = false;
@@ -137,9 +139,9 @@ export class ChatboxHandlerService {
             this.onNewChatRoomCreated(newChatRoom);
         });
 
-        // this.clientSocket.on(SocketEvents.CreateChatRoomError, (err: string) {
-        //     this.onRoomCreationFail(err);
-        // });
+        this.clientSocket.on(SocketEvents.CreateChatRoomError, (err: string) => {
+            this.createChatRoomError();
+        });
 
         this.clientSocket.on(SocketEvents.LeaveChatRoom, (chatRoom: ChatRoomClient) => {
             this.leaveRoom(chatRoom.name);
@@ -211,6 +213,10 @@ export class ChatboxHandlerService {
         this.requestLeaveRoomSession();
     }
 
+    private createChatRoomError() {
+        this.snackBarService.openError('Error while creating room : the room already exist');
+    }
+
     private updateJoinedRooms() {
         console.log('update');
         this._joinedRoomsSubject.next(this.joinedChatRooms);
@@ -232,6 +238,7 @@ export class ChatboxHandlerService {
         if (this.chatSession === roomName) {
             this.messages.push(newMessage);
             this._messagesSubject.next(this.messages);
+            if (!this.userInfoHashMap.has(newMessage.userId)) this.updateUserInfoSet();
         } else {
             this.sendNotification(roomName);
         }
@@ -308,6 +315,8 @@ export class ChatboxHandlerService {
         if (this.userService.user._id !== newChatRoom.creatorId) {
             this.allChatRooms.push(newChatRoom);
             this.updateAllRooms();
+        } else {
+            this.snackBarService.openInfo('Room created successfully');
         }
     }
 
