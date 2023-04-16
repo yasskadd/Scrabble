@@ -223,7 +223,6 @@ export class ChatboxHandlerService {
     }
 
     private updateAllRooms() {
-        console.log('updateall');
         this._allRoomsSubject.next(this.availableRooms());
     }
 

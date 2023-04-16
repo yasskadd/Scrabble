@@ -24,7 +24,7 @@
     <img
         style="cursor: pointer"
         *ngIf="userService.isConnected.getValue() && userService.user.profilePicture"
-        [src]="userService.getUser().profilePicture.key"
+        [src]="userService.user.profilePicture.key"
         [mat-menu-trigger-for]="isGamePage() ? null : accountMenu"
         class="selector-avatar mat-elevation-z5"
     />

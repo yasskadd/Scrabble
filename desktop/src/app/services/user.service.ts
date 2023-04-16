@@ -7,7 +7,6 @@ import { AvatarData } from '@common/interfaces/avatar-data';
 import { ImageInfo } from '@common/interfaces/image-info';
 import { RoomPlayer } from '@common/interfaces/room-player';
 import { IUser } from '@common/interfaces/user';
-import { UserStats } from '@common/interfaces/user-stats';
 import { ImageType } from '@common/models/image-type';
 import { PlayerType } from '@common/models/player-type';
 import { ClientSocketService } from '@services/communication/client-socket.service';
@@ -23,7 +22,6 @@ import { HttpHandlerService } from './communication/http-handler.service';
 })
 export class UserService {
     user: IUser;
-    userStats: UserStats;
     isConnected: BehaviorSubject<boolean>;
 
     private tempUserData: IUser;
@@ -37,11 +35,11 @@ export class UserService {
         private router: Router,
         private ngZone: NgZone,
     ) {
-        this.isConnected = new BehaviorSubject<boolean>(false);
         this.user = undefined;
+        this.isConnected = new BehaviorSubject<boolean>(false);
 
-        this.initUserStats();
         this.subscribeConnectionEvents();
+
         this.clientSocketService.reconnect.subscribe(() => {
             this.clientSocketService.reconnectionDialog = undefined;
             this.login(this.tempUserData);
@@ -72,7 +70,6 @@ export class UserService {
         this.httpHandlerService.logout(this.user).then(async () => {
             this.user = undefined;
             this.tempUserData = undefined;
-            this.initUserStats();
 
             this.cookieService.removeSessionCookie();
             await this.clientSocketService.disconnect();
@@ -124,12 +121,6 @@ export class UserService {
         return player.user.profilePicture.key;
     }
 
-    async getStats(): Promise<UserStats> {
-        return this.httpHandlerService.getStats().then((result) => {
-            return result.userStats;
-        });
-    }
-
     async submitNewProfilePic(avatarData: AvatarData): Promise<boolean> {
         return this.httpHandlerService
             .modifyProfilePicture(avatarData, this.avatarDataToImageInfo(avatarData).isDefaultPicture)
@@ -141,20 +132,6 @@ export class UserService {
                 }
                 return false;
             });
-    }
-
-    private initUserStats(): void {
-        this.userStats = {
-            userIdRef: '',
-            ranking: 0,
-            gameCount: 0,
-            win: 0,
-            loss: 0,
-            totalGameTime: 0,
-            totalGameScore: 0,
-            averageGameTime: '',
-            averageGameScore: 0,
-        };
     }
 
     private avatarDataToImageInfo(avatarData: AvatarData): ImageInfo {

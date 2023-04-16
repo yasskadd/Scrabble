@@ -3,49 +3,66 @@
 
     <body class="mat-app-background">
         <mat-card class="user-info justified">
-            <h2 *ngIf='userService.isConnected.getValue()'>{{ userService.getUser().username }}</h2>
-            <img *ngIf='userService.isConnected.getValue()' [src]="userService.getUser().profilePicture.key" class="selector-avatar mat-elevation-z5"  alt='profile picture'/>
-            <button mat-button color="primary" (click)="redirectSettingsPage()"><mat-icon>settings</mat-icon>Settings</button>
+            <div class="justified">
+                <h2 *ngIf="userService.isConnected.getValue()">{{ userService.user.username }}</h2>
+                <img
+                    *ngIf="userService.isConnected.getValue()"
+                    [src]="userService.user.profilePicture.key"
+                    class="selector-avatar mat-elevation-z5"
+                    alt="profile picture"
+                />
+                <button mat-button color="primary" (click)="redirectSettingsPage()"><mat-icon>settings</mat-icon>Settings</button>
+            </div>
+            <mat-divider style="width: 90%"></mat-divider>
+            <div class="user-stats">
+                <div class="justified">
+                    <h4>Stastiques</h4>
+                    <div>Temps moy : {{ userStats.averageGameTime }}</div>
+                    <div>Score moy : {{ userStats.averageGameScore }}</div>
+                    <div>Jeux joués : {{ userStats.gameCount }}</div>
+                    <canvas #myChart width="160" height="160"></canvas>
+                    <div #newUser *ngIf="(userStats.win && userStats.loss) === 0">L'utilisateur n'a pas encore joué de parties</div>
+                </div>
+                <mat-divider vertical></mat-divider>
+                <div class="justified">
+                    <h4>Historique</h4>
+                    <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+                        <mat-tab label="Parties">
+                            <mat-list *ngFor="let game of games">
+                                <mat-list-item>
+                                    <mat-panel-title>
+                                        <!-- TODO: language -->
+                                        <div *gIf="game.gameWon" style="color: green">
+                                            <p>Victoire</p>
+                                            <p>{{ game.date }}</p>
+                                        </div>
+                                        <div *gIf="!game.gameWon" style="color: red">
+                                            <p>Défaite</p>
+                                            <p>{{ game.date }}</p>
+                                        </div>
+                                    </mat-panel-title>
+                                </mat-list-item>
+                            </mat-list>
+                        </mat-tab>
+                        <mat-tab label="Connexions">
+                            <mat-expansion-panel role="list">
+                                <mat-expansion-panel-header>
+                                    <mat-panel-title>
+                                        <!-- TODO: language -->
+                                        <div>Status</div>
+                                        <div>Date</div>
+                                    </mat-panel-title>
+                                </mat-expansion-panel-header>
+                                <p>
+                                    <!-- TODO: language -->
+                                </p>
+                            </mat-expansion-panel>
+                        </mat-tab>
+                    </mat-tab-group>
+                </div>
+            </div>
         </mat-card>
-        <div class="user-stats">
-            <mat-card class="justified">
-                <h4>Stastiques</h4>
-                <div>Temps moy :</div>
-                <div>Score moy :</div>
-                <div>Jeux joués :</div>
-                <canvas #myChart width="160" height="160"></canvas>
-            </mat-card>
-            <mat-card class="justified">
-                <h4>Historique</h4>
-                <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
-                    <mat-tab label="Parties">
-                        <mat-list role="list">
-                            <mat-list-item role="listitem">
-                                <p>Victoire</p>
-                                <p>Date</p>
-                            </mat-list-item>
-                            <mat-list-item role="listitem">
-                                <p>Victoire</p>
-                                <p>Date</p>
-                            </mat-list-item>
-                            <mat-list-item role="listitem">
-                                <p>Victoire</p>
-                                <p>Date</p>
-                            </mat-list-item>
-                        </mat-list>
-                    </mat-tab>
-                    <mat-tab label="Connexions"
-                        ><mat-list role="list">
-                            <mat-list-item role="listitem">Item 1</mat-list-item>
-                            <mat-list-item role="listitem">Item 2</mat-list-item>
-                            <mat-list-item role="listitem">Item 3</mat-list-item>
-                        </mat-list>
-                    </mat-tab>
-                </mat-tab-group>
-            </mat-card>
-        </div>
     </body>
 
     <app-footer></app-footer>
 </div>
-<!-- TODO: LANGUAGE!! -->
