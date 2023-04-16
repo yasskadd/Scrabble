@@ -28,6 +28,7 @@ export class PlayAreaComponent {
     protected chatIsOpen: boolean;
 
     protected playerType: typeof PlayerType = PlayerType;
+    private focus: boolean;
 
     constructor(
         private readonly gridService: GridService,
@@ -61,7 +62,9 @@ export class PlayAreaComponent {
         switch (event.key) {
             case 'Backspace': {
                 event.preventDefault();
-                this.letterService.undoPlacement();
+                if (this.letterService.placedLetters.length !== 0 && this.focus) {
+                    this.letterService.undoPlacement();
+                }
                 break;
             }
             case 'Enter': {
@@ -74,11 +77,17 @@ export class PlayAreaComponent {
             }
             default: {
                 if (event.key.length > 1) break;
-                this.letterService.handleKeyPlacement(event.key);
+                if (this.focus) {
+                    this.letterService.handleKeyPlacement(event.key);
+                }
                 break;
             }
         }
         this.keyboardParentSubject.next(event);
+    }
+
+    setFocus(value: boolean): void {
+        this.focus = value;
     }
 
     openChat() {

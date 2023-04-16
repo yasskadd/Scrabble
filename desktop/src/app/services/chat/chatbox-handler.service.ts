@@ -15,6 +15,8 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpHandlerService } from '../communication/http-handler.service';
 import { LanguageService } from '../language.service';
 import { SnackBarService } from '../snack-bar.service';
+// import * as tauri from '@tauri-apps/api';
+import { getAll, WebviewWindow } from '@tauri-apps/api/window';
 
 const NOT_FOUND = -1;
 
@@ -35,6 +37,7 @@ export class ChatboxHandlerService {
     chatSession: string | undefined;
     userInfoHashMap: Map<string, UserChatRoom>;
 
+    chatWindowOpened: BehaviorSubject<boolean>;
     _messagesSubject: BehaviorSubject<Message[]>;
     messagesObs: Observable<Message[]>;
     _chatSessionSubject: BehaviorSubject<string | undefined>;
@@ -69,6 +72,7 @@ export class ChatboxHandlerService {
         this.chatSession = undefined;
         this.userInfoHashMap = new Map();
 
+        this.chatWindowOpened = new BehaviorSubject<boolean>(false);
         this._messagesSubject = new BehaviorSubject<Message[]>(this.messages);
         this.messagesObs = this._messagesSubject.asObservable();
         this._chatSessionSubject = new BehaviorSubject<string | undefined>(this.chatSession);
@@ -93,14 +97,23 @@ export class ChatboxHandlerService {
         this.userService.isConnected.subscribe((connected: boolean) => {
             if (connected) {
                 this.config(this.userService.user.chatRooms as UserChatRoomWithState[]);
+                this.updateWindowStatus();
             } else {
                 this.resetConfig();
             }
         });
+
+        this.updateWindowStatus();
     }
 
     get chatCurrentSession() {
         return this.chatSession;
+    }
+
+    updateWindowStatus(): void {
+        console.log(getAll());
+        this.chatWindowOpened.next( getAll().filter((window: WebviewWindow) => window.label === 'chat').length !== 0);
+        this.snackBarService.openInfo('' + this.chatWindowOpened);
     }
 
     getChatRoom(chatRoomName: string) {

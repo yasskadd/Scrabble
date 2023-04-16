@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { AfterViewInit, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
+import { Component, ElementRef, NgZone, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
 import { LanguageService } from '@app/services/language.service';
@@ -14,7 +14,7 @@ import Chart from 'chart.js/auto';
     templateUrl: './user-profile-page.component.html',
     styleUrls: ['./user-profile-page.component.scss'],
 })
-export class UserProfilePageComponent implements AfterViewInit {
+export class UserProfilePageComponent {
     @ViewChild('myChart') canvasRef: ElementRef<HTMLCanvasElement>;
 
     userStats: UserStats;
@@ -40,14 +40,11 @@ export class UserProfilePageComponent implements AfterViewInit {
         });
     }
 
-    ngAfterViewInit() {
-        this.updateChart();
-    }
-
     setUserStats() {
         this.httpHandlerService.getStats().then((userStats: UserStats) => {
             userStats.averageGameScore = Math.round(userStats.averageGameScore);
             this.userStats = userStats;
+            this.updateChart(this.userStats.win, this.userStats.loss);
         });
     }
 
@@ -85,7 +82,7 @@ export class UserProfilePageComponent implements AfterViewInit {
         return this.userStats?.win === 0 && this.userStats?.loss === 0;
     }
 
-    private updateChart(): void {
+    private updateChart(win: number, loss: number): void {
         if (this.myChart) {
             this.myChart.destroy();
         }
@@ -96,7 +93,7 @@ export class UserProfilePageComponent implements AfterViewInit {
                 labels: ['Lost', 'Won'],
                 datasets: [
                     {
-                        data: [this.userStats.loss, this.userStats.win],
+                        data: [loss, win],
                         backgroundColor: ['rgba(255, 99, 132, 1)', 'rgba(201, 242, 155, 1)'],
                         borderColor: ['rgba(255, 99, 132, 1)', 'rgba(201, 242, 155, 1)'],
                         borderWidth: 1,
@@ -112,6 +109,7 @@ export class UserProfilePageComponent implements AfterViewInit {
                 },
             },
         });
+
         this.myChart.update();
     }
 }

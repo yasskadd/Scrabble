@@ -15,7 +15,7 @@ mat-tab-group {
 
 #tabs-container {
     display: flex;
-    justify-content: center;
+    justify-content: space-evenly;
     overflow: hidden;
     //position: absolute;
     //top: 0px;
@@ -161,20 +161,21 @@ mat-tab-group {
 .chat-room-session-header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     text-align: center;
 
-    mat-icon {
-        flex: 1;
-        margin-top: 1%;
-        text-align: left;
-        cursor: pointer;
-    }
+    //mat-icon {
+    //    flex: 1;
+    //    margin-top: 1%;
+    //    text-align: left;
+    //    cursor: pointer;
+    //}
 
-    div {
-        text-align: left;
-        flex: 1;
-        // margin-left: 4%;
-    }
+    //div {
+    //    text-align: left;
+    //    flex: 1;
+    //    // margin-left: 4%;
+    //}
 
     .leave-room {
         flex: 1;
@@ -246,4 +247,11 @@ mat-tab-group {
 
 .demo-section + .demo-section {
     margin-top: 16px;
+}
+
+.quit-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 8px;
+    width: min-content;
 }
