@@ -43,11 +43,20 @@
             </mat-card>
         </mat-tab>
     </mat-tab-group> -->
-    <div class="chat-room-session-header" mat-button *ngIf="(chatboxHandler.chatSessionObs | async) !== undefined" background-color="primary">
+    <mat-toolbar class="chat-room-session-header" mat-elevation="8" color="primary" *ngIf="(chatboxHandler.chatSessionObs | async) !== undefined">
         <mat-icon (click)="closeChat()">keyboard_backspace</mat-icon>
         <div>{{ chatSession }}</div>
-        <button class="leaveRoom" (click)="leaveRoom()">{{ "chat.leave" | translate }}</button>
-    </div>
+        <button
+            *ngIf="(chatboxHandler.chatSessionObs | async) !== 'main'"
+            mat-button
+            mat-raised-button
+            class="leave-room"
+            color="accent"
+            (click)="leaveRoom()"
+        >
+            {{ "chat.leave" | translate }}
+        </button>
+    </mat-toolbar>
 </div>
 <!-- TABS -->
 
