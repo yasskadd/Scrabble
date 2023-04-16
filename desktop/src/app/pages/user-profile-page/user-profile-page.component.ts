@@ -39,7 +39,6 @@ export class UserProfilePageComponent implements AfterViewInit {
 
     ngAfterViewInit() {
         // TODO: Language, data
-        // winRate = this.userStats.loss
 
         const myChart = new Chart(this.canvasRef.nativeElement.getContext('2d'), {
             type: 'doughnut',
@@ -47,7 +46,7 @@ export class UserProfilePageComponent implements AfterViewInit {
                 labels: ['Perdues', 'Gagnées'],
                 datasets: [
                     {
-                        data: [this.userStats.loss, this.userStats.win],
+                        data: [(this.userStats.loss = 0), (this.userStats.win = 0)],
                         backgroundColor: ['rgba(255, 99, 132, 1)', 'rgba(201, 242, 155, 1)'],
                         borderColor: ['rgba(255, 99, 132, 1)', 'rgba(201, 242, 155, 1)'],
                         borderWidth: 1,
