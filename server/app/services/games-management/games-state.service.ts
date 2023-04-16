@@ -340,12 +340,14 @@ export class GamesStateService {
         gamePlayers[0].game.isGameFinish = true;
         this.updatePlayersStats(gamePlayers);
 
+        const winningPlayer = this.getWinnerPlayer(gamePlayers);
+
         console.log('kicking players');
         gamePlayers.forEach((g: GamePlayer) => {
             const socket = this.socketManager.getSocketFromId(g.player.socketId);
             if (!socket) return;
 
-            socket.emit(SocketEvents.GameEnd);
+            socket.emit(SocketEvents.GameEnd, winningPlayer);
         });
         this.gamesHandler.removeRoom(roomId);
     }
