@@ -95,8 +95,10 @@ export class UserService {
                 // TODO : Language
                 this.snackBarService.openInfo('Connection successful');
                 this.updateUserWithImageUrl(this.user);
-                const chatWindow = new WebviewWindowHandle('chat');
-                chatWindow.emit(RustEvent.UserData, this.user).then();
+                if (tauri.window.getAll().filter((webView: WebviewWindowHandle) => webView.label === 'chat').length !== 0) {
+                    const chatWindow = new WebviewWindowHandle('chat');
+                    chatWindow.emit(RustEvent.UserData, this.user).then();
+                }
             }
             this.isConnected.next(true);
             this.languageService.setLanguage(this.user.language as LanguageChoice);

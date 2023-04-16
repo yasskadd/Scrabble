@@ -28,7 +28,7 @@ export class ThemeService {
 
         this.userService.isConnected.subscribe((connected: boolean) => {
             if (connected) {
-                this.isDarkTheme.next(this.userService.user.theme.mainTheme === 'setting.dark');
+                this.isDarkTheme.next(this.userService.user.theme?.mainTheme === 'setting.dark');
             }
         });
     }

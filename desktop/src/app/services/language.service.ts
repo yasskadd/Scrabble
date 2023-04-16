@@ -17,7 +17,9 @@ export class LanguageService {
     }
 
     setLanguage(choice: LanguageChoice): void {
-        this.translateService.use(choice.toString());
+        if (choice) {
+            this.translateService.use(choice.toString());
+        }
     }
 
     getWord(selector: string): Observable<string> {

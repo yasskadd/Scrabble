@@ -82,7 +82,6 @@ export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
     }
 
     protected getBots(room: GameRoom): RoomPlayer[] | undefined {
-        console.log(room.players);
         return room.players.filter((player: RoomPlayer) => player.type === PlayerType.Bot);
     }
 
