@@ -49,6 +49,7 @@ import { SettingsPageComponent } from './pages/settings-page/settings-page.compo
 import { UserCreationPageComponent } from './pages/user-creation-page/user-creation-page.component';
 import { UserProfilePageComponent } from './pages/user-profile-page/user-profile-page.component';
 import { WaitingOpponentPageComponent } from './pages/waiting-opponent-page/waiting-opponent-page.component';
+import { ForgotPasswordPageComponent } from './pages/forgot-password-page/forgot-password-page.component';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(http, '../assets/i18n/', '.json');
@@ -99,6 +100,7 @@ export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(h
         DialogBoxLetterSelectorComponent,
         DialogBoxCreateChatComponent,
         DialogBoxReconnectionComponent,
+        ForgotPasswordPageComponent,
     ],
     imports: [
         AppMaterialModule,
