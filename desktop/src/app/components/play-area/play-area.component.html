@@ -1,19 +1,15 @@
-<div class='encapsulating-div'>
-    <b id='winning-message' *ngIf='gameClientService.isGameFinish'>
+<div class="encapsulating-div">
+    <b id="winning-message" *ngIf="gameClientService.isGameFinish">
         {{ gameClientService.winningMessage | translate : { playerName: gameClientService.winner } }}
     </b>
 
-    <div class='always-visible' cdkDropListGroup>
+    <div class="always-visible" cdkDropListGroup>
         <app-information-panel></app-information-panel>
         <div>
-
             <app-game-board></app-game-board>
 
-            <div *ngIf='gameClientService.getLocalPlayer().player.type === playerType.Observer'
-                 class='rack-container'>
-
-                <app-player-rack [keyboardParentSubject]='keyboardParentSubject' [player]='selectedPlayer'
-                                 class='player-rack'></app-player-rack>
+            <div *ngIf="gameClientService.getLocalPlayer().player.type === playerType.Observer" class="rack-container">
+                <app-player-rack [keyboardParentSubject]="keyboardParentSubject" [player]="selectedPlayer" class="player-rack"></app-player-rack>
                 <!--                    <div class='player-selector'>-->
                 <!--                        <div *ngFor='let player of gameClientService.players; index as i'>-->
                 <!--                            <img-->
@@ -38,12 +34,11 @@
                 <!--                    </div>-->
             </div>
 
-            <div *ngIf='gameClientService.getLocalPlayer().player.type === playerType.User' class='rack-container'>
-
+            <div *ngIf="gameClientService.getLocalPlayer().player.type === playerType.User" class="rack-container">
                 <app-player-rack
-                    [keyboardParentSubject]='keyboardParentSubject'
-                    [player]='gameClientService.getLocalPlayer()'
-                    class='player-rack'
+                    [keyboardParentSubject]="keyboardParentSubject"
+                    [player]="gameClientService.getLocalPlayer()"
+                    class="player-rack"
                 ></app-player-rack>
             </div>
         </div>
@@ -58,7 +53,6 @@
         <!--            <mat-icon>chat_bubble_outline</mat-icon>-->
         <!--            {{ "main_page.chat.open" | translate }}-->
         <!--        </button>-->
-        <app-generic-chat class='chat'></app-generic-chat>
+        <app-generic-chat class="chat"></app-generic-chat>
     </div>
-
 </div>

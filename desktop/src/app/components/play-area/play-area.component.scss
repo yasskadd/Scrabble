@@ -1,136 +1,133 @@
 .encapsulating-div {
-  width: inherit;
+    width: inherit;
 }
 
 mat-drawer-container {
-  height: inherit;
-  width: inherit;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    height: inherit;
+    width: inherit;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .always-visible {
-  height: 100%;
-  display: flex;
-  justify-content: space-between;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
 }
 
 mat-drawer {
-  right: 0;
-  height: 100%;
-  width: 20%;
-  padding: 10px;
+    right: 0;
+    height: 100%;
+    width: 20%;
+    padding: 10px;
 }
 
 .open-chat-button {
-  position: absolute;
-  right: 10px;
-  top: 5px;
+    position: absolute;
+    right: 10px;
+    top: 5px;
 }
 
 .chat-sidenav {
-  display: flex;
-  max-width: 25%;
-  min-width: min-content;
+    display: flex;
+    max-width: 25%;
+    min-width: min-content;
 
-  ::ng-deep + div {
-    overflow-x: hidden !important;
-    width: -webkit-fill-available;
-  }
-
+    ::ng-deep + div {
+        overflow-x: hidden !important;
+        width: -webkit-fill-available;
+    }
 }
 
 app-generic-chat {
-  display: grid;
-  right: 0px;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 250px;
-  grid-template-rows: 64px 1fr 64px;
+    display: grid;
+    right: 0px;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 250px;
+    grid-template-rows: 64px 1fr 64px;
 
-  ::ng-deep label {
-    overflow: unset;
-    right: auto;
-  }
+    ::ng-deep label {
+        overflow: unset;
+        right: auto;
+    }
 }
 
 #winning-message {
-  position: absolute;
-  top: calc(50% - 2em);
-  padding: 10px;
-  font-family: system-ui;
-  font-size: 20px;
-  border-radius: 4px;
-  font-weight: 400;
-  left: 50%;
-  transform: translateX(-50%);
+    position: absolute;
+    top: calc(50% - 2em);
+    padding: 10px;
+    font-family: system-ui;
+    font-size: 20px;
+    border-radius: 4px;
+    font-weight: 400;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 app-information-panel {
-  display: flex;
-  height: 100%;
-  left: 0px;
-  width: 250px;
-  flex-direction: column;
-  justify-content: space-evenly;
-  align-items: flex-start;
+    display: flex;
+    height: 100%;
+    left: 0px;
+    width: 250px;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: flex-start;
 }
 
 .middle {
-  display: grid;
-  justify-items: center;
-  align-items: end;
+    display: grid;
+    justify-items: center;
+    align-items: end;
 }
 
 app-game-board {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  translate: -50% -50%;
-  display: block;
-  height: 600px;
-  width: 600px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    display: block;
+    height: 600px;
+    width: 600px;
 }
 
-
 .player-rack {
-  bottom: 0px;
-  margin-bottom: 32px;
-  width: 600px;
-  display: block;
-  position: relative;
-  left: 50%;
-  translate: -50%;
+    bottom: 0px;
+    margin-bottom: 32px;
+    width: 600px;
+    display: block;
+    position: relative;
+    left: 50%;
+    translate: -50%;
 }
 
 .player-choice {
-  margin-bottom: 20px;
-  align-self: center;
-  height: 56px;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-left: 8px;
-  margin-right: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+    margin-bottom: 20px;
+    align-self: center;
+    height: 56px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-left: 8px;
+    margin-right: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .player-selector {
-  display: flex;
-  justify-content: center;
+    display: flex;
+    justify-content: center;
 }
 
 .rack-container {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  translate: -50%;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    translate: -50%;
 }
 
 ::ng-deep .mat-drawer-content {
-  width: 100%;
+    width: 100%;
 }
-
