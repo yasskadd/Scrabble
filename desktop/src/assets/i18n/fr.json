@@ -348,5 +348,11 @@
         "question": "Voulez-vous essayer de vous reconnecter?",
         "no": "Non",
         "yes": "Oui"
+    },
+
+    "info-panel": {
+        "hint": "Indice",
+        "see": "Voir",
+        "replace": "Remplacer"
     }
 }

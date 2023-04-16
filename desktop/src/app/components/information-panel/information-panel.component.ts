@@ -5,15 +5,16 @@ import { DialogBoxAbandonGameComponent } from '@app/components/dialog-box-abando
 import { DialogGameHelpComponent } from '@app/components/dialog-game-help/dialog-game-help.component';
 import { AppRoutes } from '@app/models/app-routes';
 import { GameClientService } from '@app/services/game-client.service';
-import { PlayerInformation } from '@common/interfaces/player-information';
-import { TimeService } from '@services/time.service';
-import { LetterPlacementService } from '@services/letter-placement.service';
-import { ClientSocketService } from '@services/communication/client-socket.service';
-import { SocketEvents } from '@common/constants/socket-events';
-import { PlayerType } from '@common/models/player-type';
-import { UserService } from '@services/user.service';
-import { RoomPlayer } from '@common/interfaces/room-player';
+import { LanguageService } from '@app/services/language.service';
 import { INVALID_INDEX } from '@common/constants/board-info';
+import { SocketEvents } from '@common/constants/socket-events';
+import { PlayerInformation } from '@common/interfaces/player-information';
+import { RoomPlayer } from '@common/interfaces/room-player';
+import { PlayerType } from '@common/models/player-type';
+import { ClientSocketService } from '@services/communication/client-socket.service';
+import { LetterPlacementService } from '@services/letter-placement.service';
+import { TimeService } from '@services/time.service';
+import { UserService } from '@services/user.service';
 
 @Component({
     selector: 'app-information-panel',
@@ -28,6 +29,7 @@ export class InformationPanelComponent {
         public gameClientService: GameClientService,
         protected letterService: LetterPlacementService,
         protected userService: UserService,
+        protected languageService: LanguageService,
         private clientSocketService: ClientSocketService,
         public timer: TimeService,
         private dialog: MatDialog,

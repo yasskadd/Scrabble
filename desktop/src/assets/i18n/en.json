@@ -348,5 +348,11 @@
         "question": "Attempt a reconnection?",
         "no": "No",
         "yes": "Yes"
+    },
+
+    "info-panel": {
+        "hint": "Hint",
+        "see": "See",
+        "replace": "Replace"
     }
 }
