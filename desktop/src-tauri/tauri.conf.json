@@ -16,9 +16,21 @@
             "window": {
                 "all": true
             },
+            "dialog": {
+                "all": true
+            },
+            "http": {
+                "scope": ["http://**", "https://**", "ws://**"],
+                "all": true,
+                "request": true
+            },
             "shell": {
                 "all": false,
                 "open": true
+            },
+            "fs": {
+                "all": true,
+                "scope": ["$RESOURCE/*", "$CACHE/*"]
             }
         },
         "bundle": {
@@ -34,12 +46,12 @@
             "longDescription": "",
             "macOS": {
                 "entitlements": null,
-                "exceptionDomain": "",
+                "exceptionDomain": "ec2-35-183-107-112.ca-central-1.compute.amazonaws.com",
                 "frameworks": [],
                 "providerShortName": null,
                 "signingIdentity": null
             },
-            "resources": [],
+            "resources": ["../certs/server.pem", "../certs/server.key"],
             "shortDescription": "",
             "targets": "all",
             "windows": {
@@ -49,7 +61,7 @@
             }
         },
         "security": {
-            "csp": "default-src blob: data: filesystem: ws: wss: http: https: tauri: 'unsafe-eval' 'unsafe-inline' 'self' img-src: 'self'; script-src https: 'unsafe-inline'"
+            "csp": "default-src blob: data: filesystem: ws: wss: http: http://localhost https://localhost https: tauri: tauri://localhost 'unsafe-eval' 'unsafe-inline' 'self' img-src: 'self'; script-src 'self' https://www.google.com https://www.gstatic.com 'unsafe-eval'"
         },
         "updater": {
             "active": false
@@ -57,12 +69,14 @@
         "windows": [
             {
                 "fullscreen": false,
-                "height": 800,
                 "resizable": true,
                 "title": "PolyScrabble",
-                "width": 800,
-                "minWidth": 600,
-                "minHeight": 600
+                "focus": false,
+                "height": 1460,
+                "width": 950,
+                "minWidth": 1460,
+                "minHeight": 950,
+                "label": "main"
             }
         ]
     }
