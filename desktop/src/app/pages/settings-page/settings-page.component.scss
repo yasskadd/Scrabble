@@ -25,6 +25,11 @@ mat-card {
     align-self: center;
 }
 
+.theme-selector {
+    align-self: center;
+    margin-bottom: 10px;
+}
+
 .selecter-avatar {
     margin-bottom: 20px;
     align-self: center;
@@ -61,4 +66,8 @@ mat-form-field {
 h2,
 h5 {
     text-align: center;
+}
+
+h4 {
+    margin-top: 0px;
 }
