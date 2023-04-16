@@ -331,7 +331,7 @@ export class ChatboxHandlerService {
     }
 
     private deleteChatRoom(chatRoom: ChatRoomClient) {
-        this.requestJoinRoomSession(chatRoom.name);
+        this.removeRoomFromJoinedChatRooms(chatRoom.name);
         this.removeRoomFromAllChatRooms(chatRoom.name);
         if (this.chatSession === chatRoom.name) {
             this.chatSession = undefined;
