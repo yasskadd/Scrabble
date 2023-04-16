@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { WebviewWindow } from '@tauri-apps/api/window';
 import { TauriStateService } from '@services/tauri-state.service';
+import { WebviewWindow } from '@tauri-apps/api/window';
+import { BehaviorSubject } from 'rxjs';
+import { UserService } from './user.service';
 
 @Injectable({
     providedIn: 'root',
@@ -9,7 +10,7 @@ import { TauriStateService } from '@services/tauri-state.service';
 export class ThemeService {
     isDarkTheme: BehaviorSubject<boolean>;
 
-    constructor(private tauriStateService: TauriStateService) {
+    constructor(private tauriStateService: TauriStateService, public userService: UserService) {
         this.isDarkTheme = new BehaviorSubject<boolean>(false);
 
         if (this.tauriStateService.useTauri) {
@@ -23,6 +24,12 @@ export class ThemeService {
                 })
                 .then();
         }
+
+        this.userService.isConnected.subscribe((connected: boolean) => {
+            if (connected) {
+                this.isDarkTheme.next(this.userService.user.theme.mainTheme === 'setting.dark');
+            }
+        });
     }
 
     toggleDarkMode(): void {
