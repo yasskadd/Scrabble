@@ -7,6 +7,7 @@ import { Bot } from '@common/interfaces/bot';
 import { BotNameSwitcher } from '@common/interfaces/bot-name-switcher';
 import { ChatRoomUser } from '@common/interfaces/chat-room';
 import { GameHistoryInfo } from '@common/interfaces/game-history-info';
+import { HistoryEvent } from '@common/interfaces/history-event';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
 import { IUser } from '@common/interfaces/user';
 import { UserStats } from '@common/interfaces/user-stats';
@@ -155,13 +156,19 @@ export class HttpHandlerService {
         return JSON.parse(res.body);
     }
 
-    async getStats(): Promise<{ userStats: UserStats }> {
+    async logout(user: IUser): Promise<any> {
+        const res: HttpResponse = await invoke('httpPost', { url: `${this.baseUrl}/auth/logout`, onceToldMe: JSON.stringify(user) });
+        return JSON.parse(res.body);
+    }
+
+    async getStats(): Promise<UserStats> {
         const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/profile/stats` });
         return JSON.parse(res.body);
     }
 
-    async logout(user: IUser): Promise<any> {
-        const res: HttpResponse = await invoke('httpPost', { url: `${this.baseUrl}/auth/logout`, onceToldMe: JSON.stringify(user) });
+    async getUserHistoryEvents(): Promise<{ historyEventList: HistoryEvent[] }> {
+        const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/profile/history-events` });
+        console.log(JSON.parse(res.body));
         return JSON.parse(res.body);
     }
 
