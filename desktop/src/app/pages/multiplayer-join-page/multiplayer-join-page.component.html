@@ -63,7 +63,7 @@
             </div>
 
             <div class="container-button">
-                <button class="return-button" mat-icon-button routerLink="/home">
+                <button class="return-button" mat-icon-button (click)='navigateHome()'>
                     <mat-icon>navigate_before</mat-icon>
                 </button>
                 <mat-form-field (keydown.enter)="joinSecretRoom()" appearance="outline">

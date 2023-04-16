@@ -19,12 +19,11 @@
                         </button>
                     </div>
                     <button
-                        [routerLink]='[multiplayerCreateLink]'
                         id='multiplayer-create'
                         class='button multiplayer'
                         mat-raised-button
                         color='primary'
-                        mat-dialog-close=''
+                        (click)='redirectGameCreationPage()'
                     >
                         {{ "action.create" | translate }}
                         <mat-icon class='button-icon'>create</mat-icon>
@@ -35,7 +34,6 @@
                         class='button multiplayer'
                         mat-raised-button
                         color='primary'
-                        mat-dialog-close=''
                         (click)='navigateJoinPage()'
                     >
                         {{ "action.join" | translate }}

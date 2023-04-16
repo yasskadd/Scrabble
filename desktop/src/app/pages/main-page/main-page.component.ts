@@ -38,7 +38,6 @@ export class MainPageComponent {
         private router: Router,
         private ngZone: NgZone,
     ) {
-        this.multiplayerCreateLink = `/${AppRoutes.MultiGameCreationPage}/${GameMode.Multi}`;
         if (!this.userService.isConnected.getValue()) {
             if (tauri.window.getCurrent().label === 'chat') return;
 
@@ -126,7 +125,13 @@ export class MainPageComponent {
     navigateJoinPage() {
         this.clientSocketService.send(SocketEvents.UpdateGameRooms);
         this.ngZone.run(() => {
-            this.router.navigate([`/${AppRoutes.MultiJoinPage}/classique`]);
+            this.router.navigate([`/${AppRoutes.MultiJoinPage}/classique`]).then();
+        });
+    }
+
+    redirectGameCreationPage() {
+        this.ngZone.run(() => {
+            this.router.navigate([`/${AppRoutes.MultiGameCreationPage}/${GameMode.Multi}`]).then();
         });
     }
 }
