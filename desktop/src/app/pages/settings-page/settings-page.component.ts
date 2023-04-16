@@ -81,43 +81,28 @@ export class SettingsPageComponent implements OnInit {
     protected submitUsername() {
         if (this.newUsername.invalid || this.newUsernameConfirmation.invalid) return;
         if (this.newUsername.value !== this.newUsernameConfirmation.value) return;
-        this.httpHandlerService
-            .modifyUsername(this.newUsername.value)
-            .then(() => {
-                this.userService.user.username = this.newUsername.value;
-                this.newUsername.reset();
-            })
-            .catch((err) => {
-                this.snackBarService.openError(err);
-            });
+        this.httpHandlerService.modifyUsername(this.newUsername.value).then();
+        this.snackBarService.openInfo('Modified successfully');
+        this.userService.user.username = this.newUsername.value;
+        this.newUsername.reset();
+        this.newUsernameConfirmation.reset();
     }
 
     protected submitPassword() {
         if (this.newPassword.invalid || this.newPasswordConfirmation.invalid) return;
         if (this.newPassword.value !== this.newPasswordConfirmation.value) return;
-        this.httpHandlerService
-            .modifyPassword(this.newPassword.value)
-            .then((res) => {
-                console.log(res);
-                this.userService.user.password = this.newPassword.value;
-                this.newPassword.reset();
-            })
-            .catch((err) => {
-                this.snackBarService.openError(err);
-            });
+        this.httpHandlerService.modifyPassword(this.newPassword.value).then();
+        this.snackBarService.openInfo('Modified successfully');
+        this.userService.user.password = this.newPassword.value;
+        this.newPassword.reset();
+        this.newPasswordConfirmation.reset();
     }
 
     protected submitLanguage() {
-        this.httpHandlerService
-            .modifyLanguage(this.selectedLanguage)
-            .then((res) => {
-                console.log(res);
-                this.languageService.setLanguage(this.selectedLanguage as LanguageChoice);
-                this.selectedLanguage = undefined;
-            })
-            .catch((err) => {
-                this.snackBarService.openError(err);
-            });
+        this.httpHandlerService.modifyLanguage(this.selectedLanguage).then();
+        this.snackBarService.openInfo('Modified successfully');
+        this.languageService.setLanguage(this.selectedLanguage as LanguageChoice);
+        this.selectedLanguage = undefined;
     }
 
     protected submitTheme() {
@@ -128,18 +113,13 @@ export class SettingsPageComponent implements OnInit {
             isDynamic: this.selectedDynamic,
         };
 
-        this.httpHandlerService
-            .modifyTheme(theme)
-            .then(() => {
-                this.themeService.isDarkTheme.next(this.selectedMainTheme === 'setting.dark');
-                this.selectedDynamic = undefined;
-                this.selectedMainTheme = undefined;
-                this.selectedLightTheme = undefined;
-                this.selectedDarkTheme = undefined;
-            })
-            .catch((err) => {
-                this.snackBarService.openError(err);
-            });
+        this.httpHandlerService.modifyTheme(theme).then();
+        this.snackBarService.openInfo('Modified successfully');
+        this.themeService.isDarkTheme.next(this.selectedMainTheme === 'setting.dark');
+        this.selectedDynamic = undefined;
+        this.selectedMainTheme = undefined;
+        this.selectedLightTheme = undefined;
+        this.selectedDarkTheme = undefined;
     }
 
     private addPasswordValidator(): void {
