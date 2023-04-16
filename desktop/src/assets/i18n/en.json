@@ -254,6 +254,20 @@
             "change_avatar": "Change avatar",
             "change_username": "Change username",
             "change_password": "Change password"
-        }
+        },
+        "snackbar_modify_success": "Modified successfully",
+        "snackbar_modify_err_username": "Error while trying to modify username",
+        "snackbar_modify_err_password": "Error while trying to modify password",
+        "snackbar_modify_err_language": "Error while trying to modify language",
+        "snackbar_modify_err_theme": "Error while trying to modify theme"
+    },
+    "header_options": {
+        "sign_up": "Sign Up",
+        "sign_in": "Sign In",
+        "sign_out": "Sign Out",
+        "settings": "Settings",
+        "dark_mode": "Dark Mode",
+        "light_mode": "Light Mode",
+        "profile": "Profile"
     }
 }
