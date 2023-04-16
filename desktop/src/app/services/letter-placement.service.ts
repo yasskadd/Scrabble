@@ -262,6 +262,10 @@ export class LetterPlacementService {
             return;
         }
 
+        this.clueWords.forEach((word: PlaceWordCommandInfo, index: number) => {
+            this.removeClue(index);
+        });
+        this.clueWords = [];
         this.commitLetter(letter, boardTile, false, false);
     }
 
