@@ -16,7 +16,7 @@
             class="clue-buttons"
             style="width: 50%"
         >
-            {{ "info-panel.hint" | translate }}
+            {{ "info_panel.hint" | translate }}
         </button>
         <div *ngIf="clueAvailable()" class="clue-buttons">
             <button mat-mini-fab (click)="prevClue()">
@@ -72,11 +72,11 @@
             <mat-menu #player_menu="matMenu">
                 <button (click)="selectPlayer(playerInfos.player)" mat-menu-item>
                     <mat-icon>visibility</mat-icon>
-                    <span>{{ "info-panel.see" | translate }}</span>
+                    <span>{{ "info_panel.see" | translate }}</span>
                 </button>
                 <button (click)="replaceBot(playerInfos)" *ngIf="playerInfos.player.type === PlayerType.Bot" mat-menu-item>
                     <mat-icon>sync</mat-icon>
-                    <span>{{ "info-panel.replace" | translate }}</span>
+                    <span>{{ "info_panel.replace" | translate }}</span>
                 </button>
             </mat-menu>
         </button>
