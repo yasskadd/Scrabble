@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
+import { LanguageService } from '@app/services/language.service';
 import { SnackBarService } from '@services/snack-bar.service';
 
 @Component({
@@ -11,7 +12,11 @@ import { SnackBarService } from '@services/snack-bar.service';
 export class DialogBoxPasswordComponent {
     protected passwordForm: FormControl;
 
-    constructor(private snackBarService: SnackBarService, private dialogRef: MatDialogRef<DialogBoxPasswordComponent>) {
+    constructor(
+        protected languageService: LanguageService,
+        private snackBarService: SnackBarService,
+        private dialogRef: MatDialogRef<DialogBoxPasswordComponent>,
+    ) {
         this.passwordForm = new FormControl('', [Validators.required]);
     }
     protected close(): void {
