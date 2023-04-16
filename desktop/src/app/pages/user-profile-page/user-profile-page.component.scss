@@ -1,8 +1,8 @@
 .user-info {
     margin-inline: 20%;
-    //height: 96%;
+    height: 80%;
     margin-block: 1%;
-    justify-content: space-evenly;
+    justify-content: flex-start;
     padding: 0px 16px 16px 16px;
 }
 
@@ -25,15 +25,15 @@ h2 {
 
 .user-stats {
     display: flex;
-    //height: 65%;
-    justify-content: space-around;
+    height: 90%;
+    justify-content: flex-start;
     width: 100%;
     padding: 16px;
 }
 
 .user-stats > div {
     width: 50%;
-    justify-content: space-between;
+    justify-content: flex-start;
 }
 
 #newUser {
@@ -49,6 +49,6 @@ canvas {
 //}
 
 mat-tab-group {
-    height: 600px;
+    height: 80%;
     margin-bottom: 5px;
 }
