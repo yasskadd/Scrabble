@@ -65,7 +65,7 @@
     *ngIf="(chatboxHandler.activeTabObs | async) === 'joinedChats' && (chatboxHandler.chatSessionObs | async) === undefined"
 >
     <button mat-button class="createRoom" mat-raised-button color="primary" (click)="openCreateChatDialog()">
-        {{ "chat.create" | translate }}
+        {{ "chat.create_room.create" | translate }}
         <mat-icon>add</mat-icon>
     </button>
     <mat-card>

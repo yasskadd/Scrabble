@@ -315,6 +315,8 @@ export class ChatboxHandlerService {
         if (this.userService.user._id !== newChatRoom.creatorId) {
             this.allChatRooms.push(newChatRoom);
             this.updateAllRooms();
+        } else {
+            this.snackBarService.openInfo('Room created successfully');
         }
     }
 
