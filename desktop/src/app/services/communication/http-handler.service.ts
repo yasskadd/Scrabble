@@ -226,7 +226,7 @@ export class HttpHandlerService {
     }
 
     async forgotPassword(username: string): Promise<any> {
-        const res: HttpStatusCode = await invoke('httpPost', {
+        const res: HttpResponse = await invoke('httpPost', {
             url: `${this.baseUrl}/profile/forgot-password`,
             onceToldMe: JSON.stringify({ username }),
         });
