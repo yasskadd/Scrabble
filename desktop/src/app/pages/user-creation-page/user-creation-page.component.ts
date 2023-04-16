@@ -3,16 +3,17 @@ import { Component, NgZone, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import {
-    DialogBoxAvatarSelectorComponent,
-} from '@app/components/dialog-box-avatar-selector/dialog-box-avatar-selector.component';
+import { DialogBoxAvatarSelectorComponent } from '@app/components/dialog-box-avatar-selector/dialog-box-avatar-selector.component';
 import { MAX_EMAIL_LENGTH, MAX_TEXT_LENGTH } from '@app/constants/user';
 import { equalStringValidator } from '@app/directives/custom-validators';
 import { AppRoutes } from '@app/models/app-routes';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
+import { LanguageService } from '@app/services/language.service';
 import { SnackBarService } from '@app/services/snack-bar.service';
+import { ThemeService } from '@app/services/theme.service';
 import { AvatarData } from '@common/interfaces/avatar-data';
 import { ImageInfo } from '@common/interfaces/image-info';
+import { Theme } from '@common/interfaces/theme';
 import { IUser } from '@common/interfaces/user';
 import { ImageType } from '@common/models/image-type';
 
@@ -45,6 +46,8 @@ export class UserCreationPageComponent {
         private router: Router,
         private ngZone: NgZone,
         private dialog: MatDialog,
+        private themeService: ThemeService,
+        private languageService: LanguageService,
     ) {
         this.profilePicForm = new FormControl(undefined, [Validators.required]);
         this.usernameForm = new FormControl('', [Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]);
@@ -96,12 +99,22 @@ export class UserCreationPageComponent {
                 isDefaultPicture,
             };
         }
+
+        const theme: Theme = {
+            mainTheme: this.themeService.isDarkTheme.value === true ? 'setting.dark' : 'setting.light',
+            lightTheme: 'setting.light',
+            darkTheme: 'setting.dark',
+            isDynamic: false,
+        };
+
         this.httpHandlerService
             .signUp({
                 email: this.emailForm.value,
                 username: this.usernameForm.value,
                 password: this.passwordForm.value,
                 profilePicture,
+                theme,
+                language: this.languageService.language,
             } as IUser)
             .then((res) => {
                 if (res.message) {
@@ -136,7 +149,7 @@ export class UserCreationPageComponent {
         if (form.hasError('maxLength')) return 'Too long';
         if (form.hasError('required')) return 'Field required';
         if (form.hasError('email')) return 'Not a valid email address';
-        if (form.hasError('equalString')) return 'Passwords don\'t match';
+        if (form.hasError('equalString')) return "Passwords don't match";
 
         return '';
     }

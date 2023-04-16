@@ -24,3 +24,18 @@ body {
     border-radius: 50%;
     object-fit: cover;
 }
+
+.configs-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-gap: 20px;
+
+    div {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+mat-form-field {
+    margin-bottom: 5%;
+}

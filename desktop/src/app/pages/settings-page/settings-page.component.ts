@@ -1,16 +1,20 @@
 import { Component, NgZone, OnInit } from '@angular/core';
 import { FormControl, ValidatorFn, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
+import { DialogBoxAvatarSelectorComponent } from '@app/components/dialog-box-avatar-selector/dialog-box-avatar-selector.component';
+import { equalStringValidator } from '@app/directives/custom-validators';
+import { AppRoutes } from '@app/models/app-routes';
+import { LanguageChoice } from '@app/models/language-choice';
+import { HttpHandlerService } from '@app/services/communication/http-handler.service';
+import { LanguageService } from '@app/services/language.service';
+import { SnackBarService } from '@app/services/snack-bar.service';
+import { ThemeService } from '@app/services/theme.service';
 import { MAX_TITLE_LENGTH } from '@common/constants/dictionary';
 import { AvatarData } from '@common/interfaces/avatar-data';
-import { MatDialog } from '@angular/material/dialog';
-import {
-    DialogBoxAvatarSelectorComponent,
-} from '@app/components/dialog-box-avatar-selector/dialog-box-avatar-selector.component';
+import { Theme } from '@common/interfaces/theme';
 import { ImageType } from '@common/models/image-type';
-import { equalStringValidator } from '@app/directives/custom-validators';
 import { UserService } from '@services/user.service';
-import { Router } from '@angular/router';
-import { AppRoutes } from '@app/models/app-routes';
 
 @Component({
     selector: 'app-settings-page',
@@ -20,13 +24,30 @@ import { AppRoutes } from '@app/models/app-routes';
 export class SettingsPageComponent implements OnInit {
     protected newUsername: FormControl;
     protected newUsernameConfirmation: FormControl;
+    protected newPassword: FormControl;
+    protected newPasswordConfirmation: FormControl;
     protected profilePicForm: FormControl;
-
+    protected selectedLanguage: string;
+    protected selectedDynamic: boolean;
+    protected selectedMainTheme: string;
+    protected selectedLightTheme: string;
+    protected selectedDarkTheme: string;
     protected imageTypes: typeof ImageType = ImageType;
 
-    constructor(protected userService: UserService, private router: Router, private ngZone: NgZone, private dialog: MatDialog) {
+    constructor(
+        protected userService: UserService,
+        private router: Router,
+        private ngZone: NgZone,
+        private dialog: MatDialog,
+        private httpHandlerService: HttpHandlerService,
+        private languageService: LanguageService,
+        private snackBarService: SnackBarService,
+        private themeService: ThemeService,
+    ) {
         this.newUsername = new FormControl<string>('');
         this.newUsernameConfirmation = new FormControl<string>('', [Validators.maxLength(MAX_TITLE_LENGTH)]);
+        this.newPassword = new FormControl<string>('');
+        this.newPasswordConfirmation = new FormControl<string>('', [Validators.maxLength(MAX_TITLE_LENGTH)]);
         this.profilePicForm = new FormControl<AvatarData>(undefined);
 
         this.addPasswordValidator();
@@ -59,8 +80,46 @@ export class SettingsPageComponent implements OnInit {
 
     protected submitUsername() {
         if (this.newUsername.invalid || this.newUsernameConfirmation.invalid) return;
+        if (this.newUsername.value !== this.newUsernameConfirmation.value) return;
+        this.httpHandlerService.modifyUsername(this.newUsername.value).then();
+        this.snackBarService.openInfo('Modified successfully');
+        this.userService.user.username = this.newUsername.value;
+        this.newUsername.reset();
+        this.newUsernameConfirmation.reset();
+    }
 
-        // TODO : Call method on server to change username
+    protected submitPassword() {
+        if (this.newPassword.invalid || this.newPasswordConfirmation.invalid) return;
+        if (this.newPassword.value !== this.newPasswordConfirmation.value) return;
+        this.httpHandlerService.modifyPassword(this.newPassword.value).then();
+        this.snackBarService.openInfo('Modified successfully');
+        this.userService.user.password = this.newPassword.value;
+        this.newPassword.reset();
+        this.newPasswordConfirmation.reset();
+    }
+
+    protected submitLanguage() {
+        this.httpHandlerService.modifyLanguage(this.selectedLanguage).then();
+        this.snackBarService.openInfo('Modified successfully');
+        this.languageService.setLanguage(this.selectedLanguage as LanguageChoice);
+        this.selectedLanguage = undefined;
+    }
+
+    protected submitTheme() {
+        const theme: Theme = {
+            mainTheme: this.selectedMainTheme,
+            lightTheme: this.selectedLightTheme,
+            darkTheme: this.selectedDarkTheme,
+            isDynamic: this.selectedDynamic,
+        };
+
+        this.httpHandlerService.modifyTheme(theme).then();
+        this.snackBarService.openInfo('Modified successfully');
+        this.themeService.isDarkTheme.next(this.selectedMainTheme === 'setting.dark');
+        this.selectedDynamic = undefined;
+        this.selectedMainTheme = undefined;
+        this.selectedLightTheme = undefined;
+        this.selectedDarkTheme = undefined;
     }
 
     private addPasswordValidator(): void {

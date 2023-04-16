@@ -44,6 +44,7 @@
     },
     "waiting_room": {
         "screen_name": "Waiting room",
+        "id": "room ID",
         "players": "Players",
         "start_game": "Start the game",
         "game": "Game",
@@ -65,7 +66,9 @@
         "table": {
             "users": "Users",
             "host": "Host",
-            "difficulty": "Difficulty",
+            "state": "State",
+            "in_progress": "In Progress",
+            "waiting": "Waiting",
             "timer": "Timer",
             "dictionary": "Dictionary"
         },
