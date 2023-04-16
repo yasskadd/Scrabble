@@ -35,12 +35,15 @@ import { PlayerType } from '@common/models/player-type';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import { GamesHandlerService } from './games-handler.service';
+import { Subject } from 'rxjs';
 
 const MAX_SKIP = 6;
 const ERROR_REPLACING_BOT = 'Error trying to replace the bot';
 
 @Service()
 export class GamesStateService {
+    addBotSubject: Subject<BeginnerBot>;
+
     constructor(
         private accountStorage: AccountStorageService,
         private gamesHandler: GamesHandlerService,
@@ -49,7 +52,9 @@ export class GamesStateService {
         private scoreStorage: ScoreStorageService,
         private userStatsStorage: UserStatsStorageService,
         private historyStorageService: HistoryStorageService, // private virtualPlayerStorage: VirtualPlayersStorageService,
-    ) {}
+    ) {
+        this.addBotSubject = new Subject<BeginnerBot>();
+    }
 
     initSocketsEvents(): void {
         // LEAVE GAME
@@ -318,6 +323,7 @@ export class GamesStateService {
             if (gamePlayer.player.type !== PlayerType.Observer) {
                 const bot = this.replacePlayerWithBot(gamePlayer as RealPlayer);
                 this.gamesHandler.addPlayer(bot);
+                this.addBotSubject.next(bot);
                 server.to(bot.player.roomId).emit(SocketEvents.PublicViewUpdate, {
                     gameboard: bot.game.gameboard.toStringArray(),
                     players: this.gamesHandler.getPlayersInfos(bot.player.roomId),

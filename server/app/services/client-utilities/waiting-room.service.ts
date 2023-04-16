@@ -24,6 +24,7 @@ import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import * as uuid from 'uuid';
 import { ChatHandlerService } from './chat-handler.service';
+import { BeginnerBot } from '@app/classes/player/beginner-bot.class';
 
 @Service()
 export class WaitingRoomService {
@@ -47,6 +48,10 @@ export class WaitingRoomService {
 
         this.gamesHandler.removePlayerWithSocketID.subscribe((socketID: string) => {
             this.removePlayerFromSocketID(socketID);
+        });
+        this.gameStateService.addBotSubject.subscribe((bot: BeginnerBot) => {
+            this.waitingRooms.find((room: GameRoom) => room.id === bot.player.roomId)?.players.push(bot.player);
+            this.socketManager.server.emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
         });
     }
 
