@@ -321,5 +321,12 @@
         "dark_mode": "Dark Mode",
         "light_mode": "Light Mode",
         "profile": "Profile"
+    },
+
+    "blank_letter": {
+        "title": "Choose a Letter",
+        "letter": "Letter",
+        "cancel": "Cancel",
+        "ok": "Ok"
     }
 }
