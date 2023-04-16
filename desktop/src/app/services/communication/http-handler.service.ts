@@ -247,7 +247,7 @@ export class HttpHandlerService {
     }
 
     async modifyPassword(newPassword: string): Promise<void> {
-        const res: HttpResponse = await invoke('httpPatch', {
+        await invoke('httpPatch', {
             url: `${this.baseUrl}/profile/password`,
             onceToldMe: JSON.stringify({ newPassword }),
         });
