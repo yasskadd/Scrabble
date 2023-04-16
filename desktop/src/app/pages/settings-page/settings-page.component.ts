@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
 import { FormControl, ValidatorFn, Validators } from '@angular/forms';
 import { MAX_TITLE_LENGTH } from '@common/constants/dictionary';
 import { AvatarData } from '@common/interfaces/avatar-data';
 import { MatDialog } from '@angular/material/dialog';
-import { DialogBoxAvatarSelectorComponent } from '@app/components/dialog-box-avatar-selector/dialog-box-avatar-selector.component';
+import {
+    DialogBoxAvatarSelectorComponent,
+} from '@app/components/dialog-box-avatar-selector/dialog-box-avatar-selector.component';
 import { ImageType } from '@common/models/image-type';
 import { equalStringValidator } from '@app/directives/custom-validators';
 import { UserService } from '@services/user.service';
@@ -22,7 +24,7 @@ export class SettingsPageComponent implements OnInit {
 
     protected imageTypes: typeof ImageType = ImageType;
 
-    constructor(protected userService: UserService, private router: Router, private dialog: MatDialog) {
+    constructor(protected userService: UserService, private router: Router, private ngZone: NgZone, private dialog: MatDialog) {
         this.newUsername = new FormControl<string>('');
         this.newUsernameConfirmation = new FormControl<string>('', [Validators.maxLength(MAX_TITLE_LENGTH)]);
         this.profilePicForm = new FormControl<AvatarData>(undefined);
@@ -32,7 +34,9 @@ export class SettingsPageComponent implements OnInit {
 
     ngOnInit() {
         if (!this.userService.user) {
-            this.router.navigate([AppRoutes.HomePage]).then();
+            this.ngZone.run(() => {
+                this.router.navigate([`${AppRoutes.HomePage}`]).then();
+            });
         }
     }
 

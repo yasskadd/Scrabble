@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
@@ -36,11 +36,15 @@ export class MainPageComponent {
         private dialog: MatDialog,
         private highScore: MatDialog,
         private router: Router,
+        private ngZone: NgZone,
     ) {
         this.multiplayerCreateLink = `/${AppRoutes.MultiGameCreationPage}/${GameMode.Multi}`;
         if (!this.userService.isConnected.getValue()) {
             if (tauri.window.getCurrent().label === 'chat') return;
-            this.router.navigate([`${AppRoutes.ConnectionPage}`]).then();
+
+            this.ngZone.run(() => {
+                this.router.navigate([`${AppRoutes.ConnectionPage}`]).then();
+            });
         }
 
         this.homeConnectionResponse = { validity: false };
@@ -121,6 +125,8 @@ export class MainPageComponent {
 
     navigateJoinPage() {
         this.clientSocketService.send(SocketEvents.UpdateGameRooms);
-        this.router.navigate([`/${AppRoutes.MultiJoinPage}/classique`]);
+        this.ngZone.run(() => {
+            this.router.navigate([`/${AppRoutes.MultiJoinPage}/classique`]);
+        });
     }
 }

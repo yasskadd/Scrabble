@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { GameClientService } from '@app/services/game-client.service';
 import { first } from 'rxjs/operators';
 import { LetterPlacementService } from '@services/letter-placement.service';
@@ -20,6 +20,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         private gameClientService: GameClientService,
         protected letterService: LetterPlacementService,
         private router: Router,
+        private ngZone: NgZone,
         private snackBar: MatSnackBar,
     ) {
         this.isLoading = true;
@@ -34,7 +35,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.gameClientService.abandonGame();
-        this.router.navigate([`${AppRoutes.HomePage}`]).then();
+        this.ngZone.run(() => {
+            this.router.navigate([`${AppRoutes.HomePage}`]).then();
+        });
         this.openSnackBar();
     }
 

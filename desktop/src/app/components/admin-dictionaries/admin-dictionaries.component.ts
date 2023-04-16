@@ -5,7 +5,7 @@ import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
 import { DictionaryService } from '@app/services/dictionary.service';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
-import saveAs from 'file-saver';
+// import saveAs from 'file-saver';
 
 @Component({
     selector: 'app-admin-dictionaries',
@@ -64,7 +64,7 @@ export class AdminDictionariesComponent {
     }
 
     downloadJson(dictionary: DictionaryInfo) {
-        this.dictionaryService.getDictionary(dictionary.title).subscribe(() => this.downloadFile(this.dictionaryService.dictionary));
+        // this.dictionaryService.getDictionary(dictionary.title).subscribe(() => this.downloadFile(this.dictionaryService.dictionary));
     }
 
     resetDictionaries() {
@@ -77,9 +77,9 @@ export class AdminDictionariesComponent {
         });
     }
 
-    downloadFile(data: unknown) {
-        const json = JSON.stringify(data);
-        const blob = new Blob([json] as BlobPart[], { type: 'text/json' });
-        saveAs(blob, `${(data as Dictionary).title}.json`);
-    }
+    // downloadFile(data: unknown) {
+    //     const json = JSON.stringify(data);
+    //     const blob = new Blob([json] as BlobPart[], { type: 'text/json' });
+    //     saveAs(blob, `${(data as Dictionary).title}.json`);
+    // }
 }

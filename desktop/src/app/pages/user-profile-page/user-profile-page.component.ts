@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserService } from '@app/services/user.service';
 import { UserStats } from '@common/interfaces/user-stats';
@@ -14,7 +14,7 @@ export class UserProfilePageComponent implements AfterViewInit {
     @ViewChild('myChart') canvasRef: ElementRef<HTMLCanvasElement>;
     userStats: UserStats;
 
-    constructor(protected userService: UserService, private router: Router) {
+    constructor(protected userService: UserService, private router: Router, private ngZone: NgZone) {
         this.setUserStats();
     }
 
@@ -52,7 +52,9 @@ export class UserProfilePageComponent implements AfterViewInit {
     }
 
     redirectSettingsPage() {
-        this.router.navigate(['/settings']).then();
+        this.ngZone.run(() => {
+            this.router.navigate(['/settings']).then();
+        });
     }
 
     setUserStats() {

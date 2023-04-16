@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { DialogBoxAbandonGameComponent } from '@app/components/dialog-box-abandon-game/dialog-box-abandon-game.component';
@@ -32,6 +32,7 @@ export class InformationPanelComponent {
         public timer: TimeService,
         private dialog: MatDialog,
         private router: Router,
+        private ngZone: NgZone,
     ) {
         this.clueIndex = -1;
     }
@@ -52,7 +53,9 @@ export class InformationPanelComponent {
 
     leaveGame(): void {
         this.gameClientService.quitGame();
-        this.router.navigate([AppRoutes.HomePage]).then();
+        this.ngZone.run(() => {
+            this.router.navigate([`${AppRoutes.HomePage}`]).then();
+        });
     }
 
     openHelpDialog() {

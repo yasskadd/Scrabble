@@ -11,14 +11,9 @@ import { AppCookieService } from '@services/communication/app-cookie.service';
 export class AppComponent implements OnInit {
     constructor(
         private themeService: ThemeService,
-        // private clientSocketService: ClientSocketService,
         private cookieService: AppCookieService,
-        // private changeDetector: ChangeDetectorRef,
         private elementRef: ElementRef,
     ) {
-        // this.clientSocketService.appUpdate.subscribe(() => {
-        //     this.changeDetector.detectChanges();
-        // });
         this.themeService.isDarkTheme.subscribe((isDarkTheme: boolean) => {
             if (isDarkTheme) {
                 this.elementRef.nativeElement.classList.add('darkMode');

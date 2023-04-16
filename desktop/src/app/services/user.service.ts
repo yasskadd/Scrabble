@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { RustEvent } from '@app/models/rust-command';
@@ -35,6 +35,7 @@ export class UserService {
         private cookieService: AppCookieService,
         private snackBarService: SnackBarService,
         private router: Router,
+        private ngZone: NgZone,
     ) {
         this.isConnected = new BehaviorSubject<boolean>(false);
         this.user = undefined;
@@ -78,7 +79,9 @@ export class UserService {
 
             this.isConnected.next(false);
             if (tauri.window.getCurrent().label === 'chat') return;
-            this.router.navigate([AppRoutes.ConnectionPage]).then();
+            this.ngZone.run(() => {
+                this.router.navigate([AppRoutes.ConnectionPage]).then();
+            });
         });
     }
 
@@ -98,7 +101,9 @@ export class UserService {
             this.isConnected.next(true);
 
             if (tauri.window.getCurrent().label === 'chat') return;
-            this.router.navigate([AppRoutes.HomePage]).then();
+            this.ngZone.run(() => {
+                this.router.navigate([AppRoutes.HomePage]).then();
+            });
         });
         this.clientSocketService.on(SocketEvents.UserAlreadyConnected, () => {
             // TODO : Language

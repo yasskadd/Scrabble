@@ -1,9 +1,11 @@
 /* eslint-disable no-underscore-dangle */
-import { Component, ViewChild } from '@angular/core';
+import { Component, NgZone, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { DialogBoxAvatarSelectorComponent } from '@app/components/dialog-box-avatar-selector/dialog-box-avatar-selector.component';
+import {
+    DialogBoxAvatarSelectorComponent,
+} from '@app/components/dialog-box-avatar-selector/dialog-box-avatar-selector.component';
 import { MAX_EMAIL_LENGTH, MAX_TEXT_LENGTH } from '@app/constants/user';
 import { equalStringValidator } from '@app/directives/custom-validators';
 import { AppRoutes } from '@app/models/app-routes';
@@ -41,6 +43,7 @@ export class UserCreationPageComponent {
         private httpHandlerService: HttpHandlerService,
         private snackBarService: SnackBarService,
         private router: Router,
+        private ngZone: NgZone,
         private dialog: MatDialog,
     ) {
         this.profilePicForm = new FormControl(undefined, [Validators.required]);
@@ -111,7 +114,9 @@ export class UserCreationPageComponent {
                     this.httpHandlerService.sendProfilePicture(this.profilePicForm.value as AvatarData, res.imageKey);
                 }
 
-                this.router.navigate([AppRoutes.HomePage]).then();
+                this.ngZone.run(() => {
+                    this.router.navigate([`${AppRoutes.HomePage}`]);
+                });
             });
     }
 
@@ -131,7 +136,7 @@ export class UserCreationPageComponent {
         if (form.hasError('maxLength')) return 'Too long';
         if (form.hasError('required')) return 'Field required';
         if (form.hasError('email')) return 'Not a valid email address';
-        if (form.hasError('equalString')) return "Passwords don't match";
+        if (form.hasError('equalString')) return 'Passwords don\'t match';
 
         return '';
     }

@@ -111,7 +111,6 @@ export class ClientSocketService {
             tauri.event
                 .listen(eventName, (event: Event<unknown>) => {
                     action(JSON.parse(event.payload as string));
-                    this.appUpdate.next();
                 })
                 .then();
         } else {

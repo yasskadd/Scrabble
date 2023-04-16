@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { SocketEvents } from '@common/constants/socket-events';
@@ -36,6 +36,7 @@ export class GameClientService {
         private userService: UserService,
         private snackBarService: SnackBarService,
         private router: Router,
+        private ngZone: NgZone,
     ) {
         this.players = [];
 
@@ -100,7 +101,9 @@ export class GameClientService {
 
         this.clientSocketService.on(SocketEvents.GameAboutToStart, (info: GameInfo) => {
             this.viewUpdateEvent(info);
-            this.router.navigate([`${AppRoutes.GamePage}`]).then();
+            this.ngZone.run(() => {
+                this.router.navigate([`${AppRoutes.GamePage}`]).then();
+            });
         });
 
         this.clientSocketService.on(SocketEvents.Skip, (gameInfo: GameInfo) => {
@@ -194,7 +197,9 @@ export class GameClientService {
             this.isGameFinish = true;
         }
         this.quitGameSubject.next();
-        this.router.navigate([`${AppRoutes.HomePage}`]);
+        this.ngZone.run(() => {
+            this.router.navigate([`${AppRoutes.HomePage}`]).then();
+        });
     }
 
     private skipEvent(gameInfo: GameInfo) {

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MIN_PASSWORD_LENGTH } from '@app/constants/user';
@@ -56,6 +56,7 @@ export class GameCreationPageComponent {
         private router: Router,
         private readonly httpHandler: HttpHandlerService,
         private snackBarService: SnackBarService,
+        private ngZone: NgZone,
     ) {
         this.gameMode = this.activatedRoute.snapshot.params.id as GameMode;
         this.selectedFile = null;
@@ -133,8 +134,15 @@ export class GameCreationPageComponent {
     }
 
     navigateToGamePage() {
-        if (this.isSoloMode()) this.router.navigate([AppRoutes.GamePage]).then();
-        else this.router.navigate([`${AppRoutes.MultiWaitingPage}/${this.gameMode}`]).then();
+        if (this.isSoloMode()) {
+            this.ngZone.run(() => {
+                this.router.navigate([`${AppRoutes.GamePage}`]).then();
+            });
+        } else {
+            this.ngZone.run(() => {
+                this.router.navigate([`${AppRoutes.MultiWaitingPage}/${this.gameMode}`]).then();
+            });
+        }
     }
 
     isSoloMode() {
@@ -162,8 +170,10 @@ export class GameCreationPageComponent {
 
         if (this.isGameLocked) {
             this.passwordForm.addValidators([Validators.required, Validators.minLength(MIN_PASSWORD_LENGTH)]);
+            this.passwordForm.updateValueAndValidity();
         } else {
             this.passwordForm.removeValidators([Validators.required, Validators.minLength(MIN_PASSWORD_LENGTH)]);
+            this.passwordForm.updateValueAndValidity();
         }
     }
 

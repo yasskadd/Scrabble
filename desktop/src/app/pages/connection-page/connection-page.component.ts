@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MAX_TEXT_LENGTH } from '@app/constants/user';
@@ -24,6 +24,7 @@ export class ConnectionPageComponent {
         private userService: UserService,
         private snackBarService: SnackBarService,
         private router: Router,
+        private ngZone: NgZone
     ) {
         this.usernameForm = new FormControl('', [Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]);
         this.passwordForm = new FormControl('', [Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]);
@@ -53,7 +54,9 @@ export class ConnectionPageComponent {
     }
 
     protected redirectUserPage() {
-        this.router.navigate(['/user']).then();
+        this.ngZone.run(() => {
+            this.router.navigate(['/user']).then();
+        });
     }
 
     protected forgot(): void {

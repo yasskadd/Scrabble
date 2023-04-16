@@ -2,7 +2,6 @@
     "name": "PolyScrabble",
     "private": true,
     "version": "0.0.1",
-    "main": "main.js",
     "scripts": {
         "ng": "ng",
         "tauri": "tauri",
