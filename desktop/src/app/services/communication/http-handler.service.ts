@@ -7,6 +7,7 @@ import { Bot } from '@common/interfaces/bot';
 import { BotNameSwitcher } from '@common/interfaces/bot-name-switcher';
 import { ChatRoomUser } from '@common/interfaces/chat-room';
 import { GameHistoryInfo } from '@common/interfaces/game-history-info';
+import { HistoryEvent } from '@common/interfaces/history-event';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
 import { IUser } from '@common/interfaces/user';
 import { UserStats } from '@common/interfaces/user-stats';
@@ -163,14 +164,14 @@ export class HttpHandlerService {
 
     async getStats(): Promise<UserStats> {
         const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/profile/stats` });
-        console.log(JSON.parse(res.body) + 'http');
         return JSON.parse(res.body);
     }
 
-    // async getUserHistoryEvents(): Promise<HistoryEvent[]> {
-    //     const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/profile/history-events` });
-    //     return JSON.parse(res.body);
-    // }
+    async getUserHistoryEvents(): Promise<{ historyEventList: HistoryEvent[] }> {
+        const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/profile/history-events` });
+        console.log(JSON.parse(res.body));
+        return JSON.parse(res.body);
+    }
 
     async getDefaultImages(): Promise<Map<string, string[]>> {
         const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/image/default-pictures` });

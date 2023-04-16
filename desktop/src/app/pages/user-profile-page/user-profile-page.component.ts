@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpHandlerService } from '@app/services/communication/http-handler.service';
 import { UserService } from '@app/services/user.service';
 import { HistoryEvent } from '@common/interfaces/history-event';
 import { UserStats } from '@common/interfaces/user-stats';
@@ -13,15 +14,20 @@ import Chart from 'chart.js/auto';
 })
 export class UserProfilePageComponent implements AfterViewInit {
     @ViewChild('myChart') canvasRef: ElementRef<HTMLCanvasElement>;
-    userStats: UserStats;
-    games: HistoryEvent[];
-    connections: HistoryEvent[];
-    httpHandlerService: any;
 
-    constructor(protected userService: UserService, private router: Router) {
+    userStats: UserStats;
+    connections: HistoryEvent[];
+    games: HistoryEvent[];
+
+    constructor(protected userService: UserService, private readonly httpHandlerService: HttpHandlerService, private router: Router) {
+        this.connections = [];
+        this.games = [];
+
         this.setUserStats();
-        console.log(this.userStats + 'profile-page');
-        // this.setGames();
+        this.setConnections();
+        this.setGames();
+        console.log(this.connections);
+        console.log(this.games);
     }
 
     ngAfterViewInit() {
@@ -54,22 +60,25 @@ export class UserProfilePageComponent implements AfterViewInit {
 
     setUserStats() {
         this.httpHandlerService.getStats().then((userStats: UserStats) => {
-            Math.round(userStats.averageGameScore);
+            userStats.averageGameScore = Math.round(userStats.averageGameScore);
             this.userStats = userStats;
         });
     }
 
-    // get userHistoryEvents(): HistoryEvent[] {
-    //     return this.httpHandlerService.getUserHistoryEvents().then((userHistoryEvents: HistoryEvent[]) => {
-    //         return userHistoryEvents;
-    //     });
-    // }
+    setConnections() {
+        this.httpHandlerService.getUserHistoryEvents().then((result) => {
+            result.historyEventList.forEach((event: HistoryEvent) => this.connections.push(event));
+        });
+    }
 
-    // setGames() {
-    //     this.userHistoryEvents.forEach((historyEvent: HistoryEvent) => {
-    //         if (historyEvent.gameWon != null) this.games.push(historyEvent);
-    //     });
-    // }
+    setGames() {
+        this.connections.forEach((event: HistoryEvent) => {
+            if (event.gameWon) {
+                this.games.push(event);
+                console.log('gotit');
+            }
+        });
+    }
 
     redirectSettingsPage() {
         this.router.navigate(['/settings']).then();
