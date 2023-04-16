@@ -89,18 +89,49 @@ export class LetterPlacementService {
         };
     }
 
-    async scaleCoord(window: number[], coord: number[]): Promise<number[]> {
+    readonly DESKTOP_TOP_START = 65;
+    readonly DESKTOP_BOARD_SIZE = 600;
+    readonly MOBILE_BOARD_SIZE = 620;
+    readonly MOBILE_HORIZONTAL_SCREEN_WIDTH = 1280;
+    readonly MOBILE_HORIZONTAL_SCREEN_HEIGHT = 752;
+    readonly MOBILE_VERTICAL_SCREEN_WIDTH = 800;
+    readonly MOBILE_VERTICAL_SCREEN_HEIGHT = 1232;
+    readonly MOBILE_BOARD_HORIZONTAL_MIDDLE_X = 665;
+    readonly MOBILE_BOARD_HORIZONTAL_MIDDLE_Y = 300;
+    readonly MOBILE_BOARD_VERTICAL_MIDDLE_X = 415;
+    readonly MOBILE_BOARD_VERTICAL_MIDDLE_Y = 775;
+
+    async scaleCoord(incommingWindow: number[], coord: number[]): Promise<number[]> {
         const windowSize = await tauriWindow.appWindow.innerSize();
         const windowScale = await tauriWindow.appWindow.scaleFactor();
-        const size = [windowSize.width, windowSize.height];
 
-        coord[0] *= size[0] / window[0];
-        coord[1] *= size[1] / window[1];
+        // console.log(`Window size: (${incommingWindow[0]}, ${incommingWindow[1]})`);
+        // console.log(`Incomming coords: (${coord[0]}, ${coord[1]})`);
+        if (incommingWindow[0] == this.MOBILE_HORIZONTAL_SCREEN_WIDTH && incommingWindow[1] == this.MOBILE_HORIZONTAL_SCREEN_HEIGHT) {
+            // Mobile horizontal scaling
+            let normalizedX = (coord[0] - this.MOBILE_BOARD_HORIZONTAL_MIDDLE_X) / this.MOBILE_BOARD_SIZE;
+            let normalizedY = (coord[1] - this.MOBILE_BOARD_HORIZONTAL_MIDDLE_Y) / this.MOBILE_BOARD_SIZE;
+            coord[0] = windowSize.width / 2 + normalizedX * this.DESKTOP_BOARD_SIZE;
+            coord[1] = windowSize.height / 2 - this.DESKTOP_TOP_START + normalizedY * this.DESKTOP_BOARD_SIZE;
+            // console.log(`Mobile hor: (${normalizedX}, ${normalizedY}) => (${coord[0]}, ${coord[1]})`);
+        } else if (incommingWindow[0] == this.MOBILE_VERTICAL_SCREEN_WIDTH && incommingWindow[1] == this.MOBILE_VERTICAL_SCREEN_HEIGHT) {
+            // Mobile horizontal scaling
+            let normalizedX = (coord[0] - this.MOBILE_BOARD_VERTICAL_MIDDLE_X) / (this.MOBILE_BOARD_SIZE + 20);
+            let normalizedY = (coord[1] - this.MOBILE_BOARD_VERTICAL_MIDDLE_Y) / (this.MOBILE_BOARD_SIZE + 20);
+            coord[0] = windowSize.width / 2 + normalizedX * this.DESKTOP_BOARD_SIZE;
+            coord[1] = windowSize.height / 2 - this.DESKTOP_TOP_START + normalizedY * this.DESKTOP_BOARD_SIZE;
+            // console.log(`Mobile ver: (${normalizedX}, ${normalizedY}) => (${coord[0]}, ${coord[1]})`);
+        } else {
+            // Desktop scaling
+            coord[0] *= windowSize.width / incommingWindow[0];
+            coord[1] *= windowSize.height / incommingWindow[1];
 
-        coord[0] = Math.max(0, Math.min(coord[0], size[0]));
-        coord[1] = Math.max(0, Math.min(coord[1], size[1]));
-        coord[0] -= BOARD_TILE_SIZE * windowScale;
-        coord[1] -= BOARD_TILE_SIZE * windowScale;
+            coord[0] = Math.max(0, Math.min(coord[0], windowSize.width));
+            coord[1] = Math.max(0, Math.min(coord[1], windowSize.height));
+            coord[0] -= BOARD_TILE_SIZE * windowScale;
+            coord[1] -= BOARD_TILE_SIZE * windowScale;
+            console.log(`Desktop (${coord[0]}, ${coord[1]})`);
+        }
 
         return coord;
     }
