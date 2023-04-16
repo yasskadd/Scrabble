@@ -7,7 +7,6 @@ import { RustCommand, RustEvent } from '@app/models/rust-command';
 import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
 import { UserService } from '@app/services/user.service';
 import { SocketEvents } from '@common/constants/socket-events';
-import { Message } from '@common/interfaces/message';
 import { IUser } from '@common/interfaces/user';
 import { ClientSocketService } from '@services/communication/client-socket.service';
 import * as tauri from '@tauri-apps/api';
@@ -26,7 +25,8 @@ export class GenericChatComponent implements AfterViewChecked, AfterContentInit 
     inputForm: FormControl;
     searchInput: string;
     searchAllInput: string;
-    private lastMessage: Message;
+
+    private lastMessage: string;
 
     constructor(
         public chatboxHandler: ChatboxHandlerService,
@@ -39,6 +39,7 @@ export class GenericChatComponent implements AfterViewChecked, AfterContentInit 
         this.searchAllInput = '';
         // this.chatSession = undefined;
         this.inputForm = new FormControl('');
+        this.lastMessage = '';
 
         if (tauri.window.getCurrent().label === 'chat') {
             tauri.window
@@ -104,8 +105,8 @@ export class GenericChatComponent implements AfterViewChecked, AfterContentInit 
     // }
 
     ngAfterViewChecked(): void {
-        const lastMessage = this.chatboxHandler.messages[this.chatboxHandler.messages.length - 1];
-        if (this.lastMessage !== lastMessage) {
+        const lastMessage = this.chatboxHandler.messages[this.chatboxHandler.messages.length - 1]?.date;
+        if (lastMessage != undefined && this.lastMessage !== lastMessage) {
             this.lastMessage = lastMessage;
             this.scrollToBottom();
         }
