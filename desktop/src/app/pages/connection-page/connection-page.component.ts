@@ -2,6 +2,7 @@ import { Component, NgZone } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MAX_TEXT_LENGTH } from '@app/constants/user';
+import { LanguageService } from '@app/services/language.service';
 import { UserService } from '@app/services/user.service';
 import { IUser } from '@common/interfaces/user';
 
@@ -16,7 +17,13 @@ export class ConnectionPageComponent {
     protected passwordForm: FormControl;
     protected connectionError: string;
 
-    constructor(private formBuilder: FormBuilder, private userService: UserService, private router: Router, private ngZone: NgZone) {
+    constructor(
+        protected languageService: LanguageService,
+        private formBuilder: FormBuilder,
+        private userService: UserService,
+        private router: Router,
+        private ngZone: NgZone,
+    ) {
         this.usernameForm = new FormControl('', [Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]);
         this.passwordForm = new FormControl('', [Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]);
         this.connectionError = '';

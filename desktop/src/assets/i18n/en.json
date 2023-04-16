@@ -350,9 +350,14 @@
         "yes": "Yes"
     },
 
-    "info-panel": {
+    "info_panel": {
         "hint": "Hint",
         "see": "See",
         "replace": "Replace"
+    },
+
+    "connection_page": {
+        "username": "Username",
+        "password": "Password"
     }
 }
