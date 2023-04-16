@@ -1,10 +1,10 @@
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { GameClientService } from '@app/services/game-client.service';
-import { first } from 'rxjs/operators';
-import { LetterPlacementService } from '@services/letter-placement.service';
-import { AppRoutes } from '@app/models/app-routes';
-import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
+import { AppRoutes } from '@app/models/app-routes';
+import { GameClientService } from '@app/services/game-client.service';
+import { LetterPlacementService } from '@services/letter-placement.service';
+import { first } from 'rxjs/operators';
 
 const TIMEOUT = 3000;
 
@@ -17,7 +17,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     isLoading: boolean;
 
     constructor(
-        private gameClientService: GameClientService,
+        public gameClientService: GameClientService,
         protected letterService: LetterPlacementService,
         private router: Router,
         private ngZone: NgZone,
