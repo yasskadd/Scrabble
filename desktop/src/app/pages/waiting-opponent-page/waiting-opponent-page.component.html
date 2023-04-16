@@ -1,61 +1,62 @@
-<div class='justified encapsulating-div'>
-<mat-card class='wrapper'>
-<!--    <div id='title-and-solo-button'>-->
-<!--        <mat-card-title>{{ gameConfiguration.localGameRoom.state | translate }}</mat-card-title>-->
-<!--        <button-->
-<!--            *ngIf='gameConfiguration.isGameCreator()'-->
-<!--            (click)='joinSoloMode()'-->
-<!--            class='solo-mode-button'-->
-<!--            mat-raised-button-->
-<!--            [disabled]='gameConfiguration.localGameRoom.players.length > 1'-->
-<!--        >-->
-<!--            {{ "waiting_page.join.solo" | translate }}-->
-<!--        </button>-->
-<!--    </div>-->
+<div class='justified encapsulating-div mat-app-background'>
+    <mat-card class='wrapper'>
+        <!--    <div id='title-and-solo-button'>-->
+        <!--        <mat-card-title>{{ gameConfiguration.localGameRoom.state | translate }}</mat-card-title>-->
+        <!--        <button-->
+        <!--            *ngIf='gameConfiguration.isGameCreator()'-->
+        <!--            (click)='joinSoloMode()'-->
+        <!--            class='solo-mode-button'-->
+        <!--            mat-raised-button-->
+        <!--            [disabled]='gameConfiguration.localGameRoom.players.length > 1'-->
+        <!--        >-->
+        <!--            {{ "waiting_page.join.solo" | translate }}-->
+        <!--        </button>-->
+        <!--    </div>-->
 
-    <mat-card>
-        <mat-card-content class='waiting-opponent-container'>
-            <div class='pending-player' *ngFor='let player of getRoomPlayers(); index as i'>
-                <!-- TODO : Language -->
-                <span class='player-infos'>
-                    <img [src]='userService.getPlayerImage(player)' class='selecter-avatar' alt='player.user profile picture' />
-                    {{ player.user.username }}
+        <mat-card>
+            <mat-card-content class='waiting-opponent-container'>
+                <div class='pending-player' *ngFor='let player of getRoomPlayers(); index as i'>
+                    <!-- TODO : Language -->
+                    <span class='player-infos'>
+                    <img [src]='userService.getPlayerImage(player)' class='selecter-avatar'
+                         alt='player.user profile picture' />
+                        {{ player.user.username }}
                     </span>
+                    <button
+                        *ngIf='gameConfiguration.isGameCreator() && player.user._id !== userService.user._id && player.type === playerType.User'
+                        class='rejectButton'
+                        (click)='gameConfiguration.rejectOpponent(player)'
+                        mat-raised-button
+                        [disabled]='!gameConfiguration.localGameRoom.players[i]'
+                    >
+                        {{ "waiting_page.reject" | translate }}
+                    </button>
+                </div>
+                <!--            <div class='pending-cpu' *ngFor='let player of gameConfiguration.gameRoom'></div>-->
+            </mat-card-content>
+            <mat-progress-bar
+                mode='indeterminate'
+                *ngIf='!gameConfiguration.localGameRoom.players[1] || !gameConfiguration.isGameCreator()'
+            ></mat-progress-bar>
+        </mat-card>
+        <div class='container-buttons'>
+            <button class='returnButton' mat-icon-button (click)='exitWaitingRoom()'>
+                <mat-icon>navigate_before</mat-icon>
+            </button>
+            <div *ngIf='gameConfiguration.localGameRoom.visibility === gameVisibility.Private'>
+                Code : {{gameConfiguration.localGameRoom.id}}
+            </div>
+            <div id='player-decision'>
                 <button
-                    *ngIf='gameConfiguration.isGameCreator() && player.user._id !== userService.user._id && player.type === playerType.User'
-                    class='rejectButton'
-                    (click)='gameConfiguration.rejectOpponent(player)'
+                    *ngIf='gameConfiguration.isGameCreator()'
+                    class='startButton'
+                    (click)='gameConfiguration.beginScrabbleGame()'
                     mat-raised-button
-                    [disabled]='!gameConfiguration.localGameRoom.players[i]'
+                    [disabled]='!isValidGame()'
                 >
-                    {{ "waiting_page.reject" | translate }}
+                    {{ "action.start" | translate }}
                 </button>
             </div>
-            <!--            <div class='pending-cpu' *ngFor='let player of gameConfiguration.gameRoom'></div>-->
-        </mat-card-content>
-        <mat-progress-bar
-            mode='indeterminate'
-            *ngIf='!gameConfiguration.localGameRoom.players[1] || !gameConfiguration.isGameCreator()'
-        ></mat-progress-bar>
+        </div>
     </mat-card>
-    <div class='container-buttons'>
-        <button class='returnButton' mat-icon-button (click)='exitWaitingRoom()'>
-            <mat-icon>navigate_before</mat-icon>
-        </button>
-        <div *ngIf='gameConfiguration.localGameRoom.visibility === gameVisibility.Private'>
-            Code : {{gameConfiguration.localGameRoom.id}}
-        </div>
-        <div id='player-decision'>
-            <button
-                *ngIf='gameConfiguration.isGameCreator()'
-                class='startButton'
-                (click)='gameConfiguration.beginScrabbleGame()'
-                mat-raised-button
-                [disabled]='!isValidGame()'
-            >
-                {{ "action.start" | translate }}
-            </button>
-        </div>
-    </div>
-</mat-card>
 </div>
