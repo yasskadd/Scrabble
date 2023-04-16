@@ -5,17 +5,17 @@ import { BoardTileInfo } from '@app/interfaces/board-tile-info';
 import { SelectionPosition } from '@app/interfaces/selection-position';
 import { BoardTileState, BoardTileType } from '@app/models/board-tile';
 import { PlayDirection } from '@app/models/play-direction';
+import { ClientSocketService } from '@app/services/communication/client-socket.service';
+import { GameConfigurationService } from '@app/services/game-configuration.service';
 import { LetterPlacementService } from '@app/services/letter-placement.service';
+import { SocketEvents } from '@common/constants/socket-events';
 import { Letter } from '@common/interfaces/letter';
 import { AlphabetLetter } from '@common/models/alphabet-letter';
-import { WebviewWindow } from '@tauri-apps/api/window';
-import { TauriEvent } from '@tauri-apps/api/event';
-import { TauriStateService } from '@services/tauri-state.service';
-import { ClientSocketService } from '@app/services/communication/client-socket.service';
-import { SocketEvents } from '@common/constants/socket-events';
-import { window as tauriWindow } from '@tauri-apps/api';
-import { GameConfigurationService } from '@app/services/game-configuration.service';
 import { GameClientService } from '@services/game-client.service';
+import { TauriStateService } from '@services/tauri-state.service';
+import { window as tauriWindow } from '@tauri-apps/api';
+import { TauriEvent } from '@tauri-apps/api/event';
+import { WebviewWindow } from '@tauri-apps/api/window';
 
 @Component({
     selector: 'app-game-board',

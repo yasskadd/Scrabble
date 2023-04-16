@@ -269,6 +269,7 @@ export class ChatboxHandlerService {
 
     private removeRoomFromAllChatRooms(chatRoomName: string) {
         const indexToDelete = this.allChatRooms.findIndex((room) => room.name === chatRoomName);
+        if (indexToDelete == NOT_FOUND) return;
         this.allChatRooms.splice(indexToDelete, 1);
         this.updateJoinedRooms();
         this.updateAllRooms();
