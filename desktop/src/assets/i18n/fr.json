@@ -255,5 +255,14 @@
             "change_username": "Changer le nom d'utilisateur",
             "change_password": "Changer le mot de passe"
         }
+    },
+    "header_options": {
+        "sign_up": "Créer un compte",
+        "sign_in": "Se connecter",
+        "sign_out": "Se déconnecter",
+        "settings": "Paramètres",
+        "dark_mode": "Mode Sombre",
+        "light_mode": "Mode Clair",
+        "profile": "Profil"
     }
 }

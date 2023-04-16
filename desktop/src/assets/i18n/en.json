@@ -255,5 +255,14 @@
             "change_username": "Change username",
             "change_password": "Change password"
         }
+    },
+    "header_options": {
+        "sign_up": "Sign Up",
+        "sign_in": "Sign In",
+        "sign_out": "Sign Out",
+        "settings": "Settings",
+        "dark_mode": "Dark Mode",
+        "light_mode": "Light Mode",
+        "profile": "Profile"
     }
 }
