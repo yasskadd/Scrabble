@@ -359,5 +359,12 @@
     "connection_page": {
         "username": "Nom d'utilisateur",
         "password": "Mot de passe"
+    },
+
+    "create_account": {
+        "username": "Nom d'utilisater",
+        "password": "Mot de passe",
+        "confirm_pass": "Confirmer le mot de passe",
+        "connect": "Connecter"
     }
 }
