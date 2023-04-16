@@ -1,27 +1,25 @@
-<div class='encapsulating-div mat-app-background'>
+<div class="encapsulating-div mat-app-background">
     <app-header></app-header>
 
     <mat-drawer-container>
-
-<!--    <div class='mat-app-background'>-->
-        <mat-card class='user-info justified'>
-            <div class='justified'>
-                <h2 *ngIf='userService.isConnected.getValue()'>{{ userService.user.username }}</h2>
+        <mat-card class="user-info justified">
+            <div class="justified">
+                <h2 *ngIf="userService.isConnected.getValue()">{{ userService.user.username }}</h2>
                 <img
-                    *ngIf='userService.isConnected.getValue()'
-                    [src]='userService.user.profilePicture.key'
-                    class='selector-avatar mat-elevation-z5'
-                    alt='profile picture'
+                    *ngIf="userService.isConnected.getValue()"
+                    [src]="userService.user.profilePicture.key"
+                    class="selector-avatar mat-elevation-z5"
+                    alt="profile picture"
                 />
-                <button mat-button color='primary' (click)='redirectSettingsPage()'>
+                <button mat-button color="primary" (click)="redirectSettingsPage()">
                     <mat-icon>settings</mat-icon>
                     <!-- TODO : Language-->
                     Settings
                 </button>
             </div>
-            <mat-divider style='width: 90%'></mat-divider>
-            <div class='user-stats'>
-                <div class='justified' style='height: 90%'>
+            <mat-divider style="width: 90%"></mat-divider>
+            <div class="user-stats">
+                <div class="justified">
                     <!-- TODO : Language-->
                     <h4>Stastiques</h4>
                     <!-- TODO : Language-->
@@ -30,55 +28,49 @@
                     <div>Score moy : {{ userStats?.averageGameScore }}</div>
                     <!-- TODO : Language-->
                     <div>Jeux joués : {{ userStats?.gameCount }}</div>
-                    <canvas #myChart width='160' height='160'></canvas>
+                    <canvas #myChart width="160" height="160"></canvas>
                     <!-- TODO : Language-->
-                    <div #newUser *ngIf='playerHasntPlayed()'>L'utilisateur n'a pas encore joué de
-                        parties
-                    </div>
+                    <div #newUser *ngIf="playerHasntPlayed()">L'utilisateur n'a pas encore joué de parties</div>
                 </div>
                 <mat-divider vertical></mat-divider>
-                <div class='justified'>
+                <div class="justified">
                     <!-- TODO : Language-->
                     <h4>Historique</h4>
-                    <mat-tab-group mat-stretch-tabs='false' mat-align-tabs='start'>
-                        <mat-tab label='Parties'>
-                            <mat-list *ngFor='let game of games'>
-                                <mat-list-item>
-                                    <mat-panel-title>
-                                        <div *ngIf='game.gameWon' style='color: green'>
+                    <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+                        <mat-tab label="Parties">
+                            <mat-list>
+                                <div *ngFor="let game of games">
+                                    <mat-list-item>
+                                        <div id="list-item-content">
                                             <!-- TODO: language -->
-                                            <p>Victoire</p>
-                                            <p>{{ game.date }}</p>
+                                            <span *ngIf="game.gameWon" style="color: green">Victoire</span>
+                                            <span *ngIf="!game.gameWon" style="color: red">Défaite</span>
+
+                                            <span>{{ game.date }}</span>
                                         </div>
-                                        <div *ngIf='!game.gameWon' style='color: red'>
-                                            <!-- TODO : Language-->
-                                            <p>Défaite</p>
-                                            <p>{{ game.date }}</p>
-                                        </div>
-                                    </mat-panel-title>
-                                </mat-list-item>
+                                    </mat-list-item>
+                                    <mat-divider></mat-divider>
+                                </div>
                             </mat-list>
                         </mat-tab>
-                        <mat-tab label='Connexions'>
-                            <mat-expansion-panel role='list'>
-                                <mat-expansion-panel-header>
-                                    <mat-panel-title>
-                                        <!-- TODO: language -->
-                                        <div>Status</div>
-                                        <!-- TODO : Language-->
-                                        <div>Date</div>
-                                    </mat-panel-title>
-                                </mat-expansion-panel-header>
-                                <p>
-                                    <!-- TODO: language -->
-                                </p>
-                            </mat-expansion-panel>
+                        <mat-tab label="Connexions">
+                            <mat-list>
+                                <div *ngFor="let connection of connections">
+                                    <mat-list-item>
+                                        <div id="list-item-content">
+                                            <!-- TODO: language -->
+                                            <span>{{ connection.event }}</span>
+                                            <span>{{ connection.date }}</span>
+                                        </div>
+                                    </mat-list-item>
+                                    <mat-divider></mat-divider>
+                                </div>
+                            </mat-list>
                         </mat-tab>
                     </mat-tab-group>
                 </div>
             </div>
         </mat-card>
-<!--    </div>-->
     </mat-drawer-container>
 
     <app-footer></app-footer>
