@@ -3,16 +3,16 @@
         <h4 class="team-name">{{ "footer.team" | translate }} 110</h4>
         <div class="language-dark-mode">
             <!-- Language -->
-            <button *ngIf="themeService.isDarkTheme.value" mat-stroked-button (click)="themeService.toggleDarkMode()">
+            <button *ngIf="!themeService.isDarkTheme.value" mat-stroked-button (click)="themeService.toggleDarkMode()">
                 <mat-icon>bedtime</mat-icon>
             </button>
             <!-- Language -->
-            <button *ngIf="!themeService.isDarkTheme.value" mat-stroked-button (click)="themeService.toggleDarkMode()">
+            <button *ngIf="themeService.isDarkTheme.value" mat-stroked-button (click)="themeService.toggleDarkMode()">
                 <mat-icon>wb_sunny</mat-icon>
             </button>
             <mat-form-field appearance="outline" class="language-selector">
-                <mat-label>Language</mat-label>
-                <mat-select [formControl]="languageForm" required>
+                <mat-label>{{ "user_settings.modify_language" | translate }}</mat-label>
+                <mat-select [formControl]="languageForm">
                     <mat-option [value]="languageChoices.French">{{ languageChoices.French.toString().toLocaleUpperCase() }}</mat-option>
                     <mat-option [value]="languageChoices.English">{{ languageChoices.English.toString().toLocaleUpperCase() }}</mat-option>
                 </mat-select>

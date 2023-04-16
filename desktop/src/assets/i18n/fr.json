@@ -214,5 +214,46 @@
     },
     "snackbar": {
         "close": "Fermer"
+    },
+    "user_settings": {
+        "submit_button": "Soumettre",
+        "modify_avatar": {
+            "success": "Succès de la modification de l'avatar",
+            "error": "Echec de la modification de l'avatar"
+        },
+        "modify_username": {
+            "success": "Le nom d'utilisateur a été modifié avec succès",
+            "already_exists": "Impossible de changer le nom d'utilisateur puisqu'il existe déjà",
+            "error": "Une erreur est survenue lors de la modification du nom d'utilisateur",
+            "confirm_username": "Confirmez le nom d'utilisateur",
+            "modify": "Modifier le nom d'utilisateur",
+            "hint": "Nouveau nom d'utilisateur",
+            "input_error_empty": "Veuillez rentrer un nom d'utilisateur",
+            "input_error_match": "Noms d'utilisateur non identiques"
+        },
+        "modify_password": {
+            "success": "Le mot de passe a été modifié avec succès",
+            "already_exists": "Impossible de changer le mot de passe puisque c'est le même qu'auparavant",
+            "error": "Une erreur est survenue lors de la modification du mot de passe",
+            "hint": "Nouveau mot de passe",
+            "confirm_password": "Confirmez le mot de passe",
+            "input_error_empty": "Veuillez rentrer un mot de passe",
+            "input_error_match": "Mots de passes non identiques"
+        },
+        "modify_language": "Nouveau langage",
+        "modify_theme_dynamic": "Nouveau statique ou dynamique",
+        "modify_main_theme": "Nouveau mode principal",
+        "modify_light_theme": "Nouveau mode clair",
+        "modify_dark_theme": "Nouveau mode sombre",
+        "yes": "Oui",
+        "no": "Non",
+        "light": "Clair",
+        "dark": "Sombre",
+        "labels": {
+            "user_settings": "Paramètres utilisateur",
+            "change_avatar": "Changer l'avatar",
+            "change_username": "Changer le nom d'utilisateur",
+            "change_password": "Changer le mot de passe"
+        }
     }
 }

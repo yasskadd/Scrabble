@@ -10,7 +10,7 @@ import { UserService } from './user.service';
 export class ThemeService {
     isDarkTheme: BehaviorSubject<boolean>;
 
-    constructor(private tauriStateService: TauriStateService, public userService: UserService) {
+    constructor(private tauriStateService: TauriStateService, private userService: UserService) {
         this.isDarkTheme = new BehaviorSubject<boolean>(false);
 
         if (this.tauriStateService.useTauri) {
@@ -20,7 +20,8 @@ export class ThemeService {
             });
             tauriWindow
                 .onThemeChanged(({ payload: theme }) => {
-                    this.isDarkTheme.next(theme === 'dark');
+                    if (this.userService.user !== undefined && this.userService.user.theme.isDynamic === true)
+                        this.isDarkTheme.next(theme === 'dark');
                 })
                 .then();
         }
