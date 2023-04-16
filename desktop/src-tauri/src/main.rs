@@ -414,10 +414,11 @@ async fn httpDelete(
 async fn chatWindowListening(handle: tauri::AppHandle) {
     let listener = handle.get_window("chat").unwrap();
 
-    let eventEmmitter = handle.get_window("chat").unwrap();
+    let eventEmmitter = handle.get_window("main").unwrap();
     listener.listen_global(RustEvent::WindowEvent.to_string(), move |event| {
+        println!("received {:?}", event);
         eventEmmitter
-            .emit(RustEvent::WindowEvent.to_string(), event.payload())
+            .emit_all(RustEvent::WindowEvent.to_string(), event.payload())
             .unwrap();
     });
 
@@ -466,6 +467,16 @@ fn main() {
                     .build()
                     .expect("Error creating the http client"),
             });
+
+            let windowHandle = app.handle().get_window("main").unwrap();
+            windowHandle.get_window("main").unwrap().listen_global(
+                RustEvent::WindowEvent.to_string(),
+                move |event| {
+                    windowHandle
+                        .emit(RustEvent::WindowEvent.to_string(), event.payload())
+                        .unwrap();
+                },
+            );
 
             Ok(())
         })

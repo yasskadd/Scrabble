@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { SocketEvents } from '@common/constants/socket-events';
 // import { CommandInfo } from '@common/interfaces/place-word-command-info';
 // import { Letter } from '@common/interfaces/letter';
@@ -15,8 +15,10 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpHandlerService } from '../communication/http-handler.service';
 import { LanguageService } from '../language.service';
 import { SnackBarService } from '../snack-bar.service';
-// import * as tauri from '@tauri-apps/api';
 import { getAll, WebviewWindow } from '@tauri-apps/api/window';
+import { RustCommand, RustEvent } from '@app/models/rust-command';
+import * as tauri from '@tauri-apps/api';
+import { TauriEvent } from '@tauri-apps/api/event';
 
 const NOT_FOUND = -1;
 
@@ -63,6 +65,7 @@ export class ChatboxHandlerService {
         private httpHandlerService: HttpHandlerService,
         private snackBarService: SnackBarService,
         private languageService: LanguageService,
+        private ngZone: NgZone,
     ) {
         this.messages = [];
         this.loggedIn = false;
@@ -96,6 +99,7 @@ export class ChatboxHandlerService {
 
         this.userService.isConnected.subscribe((connected: boolean) => {
             if (connected) {
+                console.log(this.userService.user.chatRooms);
                 this.config(this.userService.user.chatRooms as UserChatRoomWithState[]);
                 this.updateWindowStatus();
             } else {
@@ -103,7 +107,28 @@ export class ChatboxHandlerService {
             }
         });
 
-        this.updateWindowStatus();
+        tauri.event
+            .listen(RustEvent.WindowEvent, () => {
+                this.ngZone.run(() => {
+                    this.chatWindowOpened.next(false);
+                });
+            })
+            .then();
+
+        if (tauri.window.getCurrent().label === 'chat') {
+            this.configureBaseSocketFeatures();
+            this.listenRustEvents();
+        }
+
+        tauri.event
+            .listen(TauriEvent.WINDOW_CLOSE_REQUESTED, (event: any) => {
+                this.ngZone.run(() => {
+                    if (event.windowLabel === 'chat') {
+                        this.chatWindowOpened.next(false);
+                    }
+                });
+            })
+            .then();
     }
 
     get chatCurrentSession() {
@@ -111,9 +136,25 @@ export class ChatboxHandlerService {
     }
 
     updateWindowStatus(): void {
-        console.log(getAll());
-        this.chatWindowOpened.next( getAll().filter((window: WebviewWindow) => window.label === 'chat').length !== 0);
-        this.snackBarService.openInfo('' + this.chatWindowOpened);
+        this.chatWindowOpened.next(getAll().filter((window: WebviewWindow) => window.label === 'chat').length !== 0);
+        this.snackBarService.openInfo('' + this.chatWindowOpened.value);
+    }
+
+    async invokeChatWindow(url: string): Promise<void> {
+        const chatWindow = new WebviewWindow('chat', {
+            url: '#/' + url,
+        });
+
+        chatWindow
+            .once('tauri://created', async () => {
+                console.log('window created');
+                await tauri.invoke(RustCommand.ChatWindowListening);
+                setTimeout(() => {
+                    tauri.window.getCurrent().emit(RustEvent.UserData, this.userService.user);
+                }, 1000);
+                this.chatWindowOpened.next(true);
+            })
+            .then();
     }
 
     getChatRoom(chatRoomName: string) {
@@ -129,7 +170,7 @@ export class ChatboxHandlerService {
     //     });
     // }
 
-    private configureBaseSocketFeatures(): void {
+    configureBaseSocketFeatures(): void {
         this.clientSocket.on(SocketEvents.GetAllChatRooms, (chatRooms: ChatRoomClient[]) => {
             this.allChatRooms = chatRooms;
             this.updateAllRooms();
@@ -146,6 +187,7 @@ export class ChatboxHandlerService {
         });
 
         this.clientSocket.on(SocketEvents.JoinChatRoomSession, (chatRoom: ChatRoom) => {
+            console.log('thing');
             const roomName = chatRoom.name;
             const newMessages: Message[] = chatRoom.messages;
             this.joinRoomSession(roomName, newMessages);
@@ -171,6 +213,26 @@ export class ChatboxHandlerService {
         this.clientSocket.on(SocketEvents.DeleteChatRoom, (chatRoom: ChatRoomClient) => {
             this.deleteChatRoom(chatRoom);
         });
+    }
+
+    listenRustEvents(): void {
+        // tauri.window
+        //     .getCurrent()
+        //     .listen(RustEvent.ChatRooms, (payload) => {
+        //         this._joinedRoomsSubject.next(payload as unknown as string[]);
+        //     })
+        //     .then();
+        tauri.window
+            .getCurrent()
+            .listen(RustEvent.UserData, (payload) => {
+                this.ngZone.run(() => {
+                    console.log(payload);
+                    this.userService.user = JSON.parse(payload.payload as unknown as string);
+                    this.userService.isConnected.next(true);
+                    console.log(this.userService.user);
+                });
+            })
+            .then();
     }
 
     selectTab(tabName: string) {
@@ -225,7 +287,7 @@ export class ChatboxHandlerService {
         this.clientSocket.send(SocketEvents.LeaveChatRoom, chatRoomName);
     }
 
-    submitMessage(msg: String) {
+    submitMessage(msg: string) {
         // TODO : Revoir si ca marche
         this.clientSocket.send(SocketEvents.SendMessage, { chatRoomName: this.chatSession, msg });
     }

@@ -36,10 +36,15 @@ export class ClientSocketService {
         this.cancelConnection = new Subject();
 
         tauri.event
-            .listen(TauriEvent.WINDOW_CLOSE_REQUESTED, () => {
-                tauri.window.getAll().forEach((window: WebviewWindow) => {
-                    window.close().then();
-                });
+            .listen(TauriEvent.WINDOW_CLOSE_REQUESTED, (event: any) => {
+                if (event.windowLabel === 'main') {
+                    tauri.window.getAll().forEach((window: WebviewWindow) => {
+                        window.close().then();
+                    });
+                } else if (event.windowLabel === 'chat') {
+                    console.log('chat window closed');
+
+                }
             })
             .then();
     }
