@@ -17,10 +17,11 @@ mat-tab-group {
     display: flex;
     justify-content: center;
     overflow: hidden;
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    right: 0px;
+    //position: absolute;
+    //top: 0px;
+    //left: 0px;
+    //right: 0px;
+    height: 64px;
 }
 
 .createRoom {
@@ -64,18 +65,21 @@ mat-tab-group {
 
 .message-container,
 .chat-rooms-container {
-    height: 93%;
+    //height: 93%;
     width: 100%;
     word-wrap: break-word;
-    overflow-y: auto;
-    margin-top: 13%;
+    overflow-y: scroll;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    //margin-top: 13%;
 }
 
 .chat-input {
     display: flex;
     height: fit-content;
-    padding: 8px;
-    gap: 8px;
+    //padding: 8px;
+    //gap: 8px;
 
     button {
         align-self: center;
