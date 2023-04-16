@@ -7,9 +7,10 @@
 
 .language-dark-mode {
     display: flex;
-    position: absolute;
-    bottom: 11px;
-    right: 20px;
+    padding-bottom: 16px;
+    //position: absolute;
+    //bottom: 11px;
+    //right: 20px;
 }
 
 .language-dark-mode > .mdc-button {
@@ -41,4 +42,10 @@ mat-icon {
 
 .team-members > *:hover {
     cursor: pointer;
+}
+
+.bottom {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 8px;
 }
