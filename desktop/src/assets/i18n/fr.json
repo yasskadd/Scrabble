@@ -259,6 +259,15 @@
         "close": "Fermer"
     },
     "user_settings": {
+        "profile_section_title": "Cliquez pour modifier votre photo de profil",
+        "credential_section_title": "Modifiez vos informations",
+        "param_section_title": "Choisir vos paramètres par défaut",
+
+        "username_title": "Nom d'utilisateur",
+        "password_title": "Mot de passe",
+        "language_title": "Language",
+        "theme_title": "Thème",
+
         "submit_button": "Soumettre",
         "modify_avatar": {
             "success": "Succès de la modification de l'avatar",
@@ -284,10 +293,10 @@
             "input_error_match": "Mots de passes non identiques"
         },
         "modify_language": "Nouveau langage",
-        "modify_theme_dynamic": "Nouveau statique ou dynamique",
-        "modify_main_theme": "Nouveau mode principal",
-        "modify_light_theme": "Nouveau mode clair",
-        "modify_dark_theme": "Nouveau mode sombre",
+        "modify_theme_dynamic": "Mode dynamique",
+        "modify_main_theme": "Mode principal",
+        "modify_light_theme": "Mode clair",
+        "modify_dark_theme": "Mode sombre",
         "yes": "Oui",
         "no": "Non",
         "light": "Clair",
