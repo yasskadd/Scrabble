@@ -226,27 +226,24 @@ export class HttpHandlerService {
     }
 
     async forgotPassword(username: string): Promise<void> {
-        const res: HttpResponse = await invoke('httpPost', {
+        await invoke('httpPost', {
             url: `${this.baseUrl}/profile/forgot-password`,
             onceToldMe: JSON.stringify({ username }),
         });
-        return JSON.parse(res.body);
     }
 
     async modifyLanguage(language: string): Promise<void> {
-        const res: HttpResponse = await invoke('httpPatch', {
+        await invoke('httpPatch', {
             url: `${this.baseUrl}/profile/language`,
             onceToldMe: JSON.stringify({ language }),
         });
-        return JSON.parse(res.body);
     }
 
     async modifyTheme(theme: Theme): Promise<void> {
-        const res: HttpResponse = await invoke('httpPatch', {
+        await invoke('httpPatch', {
             url: `${this.baseUrl}/profile/theme`,
             onceToldMe: JSON.stringify({ theme }),
         });
-        return JSON.parse(res.body);
     }
 
     async modifyPassword(newPassword: string): Promise<void> {
@@ -254,15 +251,13 @@ export class HttpHandlerService {
             url: `${this.baseUrl}/profile/password`,
             onceToldMe: JSON.stringify({ newPassword }),
         });
-        return JSON.parse(res.body);
     }
 
     async modifyUsername(newUsername: string): Promise<void> {
-        const res: HttpResponse = await invoke('httpPatch', {
+        await invoke('httpPatch', {
             url: `${this.baseUrl}/profile/username`,
             onceToldMe: JSON.stringify({ newUsername }),
         });
-        return JSON.parse(res.body);
     }
 
     // private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
