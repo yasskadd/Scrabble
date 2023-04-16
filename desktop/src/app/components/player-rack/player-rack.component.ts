@@ -1,17 +1,16 @@
 import { CdkDragDrop, CdkDragMove, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component, ElementRef, HostListener, Input } from '@angular/core';
-import { ChatboxHandlerService } from '@app/services/chat/chatbox-handler.service';
 import { GameClientService } from '@app/services/game-client.service';
 import { LetterPlacementService } from '@app/services/letter-placement.service';
 import * as board from '@common/constants/board-info';
-import { Letter } from '@common/interfaces/letter';
-import { Subject } from 'rxjs';
-import { PlayerType } from '@common/models/player-type';
-import { PlayerInformation } from '@common/interfaces/player-information';
-import { ClientSocketService } from '@services/communication/client-socket.service';
 import { SocketEvents } from '@common/constants/socket-events';
-import { window as tauriWindow } from '@tauri-apps/api';
+import { Letter } from '@common/interfaces/letter';
+import { PlayerInformation } from '@common/interfaces/player-information';
+import { PlayerType } from '@common/models/player-type';
+import { ClientSocketService } from '@services/communication/client-socket.service';
 import { GameConfigurationService } from '@services/game-configuration.service';
+import { window as tauriWindow } from '@tauri-apps/api';
+import { Subject } from 'rxjs';
 
 // import { Socket } from 'socket.io-client';
 
@@ -34,7 +33,6 @@ export class PlayerRackComponent {
     duplicates: number[];
 
     constructor(
-        private chatBoxHandler: ChatboxHandlerService,
         public gameClient: GameClientService,
         private gameConfigurationService: GameConfigurationService,
         public letterPlacementService: LetterPlacementService,
@@ -72,7 +70,7 @@ export class PlayerRackComponent {
     // }
 
     skipTurn() {
-        this.chatBoxHandler.submitMessage('!passer');
+        this.clientSocketService.send(SocketEvents.Skip);
     }
 
     isCurrentPlayerPlaying(): boolean {
