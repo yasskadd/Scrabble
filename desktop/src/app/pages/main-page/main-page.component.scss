@@ -31,7 +31,7 @@ mat-drawer {
     app-generic-chat {
         display: grid;
         height: 100%;
-        grid-template-rows: 1fr max-content;
+        grid-template-rows: 64px 1fr 64px;
         align-content: space-between;
 
         ::ng-deep label {

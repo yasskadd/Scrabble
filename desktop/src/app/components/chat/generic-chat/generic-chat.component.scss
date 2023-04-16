@@ -6,7 +6,7 @@ mat-card {
 }
 
 mat-form-field {
-    height: 10%;
+    //height: 10%;
 }
 
 mat-tab-group {
@@ -212,8 +212,8 @@ mat-tab-group {
 }
 
 ::ng-deep ::-webkit-scrollbar {
-    // width: 4px;
-    display: none;
+     width: 10px;
+    //display: none;
 }
 
 .avatar {
