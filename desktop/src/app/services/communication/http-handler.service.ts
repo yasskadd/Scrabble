@@ -9,6 +9,7 @@ import { ChatRoomUser } from '@common/interfaces/chat-room';
 import { GameHistoryInfo } from '@common/interfaces/game-history-info';
 import { HistoryEvent } from '@common/interfaces/history-event';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
+import { Theme } from '@common/interfaces/theme';
 import { IUser } from '@common/interfaces/user';
 import { UserStats } from '@common/interfaces/user-stats';
 import { fs, invoke } from '@tauri-apps/api';
@@ -228,6 +229,38 @@ export class HttpHandlerService {
         const res: HttpResponse = await invoke('httpPost', {
             url: `${this.baseUrl}/profile/forgot-password`,
             onceToldMe: JSON.stringify({ username }),
+        });
+        return JSON.parse(res.body);
+    }
+
+    async modifyLanguage(language: string): Promise<void> {
+        const res: HttpResponse = await invoke('httpPatch', {
+            url: `${this.baseUrl}/profile/language`,
+            onceToldMe: JSON.stringify({ language }),
+        });
+        return JSON.parse(res.body);
+    }
+
+    async modifyTheme(theme: Theme): Promise<void> {
+        const res: HttpResponse = await invoke('httpPatch', {
+            url: `${this.baseUrl}/profile/theme`,
+            onceToldMe: JSON.stringify({ theme }),
+        });
+        return JSON.parse(res.body);
+    }
+
+    async modifyPassword(newPassword: string): Promise<void> {
+        const res: HttpResponse = await invoke('httpPatch', {
+            url: `${this.baseUrl}/profile/password`,
+            onceToldMe: JSON.stringify({ newPassword }),
+        });
+        return JSON.parse(res.body);
+    }
+
+    async modifyUsername(newUsername: string): Promise<void> {
+        const res: HttpResponse = await invoke('httpPatch', {
+            url: `${this.baseUrl}/profile/username`,
+            onceToldMe: JSON.stringify({ newUsername }),
         });
         return JSON.parse(res.body);
     }

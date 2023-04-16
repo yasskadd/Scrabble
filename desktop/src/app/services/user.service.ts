@@ -1,6 +1,7 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
+import { LanguageChoice } from '@app/models/language-choice';
 import { RustEvent } from '@app/models/rust-command';
 import { SocketEvents } from '@common/constants/socket-events';
 import { AvatarData } from '@common/interfaces/avatar-data';
@@ -16,6 +17,7 @@ import { WebviewWindowHandle } from '@tauri-apps/api/window';
 import { BehaviorSubject } from 'rxjs';
 import { AppCookieService } from './communication/app-cookie.service';
 import { HttpHandlerService } from './communication/http-handler.service';
+import { LanguageService } from './language.service';
 
 @Injectable({
     providedIn: 'root',
@@ -34,6 +36,7 @@ export class UserService {
         private snackBarService: SnackBarService,
         private router: Router,
         private ngZone: NgZone,
+        private languageService: LanguageService,
     ) {
         this.user = undefined;
         this.isConnected = new BehaviorSubject<boolean>(false);
@@ -96,6 +99,7 @@ export class UserService {
                 chatWindow.emit(RustEvent.UserData, this.user).then();
             }
             this.isConnected.next(true);
+            this.languageService.setLanguage(this.user.language as LanguageChoice);
 
             if (tauri.window.getCurrent().label === 'chat') return;
             this.ngZone.run(() => {

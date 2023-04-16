@@ -6,9 +6,9 @@ import { RackPosition } from '@app/models/rack-position';
 import { GameClientService } from '@app/services/game-client.service';
 import { GridService } from '@app/services/grid.service';
 import { LetterPlacementService } from '@app/services/letter-placement.service';
-import { Subject } from 'rxjs';
-import { PlayerType } from '@common/models/player-type';
 import { PlayerInformation } from '@common/interfaces/player-information';
+import { PlayerType } from '@common/models/player-type';
+import { Subject } from 'rxjs';
 
 // export enum MouseButton {
 //     Left = 0,
