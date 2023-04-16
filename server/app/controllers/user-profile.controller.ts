@@ -134,9 +134,7 @@ export class UserProfileController {
             const username: string = req.body.username;
             const user: IUser = await this.accountStorageService.getUserData(username);
             if (!user) {
-                res.status(StatusCodes.BAD_REQUEST).send({
-                    error: 'Username not found',
-                });
+                res.sendStatus(StatusCodes.BAD_REQUEST);
                 return;
             }
             const email = user.email;

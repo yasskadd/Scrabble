@@ -225,11 +225,12 @@ export class HttpHandlerService {
         });
     }
 
-    async forgotPassword(username: string): Promise<void> {
-        await invoke('httpPost', {
+    async forgotPassword(username: string): Promise<any> {
+        const res: HttpStatusCode = await invoke('httpPost', {
             url: `${this.baseUrl}/profile/forgot-password`,
             onceToldMe: JSON.stringify({ username }),
         });
+        return res;
     }
 
     async modifyLanguage(language: string): Promise<void> {

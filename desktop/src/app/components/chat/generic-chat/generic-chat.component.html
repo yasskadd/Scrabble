@@ -47,7 +47,7 @@
         <mat-icon (click)="closeChat()">keyboard_backspace</mat-icon>
         <div>{{ chatSession }}</div>
         <button
-            *ngIf="(chatboxHandler.chatSessionObs | async) !== 'main'"
+            *ngIf="checkLeaveButton(chatboxHandler.chatSessionObs | async)"
             mat-button
             mat-raised-button
             class="leave-room"
@@ -55,6 +55,16 @@
             (click)="leaveRoom()"
         >
             {{ "chat.leave" | translate }}
+        </button>
+        <button
+            *ngIf="checkDeleteButton(chatboxHandler.chatSessionObs | async)"
+            mat-button
+            mat-raised-button
+            class="leave-room"
+            color="accent"
+            (click)="leaveRoom()"
+        >
+            {{ "chat.delete" | translate }}
         </button>
     </mat-toolbar>
 </div>
