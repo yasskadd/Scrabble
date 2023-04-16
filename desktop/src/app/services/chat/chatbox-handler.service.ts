@@ -13,6 +13,7 @@ import { ChatRoom } from '@common/interfaces/chat-room';
 import { Message } from '@common/interfaces/message';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpHandlerService } from '../communication/http-handler.service';
+import { LanguageService } from '../language.service';
 import { SnackBarService } from '../snack-bar.service';
 
 const NOT_FOUND = -1;
@@ -58,6 +59,7 @@ export class ChatboxHandlerService {
         public userService: UserService,
         private httpHandlerService: HttpHandlerService,
         private snackBarService: SnackBarService,
+        private languageService: LanguageService,
     ) {
         this.messages = [];
         this.loggedIn = false;
@@ -214,7 +216,9 @@ export class ChatboxHandlerService {
     }
 
     private createChatRoomError() {
-        this.snackBarService.openError('Error while creating room : the room already exist');
+        this.languageService.getWord('chat.create_room.already_exist').subscribe((word: string) => {
+            this.snackBarService.openError(word);
+        });
     }
 
     private updateJoinedRooms() {

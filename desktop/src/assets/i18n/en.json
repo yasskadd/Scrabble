@@ -169,7 +169,9 @@
             "note_5": "game",
             "create": "Create a new room",
             "create_action": "Create",
-            "cancel_action": "Cancel"
+            "cancel_action": "Cancel",
+            "invalid": "Invalid room name",
+            "already_exist": "Error while creating room : the room already exist"
         }
     },
     "footer": {

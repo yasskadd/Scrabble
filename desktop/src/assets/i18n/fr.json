@@ -169,7 +169,9 @@
             "note_4": "et ne doivent pas commencer par",
             "note_5": "game",
             "create_action": "Créer",
-            "cancel_action": "Annuler"
+            "cancel_action": "Annuler",
+            "invalid": "Nom du canal invalide",
+            "already_exist": "Erreur lors de la création de la salle : la salle existe déjà"
         }
     },
     "footer": {
