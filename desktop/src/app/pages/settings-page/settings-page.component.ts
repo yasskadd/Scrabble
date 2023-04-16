@@ -83,7 +83,8 @@ export class SettingsPageComponent implements OnInit {
         if (this.newUsername.value !== this.newUsernameConfirmation.value) return;
         this.httpHandlerService
             .modifyUsername(this.newUsername.value)
-            .then(() => {
+            .then((res) => {
+                console.log(res);
                 this.userService.user.username = this.newUsername.value;
                 this.newUsername.reset();
                 this.newUsernameConfirmation.reset();

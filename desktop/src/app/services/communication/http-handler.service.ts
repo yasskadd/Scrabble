@@ -1,3 +1,4 @@
+import { HttpStatusCode } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Dictionary } from '@app/interfaces/dictionary';
 import { DictionaryInfo } from '@app/interfaces/dictionary-info';
@@ -253,11 +254,13 @@ export class HttpHandlerService {
         });
     }
 
-    async modifyUsername(newUsername: string): Promise<void> {
-        await invoke('httpPatch', {
+    async modifyUsername(newUsername: string): Promise<HttpStatusCode> {
+        const res: HttpStatusCode = await invoke('httpPatch', {
             url: `${this.baseUrl}/profile/username`,
             onceToldMe: JSON.stringify({ newUsername }),
         });
+
+        return res;
     }
 
     // private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
