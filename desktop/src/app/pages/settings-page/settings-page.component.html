@@ -2,8 +2,7 @@
     <app-header></app-header>
     <body class="mat-app-background">
         <mat-card class="justified">
-            <!-- TODO language -->
-            <h5>Cliquez pour modifier votre photo de profil</h5>
+            <h5>{{ "user_settings.profile_section_title" | translate }}</h5>
             <button
                 color="primary"
                 mat-fab
@@ -36,12 +35,10 @@
             <mat-divider style="width: 100%"></mat-divider>
             <div class="configs-container">
                 <div class="username-password">
-                    <!-- TODO language -->
-                    <h2>Modifier vos informations</h2>
+                    <h2>{{ "user_settings.credential_section_title" | translate }}</h2>
                     <div style="display: flex; flex-direction: row">
                         <div class="input-pair">
-                            <!-- TODO language -->
-                            <h4>Nom d'utilisateur</h4>
+                            <h4>{{ "user_settings.username_title" | translate }}</h4>
                             <mat-form-field appearance="outline">
                                 <mat-label>{{ "user_settings.modify_username.hint" | translate }}</mat-label>
                                 <input matInput [formControl]="newUsername" />
@@ -55,8 +52,7 @@
                             </button>
                         </div>
                         <div class="input-pair">
-                            <!-- TODO language -->
-                            <h4>Mot de passe</h4>
+                            <h4>{{ "user_settings.password_title" | translate }}</h4>
                             <mat-form-field appearance="outline">
                                 <mat-label>{{ "user_settings.modify_password.hint" | translate }}</mat-label>
                                 <input matInput [formControl]="newPassword" />
@@ -73,12 +69,10 @@
                 </div>
                 <mat-divider vertical></mat-divider>
                 <div class="params">
-                    <!-- TODO language -->
-                    <h2>Choisir vos paramètres par défaut</h2>
+                    <h2>{{ "user_settings.param_section_title" | translate }}</h2>
                     <div style="display: flex; flex-direction: row">
                         <div class="input-pair">
-                            <!-- TODO language -->
-                            <h4>Language</h4>
+                            <h4>{{ "user_settings.language_title" | translate }}</h4>
                             <mat-form-field appearance="outline" class="language-selector">
                                 <mat-label>{{ "user_settings.modify_language" | translate }}</mat-label>
                                 <mat-select [(value)]="selectedLanguage">
@@ -88,12 +82,10 @@
                             </mat-form-field>
                             <button color="primary" mat-raised-button (click)="submitLanguage()" class="language-confirmation">
                                 {{ "user_settings.submit_button" | translate }}
-                                <!-- TODO language -->
                             </button>
                         </div>
                         <div class="input-pair">
-                            <!-- TODO language -->
-                            <h4>Thèmes</h4>
+                            <h4>{{ "user_settings.theme_title" | translate }}</h4>
                             <mat-slide-toggle class="theme-selector" [(ngModel)]="selectedDynamic">
                                 {{ "user_settings.modify_theme_dynamic" | translate }}
                             </mat-slide-toggle>
