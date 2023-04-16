@@ -329,5 +329,17 @@
         "letter": "Letter",
         "cancel": "Cancel",
         "ok": "Ok"
+    },
+
+    "profile_settings": {
+        "settings": "Settings",
+        "stats": "Statistics",
+        "avg_time": "Average Game Time",
+        "avg_score": "Average Score",
+        "games": "Games played",
+        "new_user": "The user hasn't yet played any games",
+        "history": "History",
+        "win": "Win",
+        "loss": "Loss"
     }
 }

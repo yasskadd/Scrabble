@@ -2,6 +2,7 @@
 import { AfterViewInit, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
+import { LanguageService } from '@app/services/language.service';
 import { UserService } from '@app/services/user.service';
 import { HistoryEvent } from '@common/interfaces/history-event';
 import { UserStats } from '@common/interfaces/user-stats';
@@ -23,6 +24,7 @@ export class UserProfilePageComponent implements AfterViewInit {
     private myChart: Chart;
 
     constructor(
+        protected languageService: LanguageService,
         protected userService: UserService,
         private readonly httpHandlerService: HttpHandlerService,
         private router: Router,
@@ -39,15 +41,13 @@ export class UserProfilePageComponent implements AfterViewInit {
     }
 
     ngAfterViewInit() {
-        // TODO: Language, data
-        this.updateChart(0, 0);
+        this.updateChart();
     }
 
     setUserStats() {
         this.httpHandlerService.getStats().then((userStats: UserStats) => {
             userStats.averageGameScore = Math.round(userStats.averageGameScore);
             this.userStats = userStats;
-            this.updateChart(this.userStats.win, this.userStats.loss);
         });
     }
 
@@ -85,7 +85,7 @@ export class UserProfilePageComponent implements AfterViewInit {
         return this.userStats?.win === 0 && this.userStats?.loss === 0;
     }
 
-    private updateChart(win: number, loss: number): void {
+    private updateChart(): void {
         if (this.myChart) {
             this.myChart.destroy();
         }
@@ -93,10 +93,10 @@ export class UserProfilePageComponent implements AfterViewInit {
         this.myChart = new Chart(this.canvasRef.nativeElement.getContext('2d'), {
             type: 'doughnut',
             data: {
-                labels: ['Perdues', 'Gagnées'],
+                labels: ['Lost', 'Won'],
                 datasets: [
                     {
-                        data: [loss, win],
+                        data: [this.userStats.loss, this.userStats.win],
                         backgroundColor: ['rgba(255, 99, 132, 1)', 'rgba(201, 242, 155, 1)'],
                         borderColor: ['rgba(255, 99, 132, 1)', 'rgba(201, 242, 155, 1)'],
                         borderWidth: 1,

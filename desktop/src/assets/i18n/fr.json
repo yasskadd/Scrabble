@@ -329,5 +329,17 @@
         "letter": "Lettre",
         "cancel": "Annuler",
         "ok": "Choisir"
+    },
+
+    "profile_settings": {
+        "settings": "Paramètres",
+        "stats": "Statistiques",
+        "avg_time": "Temps moyen",
+        "avg_score": "Score moy",
+        "games": "Jeux joués",
+        "new_user": "L'utilisateur n'a pas encore joué de parties",
+        "history": "Historique",
+        "win": "Victoire",
+        "loss": "Défaite"
     }
 }

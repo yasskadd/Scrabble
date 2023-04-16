@@ -13,38 +13,30 @@
                 />
                 <button mat-button color="primary" (click)="redirectSettingsPage()">
                     <mat-icon>settings</mat-icon>
-                    <!-- TODO : Language-->
-                    Settings
+                    {{ "profile_settings.settings" | translate }}
                 </button>
             </div>
             <mat-divider style="width: 90%"></mat-divider>
             <div class="user-stats">
                 <div class="justified">
-                    <!-- TODO : Language-->
-                    <h4>Stastiques</h4>
-                    <!-- TODO : Language-->
-                    <div>Temps moy : {{ userStats?.averageGameTime }}</div>
-                    <!-- TODO : Language-->
-                    <div>Score moy : {{ userStats?.averageGameScore }}</div>
-                    <!-- TODO : Language-->
-                    <div>Jeux joués : {{ userStats?.gameCount }}</div>
+                    <h4>{{ "profile_settings.stats" | translate }}</h4>
+                    <div>{{ "profile_settings.avg_time" | translate }} : {{ userStats?.averageGameTime }}</div>
+                    <div>{{ "profile_settings.avg_score" | translate }} : {{ userStats?.averageGameScore }}</div>
+                    <div>{{ "profile_settings.games" | translate }} : {{ userStats?.gameCount }}</div>
                     <canvas #myChart width="160" height="160"></canvas>
-                    <!-- TODO : Language-->
-                    <div #newUser *ngIf="playerHasntPlayed()">L'utilisateur n'a pas encore joué de parties</div>
+                    <div #newUser *ngIf="playerHasntPlayed()">{{ "profile_settings.new_user" | translate }}</div>
                 </div>
                 <mat-divider vertical></mat-divider>
                 <div class="justified">
-                    <!-- TODO : Language-->
-                    <h4>Historique</h4>
+                    <h4>{{ "profile_settings.history" | translate }}</h4>
                     <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
                         <mat-tab label="Parties">
                             <mat-list>
                                 <div *ngFor="let game of games">
                                     <mat-list-item>
                                         <div id="list-item-content">
-                                            <!-- TODO: language -->
-                                            <span *ngIf="game.gameWon" style="color: green">Victoire</span>
-                                            <span *ngIf="!game.gameWon" style="color: red">Défaite</span>
+                                            <span *ngIf="game.gameWon" style="color: green">{{ "profile_settings.win" | translate }}</span>
+                                            <span *ngIf="!game.gameWon" style="color: red">{{ "profile_settings.loss" | translate }}</span>
 
                                             <span>{{ game.date }}</span>
                                         </div>
