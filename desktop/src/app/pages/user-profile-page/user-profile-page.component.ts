@@ -39,6 +39,8 @@ export class UserProfilePageComponent implements AfterViewInit {
 
     ngAfterViewInit() {
         // TODO: Language, data
+        // winRate = this.userStats.loss
+
         const myChart = new Chart(this.canvasRef.nativeElement.getContext('2d'), {
             type: 'doughnut',
             data: {
