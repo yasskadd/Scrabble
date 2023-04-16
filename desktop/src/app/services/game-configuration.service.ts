@@ -16,7 +16,7 @@ import { TauriStateService } from '@services/tauri-state.service';
 import { UserService } from '@services/user.service';
 import { window as tauriWindow } from '@tauri-apps/api';
 import { TauriEvent } from '@tauri-apps/api/event';
-import { Observable, of, Subject } from 'rxjs';
+import { Observable, Subject, of } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
 import { LanguageService } from './language.service';
 
@@ -182,8 +182,9 @@ export class GameConfigurationService {
         this.ngZone.run(() => {
             this.router.navigate([`${AppRoutes.MultiJoinPage}/multi`]).then();
         });
-        // TODO : Language
-        this.snackBarService.openError('Rejected by other player');
+        this.languageService.getWord('waiting_page.reject_by_host').subscribe((word: string) => {
+            this.snackBarService.openError(word);
+        });
     }
 
     private joinedValidGame(gameRoom: GameRoom): void {

@@ -1,16 +1,17 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
+import { Word } from '@common/classes/word.class';
 import { SocketEvents } from '@common/constants/socket-events';
 import { GameInfo } from '@common/interfaces/game-state';
 import { Letter } from '@common/interfaces/letter';
 import { PlayerInformation } from '@common/interfaces/player-information';
 import { IUser } from '@common/interfaces/user';
+import { SnackBarService } from '@services/snack-bar.service';
 import { UserService } from '@services/user.service';
 import { ReplaySubject, Subject } from 'rxjs';
 import { ClientSocketService } from './communication/client-socket.service';
-import { SnackBarService } from '@services/snack-bar.service';
-import { Word } from '@common/classes/word.class';
+import { LanguageService } from './language.service';
 
 const TIMEOUT_PASS = 30;
 
@@ -37,6 +38,7 @@ export class GameClientService {
         private snackBarService: SnackBarService,
         private router: Router,
         private ngZone: NgZone,
+        private languageService: LanguageService,
     ) {
         this.players = [];
 
@@ -89,8 +91,9 @@ export class GameClientService {
         });
 
         this.clientSocketService.on(SocketEvents.PlacementSuccess, () => {
-            // TODO : Language
-            this.snackBarService.openInfo('Word placed successfully!');
+            this.languageService.getWord('game_page.play.word_placement_success').subscribe((word: string) => {
+                this.snackBarService.openInfo(word);
+            });
         });
 
         this.clientSocketService.on(SocketEvents.PlacementFailure, (word: Word) => {

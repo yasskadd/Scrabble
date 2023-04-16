@@ -105,7 +105,8 @@
             "wrong_placement": "Impossible de placer la lettre ici",
             "wrong_turn": "Veuillez attendre votre tour",
             "wrong_tile": "Impossible de placer sur une tuile utilisée",
-            "wrong_cannot_place_tile": "Vous ne pouvez pas placer une tuile ici"
+            "wrong_cannot_place_tile": "Vous ne pouvez pas placer une tuile ici",
+            "word_placement_success": "Mot placé avec succès!"
         }
     },
     "difficulty": {

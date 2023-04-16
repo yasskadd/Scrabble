@@ -105,7 +105,8 @@
             "wrong_placement": "Cannot place letter here",
             "wrong_turn": "Please wait for you turn",
             "wrong_tile": "Cannot place over a used tile",
-            "wrong_cannot_place_tile": "You cannot place a tile here"
+            "wrong_cannot_place_tile": "You cannot place a tile here",
+            "word_placement_success": "Word placed successfully!"
         }
     },
     "difficulty": {
