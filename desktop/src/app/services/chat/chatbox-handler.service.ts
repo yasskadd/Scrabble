@@ -320,7 +320,9 @@ export class ChatboxHandlerService {
             this.allChatRooms.push(newChatRoom);
             this.updateAllRooms();
         } else {
-            this.snackBarService.openInfo('Room created successfully');
+            this.languageService.getWord('chat.create_room.success').subscribe((word: string) => {
+                this.snackBarService.openError(word);
+            });
         }
     }
 

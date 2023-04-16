@@ -25,6 +25,7 @@ import { Observable } from 'rxjs';
 import { delay, first } from 'rxjs/operators';
 import { ClientSocketService } from './communication/client-socket.service';
 import { GameClientService } from './game-client.service';
+import { LanguageService } from './language.service';
 
 // const ASCII_ALPHABET_START = 96;
 
@@ -52,6 +53,7 @@ export class LetterPlacementService {
         private gameClientService: GameClientService, // private chatboxService: ChatboxHandlerService,
         private snackBarService: SnackBarService,
         private matDialog: MatDialog,
+        private languageService: LanguageService,
     ) {
         this.liveBoard = [];
         this.defaultBoard = [];
@@ -149,12 +151,14 @@ export class LetterPlacementService {
 
         if (this.placingMode !== PlacingState.Drag || this.hasPlacingEnded || !this.gameClientService.currentlyPlaying()) {
             if (this.hasPlacingEnded) {
-                // TODO : Language
-                this.snackBarService.openError('Cannot place letter here');
+                this.languageService.getWord('game_page.play.wrong_placement').subscribe((word: string) => {
+                    this.snackBarService.openError(word);
+                });
             }
             if (!this.gameClientService.currentlyPlaying()) {
-                // TODO : Language
-                this.snackBarService.openError('Please wait for you turn');
+                this.languageService.getWord('game_page.play.wrong_turn').subscribe((word: string) => {
+                    this.snackBarService.openError(word);
+                });
             }
             return;
         }
@@ -619,8 +623,9 @@ export class LetterPlacementService {
         let validity = false;
 
         if (this.liveBoard[coord].state === BoardTileState.Confirmed) {
-            // TODO : Language
-            this.snackBarService.openError('Cannot place over a tile');
+            this.languageService.getWord('game_page.play.wrong_tile').subscribe((word: string) => {
+                this.snackBarService.openError(word);
+            });
             return false;
         }
 
@@ -635,8 +640,9 @@ export class LetterPlacementService {
         });
 
         if (!validity) {
-            // TODO : Language
-            this.snackBarService.openError('You cannot place a tile here');
+            this.languageService.getWord('game_page.play.wrong_cannot_place_tile').subscribe((word: string) => {
+                this.snackBarService.openError(word);
+            });
         }
 
         return validity;
