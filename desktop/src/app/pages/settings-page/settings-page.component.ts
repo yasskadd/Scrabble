@@ -84,7 +84,12 @@ export class SettingsPageComponent implements OnInit {
         this.httpHandlerService
             .modifyUsername(this.newUsername.value)
             .then((res) => {
-                console.log(res);
+                if (res.body !== 'OK') {
+                    this.languageService.getWord('user_settings.snackbar_modify_err_username').subscribe((word: string) => {
+                        this.snackBarService.openError(word);
+                    });
+                    return;
+                }
                 this.userService.user.username = this.newUsername.value;
                 this.newUsername.reset();
                 this.newUsernameConfirmation.reset();

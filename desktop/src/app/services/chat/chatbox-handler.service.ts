@@ -103,6 +103,12 @@ export class ChatboxHandlerService {
         return this.chatSession;
     }
 
+    getChatRoom(chatRoomName: string) {
+        return this.allChatRooms.find((room) => {
+            return room.name === chatRoomName;
+        });
+    }
+
     // get joinedRooms(): ChatRoomClient[] {
     //     return this.allChatRooms.filter((allRoom) => {
     //         const indexToDelete = this.joinedChatRooms.findIndex((joinedRoom) => joinedRoom === allRoom.name);
