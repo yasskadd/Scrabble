@@ -87,10 +87,14 @@ export class SettingsPageComponent implements OnInit {
                 this.userService.user.username = this.newUsername.value;
                 this.newUsername.reset();
                 this.newUsernameConfirmation.reset();
-                this.snackBarService.openInfo('Modified successfully');
+                this.languageService.getWord('user_settings.snackbar_modify_success').subscribe((word: string) => {
+                    this.snackBarService.openInfo(word);
+                });
             })
             .catch((err) => {
-                this.snackBarService.openError('Error while trying to modify');
+                this.languageService.getWord('user_settings.snackbar_modify_err_username').subscribe((word: string) => {
+                    this.snackBarService.openError(word);
+                });
             });
     }
 
@@ -103,10 +107,14 @@ export class SettingsPageComponent implements OnInit {
                 this.userService.user.password = this.newPassword.value;
                 this.newPassword.reset();
                 this.newPasswordConfirmation.reset();
-                this.snackBarService.openInfo('Modified successfully');
+                this.languageService.getWord('user_settings.snackbar_modify_success').subscribe((word: string) => {
+                    this.snackBarService.openInfo(word);
+                });
             })
             .catch((err) => {
-                this.snackBarService.openError('Error while trying to modify');
+                this.languageService.getWord('user_settings.snackbar_modify_err_password').subscribe((word: string) => {
+                    this.snackBarService.openError(word);
+                });
             });
     }
 
@@ -116,10 +124,14 @@ export class SettingsPageComponent implements OnInit {
             .then(() => {
                 this.languageService.setLanguage(this.selectedLanguage as LanguageChoice);
                 this.selectedLanguage = undefined;
-                this.snackBarService.openInfo('Modified successfully');
+                this.languageService.getWord('user_settings.snackbar_modify_success').subscribe((word: string) => {
+                    this.snackBarService.openInfo(word);
+                });
             })
             .catch((err) => {
-                this.snackBarService.openError('Error while trying to modify');
+                this.languageService.getWord('user_settings.snackbar_modify_err_language').subscribe((word: string) => {
+                    this.snackBarService.openError(word);
+                });
             });
     }
 
@@ -139,10 +151,14 @@ export class SettingsPageComponent implements OnInit {
                 this.selectedMainTheme = undefined;
                 this.selectedLightTheme = undefined;
                 this.selectedDarkTheme = undefined;
-                this.snackBarService.openInfo('Modified successfully');
+                this.languageService.getWord('user_settings.snackbar_modify_success').subscribe((word: string) => {
+                    this.snackBarService.openInfo(word);
+                });
             })
             .catch((err) => {
-                this.snackBarService.openError('Error while trying to modify');
+                this.languageService.getWord('user_settings.snackbar_modify_err_theme').subscribe((word: string) => {
+                    this.snackBarService.openError(word);
+                });
             });
     }
 
