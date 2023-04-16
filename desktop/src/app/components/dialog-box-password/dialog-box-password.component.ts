@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
-import { MIN_PASSWORD_LENGTH } from '@app/constants/user';
 import { MatDialogRef } from '@angular/material/dialog';
 import { SnackBarService } from '@services/snack-bar.service';
 
@@ -13,7 +12,7 @@ export class DialogBoxPasswordComponent {
     protected passwordForm: FormControl;
 
     constructor(private snackBarService: SnackBarService, private dialogRef: MatDialogRef<DialogBoxPasswordComponent>) {
-        this.passwordForm = new FormControl('', [Validators.required, Validators.minLength(MIN_PASSWORD_LENGTH)]);
+        this.passwordForm = new FormControl('', [Validators.required]);
     }
     protected close(): void {
         if (this.passwordForm.valid) {
