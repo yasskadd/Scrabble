@@ -32,11 +32,11 @@
                                 <mat-list-item>
                                     <mat-panel-title>
                                         <!-- TODO: language -->
-                                        <div *gIf="game.gameWon" style="color: green">
+                                        <div *ngIf="game.gameWon" style="color: green">
                                             <p>Victoire</p>
                                             <p>{{ game.date }}</p>
                                         </div>
-                                        <div *gIf="!game.gameWon" style="color: red">
+                                        <div *ngIf="!game.gameWon" style="color: red">
                                             <p>Défaite</p>
                                             <p>{{ game.date }}</p>
                                         </div>

@@ -89,7 +89,7 @@ export class UserProfilePageComponent implements AfterViewInit {
 
     setGames() {
         this.allEvents.forEach((event: HistoryEvent) => {
-            if (event.event == HistoryActions.Game) {
+            if (event.event === HistoryActions.Game) {
                 this.games.push(event);
             }
         });
