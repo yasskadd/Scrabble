@@ -1,8 +1,8 @@
 import { LetterTreeNode } from '@app/classes/trie/letter-tree-node.class';
 import { LetterTree } from '@app/classes/trie/letter-tree.class';
-import { Word } from '@common/classes/word.class';
 import { ValidateWordReturn } from '@app/interfaces/validate-word-return';
 import { Gameboard } from '@common/classes/gameboard.class';
+import { Word } from '@common/classes/word.class';
 import * as constants from '@common/constants/board-info';
 import { Coordinate } from '@common/interfaces/coordinate';
 import { PlaceWordCommandInfo } from '@common/interfaces/place-word-command-info';
@@ -70,8 +70,10 @@ export class WordSolver {
 
     private checkIfPartialWordExistInTrie(currentAnchor: Coordinate, beforeAnchor: Coordinate) {
         const partialWord = this.buildPartialWord(beforeAnchor);
-        const partialWordNode: LetterTreeNode | null = this.trie.lookUp(partialWord);
-        if (partialWordNode !== null) this.extendWordAfterAnchor(partialWord, partialWordNode, currentAnchor, false);
+        const partialWordNode: LetterTreeNode | null = this.trie.lookUp(partialWord.toLowerCase());
+        if (partialWordNode !== null) {
+            this.extendWordAfterAnchor(partialWord, partialWordNode, currentAnchor, false);
+        }
     }
 
     private placeLettersOnBoard(word: Word, commandInfo: PlaceWordCommandInfo) {
@@ -251,7 +253,8 @@ export class WordSolver {
 
     private pushLetterToLegalHere(lettersUpwards: string, lettersDownwards: string) {
         const legalHere: string[] = [];
-        for (const letter of ALPHABET_LETTERS.split('')) if (this.trie.isWord(lettersUpwards + letter + lettersDownwards)) legalHere.push(letter);
+        for (const letter of ALPHABET_LETTERS.split(''))
+            if (this.trie.isWord(lettersUpwards.toLowerCase() + letter.toLowerCase() + lettersDownwards.toLowerCase())) legalHere.push(letter);
         return legalHere;
     }
 

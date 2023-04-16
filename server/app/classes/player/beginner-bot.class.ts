@@ -11,13 +11,19 @@ export class BeginnerBot extends Bot {
             return;
         }
         setTimeout(() => {
-            if (randomNumber === 1) this.skipTurn();
-            else this.exchangeLetters();
+            if (randomNumber === 1) {
+                this.skipTurn();
+            } else {
+                this.exchangeLetters();
+            }
         }, Constant.SECOND_3 - this.countUp * Constant.SECOND_1);
     }
 
     exchangeLetters(): void {
-        if (this.game === undefined || this.isNotTurn || this.game.letterReserve.totalQuantity() < Constant.letterReserveMinQuantity) return;
+        if (this.game === undefined || this.isNotTurn || this.game.letterReserve.totalQuantity() < Constant.letterReserveMinQuantity) {
+            this.skipTurn();
+            return;
+        }
         const rack: string[] = [...this.rackToString()];
         let numberOfLetters = this.getRandomNumber(rack.length);
         const lettersToExchange: string[] = new Array();
@@ -33,12 +39,15 @@ export class BeginnerBot extends Bot {
     placeLetters() {
         const commandInfoList = this.addCommandInfoToList(this.processWordSolver(), this.getRandomNumber(Constant.MAX_NUMBER));
         if (commandInfoList.length === 0) {
+            console.log('NO PLACEMENT FOUND FOR BEGINNER BOT');
             setTimeout(() => this.skipTurn(), Constant.SECOND_3 - this.countUp * Constant.SECOND_1);
             return;
         }
         const randomCommandInfo = commandInfoList[Math.floor(Math.random() * commandInfoList.length)];
-        if (this.countUp >= 3 && this.countUp < Constant.TIME_SKIP) this.placeWord(randomCommandInfo);
-        else if (this.countUp < 3) setTimeout(() => this.placeWord(randomCommandInfo), Constant.SECOND_3 - this.countUp * Constant.SECOND_1);
+        if (this.countUp >= 3 && this.countUp < Constant.TIME_SKIP) {
+            console.log('LOL WHY ???');
+            this.placeWord(randomCommandInfo);
+        } else if (this.countUp < 3) setTimeout(() => this.placeWord(randomCommandInfo), Constant.SECOND_3 - this.countUp * Constant.SECOND_1);
     }
 
     protected addCommandInfoToList(commandInfoMap: Map<PlaceWordCommandInfo, number>, randomNumber: number): PlaceWordCommandInfo[] {
