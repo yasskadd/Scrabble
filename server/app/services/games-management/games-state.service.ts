@@ -32,10 +32,10 @@ import { GameDifficulty } from '@common/models/game-difficulty';
 import { GameMode } from '@common/models/game-mode';
 import { HistoryActions } from '@common/models/history-actions';
 import { PlayerType } from '@common/models/player-type';
+import { Subject } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import { GamesHandlerService } from './games-handler.service';
-import { Subject } from 'rxjs';
 
 const MAX_SKIP = 6;
 const ERROR_REPLACING_BOT = 'Error trying to replace the bot';
@@ -347,13 +347,11 @@ export class GamesStateService {
         this.updatePlayersStats(gamePlayers);
 
         const winningPlayer = this.getWinnerPlayer(gamePlayers);
-
         console.log('kicking players');
         gamePlayers.forEach((g: GamePlayer) => {
             const socket = this.socketManager.getSocketFromId(g.player.socketId);
             if (!socket) return;
-
-            socket.emit(SocketEvents.GameEnd, winningPlayer);
+            socket.emit(SocketEvents.GameEnd, winningPlayer.getInformation());
         });
         this.gamesHandler.removeRoom(roomId);
     }
