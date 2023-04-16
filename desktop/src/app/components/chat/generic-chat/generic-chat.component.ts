@@ -24,8 +24,8 @@ export class GenericChatComponent implements AfterViewChecked, AfterContentInit 
     // chatSession: string | undefined;
 
     inputForm: FormControl;
-    searchInput: string;
-    searchAllInput: string;
+    searchForm: FormControl;
+    searchAllForm: FormControl;
 
     private lastMessage: string;
 
@@ -37,8 +37,8 @@ export class GenericChatComponent implements AfterViewChecked, AfterContentInit 
         private snackBarService: SnackBarService,
     ) {
         this.inputForm = new FormControl('');
-        this.searchInput = '';
-        this.searchAllInput = '';
+        this.searchForm = new FormControl('');
+        this.searchAllForm = new FormControl('');
         // this.chatSession = undefined;
         this.inputForm = new FormControl('');
         this.lastMessage = '';
@@ -148,19 +148,19 @@ export class GenericChatComponent implements AfterViewChecked, AfterContentInit 
     }
 
     onSearch(chatRoomName: string) {
-        return chatRoomName.toLowerCase().startsWith(this.searchInput.toLowerCase());
+        return chatRoomName.toLowerCase().startsWith(this.searchForm.value.toLowerCase());
     }
 
     onSearchAll(chatRoomName: string) {
-        return chatRoomName.toLowerCase().startsWith(this.searchAllInput.toLowerCase());
+        return chatRoomName.toLowerCase().startsWith(this.searchAllForm.value.toLowerCase());
     }
 
     resetSearchInput() {
-        this.searchInput = '';
+        this.searchForm.setValue('');
     }
 
     resetSearchAllInput() {
-        this.searchAllInput = '';
+        this.searchAllForm.setValue('');
     }
 
     toggleWindow() {
