@@ -197,6 +197,7 @@
         "joined_chats": "Canaux rejoints",
         "available_chats": "Canaux disponibles",
         "join": "REJOINDRE",
+        "delete": "EFFACER",
         "leave": "QUITTER",
         "create_room": {
             "create": "Creer un nouveau canal",
