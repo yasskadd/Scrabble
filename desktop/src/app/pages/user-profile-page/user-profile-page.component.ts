@@ -20,6 +20,7 @@ export class UserProfilePageComponent implements AfterViewInit {
     connections: HistoryEvent[];
     games: HistoryEvent[];
     private allEvents: HistoryEvent[];
+    private myChart: Chart;
 
     constructor(
         protected userService: UserService,
@@ -39,37 +40,14 @@ export class UserProfilePageComponent implements AfterViewInit {
 
     ngAfterViewInit() {
         // TODO: Language, data
-
-        const myChart = new Chart(this.canvasRef.nativeElement.getContext('2d'), {
-            type: 'doughnut',
-            data: {
-                labels: ['Perdues', 'Gagnées'],
-                datasets: [
-                    {
-                        data: [(this.userStats.loss = 0), (this.userStats.win = 0)],
-                        backgroundColor: ['rgba(255, 99, 132, 1)', 'rgba(201, 242, 155, 1)'],
-                        borderColor: ['rgba(255, 99, 132, 1)', 'rgba(201, 242, 155, 1)'],
-                        borderWidth: 1,
-                    },
-                ],
-            },
-            options: {
-                responsive: false,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                },
-            },
-        });
-
-        myChart.update();
+        this.updateChart(0, 0);
     }
 
     setUserStats() {
         this.httpHandlerService.getStats().then((userStats: UserStats) => {
             userStats.averageGameScore = Math.round(userStats.averageGameScore);
             this.userStats = userStats;
+            this.updateChart(this.userStats.win, this.userStats.loss);
         });
     }
 
@@ -81,7 +59,7 @@ export class UserProfilePageComponent implements AfterViewInit {
 
     setConnections() {
         this.allEvents.forEach((event: HistoryEvent) => {
-            if (event.event != HistoryActions.Game) {
+            if (event.event !== HistoryActions.Game) {
                 this.connections.push(event);
             }
         });
@@ -101,5 +79,39 @@ export class UserProfilePageComponent implements AfterViewInit {
         this.ngZone.run(() => {
             this.router.navigate(['/settings']).then();
         });
+    }
+
+    protected playerHasntPlayed(): boolean {
+        return this.userStats?.win === 0 && this.userStats?.loss === 0;
+    }
+
+    private updateChart(win: number, loss: number): void {
+        if (this.myChart) {
+            this.myChart.destroy();
+        }
+
+        this.myChart = new Chart(this.canvasRef.nativeElement.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Perdues', 'Gagnées'],
+                datasets: [
+                    {
+                        data: [loss, win],
+                        backgroundColor: ['rgba(255, 99, 132, 1)', 'rgba(201, 242, 155, 1)'],
+                        borderColor: ['rgba(255, 99, 132, 1)', 'rgba(201, 242, 155, 1)'],
+                        borderWidth: 1,
+                    },
+                ],
+            },
+            options: {
+                responsive: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                },
+            },
+        });
+        this.myChart.update();
     }
 }

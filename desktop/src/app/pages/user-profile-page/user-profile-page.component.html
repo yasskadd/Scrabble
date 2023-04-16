@@ -1,67 +1,81 @@
-<div class="encapsulating-div">
+<div class='encapsulating-div'>
     <app-header></app-header>
 
-    <body class="mat-app-background">
-        <mat-card class="user-info justified">
-            <div class="justified">
-                <h2 *ngIf="userService.isConnected.getValue()">{{ userService.user.username }}</h2>
-                <img
-                    *ngIf="userService.isConnected.getValue()"
-                    [src]="userService.user.profilePicture.key"
-                    class="selector-avatar mat-elevation-z5"
-                    alt="profile picture"
-                />
-                <button mat-button color="primary" (click)="redirectSettingsPage()"><mat-icon>settings</mat-icon>Settings</button>
-            </div>
-            <mat-divider style="width: 90%"></mat-divider>
-            <div class="user-stats">
-                <div class="justified">
-                    <h4>Stastiques</h4>
-                    <div>Temps moy : {{ userStats.averageGameTime }}</div>
-                    <div>Score moy : {{ userStats.averageGameScore }}</div>
-                    <div>Jeux joués : {{ userStats.gameCount }}</div>
-                    <canvas #myChart width="160" height="160"></canvas>
-                    <div #newUser *ngIf="(userStats.win && userStats.loss) === 0">L'utilisateur n'a pas encore joué de parties</div>
+    <body class='mat-app-background'>
+    <mat-card class='user-info justified'>
+        <div class='justified'>
+            <h2 *ngIf='userService.isConnected.getValue()'>{{ userService.user.username }}</h2>
+            <img
+                *ngIf='userService.isConnected.getValue()'
+                [src]='userService.user.profilePicture.key'
+                class='selector-avatar mat-elevation-z5'
+                alt='profile picture'
+            />
+            <button mat-button color='primary' (click)='redirectSettingsPage()'>
+                <mat-icon>settings</mat-icon>
+                <!-- TODO : Language-->
+                Settings
+            </button>
+        </div>
+        <mat-divider style='width: 90%'></mat-divider>
+        <div class='user-stats'>
+            <div class='justified'>
+                <!-- TODO : Language-->
+                <h4>Stastiques</h4>
+                <!-- TODO : Language-->
+                <div>Temps moy : {{ userStats?.averageGameTime }}</div>
+                <!-- TODO : Language-->
+                <div>Score moy : {{ userStats?.averageGameScore }}</div>
+                <!-- TODO : Language-->
+                <div>Jeux joués : {{ userStats?.gameCount }}</div>
+                <canvas #myChart width='160' height='160'></canvas>
+                <!-- TODO : Language-->
+                <div #newUser *ngIf='playerHasntPlayed()'>L'utilisateur n'a pas encore joué de
+                    parties
                 </div>
-                <mat-divider vertical></mat-divider>
-                <div class="justified">
-                    <h4>Historique</h4>
-                    <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
-                        <mat-tab label="Parties">
-                            <mat-list *ngFor="let game of games">
-                                <mat-list-item>
-                                    <mat-panel-title>
-                                        <!-- TODO: language -->
-                                        <div *ngIf="game.gameWon" style="color: green">
-                                            <p>Victoire</p>
-                                            <p>{{ game.date }}</p>
-                                        </div>
-                                        <div *ngIf="!game.gameWon" style="color: red">
-                                            <p>Défaite</p>
-                                            <p>{{ game.date }}</p>
-                                        </div>
-                                    </mat-panel-title>
-                                </mat-list-item>
-                            </mat-list>
-                        </mat-tab>
-                        <mat-tab label="Connexions">
-                            <mat-expansion-panel role="list">
-                                <mat-expansion-panel-header>
-                                    <mat-panel-title>
-                                        <!-- TODO: language -->
-                                        <div>Status</div>
-                                        <div>Date</div>
-                                    </mat-panel-title>
-                                </mat-expansion-panel-header>
-                                <p>
+            </div>
+            <mat-divider vertical></mat-divider>
+            <div class='justified'>
+                <!-- TODO : Language-->
+                <h4>Historique</h4>
+                <mat-tab-group mat-stretch-tabs='false' mat-align-tabs='start'>
+                    <mat-tab label='Parties'>
+                        <mat-list *ngFor='let game of games'>
+                            <mat-list-item>
+                                <mat-panel-title>
+                                    <div *ngIf='game.gameWon' style='color: green'>
                                     <!-- TODO: language -->
-                                </p>
-                            </mat-expansion-panel>
-                        </mat-tab>
-                    </mat-tab-group>
-                </div>
+                                        <p>Victoire</p>
+                                        <p>{{ game.date }}</p>
+                                    </div>
+                                    <div *ngIf='!game.gameWon' style='color: red'>
+                                        <!-- TODO : Language-->
+                                        <p>Défaite</p>
+                                        <p>{{ game.date }}</p>
+                                    </div>
+                                </mat-panel-title>
+                            </mat-list-item>
+                        </mat-list>
+                    </mat-tab>
+                    <mat-tab label='Connexions'>
+                        <mat-expansion-panel role='list'>
+                            <mat-expansion-panel-header>
+                                <mat-panel-title>
+                                    <!-- TODO: language -->
+                                    <div>Status</div>
+                                    <!-- TODO : Language-->
+                                    <div>Date</div>
+                                </mat-panel-title>
+                            </mat-expansion-panel-header>
+                            <p>
+                                <!-- TODO: language -->
+                            </p>
+                        </mat-expansion-panel>
+                    </mat-tab>
+                </mat-tab-group>
             </div>
-        </mat-card>
+        </div>
+    </mat-card>
     </body>
 
     <app-footer></app-footer>
