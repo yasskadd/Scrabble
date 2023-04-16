@@ -5,6 +5,7 @@ import { HttpHandlerService } from '@app/services/communication/http-handler.ser
 import { UserService } from '@app/services/user.service';
 import { HistoryEvent } from '@common/interfaces/history-event';
 import { UserStats } from '@common/interfaces/user-stats';
+import { HistoryActions } from '@common/models/history-actions';
 import Chart from 'chart.js/auto';
 
 @Component({
@@ -18,6 +19,7 @@ export class UserProfilePageComponent implements AfterViewInit {
     userStats: UserStats;
     connections: HistoryEvent[];
     games: HistoryEvent[];
+    private allEvents: HistoryEvent[];
 
     constructor(
         protected userService: UserService,
@@ -29,10 +31,10 @@ export class UserProfilePageComponent implements AfterViewInit {
         this.games = [];
 
         this.setUserStats();
-        this.setConnections();
-        this.setGames();
-        console.log(this.connections);
-        console.log(this.games);
+        this.fetchHistories().then(() => {
+            this.setConnections();
+            this.setGames();
+        });
     }
 
     ngAfterViewInit() {
@@ -43,7 +45,7 @@ export class UserProfilePageComponent implements AfterViewInit {
                 labels: ['Perdues', 'Gagnées'],
                 datasets: [
                     {
-                        data: [12, 19], // TODO
+                        data: [this.userStats.loss, this.userStats.win],
                         backgroundColor: ['rgba(255, 99, 132, 1)', 'rgba(201, 242, 155, 1)'],
                         borderColor: ['rgba(255, 99, 132, 1)', 'rgba(201, 242, 155, 1)'],
                         borderWidth: 1,
@@ -70,20 +72,29 @@ export class UserProfilePageComponent implements AfterViewInit {
         });
     }
 
+    async fetchHistories() {
+        await this.httpHandlerService.getUserHistoryEvents().then((result) => {
+            this.allEvents = result.historyEventList as HistoryEvent[];
+        });
+    }
+
     setConnections() {
-        this.httpHandlerService.getUserHistoryEvents().then((result) => {
-            result.historyEventList.forEach((event: HistoryEvent) => this.connections.push(event));
+        this.allEvents.forEach((event: HistoryEvent) => {
+            if (event.event != HistoryActions.Game) {
+                this.connections.push(event);
+            }
         });
     }
 
     setGames() {
-        this.connections.forEach((event: HistoryEvent) => {
-            if (event.gameWon) {
+        this.allEvents.forEach((event: HistoryEvent) => {
+            if (event.event == HistoryActions.Game) {
                 this.games.push(event);
-                console.log('gotit');
             }
         });
     }
+
+    calculatePercentageWon() {}
 
     redirectSettingsPage() {
         this.ngZone.run(() => {
