@@ -81,7 +81,8 @@
         "reject": "Reject",
         "join": {
             "solo": "Join a solo game"
-        }
+        },
+        "reject_by_host": "Rejected by other player"
     },
     "game_page": {
         "informations": {

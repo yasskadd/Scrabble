@@ -81,7 +81,8 @@
         "reject": "Rejeter",
         "join": {
             "solo": "Rejoindre une partie en solo"
-        }
+        },
+        "reject_by_host": "Rejeté par un joueur de la salle"
     },
     "game_page": {
         "informations": {
@@ -105,7 +106,6 @@
             "wrong_turn": "Veuillez attendre votre tour",
             "wrong_tile": "Impossible de placer sur une tuile utilisée",
             "wrong_cannot_place_tile": "Vous ne pouvez pas placer une tuile ici"
-            "
         }
     },
     "difficulty": {
