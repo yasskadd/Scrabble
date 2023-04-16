@@ -299,9 +299,9 @@
             "change_password": "Changer le mot de passe"
         },
         "snackbar_modify_success": "Modifié avec succès",
-        "snackbar_modify_err_username": "Erreur lors de la tentative de modification du nom d'utilisateur",
+        "snackbar_modify_err_username": "Erreur lors de la tentative de modification du nom d'utilisateur : le nom d'utilisateur est déjà pris",
         "snackbar_modify_err_password": "Erreur lors de la tentative de modification du nom mot de passe",
-        "snackbar_modify_err_language": "Erreur lors de la tentative de modification du langager",
+        "snackbar_modify_err_language": "Erreur lors de la tentative de modification du langage",
         "snackbar_modify_err_theme": "Erreur lors de la tentative de modification du theme"
     },
     "header_options": {
