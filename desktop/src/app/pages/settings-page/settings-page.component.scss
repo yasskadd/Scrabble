@@ -13,6 +13,7 @@ mat-card {
     margin-block: 1%;
     justify-content: flex-start;
     padding: 16px;
+    padding-top: 0px;
 }
 
 .settings-form {
@@ -51,4 +52,13 @@ mat-card {
 
 mat-form-field {
     margin-bottom: 5%;
+}
+
+.input-pair {
+    margin: 5px;
+}
+
+h2,
+h5 {
+    text-align: center;
 }

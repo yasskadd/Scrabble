@@ -2,7 +2,10 @@
     <app-header></app-header>
     <body class="mat-app-background">
         <mat-card class="justified">
+            <!-- TODO language -->
+            <h5>Cliquez pour modifier votre photo de profil</h5>
             <button
+                color="primary"
                 mat-fab
                 *ngIf="userService.isConnected.getValue() && !userService.user.profilePicture"
                 color="primary"
@@ -30,11 +33,15 @@
                 (click)="openAvatarSelector()"
                 class="selecter-avatar mat-elevation-z5"
             />
+            <mat-divider style="width: 100%"></mat-divider>
             <div class="configs-container">
                 <div class="username-password">
+                    <!-- TODO language -->
                     <h2>Modifier vos informations</h2>
                     <div style="display: flex; flex-direction: row">
-                        <div class="username-config">
+                        <div class="input-pair">
+                            <!-- TODO language -->
+                            <h4>Nom d'utilisateur</h4>
                             <mat-form-field appearance="outline">
                                 <mat-label>{{ "user_settings.modify_username.hint" | translate }}</mat-label>
                                 <input matInput [formControl]="newUsername" />
@@ -43,11 +50,13 @@
                                 <mat-label>{{ "user_settings.modify_username.confirm_username" | translate }}</mat-label>
                                 <input matInput [formControl]="newUsernameConfirmation" />
                             </mat-form-field>
-                            <button mat-raised-button (click)="submitUsername()" class="username-confirmation">
+                            <button color="primary" mat-raised-button (click)="submitUsername()" class="username-confirmation">
                                 {{ "user_settings.submit_button" | translate }}
                             </button>
                         </div>
-                        <div class="password-config">
+                        <div class="input-pair">
+                            <!-- TODO language -->
+                            <h4>Mot de passe</h4>
                             <mat-form-field appearance="outline">
                                 <mat-label>{{ "user_settings.modify_password.hint" | translate }}</mat-label>
                                 <input matInput [formControl]="newPassword" />
@@ -56,7 +65,7 @@
                                 <mat-label>{{ "user_settings.modify_password.confirm_password" | translate }}</mat-label>
                                 <input matInput [formControl]="newPasswordConfirmation" />
                             </mat-form-field>
-                            <button mat-raised-button (click)="submitPassword()" class="password-confirmation">
+                            <button color="primary" mat-raised-button (click)="submitPassword()" class="password-confirmation">
                                 {{ "user_settings.submit_button" | translate }}
                             </button>
                         </div>
@@ -64,9 +73,12 @@
                 </div>
                 <mat-divider vertical></mat-divider>
                 <div class="params">
-                    <h2>Modifier vos paramètres</h2>
+                    <!-- TODO language -->
+                    <h2>Choisir vos paramètres par défaut</h2>
                     <div style="display: flex; flex-direction: row">
-                        <div class="language-config">
+                        <div class="input-pair">
+                            <!-- TODO language -->
+                            <h4>Language</h4>
                             <mat-form-field appearance="outline" class="language-selector">
                                 <mat-label>{{ "user_settings.modify_language" | translate }}</mat-label>
                                 <mat-select [(value)]="selectedLanguage">
@@ -74,18 +86,17 @@
                                     <mat-option value="en">EN</mat-option>
                                 </mat-select>
                             </mat-form-field>
-                            <button mat-raised-button (click)="submitLanguage()" class="language-confirmation">
+                            <button color="primary" mat-raised-button (click)="submitLanguage()" class="language-confirmation">
                                 {{ "user_settings.submit_button" | translate }}
+                                <!-- TODO language -->
                             </button>
                         </div>
-                        <div class="theme-config">
-                            <mat-form-field appearance="outline" class="theme-selector">
-                                <mat-label>{{ "user_settings.modify_theme_dynamic" | translate }}</mat-label>
-                                <mat-select [(value)]="selectedDynamic">
-                                    <mat-option value="true">{{ "user_settings.yes" | translate }}</mat-option>
-                                    <mat-option value="false">{{ "user_settings.no" | translate }}</mat-option>
-                                </mat-select>
-                            </mat-form-field>
+                        <div class="input-pair">
+                            <!-- TODO language -->
+                            <h4>Thèmes</h4>
+                            <mat-slide-toggle class="theme-selector" [(ngModel)]="selectedDynamic">
+                                {{ "user_settings.modify_theme_dynamic" | translate }}
+                            </mat-slide-toggle>
                             <mat-form-field appearance="outline" class="theme-selector">
                                 <mat-label>{{ "user_settings.modify_main_theme" | translate }}</mat-label>
                                 <mat-select [(value)]="selectedMainTheme">
@@ -107,7 +118,7 @@
                                     <mat-option value="setting.dark">{{ "user_settings.dark" | translate }}</mat-option>
                                 </mat-select>
                             </mat-form-field>
-                            <button mat-raised-button (click)="submitTheme()" class="theme-confirmation">
+                            <button color="primary" mat-raised-button (click)="submitTheme()" class="theme-confirmation">
                                 {{ "user_settings.submit_button" | translate }}
                             </button>
                         </div>
