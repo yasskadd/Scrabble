@@ -103,7 +103,6 @@ export class ChatHandlerService {
         this.leaveUserFromAllRoomSessions(socket); // Leave client from other chatrooms
         socket.emit(SocketEvents.CreateChatRoom, gameChatRoom); // Create chatRoom on client
         this.joinChatRoom(socket, gameChatRoomName); // Add client to chatroom
-        this.joinChatRoomSession(socket, gameChatRoomName); // Make him join the chatRoom
     }
 
     leaveGameChatRoom(socket: Socket, gameId: string) {
