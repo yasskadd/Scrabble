@@ -24,7 +24,7 @@ export class ConnectionPageComponent {
         private userService: UserService,
         private snackBarService: SnackBarService,
         private router: Router,
-        private ngZone: NgZone
+        private ngZone: NgZone,
     ) {
         this.usernameForm = new FormControl('', [Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]);
         this.passwordForm = new FormControl('', [Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]);
@@ -56,6 +56,13 @@ export class ConnectionPageComponent {
     protected redirectUserPage() {
         this.ngZone.run(() => {
             this.router.navigate(['/user']).then();
+        });
+    }
+
+    protected redirectForgotPasswordPage() {
+        console.log('CALLED');
+        this.ngZone.run(() => {
+            this.router.navigate(['/forgot-password']).then();
         });
     }
 

@@ -11,4 +11,5 @@ export enum AppRoutes {
     MultiGameCreationPage = 'multi/create',
     MultiWaitingPage = 'multi/waiting',
     Chat = 'chat',
+    ForgotPasswordPage = 'forgot-password',
 }
