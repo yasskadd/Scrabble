@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, NgZone, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, NgZone, OnDestroy, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -14,6 +14,8 @@ import { PlayerType } from '@common/models/player-type';
 import { ClientSocketService } from '@services/communication/client-socket.service';
 import { TimeService } from '@services/time.service';
 import { AppRoutes } from '@app/models/app-routes';
+import { MatDrawer } from '@angular/material/sidenav';
+import { ChatboxHandlerService } from '@services/chat/chatbox-handler.service';
 
 @Component({
     selector: 'app-multiplayer-join-page',
@@ -21,18 +23,31 @@ import { AppRoutes } from '@app/models/app-routes';
     styleUrls: ['./multiplayer-join-page.component.scss'],
 })
 export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
+    @ViewChild('drawer') drawer: MatDrawer;
     gameMode: string;
     protected roomIdForm: FormControl;
+    protected chatIsOpen: boolean;
 
     constructor(
         protected timer: TimeService,
         protected gameConfiguration: GameConfigurationService,
+        protected chatboxHandler: ChatboxHandlerService,
         private activatedRoute: ActivatedRoute,
         private dialog: MatDialog,
         private clientSocketService: ClientSocketService,
         private router: Router,
         private ngZone: NgZone,
     ) {
+        this.chatIsOpen = false;
+
+        this.chatboxHandler.chatWindowOpened.subscribe((value: boolean) => {
+            if (value) {
+                this.drawer?.close().then();
+            } else {
+                this.drawer?.open().then();
+            }
+        });
+
         this.gameMode = this.activatedRoute.snapshot.params.id;
         this.roomIdForm = new FormControl('');
     }

@@ -1,45 +1,45 @@
 .user-info {
-    margin-inline: 20%;
-    height: 94%;
-    margin-block: 1%;
-    justify-content: flex-start;
-    padding: 0px 16px 16px 16px;
+  margin-inline: 20%;
+  height: 94%;
+  margin-block: 1%;
+  justify-content: flex-start;
+  padding: 0px 16px 16px 16px;
 }
 
 h2 {
-    margin-block: 10px;
+  margin-block: 10px;
 }
 
 .justified button {
-    margin: 8px;
+  margin: 8px;
 }
 
 .selector-avatar {
-    height: 56px;
-    aspect-ratio: 1;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-bottom: 10px;
+  height: 56px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 10px;
 }
 
 .user-stats {
-    display: flex;
-    height: 65%;
-    width: 100%;
-    padding: 16px;
+  display: flex;
+  height: 65%;
+  width: 100%;
+  padding: 16px;
 }
 
 .user-stats > div {
-    width: 50%;
-    justify-content: space-between;
+  width: 50%;
+  justify-content: space-between;
 }
 
 #newUser {
-    margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 canvas {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 //mat-card > div {
@@ -47,25 +47,32 @@ canvas {
 //}
 
 mat-tab-group {
-    height: 80%;
-    width: 80%;
-    margin-bottom: 5px;
+  height: 80%;
+  width: 80%;
+  margin-bottom: 5px;
 }
 
 mat-list-item {
-    display: flex;
-    flex-direction: row;
+  display: flex;
+  flex-direction: row;
+}
+
+.return-button {
+  transform: scale(1.01);
+  position: absolute;
+  top: 80px;
+  left: 8px;
 }
 
 #list-item-content {
-    display: flex;
-    justify-content: space-between;
+  display: flex;
+  justify-content: space-between;
 }
 
 ::ng-deep .mat-mdc-tab-labels {
-    justify-content: space-around;
+  justify-content: space-around;
 }
 
 ::ng-deep .mat-mdc-tab-labels > * {
-    width: 50%;
+  width: 50%;
 }

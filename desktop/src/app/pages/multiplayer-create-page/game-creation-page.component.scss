@@ -38,3 +38,27 @@ mat-form-field {
 .soloMode {
     margin-bottom: 16px;
 }
+
+.open-chat-button {
+  position: absolute;
+  right: 10px;
+  top: 5px;
+}
+
+.chat-sidenav {
+  display: flex;
+  max-width: 300px;
+  min-width: min-content;
+  padding: 0px;
+}
+
+mat-drawer {
+  right: 0;
+  height: 100%;
+  width: 30%;
+  padding: 10px;
+
+  ::ng-deep .mat-drawer-inner-container {
+    overflow: hidden;
+  }
+}

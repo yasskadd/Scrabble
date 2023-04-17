@@ -64,6 +64,7 @@
             (click)="drawer.toggle()"
             (click)="closeChat()"
         >
+            <mat-icon *ngIf='chatboxHandler.notifiedRooms.length !== 0'>lightbult</mat-icon>
             {{ "main_page.chat.close" | translate }}
             <mat-icon>keyboard_arrow_right</mat-icon>
         </button>
@@ -75,6 +76,7 @@
             (click)="drawer.toggle()"
             (click)="openChat()"
         >
+            <mat-icon *ngIf='chatboxHandler.notifiedRooms.length !== 0'>lightbult</mat-icon>
             <mat-icon>chat_bubble_outline</mat-icon>
             {{ "main_page.chat.open" | translate }}
         </button>

@@ -1,4 +1,4 @@
-import { Component, NgZone, OnDestroy } from '@angular/core';
+import { Component, NgZone, OnDestroy, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { GameConfigurationService } from '@app/services/game-configuration.service';
@@ -7,6 +7,7 @@ import { RoomPlayer } from '@common/interfaces/room-player';
 import { GameVisibility } from '@common/models/game-visibility';
 import { PlayerType } from '@common/models/player-type';
 import { ChatboxHandlerService } from '@services/chat/chatbox-handler.service';
+import { MatDrawer } from '@angular/material/sidenav';
 
 @Component({
     selector: 'app-waiting-opponent-page',
@@ -14,10 +15,12 @@ import { ChatboxHandlerService } from '@services/chat/chatbox-handler.service';
     styleUrls: ['./waiting-opponent-page.component.scss'],
 })
 export class WaitingOpponentPageComponent implements OnDestroy {
+    @ViewChild('drawer') drawer: MatDrawer;
     protected gameVisibility: typeof GameVisibility = GameVisibility;
     protected playerType: typeof PlayerType = PlayerType;
 
     private gameMode: string;
+
     protected chatIsOpen: boolean;
 
     constructor(
@@ -30,6 +33,22 @@ export class WaitingOpponentPageComponent implements OnDestroy {
     ) {
         this.chatIsOpen = false;
         this.gameMode = this.activatedRoute.snapshot.params.id;
+
+        this.chatboxHandler.chatWindowOpened.subscribe((value: boolean) => {
+            if (value) {
+                this.drawer?.close().then();
+            } else {
+                this.drawer?.open().then();
+            }
+        });
+    }
+
+    openChat() {
+        this.chatIsOpen = true;
+    }
+
+    closeChat() {
+        this.chatIsOpen = false;
     }
 
     getRoomPlayers(): RoomPlayer[] {

@@ -33,6 +33,10 @@ export class ThemeService {
         });
     }
 
+    async setDynamic(): Promise<void> {
+        this.isDarkTheme.next((await WebviewWindow.getByLabel('main').theme()) === 'dark');
+    }
+
     toggleDarkMode(): void {
         this.isDarkTheme.next(!this.isDarkTheme.value);
     }
