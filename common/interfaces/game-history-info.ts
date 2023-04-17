@@ -1,5 +1,8 @@
+import { PlayerType } from '@common/models/player-type';
+
 export interface PlayerGameResult {
-    name: string;
+    playerId: string;
+    playerType?: PlayerType;
     score: number;
 }
 
