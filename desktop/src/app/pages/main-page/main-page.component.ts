@@ -52,7 +52,9 @@ export class MainPageComponent {
 
         this.chatboxHandler.chatWindowOpened.subscribe((value: boolean) => {
             if (value) {
-                this.drawer.close().then();
+                this.drawer?.close().then();
+            } else {
+                this.drawer?.open().then();
             }
         });
 
