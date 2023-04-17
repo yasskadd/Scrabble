@@ -75,7 +75,7 @@ export class UserService {
     }
 
     async logout(): Promise<void> {
-        this.httpHandlerService.logout(this.user).then(async () => {
+        this.httpHandlerService.logout().then(async () => {
             this.user = undefined;
             this.tempUserData = undefined;
 
