@@ -6,6 +6,7 @@ import { UserService } from '@app/services/user.service';
 import { RoomPlayer } from '@common/interfaces/room-player';
 import { GameVisibility } from '@common/models/game-visibility';
 import { PlayerType } from '@common/models/player-type';
+import { ChatboxHandlerService } from '@services/chat/chatbox-handler.service';
 
 @Component({
     selector: 'app-waiting-opponent-page',
@@ -17,14 +18,17 @@ export class WaitingOpponentPageComponent implements OnDestroy {
     protected playerType: typeof PlayerType = PlayerType;
 
     private gameMode: string;
+    protected chatIsOpen: boolean;
 
     constructor(
         protected gameConfiguration: GameConfigurationService,
+        protected chatboxHandler: ChatboxHandlerService,
         protected userService: UserService,
         private router: Router,
         private ngZone: NgZone,
         private activatedRoute: ActivatedRoute,
     ) {
+        this.chatIsOpen = false;
         this.gameMode = this.activatedRoute.snapshot.params.id;
     }
 
