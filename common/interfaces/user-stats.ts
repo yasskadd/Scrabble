@@ -9,3 +9,8 @@ export interface UserStats {
     averageGameTime: string;
     averageGameScore: number;
 }
+
+export interface TopRanker {
+    username: string;
+    ranking: number;
+}

@@ -119,6 +119,7 @@ export class UserProfileController {
         });
 
         this.router.get('/stats', verifyToken, async (req: Request, res: Response) => {
+            this.userStatsStorageService.getTopRanking();
             const userID: string = res.locals.user.userID;
             const userStats = await this.userStatsStorageService.getUserStats(userID);
             res.status(StatusCodes.OK).json(userStats);
