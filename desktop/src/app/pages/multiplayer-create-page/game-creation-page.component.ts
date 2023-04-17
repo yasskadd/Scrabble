@@ -1,4 +1,4 @@
-import { Component, NgZone } from '@angular/core';
+import { Component, NgZone, ViewChild } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Dictionary } from '@app/interfaces/dictionary';
@@ -19,6 +19,8 @@ import { GameTimeOptions } from '@common/models/game-time-options';
 import { GameVisibility } from '@common/models/game-visibility';
 import { ClientSocketService } from '@services/communication/client-socket.service';
 import { SnackBarService } from '@services/snack-bar.service';
+import { MatDrawer } from '@angular/material/sidenav';
+import { ChatboxHandlerService } from '@services/chat/chatbox-handler.service';
 
 @Component({
     selector: 'app-multiplayer-create-page',
@@ -26,6 +28,7 @@ import { SnackBarService } from '@services/snack-bar.service';
     styleUrls: ['./game-creation-page.component.scss'],
 })
 export class GameCreationPageComponent {
+    @ViewChild('drawer') drawer: MatDrawer;
     timerList: number[];
     botName: string;
     playerName: string;
@@ -41,12 +44,14 @@ export class GameCreationPageComponent {
 
     protected isGameLocked: boolean;
     protected isGamePublic: boolean;
+    protected chatIsOpen: boolean;
 
     private readonly gameMode: GameMode;
 
     constructor(
         protected virtualPlayers: VirtualPlayersService,
         protected gameConfiguration: GameConfigurationService,
+        protected chatboxHandler: ChatboxHandlerService,
         protected timer: TimeService,
         protected userService: UserService,
         private clientSocketService: ClientSocketService,
@@ -57,6 +62,16 @@ export class GameCreationPageComponent {
         private snackBarService: SnackBarService,
         private ngZone: NgZone,
     ) {
+        this.chatIsOpen = false;
+
+        this.chatboxHandler.chatWindowOpened.subscribe((value: boolean) => {
+            if (value) {
+                this.drawer?.close().then();
+            } else {
+                this.drawer?.open().then();
+            }
+        });
+
         this.gameMode = this.activatedRoute.snapshot.params.id as GameMode;
         this.selectedFile = null;
         this.difficultyList = [];
@@ -97,6 +112,14 @@ export class GameCreationPageComponent {
 
         this.updateBotList();
         this.downloadDictionaries();
+    }
+
+    openChat() {
+        this.chatIsOpen = true;
+    }
+
+    closeChat() {
+        this.chatIsOpen = false;
     }
 
     downloadDictionaries() {

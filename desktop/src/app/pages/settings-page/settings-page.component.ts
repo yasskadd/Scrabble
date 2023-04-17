@@ -61,6 +61,12 @@ export class SettingsPageComponent implements OnInit {
         }
     }
 
+    changeDynamic(): void {
+        if (this.selectedDynamic.valueOf()) {
+            this.themeService.setDynamic();
+        }
+    }
+
     protected openAvatarSelector(): void {
         this.dialog
             .open(DialogBoxAvatarSelectorComponent, {

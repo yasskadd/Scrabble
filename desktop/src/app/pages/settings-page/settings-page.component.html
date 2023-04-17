@@ -1,9 +1,9 @@
 <div class="encapsulating-div">
     <app-header></app-header>
-    <button mat-fab-button class="return-button" mat-icon-button (click)="redirectProfile()">
+    <body class="mat-app-background">
+    <button mat-icon-button class="return-button" (click)="redirectProfile()" color='primary'>
         <mat-icon>navigate_before</mat-icon>
     </button>
-    <body class="mat-app-background">
         <mat-card class="justified">
             <h5>{{ "user_settings.profile_section_title" | translate }}</h5>
             <button
@@ -89,7 +89,7 @@
                         </div>
                         <div class="input-pair">
                             <h4>{{ "user_settings.theme_title" | translate }}</h4>
-                            <mat-slide-toggle class="theme-selector" [(ngModel)]="selectedDynamic">
+                            <mat-slide-toggle class="theme-selector" [(ngModel)]="selectedDynamic" (change)='changeDynamic()'>
                                 {{ "user_settings.modify_theme_dynamic" | translate }}
                             </mat-slide-toggle>
                             <mat-form-field appearance="outline" class="theme-selector">

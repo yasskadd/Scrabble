@@ -7,6 +7,11 @@ body {
     height: 100%;
 }
 
+.return-button {
+    transform: scale(1.01);
+    position: absolute;top: 80px;left: 8px;
+}
+
 mat-card {
     margin-inline: 20%;
     height: 94%;

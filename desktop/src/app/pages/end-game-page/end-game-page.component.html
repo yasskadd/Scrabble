@@ -3,18 +3,20 @@
 
     <body class="mat-app-background">
         <div class="result-container" [ngClass]="{ victory: isWinner, defeat: !isWinner }">
-            <h1>{{ isWinner ? "VICTORY!" : "DEFEAT" }}</h1>
-
+            <h1 *ngIf="isWinner">{{ "end-game.victory" | translate }}</h1>
+            <h1 *ngIf="!isWinner">{{ "end-game.defeat" | translate }}</h1>
             <div class="winner-info">
                 <img class="profile-picture" [src]="winnerImageURL" />
                 <div class="winner-details">
-                    <h2 class="username">{{ winnerUsername }} HAS WON</h2>
+                    <h2 class="username">{{ winnerUsername }} {{ "end-game.win" | translate }}</h2>
                     <p class="info">Score: {{ winnerScore }}</p>
                 </div>
             </div>
         </div>
         <div>
-            <button mat-raised-button color="primary" (click)="redirectHomePage()" style="display: block; margin: 0 auto">Return Home</button>
+            <button mat-raised-button color="primary" (click)="redirectHomePage()" style="display: block; margin: 0 auto">
+                {{ "end-game.home" | translate }}
+            </button>
         </div>
     </body>
 

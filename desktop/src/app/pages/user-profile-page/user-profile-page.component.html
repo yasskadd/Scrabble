@@ -1,6 +1,6 @@
 <div class="encapsulating-div mat-app-background">
     <app-header></app-header>
-    <button mat-fab-button class="return-button" mat-icon-button (click)="redirectHome()">
+    <button class="return-button" mat-icon-button (click)="redirectHome()" style='position: absolute; top: 80px; left: 8px; z-index: 2'>
         <mat-icon>navigate_before</mat-icon>
     </button>
     <mat-drawer-container>
@@ -47,13 +47,14 @@
                                 </div>
                             </mat-list>
                         </mat-tab>
-                        <mat-tab label="Connexions">
+                        <mat-tab label="{{ 'profile_settings.connections' | translate }}">
                             <mat-list>
                                 <div *ngFor="let connection of connections">
                                     <mat-list-item>
                                         <div id="list-item-content">
                                             <!-- TODO: language -->
-                                            <span>{{ connection.event }}</span>
+                                            <span *ngIf="connection.event === 'connection'">{{ "profile_settings.connection" | translate }}</span>
+                                            <span *ngIf="connection.event === 'logout'">{{ "profile_settings.logout" | translate }}</span>
                                             <span>{{ connection.date }}</span>
                                         </div>
                                     </mat-list-item>

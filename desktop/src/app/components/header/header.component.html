@@ -3,9 +3,9 @@
         <button [hidden]="true" mat-flat-button color="primary" *ngFor="let letter of getLetters('header.home')">{{ letter }}</button>
     </div>
 
-    <div *ngIf="isHomePage" id="admin" (click)="redirectAdmin()">
-        <button [hidden]="true" mat-flat-button color="accent" *ngFor="let letter of getLetters('header.admin')">{{ letter }}</button>
-    </div>
+<!--    <div  *ngIf="isHomePage" id="admin" (click)="redirectAdmin()">-->
+<!--        <button [hidden]="true" mat-flat-button color="accent" *ngFor="let letter of getLetters('header.admin')">{{ letter }}</button>-->
+<!--    </div>-->
 
     <div id="image">
         <img src="https://bit.ly/3m206ss" width="250" height="50" alt="Logo Scrabble" (click)="redirectHome()" />

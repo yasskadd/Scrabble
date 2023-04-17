@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MAX_TEXT_LENGTH } from '@app/constants/user';
+import { LanguageService } from '@app/services/language.service';
 import { HttpHandlerService } from '@services/communication/http-handler.service';
 import { SnackBarService } from '@services/snack-bar.service';
 
@@ -15,7 +16,12 @@ export class ForgotPasswordPageComponent {
     protected passwordForm: FormControl;
     protected connectionError: string;
 
-    constructor(private httpHandlerService: HttpHandlerService, private formBuilder: FormBuilder, private snackBarService: SnackBarService) {
+    constructor(
+        private httpHandlerService: HttpHandlerService,
+        private formBuilder: FormBuilder,
+        private snackBarService: SnackBarService,
+        private languageService: LanguageService,
+    ) {
         this.usernameForm = new FormControl('', [Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]);
         this.passwordForm = new FormControl('', [Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]);
         this.connectionError = '';
@@ -33,8 +39,15 @@ export class ForgotPasswordPageComponent {
 
         this.httpHandlerService.forgotPassword(this.usernameForm.value).then((response) => {
             console.log(response.body);
-            if (response.body === 'Created') this.snackBarService.openEmailInfo('Temporary password has been sent to email');
-            else this.snackBarService.openError('There is no email linked to the username you provided');
+            if (response.body === 'Created') {
+                this.languageService.getWord('forgot-password.success').subscribe((word: string) => {
+                    this.snackBarService.openEmailInfo(word);
+                });
+                return;
+            }
+            this.languageService.getWord('forgot-password.error').subscribe((word: string) => {
+                this.snackBarService.openError(word);
+            });
         });
     }
 }
