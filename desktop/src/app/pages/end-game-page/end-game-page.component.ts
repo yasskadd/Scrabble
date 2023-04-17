@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
 import { GameClientService } from '@app/services/game-client.service';
 import { UserService } from '@app/services/user.service';
@@ -17,7 +18,13 @@ export class EndGameComponent implements OnInit {
     winnerUsername: string;
     winnerScore: number;
 
-    constructor(private userService: UserService, private gameService: GameClientService, private httpService: HttpHandlerService) {}
+    constructor(
+        private userService: UserService,
+        private gameService: GameClientService,
+        private httpService: HttpHandlerService,
+        private ngZone: NgZone,
+        private router: Router,
+    ) {}
 
     ngOnInit(): void {
         // Get the game result from the route state
@@ -35,5 +42,9 @@ export class EndGameComponent implements OnInit {
         });
     }
 
-    getWinnerInfo() {}
+    protected redirectHomePage() {
+        this.ngZone.run(() => {
+            this.router.navigate(['/home']).then();
+        });
+    }
 }
