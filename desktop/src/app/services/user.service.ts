@@ -27,7 +27,7 @@ export class UserService {
     isConnected: BehaviorSubject<boolean>;
 
     private tempUserData: IUser;
-    private botImageUrl: string;
+    public botImageUrl: string;
 
     constructor(
         private httpHandlerService: HttpHandlerService,

@@ -70,3 +70,23 @@
     font-size: 16px;
     margin: 0;
 }
+
+.winner-details {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.username {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: primary;
+}
+
+.info {
+    font-size: 18px;
+    color: primary;
+    margin: 0;
+}
