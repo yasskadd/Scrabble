@@ -1,6 +1,8 @@
 <div class="encapsulating-div mat-app-background">
     <app-header></app-header>
-
+    <button mat-fab-button class="return-button" mat-icon-button (click)="redirectHome()">
+        <mat-icon>navigate_before</mat-icon>
+    </button>
     <mat-drawer-container>
         <mat-card class="user-info justified">
             <div class="justified">

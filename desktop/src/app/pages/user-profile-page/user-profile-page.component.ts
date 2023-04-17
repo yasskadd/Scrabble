@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { Component, ElementRef, NgZone, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
+import { AppRoutes } from '@app/models/app-routes';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
 import { LanguageService } from '@app/services/language.service';
 import { UserService } from '@app/services/user.service';
@@ -111,5 +112,11 @@ export class UserProfilePageComponent {
         });
 
         this.myChart.update();
+    }
+
+    protected redirectHome() {
+        this.ngZone.run(() => {
+            this.router.navigate([AppRoutes.HomePage]).then();
+        });
     }
 }

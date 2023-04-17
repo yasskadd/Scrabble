@@ -1,5 +1,8 @@
 <div class="encapsulating-div">
     <app-header></app-header>
+    <button mat-fab-button class="return-button" mat-icon-button (click)="redirectProfile()">
+        <mat-icon>navigate_before</mat-icon>
+    </button>
     <body class="mat-app-background">
         <mat-card class="justified">
             <h5>{{ "user_settings.profile_section_title" | translate }}</h5>
