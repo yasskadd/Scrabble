@@ -95,6 +95,14 @@ export class MultiplayerJoinPageComponent implements OnDestroy, AfterViewInit {
         this.clientSocketService.send(SocketEvents.UpdateGameRooms);
     }
 
+    openChat() {
+        this.chatIsOpen = true;
+    }
+
+    closeChat() {
+        this.chatIsOpen = false;
+    }
+
     protected getPlayers(room: GameRoom) {
         return room.players.filter((player: RoomPlayer) => player.type === PlayerType.User);
     }
