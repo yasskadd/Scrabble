@@ -11,7 +11,7 @@ import { HistoryEvent } from '@common/interfaces/history-event';
 import { ModifiedDictionaryInfo } from '@common/interfaces/modified-dictionary-info';
 import { Theme } from '@common/interfaces/theme';
 import { IUser } from '@common/interfaces/user';
-import { UserStats } from '@common/interfaces/user-stats';
+import { TopRanker, UserStats } from '@common/interfaces/user-stats';
 import { fs, invoke } from '@tauri-apps/api';
 import { environment } from 'src/environments/environment';
 
@@ -194,6 +194,11 @@ export class HttpHandlerService {
 
     async getProfilePicture(): Promise<{ url: string }> {
         const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/image/profile-picture` });
+        return JSON.parse(res.body);
+    }
+
+    async getRanking(): Promise<{ topRanker: TopRanker[] }> {
+        const res: HttpResponse = await invoke('httpGet', { url: `${this.baseUrl}/highScore/classique` });
         return JSON.parse(res.body);
     }
 
