@@ -1,4 +1,5 @@
 import { ScoreStorageService } from '@app/services/database/score-storage.service';
+import { UserStatsStorageService } from '@app/services/database/user-stats-storage.service';
 import { Request, Response, Router } from 'express';
 import { Service } from 'typedi';
 
@@ -6,7 +7,7 @@ import { Service } from 'typedi';
 export class HighScoreController {
     router: Router;
 
-    constructor(private scoreStorage: ScoreStorageService) {
+    constructor(private scoreStorage: ScoreStorageService, private userStatsStorage: UserStatsStorageService) {
         this.configureRouter();
     }
 
@@ -14,7 +15,7 @@ export class HighScoreController {
         this.router = Router();
 
         this.router.get('/classique', async (req: Request, res: Response) => {
-            const highScore = await this.scoreStorage.getClassicTopScores();
+            const highScore = await this.userStatsStorage.getTopRanking();
             res.json(highScore);
         });
 

@@ -1,15 +1,15 @@
-<div class="encapsulating-div">
-    <b id="winning-message" *ngIf="gameClientService.isGameFinish">
+<div class='encapsulating-div'>
+    <b id='winning-message' *ngIf='gameClientService.isGameFinish'>
         {{ gameClientService.winningMessage | translate : { playerName: gameClientService.winner } }}
     </b>
 
-    <div class="always-visible" cdkDropListGroup>
+    <div class='always-visible' cdkDropListGroup>
         <app-information-panel></app-information-panel>
         <div>
-            <app-game-board [keyboardParentSubject]="keyboardParentSubject"></app-game-board>
+            <app-game-board [keyboardParentSubject]='keyboardParentSubject'></app-game-board>
 
-            <div *ngIf="gameClientService.getLocalPlayer().player.type === playerType.Observer" class="rack-container">
-                <app-player-rack [player]="selectedPlayer" class="player-rack"></app-player-rack>
+            <div *ngIf='gameClientService.getLocalPlayer().player.type === playerType.Observer' class='rack-container'>
+                <app-player-rack [player]='selectedPlayer' class='player-rack'></app-player-rack>
                 <!--                    <div class='player-selector'>-->
                 <!--                        <div *ngFor='let player of gameClientService.players; index as i'>-->
                 <!--                            <img-->
@@ -34,11 +34,11 @@
                 <!--                    </div>-->
             </div>
 
-            <div *ngIf="gameClientService.getLocalPlayer().player.type === playerType.User" class="rack-container">
+            <div *ngIf='gameClientService.getLocalPlayer().player.type === playerType.User' class='rack-container'>
                 <app-player-rack
-                    [keyboardParentSubject]="keyboardParentSubject"
-                    [player]="gameClientService.getLocalPlayer()"
-                    class="player-rack"
+                    [keyboardParentSubject]='keyboardParentSubject'
+                    [player]='gameClientService.getLocalPlayer()'
+                    class='player-rack'
                 ></app-player-rack>
             </div>
         </div>
@@ -53,6 +53,11 @@
         <!--            <mat-icon>chat_bubble_outline</mat-icon>-->
         <!--            {{ "main_page.chat.open" | translate }}-->
         <!--        </button>-->
-        <app-generic-chat (mouseenter)='setFocus(false)' (mouseleave)='setFocus(true)' class="chat"></app-generic-chat>
+        <mat-card style='height: 80%; width: 260px; align-self: center; display: flex'>
+            <mat-card-content style='padding: 0px; height: 100%'>
+                <app-generic-chat (mouseenter)='setFocus(false)' (mouseleave)='setFocus(true)'
+                                  class='chat'></app-generic-chat>
+            </mat-card-content>
+        </mat-card>
     </div>
 </div>

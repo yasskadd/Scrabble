@@ -1,125 +1,113 @@
 mat-drawer-container {
-    height: inherit;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  height: inherit;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 mat-drawer {
-    right: 0;
-    height: 100%;
-    width: 30%;
-    padding: 10px;
+  right: 0;
+  height: 100%;
+  width: 30%;
+  padding: 10px;
+
+  ::ng-deep .mat-drawer-inner-container {
+    overflow: hidden;
+  }
 }
 
 .open-chat-button {
-    position: absolute;
-    right: 10px;
-    top: 5px;
+  position: absolute;
+  right: 10px;
+  top: 5px;
 }
 
 .chat-sidenav {
-    display: flex;
-    max-width: 50%;
-    min-width: min-content;
-
-    ::ng-deep + div {
-        overflow-x: hidden !important;
-        width: -webkit-fill-available;
-    }
-
-    app-generic-chat {
-        display: grid;
-        height: 100%;
-        grid-template-rows: 64px 1fr 64px;
-        align-content: space-between;
-
-        ::ng-deep label {
-            overflow: unset;
-            right: auto;
-        }
-    }
+  display: flex;
+  max-width: 50%;
+  min-width: min-content;
+  padding: 0px;
 }
 
 .always-visible-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 
 .language-selector {
-    position: absolute;
-    right: 5px;
-    top: 5px;
-    padding: 8px;
-    width: 130px;
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  padding: 8px;
+  width: 130px;
 }
 
 .mat-raised-button:hover {
-    transform: scale(1.01);
+  transform: scale(1.01);
 }
 
 .button {
-    margin: 7px;
-    width: 95%;
-    padding: 5px;
-    font-size: 23px;
-    font-weight: 500;
-    font-family: system-ui;
-    text-align: center;
+  margin: 7px;
+  width: 95%;
+  padding: 5px;
+  font-size: 23px;
+  font-weight: 500;
+  font-family: system-ui;
+  text-align: center;
 }
 
 .buttons-columns {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    column-gap: 8px;
-    padding-top: 16px;
-    justify-self: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 8px;
+  padding-top: 16px;
+  justify-self: center;
 
-    button {
-        justify-self: center;
-    }
+  button {
+    justify-self: center;
+  }
 }
 
 .text-input {
-    padding: 16px;
+  padding: 16px;
 }
 
 #scores {
-    display: flex;
-    flex-direction: row;
-    cursor: pointer;
-    margin-bottom: 30px;
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
+  margin-bottom: 30px;
 }
 
 #scores > .mdc-button {
-    font-weight: 800;
-    font-family: system-ui;
-    display: flex;
-    border-radius: 3px;
-    margin: 2px;
-    min-width: 40px;
-    min-height: 40px;
-    max-width: 40px;
-    max-height: 40px;
-    padding-inline: 0px;
+  font-weight: 800;
+  font-family: system-ui;
+  display: flex;
+  border-radius: 3px;
+  margin: 2px;
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 40px;
+  max-height: 40px;
+  padding-inline: 0px;
 }
 
 ::ng-deep .mat-fab {
-    height: 40px !important;
-    width: 40px !important;
+  height: 40px !important;
+  width: 40px !important;
 }
 
 ::ng-deep .mat-button-wrapper {
-    padding: 0px !important;
+  padding: 0px !important;
 }
 
 ::ng-deep .mat-drawer-content {
-    width: 100%;
+  width: 100%;
 }
 
 ::ng-deep .toolMainPage {
-    font-size: 14px;
+  font-size: 14px;
 }

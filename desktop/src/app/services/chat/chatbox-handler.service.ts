@@ -94,12 +94,14 @@ export class ChatboxHandlerService {
         this.clientSocket.connected.subscribe((connected: boolean) => {
             if (connected) {
                 this.configureBaseSocketFeatures();
+            } else {
+                this.unsubscribe();
             }
         });
 
         this.userService.isConnected.subscribe((connected: boolean) => {
             if (connected) {
-                console.log(this.userService.user.chatRooms);
+                this.resetConfig();
                 this.config(this.userService.user.chatRooms as UserChatRoomWithState[]);
                 this.updateWindowStatus();
             } else {
@@ -117,11 +119,17 @@ export class ChatboxHandlerService {
 
         if (tauri.window.getCurrent().label === 'chat') {
             this.configureBaseSocketFeatures();
+            // this.resetConfig();
             this.listenRustEvents();
         }
 
         tauri.event
             .listen(TauriEvent.WINDOW_CLOSE_REQUESTED, (event: any) => {
+                if (tauri.window.getCurrent().label === 'chat') {
+                    this.resetConfig();
+                    this.unsubscribe();
+                    tauri.window.getCurrent().close().then();
+                }
                 this.ngZone.run(() => {
                     if (event.windowLabel === 'chat') {
                         this.chatWindowOpened.next(false);
@@ -137,7 +145,6 @@ export class ChatboxHandlerService {
 
     updateWindowStatus(): void {
         this.chatWindowOpened.next(getAll().filter((window: WebviewWindow) => window.label === 'chat').length !== 0);
-        this.snackBarService.openInfo('' + this.chatWindowOpened.value);
     }
 
     async invokeChatWindow(url: string): Promise<void> {
@@ -215,6 +222,26 @@ export class ChatboxHandlerService {
         });
     }
 
+    unsubscribe(): void {
+        this.clientSocket.off(SocketEvents.GetAllChatRooms);
+
+        this.clientSocket.off(SocketEvents.SendMessage);
+
+        this.clientSocket.off(SocketEvents.JoinChatRoom);
+
+        this.clientSocket.off(SocketEvents.JoinChatRoomSession);
+
+        this.clientSocket.off(SocketEvents.LeaveChatRoomSession);
+
+        this.clientSocket.off(SocketEvents.CreateChatRoom);
+
+        this.clientSocket.off(SocketEvents.CreateChatRoomError);
+
+        this.clientSocket.off(SocketEvents.LeaveChatRoom);
+
+        this.clientSocket.off(SocketEvents.DeleteChatRoom);
+    }
+
     listenRustEvents(): void {
         // tauri.window
         //     .getCurrent()
@@ -226,10 +253,8 @@ export class ChatboxHandlerService {
             .getCurrent()
             .listen(RustEvent.UserData, (payload) => {
                 this.ngZone.run(() => {
-                    console.log(payload);
                     this.userService.user = JSON.parse(payload.payload as unknown as string);
                     this.userService.isConnected.next(true);
-                    console.log(this.userService.user);
                 });
             })
             .then();
@@ -304,10 +329,12 @@ export class ChatboxHandlerService {
 
     private updateJoinedRooms() {
         console.log('update');
+        console.log(this.joinedChatRooms);
         this._joinedRoomsSubject.next(this.joinedChatRooms);
     }
 
     private updateAllRooms() {
+        console.log(this.availableRooms());
         this._allRoomsSubject.next(this.availableRooms());
     }
 
