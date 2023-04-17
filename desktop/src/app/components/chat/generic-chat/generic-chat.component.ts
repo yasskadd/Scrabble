@@ -10,6 +10,7 @@ import { SnackBarService } from '@app/services/snack-bar.service';
 import { UserService } from '@app/services/user.service';
 import * as tauri from '@tauri-apps/api';
 import { WebviewWindow } from '@tauri-apps/api/window';
+import { Observable } from 'rxjs';
 
 @Component({
     selector: 'app-generic-chat',
@@ -63,6 +64,10 @@ export class GenericChatComponent implements AfterViewChecked, AfterContentInit 
 
     get username() {
         return this.userService.user.username;
+    }
+
+    get allRooms(): Observable<any> {
+        return this.chatboxHandler.allRoomsObs;
     }
 
     @HostListener('click')

@@ -1,5 +1,6 @@
 .encapsulating-div {
     width: inherit;
+    height: 90%;
 }
 
 mat-drawer-container {
@@ -40,19 +41,19 @@ mat-drawer {
     }
 }
 
-app-generic-chat {
-    display: grid;
-    right: 0px;
-    flex-direction: column;
-    justify-content: space-between;
-    width: 250px;
-    grid-template-rows: 64px 1fr 64px;
-
-    ::ng-deep label {
-        overflow: unset;
-        right: auto;
-    }
-}
+//app-generic-chat {
+//    display: grid;
+//    right: 0px;
+//    flex-direction: column;
+//    justify-content: space-between;
+//    width: 250px;
+//    grid-template-rows: 64px 1fr 64px;
+//
+//    ::ng-deep label {
+//        overflow: unset;
+//        right: auto;
+//    }
+//}
 
 #winning-message {
     position: absolute;

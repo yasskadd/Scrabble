@@ -1,7 +1,7 @@
 /* eslint-disable quote-props */
 import { LOSS_SCORE, MAX_SCORE, MIN_SCORE, WIN_SCORE } from '@app/constants/score';
 import { GameHistoryInfo } from '@common/interfaces/game-history-info';
-import { UserStats } from '@common/interfaces/user-stats';
+import { TopRanker, UserStats } from '@common/interfaces/user-stats';
 import { Document, ObjectId } from 'mongodb';
 import { Service } from 'typedi';
 import { DatabaseService } from './database.service';
@@ -16,6 +16,23 @@ export class UserStatsStorageService {
     async getUserStats(id: string): Promise<UserStats> {
         const userStats = (await this.database.usersStats.fetchDocuments({ userIdRef: new ObjectId(id) }))[0] as Document;
         return userStats as UserStats;
+    }
+
+    async getTopRanking(): Promise<TopRanker[]> {
+        const NUMBER_OF_TOP = 5;
+        const topRanking = await this.database.usersStats.collection
+            .find({}, { projection: { userIdRef: 1, ranking: 1 } })
+            .sort({ ranking: -1 })
+            .limit(NUMBER_OF_TOP)
+            .toArray();
+        const parsedInfo = [] as TopRanker[];
+        for (const info of topRanking) {
+            const user = await this.database.users.collection.findOne({ _id: new ObjectId(info.userIdRef) });
+            const topRanker = { username: user?.username === undefined ? '???' : user?.username, ranking: info.ranking };
+            parsedInfo.push(topRanker);
+        }
+
+        return parsedInfo.reverse();
     }
 
     async updatePlayerStats(gameHistoryInfo: GameHistoryInfo): Promise<void> {

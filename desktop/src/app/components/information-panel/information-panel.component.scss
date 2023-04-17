@@ -1,8 +1,11 @@
 @import url('https://fonts.googleapis.com/css?family=Proxima+Nova');
 
 mat-card {
-    height: 100%;
     width: 100%;
+    padding: 32px;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
 }
 
 .justified {
@@ -190,12 +193,16 @@ td {
     width: 100%;
 }
 
+.message-container {
+
+}
+
 .panel-top {
-    position: absolute;
     top: 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-bottom: 32px;
 }
 
 .timer {

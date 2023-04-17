@@ -6,7 +6,7 @@ import { LanguageService } from '@services/language.service';
 import { SnackBarService } from '@services/snack-bar.service';
 import { TauriStateService } from '@services/tauri-state.service';
 import * as tauri from '@tauri-apps/api';
-import { Event, TauriEvent } from '@tauri-apps/api/event';
+import { Event, listen, TauriEvent, UnlistenFn } from '@tauri-apps/api/event';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
@@ -22,6 +22,7 @@ export class ClientSocketService {
     cancelConnection: Subject<void>;
     reconnectionDialog: MatDialogRef<DialogBoxReconnectionComponent>;
     private socket: Socket;
+    private subscriptions: Map<string, Promise<any>>;
 
     constructor(
         private snackBarService: SnackBarService,
@@ -30,6 +31,7 @@ export class ClientSocketService {
         private dialog: MatDialog,
         private ngZone: NgZone,
     ) {
+        this.subscriptions = new Map();
         this.appUpdate = new Subject();
         this.connected = new BehaviorSubject<boolean>(false);
         this.reconnect = new Subject();
@@ -43,7 +45,6 @@ export class ClientSocketService {
                     });
                 } else if (event.windowLabel === 'chat') {
                     console.log('chat window closed');
-
                 }
             })
             .then();
@@ -126,17 +127,19 @@ export class ClientSocketService {
     }
 
     on<T>(eventName: string, action: (data: T) => void): void {
-        if (this.tauriStateService.useTauri) {
-            tauri.event
-                .listen(eventName, (event: Event<unknown>) => {
-                    this.ngZone.run(() => {
-                        action(JSON.parse(event.payload as string));
-                    });
-                })
-                .then();
-        } else {
-            this.socket.on(eventName, action);
-        }
+        const unlisten = listen<T>(eventName, (event: Event<unknown>) => {
+            this.ngZone.run(() => {
+                action(JSON.parse(event.payload as string));
+            });
+        });
+
+        this.subscriptions.set(eventName, unlisten);
+    }
+
+    off(eventName: string): void {
+        this.subscriptions.get(eventName).then((unlisten: UnlistenFn) => {
+            unlisten();
+        });
     }
 
     send<T>(event: string, data?: T): void {

@@ -1,66 +1,53 @@
-<div class='encapsulating-div'>
+<div class="encapsulating-div">
     <app-header></app-header>
 
     <mat-drawer-container>
-        <div class='always-visible-content'>
-            <mat-card class='justified'>
-                <mat-card-content class='justified'>
+        <div class="always-visible-content">
+            <mat-card class="justified">
+                <mat-card-content class="justified">
                     <div
-                        id='scores'
-                        (click)='openHighScoreDialog()'
+                        id="scores"
+                        (click)="openHighScoreDialog()"
                         matTooltip="{{ 'main_page.tooltip.scores' | translate }}"
-                        matTooltipPosition='right'
-                        matTooltipClass='toolMainPage'
+                        matTooltipPosition="right"
+                        matTooltipClass="toolMainPage"
                     >
-                        <button mat-flat-button color='accent'
-                                *ngFor="let letter of ['S', 'C', 'O', 'R', 'E', 'S']">{{ letter }}</button>
-                        <button mat-flat-button color='accent'>
-                            <mat-icon class='scores-icon justified'>emoji_events</mat-icon>
+                        <button mat-flat-button color="accent" *ngFor="let letter of ['S', 'C', 'O', 'R', 'E', 'S']">{{ letter }}</button>
+                        <button mat-flat-button color="accent">
+                            <mat-icon class="scores-icon justified">emoji_events</mat-icon>
                         </button>
                     </div>
-                    <button
-                        id='multiplayer-create'
-                        class='button multiplayer'
-                        mat-raised-button
-                        color='primary'
-                        (click)='redirectGameCreationPage()'
-                    >
+                    <button id="multiplayer-create" class="button multiplayer" mat-raised-button color="primary" (click)="redirectGameCreationPage()">
                         {{ "action.create" | translate }}
-                        <mat-icon class='button-icon'>create</mat-icon>
+                        <mat-icon class="button-icon">create</mat-icon>
                     </button>
 
-                    <button
-                        id='multiplayer-join'
-                        class='button multiplayer'
-                        mat-raised-button
-                        color='primary'
-                        (click)='navigateJoinPage()'
-                    >
+                    <button id="multiplayer-join" class="button multiplayer" mat-raised-button color="primary" (click)="navigateJoinPage()">
                         {{ "action.join" | translate }}
-                        <mat-icon class='button-icon'>leak_add</mat-icon>
+                        <mat-icon class="button-icon">leak_add</mat-icon>
                     </button>
                     <button
-                        id='classique'
+                        id="classique"
                         mat-raised-button
-                        color='primary'
-                        class='button game'
+                        color="primary"
+                        class="button game"
                         (click)="openGameTypeDialog('classique')"
                         matTooltip="{{ 'main_page.tooltip.play' | translate }}"
-                        matTooltipPosition='right'
-                        matTooltipClass='toolMainPage'
-                        [disabled]='!userService.isConnected.getValue()'
+                        matTooltipPosition="right"
+                        matTooltipClass="toolMainPage"
+                        [disabled]="!userService.isConnected.getValue()"
                         hidden
                     >
                         {{ "main_page.play" | translate }}
                     </button>
                     <button
-                        id='LOG3900'
+                        id="LOG3900"
                         mat-raised-button
-                        color='primary'
-                        class='button game'
+                        color="primary"
+                        class="button game"
                         (click)="openGameTypeDialog('LOG2990')"
-                        matTooltipPosition='right'
-                        matTooltipClass='toolMainPage'
+                        matTooltipPosition="right"
+                        matTooltipClass="toolMainPage"
                         hidden
                     >
                         Scrabble LOG2990
@@ -69,19 +56,30 @@
             </mat-card>
         </div>
 
-
-        <button *ngIf='chatIsOpen && !chatboxHandler.chatWindowOpened.getValue()' class='open-chat-button' mat-button color='primary' (click)='drawer.toggle()'
-                (click)='closeChat()'>
+        <button
+            *ngIf="chatIsOpen && !chatboxHandler.chatWindowOpened.getValue()"
+            class="open-chat-button"
+            mat-button
+            color="primary"
+            (click)="drawer.toggle()"
+            (click)="closeChat()"
+        >
             {{ "main_page.chat.close" | translate }}
             <mat-icon>keyboard_arrow_right</mat-icon>
         </button>
-        <button *ngIf='!chatIsOpen && !chatboxHandler.chatWindowOpened.getValue()' class='open-chat-button' mat-button color='primary' (click)='drawer.toggle()'
-                (click)='openChat()'>
+        <button
+            *ngIf="!chatIsOpen && !chatboxHandler.chatWindowOpened.getValue()"
+            class="open-chat-button"
+            mat-button
+            color="primary"
+            (click)="drawer.toggle()"
+            (click)="openChat()"
+        >
             <mat-icon>chat_bubble_outline</mat-icon>
             {{ "main_page.chat.open" | translate }}
         </button>
 
-        <mat-drawer #drawer class='chat-sidenav' mode='side' position='end'>
+        <mat-drawer #drawer class="chat-sidenav" mode="side" position="end">
             <!-- <div *ngIf="!loggedIn">{{ "chat.disconnected" | translate }}</div> -->
             <app-generic-chat></app-generic-chat>
         </mat-drawer>

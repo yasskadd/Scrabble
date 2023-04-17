@@ -131,66 +131,309 @@
                 <input matInput type="text" placeholder="Search" [formControl]="searchAllForm" />
             </mat-form-field>
             <mat-icon class="clear-icon" (click)="resetSearchAllInput()">clear</mat-icon>
-        </div>
-    </mat-card>
+            <div class="container">
+                <div id="tabs-container">
+                    <button
+                        class="tab"
+                        mat-button
+                        [ngClass]="[(chatboxHandler.activeTabObs | async) === 'joinedChats' ? 'activeTab' : '']"
+                        [ngStyle]="{ 'background-color': (chatboxHandler.activeTabObs | async) === 'joinedChats' ? 'primary' : '' }"
+                        (click)="selectTab('joinedChats')"
+                        *ngIf="(chatboxHandler.chatSessionObs | async) === undefined"
+                    >
+                        {{ "chat.joined_chats" | translate }}
+                    </button>
+                    <button
+                        class="tab"
+                        mat-button
+                        [ngClass]="[(chatboxHandler.activeTabObs | async) === 'allChats' ? 'activeTab' : '']"
+                        [ngStyle]="{ 'background-color': (chatboxHandler.activeTabObs | async) === 'allChats' ? 'primary' : '' }"
+                        (click)="selectTab('allChats')"
+                        *ngIf="(chatboxHandler.chatSessionObs | async) === undefined"
+                    >
+                        {{ "chat.available_chats" | translate }}
+                    </button>
+                    <button
+                        mat-mini-fab
+                        color="primary"
+                        matTooltip="Ouvrir dans une fenêtre"
+                        *ngIf="(chatboxHandler.chatSessionObs | async) === undefined"
+                        (click)="toggleWindow()"
+                    >
+                        <mat-icon>open_in_new</mat-icon>
+                    </button>
+                    <!-- <mat-tab-group *ngIf="chatSession === undefined">
+            <mat-tab label="First">
+                <mat-card *ngFor="let room of chatboxHandler.joinedRoomsObs | async">
+                    <div class="chat-rooms">
+                        <div>{{ room }}</div>
+                        <button class="join" mat-button mat-stroked-button color="primary" (click)="joinChatSession(room)">
+                            {{ "chat.join" | translate }}
+                        </button>
+                    </div>
+                </mat-card>
+            </mat-tab>
+            <mat-tab label="Second">
+                <mat-card *ngFor="let room of chatboxHandler.allRoomsObs | async">
+                    <div class="chat-rooms">
+                        <div>{{ room.name }}</div>
+                        <button class="join" mat-button mat-stroked-button color="primary" (click)="joinChat(room.name)">
+                            {{ "chat.join" | translate }}
+                        </button>
+                    </div>
+                </mat-card>
+            </mat-tab>
+        </mat-tab-group> -->
+                    <mat-toolbar class="chat-room-session-header" mat-elevation="8" *ngIf="(chatboxHandler.chatSessionObs | async) !== undefined">
+                        <!--TODO : Language-->
+                        <div class="quit-buttons">
+                            <button mat-mini-fab (click)="closeChat()" matTooltip="Sortir">
+                                <mat-icon>keyboard_backspace</mat-icon>
+                            </button>
+                            <button
+                                *ngIf="(chatboxHandler.chatSessionObs | async) !== 'main'"
+                                mat-mini-fab
+                                class="leave-room"
+                                color="accent"
+                                (click)="leaveRoom()"
+                                matTooltip="Quitter"
+                            >
+                                <mat-icon> logout </mat-icon>
+                            </button>
+                        </div>
+                        <div style="text-overflow: ellipsis">{{ chatSession }}</div>
+                        <!--TODO : Language-->
+                        <!-- TODO : Language -->
+                        <button mat-mini-fab color="primary" matTooltip="Ouvrir dans une fenêtre" (click)="toggleWindow()">
+                            <mat-icon> open_in_new</mat-icon>
+                        </button>
+                        <button
+                            *ngIf="checkDeleteButton(chatboxHandler.chatSessionObs | async)"
+                            mat-button
+                            mat-raised-button
+                            class="leave-room"
+                            color="accent"
+                            (click)="leaveRoom()"
+                        >
+                            {{ "chat.delete" | translate }}
+                        </button>
+                    </mat-toolbar>
+                </div>
+                <!-- TABS -->
 
-    <ng-container *ngFor="let room of chatboxHandler.allRoomsObs | async">
-        <mat-card *ngIf="onSearchAll(room.name)">
-            <div class="chat-rooms">
-                <div>{{ room.name }}</div>
-                <button class="join" mat-button mat-stroked-button color="primary" (click)="joinChat(room.name)">
-                    {{ "chat.join" | translate }}
-                </button>
+                <div
+                    class="chat-rooms-container"
+                    *ngIf="(chatboxHandler.activeTabObs | async) === 'joinedChats' && (chatboxHandler.chatSessionObs | async) === undefined"
+                >
+                    <mat-card class="search-control">
+                        <mat-form-field appearance="outline">
+                            <mat-icon matSuffix class="search-icon">search</mat-icon>
+                            <input matInput type="text" placeholder="Search" [formControl]="searchForm" />
+                            <mat-icon matSuffix class="clear-icon" (click)="resetSearchInput()">clear</mat-icon>
+                        </mat-form-field>
+                        <button
+                            mat-fab
+                            class="createRoom"
+                            color="primary"
+                            (click)="openCreateChatDialog()"
+                            matTooltip="{{ 'chat.create_room.create' | translate }}"
+                        >
+                            <mat-icon>add</mat-icon>
+                        </button>
+                        <!--                <mat-icon class='clear-icon' (click)='resetSearchInput()'>clear</mat-icon>-->
+                    </mat-card>
+
+                    <div>
+                        <ng-container *ngFor="let room of chatboxHandler.joinedRoomsObs | async">
+                            <mat-card *ngIf="onSearch(room)" background-color="primary">
+                                <div class="chat-rooms">
+                                    <div>{{ room }}</div>
+                                    <button class="join" mat-button mat-stroked-button color="primary" (click)="joinChatSession(room)">
+                                        <div
+                                            [matBadge]="(chatboxHandler.notifsObs | async).includes(room) ? '&#8288;' : null"
+                                            matBadgeSize="small"
+                                            class="demo-section"
+                                        >
+                                            {{ "chat.join" | translate }}
+                                        </div>
+                                    </button>
+                                </div>
+                            </mat-card>
+                        </ng-container>
+                    </div>
+                </div>
+                <div
+                    class="chat-rooms-container"
+                    *ngIf="(chatboxHandler.activeTabObs | async) === 'allChats' && (chatboxHandler.chatSessionObs | async) === undefined"
+                >
+                    <mat-card class="search-control" style="grid-template-columns: 1fr">
+                        <mat-form-field appearance="outline">
+                            <mat-icon matSuffix class="search-icon">search</mat-icon>
+                            <input matInput type="text" placeholder="Search" [formControl]="searchAllForm" />
+                            <mat-icon matSuffix class="clear-icon" (click)="resetSearchAllInput()">clear</mat-icon>
+                        </mat-form-field>
+                    </mat-card>
+
+                    <div>
+                        <ng-container *ngFor="let room of allRooms | async">
+                            <mat-card *ngIf="onSearchAll(room.name)">
+                                <div class="chat-rooms">
+                                    <div>{{ room.name }}</div>
+                                    <button class="join" mat-button mat-stroked-button color="primary" (click)="joinChat(room.name)">
+                                        {{ "chat.join" | translate }}
+                                    </button>
+                                </div>
+                            </mat-card>
+                        </ng-container>
+                    </div>
+                </div>
+
+                <<<<<<< HEAD
+                <ng-container *ngFor="let room of chatboxHandler.allRoomsObs | async">
+                    <mat-card *ngIf="onSearchAll(room.name)">
+                        <div class="chat-rooms">
+                            <div>{{ room.name }}</div>
+                            <button class="join" mat-button mat-stroked-button color="primary" (click)="joinChat(room.name)">
+                                {{ "chat.join" | translate }}
+                                =======
+                                <!-- CHAT SESSION -->
+                                <div #container class="message-container" *ngIf="(chatboxHandler.chatSessionObs | async) !== undefined">
+                                    <mat-card *ngFor="let message of chatboxHandler.messagesObs | async">
+                                        <div class="chat-metadata me" *ngIf="chatboxHandler.userService.user._id === message.userId">
+                                            <p>{{ message.date }}</p>
+                                            <strong *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) !== undefined">
+                                                {{ (chatboxHandler.userInfoObs | async).get(message.userId).username }}
+                                            </strong>
+                                            <strong *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) === undefined">...</strong>
+                                            <img
+                                                *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) !== undefined"
+                                                [src]="(chatboxHandler.userInfoObs | async).get(message.userId).imageUrl"
+                                                class="avatar"
+                                            />
+                                            <button
+                                                class="person"
+                                                mat-fab
+                                                color="primary"
+                                                *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) === undefined"
+                                            >
+                                                <mat-icon>person</mat-icon>
+                                                >>>>>>> 278fdf8056a8dad2dfff23cdef2e3c1ca6b33522
+                                            </button>
+                                        </div>
+                                        <div class="chat-metadata other" *ngIf="chatboxHandler.userService.user._id !== message.userId">
+                                            <img
+                                                *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) !== undefined"
+                                                [src]="(chatboxHandler.userInfoObs | async).get(message.userId).imageUrl"
+                                                class="avatar"
+                                            />
+                                            <button
+                                                class="person"
+                                                mat-fab
+                                                color="primary"
+                                                *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) === undefined"
+                                            >
+                                                <mat-icon>person</mat-icon>
+                                            </button>
+
+                                            <strong *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) !== undefined">
+                                                {{ (chatboxHandler.userInfoObs | async).get(message.userId).username }}
+                                            </strong>
+                                            <strong *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) === undefined">...</strong>
+                                            <p>{{ message.date }}</p>
+                                        </div>
+                                        <div class="message">{{ message.message }}</div>
+                                    </mat-card>
+                                </div>
+
+                                <<<<<<< HEAD
+                                <!-- CHAT SESSION -->
+                                <div #container class="message-container" *ngIf="(chatboxHandler.chatSessionObs | async) !== undefined">
+                                    <mat-card *ngFor="let message of chatboxHandler.messagesObs | async">
+                                        <div class="chat-metadata me" *ngIf="chatboxHandler.userService.user._id === message.userId">
+                                            <p>{{ message.date }}</p>
+                                            <strong *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) !== undefined">
+                                                {{ (chatboxHandler.userInfoObs | async).get(message.userId).username }}
+                                            </strong>
+                                            <strong *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) === undefined">...</strong>
+                                            <img
+                                                *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) !== undefined"
+                                                [src]="(chatboxHandler.userInfoObs | async).get(message.userId).imageUrl"
+                                                class="avatar"
+                                            />
+                                            <button
+                                                class="person"
+                                                mat-fab
+                                                color="primary"
+                                                *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) === undefined"
+                                            >
+                                                <mat-icon>person</mat-icon>
+                                            </button>
+                                        </div>
+                                        <div class="chat-metadata other" *ngIf="chatboxHandler.userService.user._id !== message.userId">
+                                            <img
+                                                *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) !== undefined"
+                                                [src]="(chatboxHandler.userInfoObs | async).get(message.userId).imageUrl"
+                                                class="avatar"
+                                            />
+                                            <button
+                                                class="person"
+                                                mat-fab
+                                                color="primary"
+                                                *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) === undefined"
+                                            >
+                                                <mat-icon>person</mat-icon>
+                                            </button>
+
+                                            <strong *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) !== undefined">
+                                                {{ (chatboxHandler.userInfoObs | async).get(message.userId).username }}
+                                            </strong>
+                                            <strong *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) === undefined">...</strong>
+                                            <p>{{ message.date }}</p>
+                                        </div>
+                                        <div class="message">{{ message.message }}</div>
+                                    </mat-card>
+                                </div>
+
+                                <div class="chat-input" *ngIf="(chatboxHandler.chatSessionObs | async) !== undefined">
+                                    <mat-form-field appearance="outline" (keydown.enter)="submit()" (keydown)="write($event)" class="user-input">
+                                        <mat-label>{{ "chat.message_box" | translate }}</mat-label>
+                                        <input
+                                            #chatbox
+                                            matInput
+                                            maxlength="512"
+                                            type="text"
+                                            [formControl]="inputForm"
+                                            placeholder="{{ 'chat.input_example' | translate }}"
+                                        />
+                                        <button mat-icon-button matSuffix color="primary" (click)="submit()">
+                                            <mat-icon> send</mat-icon>
+                                        </button>
+                                    </mat-form-field>
+                                    =======
+                                    <div class="chat-input" *ngIf="(chatboxHandler.chatSessionObs | async) !== undefined">
+                                        <mat-form-field appearance="outline" (keydown.enter)="submit()" (keydown)="write($event)" class="user-input">
+                                            <mat-label>{{ "chat.message_box" | translate }}</mat-label>
+                                            <input
+                                                #chatbox
+                                                matInput
+                                                maxlength="512"
+                                                type="text"
+                                                [formControl]="inputForm"
+                                                placeholder="{{ 'chat.input_example' | translate }}"
+                                            />
+                                            <button mat-icon-button matSuffix color="primary" (click)="submit()">
+                                                <mat-icon> send</mat-icon>
+                                            </button>
+                                        </mat-form-field>
+                                    </div>
+                                    >>>>>>> 278fdf8056a8dad2dfff23cdef2e3c1ca6b33522
+                                </div>
+                                <!-- CHAT SESSION -->
+                            </button>
+                        </div></mat-card
+                    ></ng-container
+                >
             </div>
-        </mat-card>
-    </ng-container>
+        </div></mat-card
+    >
 </div>
-
-<!-- CHAT SESSION -->
-<div #container class="message-container" *ngIf="(chatboxHandler.chatSessionObs | async) !== undefined">
-    <mat-card *ngFor="let message of chatboxHandler.messagesObs | async">
-        <div class="chat-metadata me" *ngIf="chatboxHandler.userService.user._id === message.userId">
-            <p>{{ message.date }}</p>
-            <strong *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) !== undefined">
-                {{ (chatboxHandler.userInfoObs | async).get(message.userId).username }}
-            </strong>
-            <strong *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) === undefined">...</strong>
-            <img
-                *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) !== undefined"
-                [src]="(chatboxHandler.userInfoObs | async).get(message.userId).imageUrl"
-                class="avatar"
-            />
-            <button class="person" mat-fab color="primary" *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) === undefined">
-                <mat-icon>person</mat-icon>
-            </button>
-        </div>
-        <div class="chat-metadata other" *ngIf="chatboxHandler.userService.user._id !== message.userId">
-            <img
-                *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) !== undefined"
-                [src]="(chatboxHandler.userInfoObs | async).get(message.userId).imageUrl"
-                class="avatar"
-            />
-            <button class="person" mat-fab color="primary" *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) === undefined">
-                <mat-icon>person</mat-icon>
-            </button>
-
-            <strong *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) !== undefined">
-                {{ (chatboxHandler.userInfoObs | async).get(message.userId).username }}
-            </strong>
-            <strong *ngIf="(chatboxHandler.userInfoObs | async).get(message.userId) === undefined">...</strong>
-            <p>{{ message.date }}</p>
-        </div>
-        <div class="message">{{ message.message }}</div>
-    </mat-card>
-</div>
-
-<div class="chat-input" *ngIf="(chatboxHandler.chatSessionObs | async) !== undefined">
-    <mat-form-field appearance="outline" (keydown.enter)="submit()" (keydown)="write($event)" class="user-input">
-        <mat-label>{{ "chat.message_box" | translate }}</mat-label>
-        <input #chatbox matInput maxlength="512" type="text" [formControl]="inputForm" placeholder="{{ 'chat.input_example' | translate }}" />
-        <button mat-icon-button matSuffix color="primary" (click)="submit()">
-            <mat-icon> send</mat-icon>
-        </button>
-    </mat-form-field>
-</div>
-<!-- CHAT SESSION -->
