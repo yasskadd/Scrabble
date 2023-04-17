@@ -1,127 +1,137 @@
 mat-card {
-    padding: 3% 2%;
-    margin: 12px 0px;
-    font-family: sans-serif;
-    height: fit-content;
+  padding: 8px 8px;
+  margin: 12px 12px;
+  font-family: sans-serif;
+  height: fit-content;
 }
 
 mat-form-field {
-    //height: 10%;
+  //height: 10%;
 }
 
 mat-tab-group {
-    width: 100%;
+  width: 100%;
 }
 
 #tabs-container {
-    display: flex;
-    justify-content: space-evenly;
-    overflow: hidden;
-    //position: absolute;
-    //top: 0px;
-    //left: 0px;
-    //right: 0px;
-    height: 64px;
+  display: flex;
+  justify-content: space-evenly;
+  overflow: hidden;
+  //position: absolute;
+  //top: 0px;
+  //left: 0px;
+  //right: 0px;
+  height: 64px;
+  align-items: center;
 }
 
-.createRoom {
-    width: 100%;
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  grid-template-rows: 64px 1fr 64px;
+  align-content: space-between;
+}
+
+.room-container {
+  overflow-y: scroll;
+  //height: -webkit-fill-available;
 }
 
 .search-control {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    padding: auto;
-    justify-content: space-around;
+  display: grid;
+  grid-template-columns: 1fr min-content;
+  grid-gap: 32px;
+  align-items: center;
 
-    mat-form-field {
-        font-size: 20px;
-        width: 75%;
-        background-color: transparent;
-        border: none;
-    }
+  mat-form-field {
+    font-size: 20px;
+    background-color: transparent;
+    border: none;
+  }
 
-    .clear-icon {
-        cursor: pointer;
-    }
+  .clear-icon {
+    cursor: pointer;
+  }
 }
 
 .tab {
-    text-align: center;
-    // width: 20%;
-    cursor: pointer;
-    margin: 0% 0.2%;
-    border-radius: 20px;
-    text-decoration: none;
-    border: none;
-    margin-top: 1%;
+  text-align: center;
+  // width: 20%;
+  cursor: pointer;
+  margin: 0% 0.2%;
+  border-radius: 20px;
+  text-decoration: none;
+  border: none;
+  margin-top: 1%;
 }
 
 .activeTab {
-    color: white;
-    background-color: green;
+  color: white;
+  background-color: green;
 }
 
 .message-container,
 .chat-rooms-container {
-    //height: 93%;
-    width: 100%;
-    word-wrap: break-word;
-    overflow-y: scroll;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    //margin-top: 13%;
+  height: -webkit-fill-available;
+  width: 100%;
+  word-wrap: break-word;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  //margin-top: 13%;
 }
 
 .chat-input {
-    display: flex;
-    height: fit-content;
-    //padding: 8px;
-    //gap: 8px;
+  display: flex;
+  height: fit-content;
+  //padding: 8px;
+  //gap: 8px;
 
-    button {
-        align-self: center;
-    }
+  button {
+    align-self: center;
+  }
 }
 
 .chat-metadata {
-    display: flex;
-    align-items: baseline;
-    justify-content: center;
-    padding: 0 2%;
-    border-bottom: 1px solid rgb(179, 255, 255);
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  //padding: 0 2%;
+  border-bottom: 1px solid rgb(179, 255, 255);
 
-    strong,
-    img,
-    p,
-    .person {
-        margin-bottom: 2%;
-    }
+  strong,
+  img,
+  p,
+  .person {
+    margin-bottom: 2%;
+  }
 }
 
 .other {
-    strong {
-        flex: 2;
-        margin-left: 5%;
-    }
+  strong {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
 }
 
 .me {
-    strong {
-        flex: 2;
-        margin-left: 35%;
-    }
-    p {
-        margin-bottom: 2%;
-        flex: 5;
-        text-align: left;
-    }
+  strong {
+    flex: 2;
+    margin-left: 35%;
+  }
+
+  p {
+    margin-bottom: 2%;
+    flex: 5;
+    text-align: left;
+  }
 }
 
 .message {
-    margin-top: 2%;
+  margin-top: 2%;
+  width: 260px;
 }
 
 // .current-user {
@@ -143,52 +153,53 @@ mat-tab-group {
 // }
 
 .chat-rooms {
-    display: flex;
-    align-items: baseline;
-    justify-content: center;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
 
-    div {
-        flex: 1;
-        text-align: left;
-    }
+  div {
+    flex: 1;
+    text-align: left;
+  }
 
-    button {
-        flex: 1;
-        float: right;
-    }
+  button {
+    flex: 1;
+    float: right;
+  }
 }
 
 .chat-room-session-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
 
-    //mat-icon {
-    //    flex: 1;
-    //    margin-top: 1%;
-    //    text-align: left;
-    //    cursor: pointer;
-    //}
+  //mat-icon {
+  //    flex: 1;
+  //    margin-top: 1%;
+  //    text-align: left;
+  //    cursor: pointer;
+  //}
 
-    //div {
-    //    text-align: left;
-    //    flex: 1;
-    //    // margin-left: 4%;
-    //}
+  //div {
+  //    text-align: left;
+  //    flex: 1;
+  //    // margin-left: 4%;
+  //}
 
-    .leave-room {
-        flex: 1;
-        float: right;
-        // justify-content: right;
-    }
+  .leave-room {
+    flex: 1;
+    float: right;
+    // justify-content: right;
+  }
 }
 
 ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
-    border-radius: 5px;
-    .search-control {
-        opacity: 0;
-    }
+  border-radius: 5px;
+
+  .search-control {
+    opacity: 0;
+  }
 }
 
 // .system-message {
@@ -196,7 +207,7 @@ mat-tab-group {
 // }
 
 .user-input {
-    width: 100%;
+  width: 100%;
 }
 
 // .max {
@@ -204,54 +215,54 @@ mat-tab-group {
 // }
 
 ::ng-deep .mat-mdc-form-field-bottom-align {
-    height: 0px;
+  height: 0px;
 }
 
 .placement {
-    text-decoration: underline;
-    cursor: pointer;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 ::ng-deep ::-webkit-scrollbar {
-     width: 10px;
-    //display: none;
+  width: 10px;
+  //display: none;
 }
 
 .avatar {
-    align-self: center;
-    height: 45px;
-    border-radius: 50%;
-    aspect-ratio: 1;
-    object-fit: cover;
+  align-self: center;
+  height: 45px;
+  border-radius: 50%;
+  aspect-ratio: 1;
+  object-fit: cover;
 }
 
 .person {
-    align-self: center;
-    height: 45px;
-    width: 45px;
-    border-radius: 50%;
-    aspect-ratio: 1;
-    box-shadow: none;
-    border: none;
-    outline: none;
-    cursor: none;
-    background-color: primary;
+  align-self: center;
+  height: 45px;
+  width: 45px;
+  border-radius: 50%;
+  aspect-ratio: 1;
+  box-shadow: none;
+  border: none;
+  outline: none;
+  cursor: none;
+  background-color: primary;
 }
 
 .person:hover {
-    cursor: default;
-    box-shadow: none;
-    border: none;
-    outline: none;
+  cursor: default;
+  box-shadow: none;
+  border: none;
+  outline: none;
 }
 
 .demo-section + .demo-section {
-    margin-top: 16px;
+  margin-top: 16px;
 }
 
 .quit-buttons {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 8px;
-    width: min-content;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 8px;
+  width: min-content;
 }

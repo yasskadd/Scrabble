@@ -154,7 +154,7 @@
     <!--    </div>-->
 
     <div id="combined">
-        <button id="abandonButton" *ngIf="!gameClientService.isGameFinish" (click)="abandonGame()" mat-raised-button color="warn">
+        <button id="abandonButton" *ngIf="!gameClientService.isGameFinish" (click)="abandonGame()" mat-raised-button color="warn" style='margin: 32px'>
             {{ "action.abandon" | translate }}
         </button>
 
