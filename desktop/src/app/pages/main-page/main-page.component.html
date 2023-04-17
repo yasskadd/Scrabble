@@ -5,6 +5,15 @@
         <div class="always-visible-content">
             <mat-card class="justified">
                 <mat-card-content class="justified">
+                    <button id="multiplayer-create" class="button multiplayer" mat-raised-button color="primary" (click)="redirectGameCreationPage()">
+                        {{ "action.create" | translate }}
+                        <mat-icon class="button-icon">create</mat-icon>
+                    </button>
+
+                    <button id="multiplayer-join" class="button multiplayer" mat-raised-button color="primary" (click)="navigateJoinPage()">
+                        {{ "action.join" | translate }}
+                        <mat-icon class="button-icon">leak_add</mat-icon>
+                    </button>
                     <div
                         id="scores"
                         (click)="openHighScoreDialog()"
@@ -17,15 +26,6 @@
                             <mat-icon class="scores-icon justified">emoji_events</mat-icon>
                         </button>
                     </div>
-                    <button id="multiplayer-create" class="button multiplayer" mat-raised-button color="primary" (click)="redirectGameCreationPage()">
-                        {{ "action.create" | translate }}
-                        <mat-icon class="button-icon">create</mat-icon>
-                    </button>
-
-                    <button id="multiplayer-join" class="button multiplayer" mat-raised-button color="primary" (click)="navigateJoinPage()">
-                        {{ "action.join" | translate }}
-                        <mat-icon class="button-icon">leak_add</mat-icon>
-                    </button>
                     <button
                         id="classique"
                         mat-raised-button
