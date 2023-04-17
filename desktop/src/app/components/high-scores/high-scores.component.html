@@ -1,28 +1,17 @@
 <div class="container" mat-dialog-content>
     <div class="wrapper">
         <div class="scoreInfo classique">
-            <mat-card-title> {{ "game.type.classic" | translate }} </mat-card-title>
+            <!-- <mat-card-title> {{ "game.type.classic" | translate }} </mat-card-title> -->
             <mat-card class="highScoreTableClassic">
                 <table>
                     <thead class="tableContainer">
                         <tr>
-                            <th></th>
                             <th>{{ "game.info.scores" | translate }}</th>
                             <th>{{ "game.info.players" | translate }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr *ngFor="let highScore of highScoreClassic">
-                            <td>
-                                <mat-icon
-                                    ng
-                                    [ngClass]="{ first: highScore.position === 1, second: highScore.position === 2, third: highScore.position === 3 }"
-                                    *ngIf="highScore.position === 1 || highScore.position === 2 || highScore.position === 3"
-                                >
-                                    emoji_events
-                                </mat-icon>
-                            </td>
-
                             <td class="tableData">
                                 {{ highScore.score }}
                             </td>
@@ -34,38 +23,5 @@
                 </table>
             </mat-card>
         </div>
-        <!-- <div class="scoreInfo log2990">
-            <mat-card-title>Partie LOG2990</mat-card-title>
-            <mat-card class="highScoreTableLOG2990">
-                <table>
-                    <thead class="tableContainer">
-                        <tr>
-                            <th></th>
-                            <th>Scores</th>
-                            <th>Joueurs</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let highScore of highScoreLOG29990">
-                            <td>
-                                <mat-icon
-                                    ng
-                                    [ngClass]="{ first: highScore.position === 1, second: highScore.position === 2, third: highScore.position === 3 }"
-                                    *ngIf="highScore.position === 1 || highScore.position === 2 || highScore.position === 3"
-                                    >emoji_events</mat-icon
-                                >
-                            </td>
-
-                            <td class="tableData">
-                                {{ highScore.score }}
-                            </td>
-                            <td class="tableData">
-                                {{ highScore.username }}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </mat-card>
-        </div> -->
     </div>
 </div>

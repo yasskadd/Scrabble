@@ -1,16 +1,18 @@
 .headerContent {
     display: flex;
-    flex-direction: row;
     margin-bottom: 10px;
-    justify-content: space-between;
+    justify-content: center;
+
+    .returnButton {
+        float: left;
+    }
+
+    .containerTitle {
+        flex: 2;
+        right: 4%;
+    }
 }
 
 .containerTitle {
     text-align: center;
-    font-size: 40px;
-    font-style: oblique;
-    font-weight: bold;
-    padding: 0px 0px 20px 0px;
-    text-transform: uppercase;
-    width: 150%;
 }
