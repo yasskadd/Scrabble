@@ -414,8 +414,9 @@ async fn httpDelete(
 async fn chatWindowListening(handle: tauri::AppHandle) {
     let listener = handle.get_window("chat").unwrap();
 
-    let eventEmmitter = handle.get_window("chat").unwrap();
+    let eventEmmitter = handle.get_window("main").unwrap();
     listener.listen_global(RustEvent::WindowEvent.to_string(), move |event| {
+        println!("received {:?}", event);
         eventEmmitter
             .emit_all(RustEvent::WindowEvent.to_string(), event.payload())
             .unwrap();
@@ -424,7 +425,7 @@ async fn chatWindowListening(handle: tauri::AppHandle) {
     let userDataEmitter = handle.get_window("chat").unwrap();
     listener.listen_global(RustEvent::UserData.to_string(), move |event| {
         userDataEmitter
-            .emit_all(RustEvent::UserData.to_string(), event.payload())
+            .emit(RustEvent::UserData.to_string(), event.payload())
             .unwrap();
     });
 }
@@ -436,9 +437,7 @@ async fn chatWindowUnlistening(handle: tauri::AppHandle) {
         .get_window("chat")
         .unwrap()
         .listen_global("windowEvent", move |event| {
-            windowHandle
-                .emit_all("windowEvent", event.payload())
-                .unwrap();
+            windowHandle.emit("windowEvent", event.payload()).unwrap();
         });
 }
 
@@ -468,6 +467,16 @@ fn main() {
                     .build()
                     .expect("Error creating the http client"),
             });
+
+            let windowHandle = app.handle().get_window("main").unwrap();
+            windowHandle.get_window("main").unwrap().listen_global(
+                RustEvent::WindowEvent.to_string(),
+                move |event| {
+                    windowHandle
+                        .emit(RustEvent::WindowEvent.to_string(), event.payload())
+                        .unwrap();
+                },
+            );
 
             Ok(())
         })

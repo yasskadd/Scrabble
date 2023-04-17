@@ -329,5 +329,42 @@
         "letter": "Letter",
         "cancel": "Cancel",
         "ok": "Ok"
+    },
+
+    "profile_settings": {
+        "settings": "Settings",
+        "stats": "Statistics",
+        "avg_time": "Average Game Time",
+        "avg_score": "Average Score",
+        "games": "Games played",
+        "new_user": "The user hasn't yet played any games",
+        "history": "History",
+        "win": "Win",
+        "loss": "Loss"
+    },
+
+    "reconnection": {
+        "title": "Connection Failed",
+        "question": "Attempt a reconnection?",
+        "no": "No",
+        "yes": "Yes"
+    },
+
+    "info_panel": {
+        "hint": "Hint",
+        "see": "See",
+        "replace": "Replace"
+    },
+
+    "connection_page": {
+        "username": "Username",
+        "password": "Password"
+    },
+
+    "create_account": {
+        "username": "Username",
+        "password": "Password",
+        "confirm_pass": "Confirm Password",
+        "connect": "Connect"
     }
 }

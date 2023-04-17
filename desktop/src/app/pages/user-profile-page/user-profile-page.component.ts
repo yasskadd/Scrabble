@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { AfterViewInit, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
+import { Component, ElementRef, NgZone, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpHandlerService } from '@app/services/communication/http-handler.service';
+import { LanguageService } from '@app/services/language.service';
 import { UserService } from '@app/services/user.service';
 import { HistoryEvent } from '@common/interfaces/history-event';
 import { UserStats } from '@common/interfaces/user-stats';
@@ -13,7 +14,7 @@ import Chart from 'chart.js/auto';
     templateUrl: './user-profile-page.component.html',
     styleUrls: ['./user-profile-page.component.scss'],
 })
-export class UserProfilePageComponent implements AfterViewInit {
+export class UserProfilePageComponent {
     @ViewChild('myChart') canvasRef: ElementRef<HTMLCanvasElement>;
 
     userStats: UserStats;
@@ -23,6 +24,7 @@ export class UserProfilePageComponent implements AfterViewInit {
     private myChart: Chart;
 
     constructor(
+        protected languageService: LanguageService,
         protected userService: UserService,
         private readonly httpHandlerService: HttpHandlerService,
         private router: Router,
@@ -36,11 +38,6 @@ export class UserProfilePageComponent implements AfterViewInit {
             this.setConnections();
             this.setGames();
         });
-    }
-
-    ngAfterViewInit() {
-        // TODO: Language, data
-        this.updateChart(0, 0);
     }
 
     setUserStats() {
@@ -93,7 +90,7 @@ export class UserProfilePageComponent implements AfterViewInit {
         this.myChart = new Chart(this.canvasRef.nativeElement.getContext('2d'), {
             type: 'doughnut',
             data: {
-                labels: ['Perdues', 'Gagnées'],
+                labels: ['Lost', 'Won'],
                 datasets: [
                     {
                         data: [loss, win],
@@ -112,6 +109,7 @@ export class UserProfilePageComponent implements AfterViewInit {
                 },
             },
         });
+
         this.myChart.update();
     }
 }

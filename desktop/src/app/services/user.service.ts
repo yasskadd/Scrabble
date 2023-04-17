@@ -58,6 +58,11 @@ export class UserService {
         this.user = user;
         this.httpHandlerService.login(user).then(
             (loginRes: { userData: IUser; sessionToken: string }) => {
+                if (!loginRes.sessionToken) {
+                    // TODO : Language
+                    this.snackBarService.openError('Connection failed');
+                    return;
+                }
                 this.tempUserData = loginRes.userData;
                 this.cookieService.updateUserSessionCookie(loginRes.sessionToken).then();
             },

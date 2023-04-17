@@ -329,5 +329,42 @@
         "letter": "Lettre",
         "cancel": "Annuler",
         "ok": "Choisir"
+    },
+
+    "profile_settings": {
+        "settings": "Paramètres",
+        "stats": "Statistiques",
+        "avg_time": "Temps moyen",
+        "avg_score": "Score moy",
+        "games": "Jeux joués",
+        "new_user": "L'utilisateur n'a pas encore joué de parties",
+        "history": "Historique",
+        "win": "Victoire",
+        "loss": "Défaite"
+    },
+
+    "reconnection": {
+        "title": "Connection Échouée",
+        "question": "Voulez-vous essayer de vous reconnecter?",
+        "no": "Non",
+        "yes": "Oui"
+    },
+
+    "info_panel": {
+        "hint": "Indice",
+        "see": "Voir",
+        "replace": "Remplacer"
+    },
+
+    "connection_page": {
+        "username": "Nom d'utilisateur",
+        "password": "Mot de passe"
+    },
+
+    "create_account": {
+        "username": "Nom d'utilisater",
+        "password": "Mot de passe",
+        "confirm_pass": "Confirmer le mot de passe",
+        "connect": "Connecter"
     }
 }

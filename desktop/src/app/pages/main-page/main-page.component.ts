@@ -1,4 +1,4 @@
-import { Component, NgZone } from '@angular/core';
+import { Component, NgZone, ViewChild } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
@@ -13,6 +13,8 @@ import { GameMode } from '@common/models/game-mode';
 import { ClientSocketService } from '@services/communication/client-socket.service';
 import { LanguageService } from '@services/language.service';
 import * as tauri from '@tauri-apps/api';
+import { ChatboxHandlerService } from '@services/chat/chatbox-handler.service';
+import { MatDrawer } from '@angular/material/sidenav';
 
 @Component({
     selector: 'app-main-page',
@@ -20,6 +22,7 @@ import * as tauri from '@tauri-apps/api';
     styleUrls: ['./main-page.component.scss'],
 })
 export class MainPageComponent {
+    @ViewChild('drawer') drawer: MatDrawer;
     protected userNameForm: FormControl;
     protected homeConnectionResponse: SocketResponse;
     protected multiplayerCreateLink: string;
@@ -32,6 +35,7 @@ export class MainPageComponent {
     constructor(
         protected userService: UserService,
         protected languageService: LanguageService,
+        protected chatboxHandler: ChatboxHandlerService,
         private clientSocketService: ClientSocketService,
         private dialog: MatDialog,
         private highScore: MatDialog,
@@ -45,6 +49,14 @@ export class MainPageComponent {
                 this.router.navigate([`${AppRoutes.ConnectionPage}`]).then();
             });
         }
+
+        this.chatboxHandler.chatWindowOpened.subscribe((value: boolean) => {
+            if (value) {
+                this.drawer?.close().then();
+            } else {
+                this.drawer?.open().then();
+            }
+        });
 
         this.homeConnectionResponse = { validity: false };
         this.userNameForm = new FormControl('', Validators.required);

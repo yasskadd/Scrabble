@@ -15,4 +15,5 @@ export enum RustEvent {
     SocketNotAlive = 'socketNotAlive',
     WindowEvent = 'windowEvent',
     UserData = 'userData',
+    ChatRooms = 'charRooms',
 }

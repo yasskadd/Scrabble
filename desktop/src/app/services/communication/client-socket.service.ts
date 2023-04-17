@@ -6,10 +6,11 @@ import { LanguageService } from '@services/language.service';
 import { SnackBarService } from '@services/snack-bar.service';
 import { TauriStateService } from '@services/tauri-state.service';
 import * as tauri from '@tauri-apps/api';
-import { Event } from '@tauri-apps/api/event';
+import { Event, TauriEvent } from '@tauri-apps/api/event';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
+import { WebviewWindow } from '@tauri-apps/api/window';
 
 @Injectable({
     providedIn: 'root',
@@ -33,6 +34,19 @@ export class ClientSocketService {
         this.connected = new BehaviorSubject<boolean>(false);
         this.reconnect = new Subject();
         this.cancelConnection = new Subject();
+
+        tauri.event
+            .listen(TauriEvent.WINDOW_CLOSE_REQUESTED, (event: any) => {
+                if (event.windowLabel === 'main') {
+                    tauri.window.getAll().forEach((window: WebviewWindow) => {
+                        window.close().then();
+                    });
+                } else if (event.windowLabel === 'chat') {
+                    console.log('chat window closed');
+
+                }
+            })
+            .then();
     }
 
     async isSocketAlive() {
@@ -134,7 +148,9 @@ export class ClientSocketService {
                     tauri.event
                         .listen(RustEvent.SocketSendFailed, () => {
                             this.ngZone.run(() => {
-                                this.launchReconnectionProtocol();
+                                if (this.connected.value) {
+                                    this.launchReconnectionProtocol();
+                                }
                             });
                         })
                         .then();
@@ -144,7 +160,9 @@ export class ClientSocketService {
                     tauri.event
                         .listen(RustEvent.SocketSendFailed, () => {
                             this.ngZone.run(() => {
-                                this.launchReconnectionProtocol();
+                                if (this.connected.value) {
+                                    this.launchReconnectionProtocol();
+                                }
                             });
                         })
                         .then();

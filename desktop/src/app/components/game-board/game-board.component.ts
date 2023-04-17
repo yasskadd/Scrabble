@@ -1,5 +1,5 @@
 import { CdkDragDrop, CdkDragMove } from '@angular/cdk/drag-drop';
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CENTER_TILE } from '@app/constants/board-view';
 import { BoardTileInfo } from '@app/interfaces/board-tile-info';
 import { SelectionPosition } from '@app/interfaces/selection-position';
@@ -16,6 +16,7 @@ import { TauriStateService } from '@services/tauri-state.service';
 import { window as tauriWindow } from '@tauri-apps/api';
 import { TauriEvent } from '@tauri-apps/api/event';
 import { WebviewWindow } from '@tauri-apps/api/window';
+import { Subject } from 'rxjs';
 
 @Component({
     selector: 'app-game-board',
@@ -25,6 +26,9 @@ import { WebviewWindow } from '@tauri-apps/api/window';
 export class GameBoardComponent {
     protected boardTileStates: typeof BoardTileState = BoardTileState;
     protected playDirection: typeof PlayDirection = PlayDirection;
+    protected focus: boolean;
+    @Input()
+    keyboardParentSubject: Subject<KeyboardEvent>;
 
     constructor(
         protected letterPlacementService: LetterPlacementService,

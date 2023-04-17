@@ -2,81 +2,81 @@
     <img src="https://bit.ly/3m206ss" width="250" height="50" alt="Logo Scrabble" *ngIf="!gameClientService.isGameFinish" (click)="abandonGame()" />
     <img src="https://bit.ly/3m206ss" width="250" height="50" alt="Logo Scrabble" *ngIf="gameClientService.isGameFinish" (click)="leaveGame()" />
 </div> -->
-<mat-card class='justified' style='padding-bottom: 0px'>
-    <div class='panel-top'>
-        <div id='reserve'>
-            <div id='number-letters'>{{ this.gameClientService.letterReserveLength }}</div>
+<mat-card class="justified" style="padding-bottom: 0px">
+    <div class="panel-top">
+        <div id="reserve">
+            <div id="number-letters">{{ this.gameClientService.letterReserveLength }}</div>
             lettres restantes
         </div>
-        <button mat-raised-button
-                [disabled]='!gameClientService.currentlyPlaying() || letterService.placedLetters.length !== 0'
-                *ngIf='!clueAvailable()'
-                (click)='askForClue()'
-                class='clue-buttons'
-                style='width: 50%'>
-            <!-- TODO : Language -->
-            Indice
+        <button
+            mat-raised-button
+            [disabled]="!gameClientService.currentlyPlaying() || letterService.placedLetters.length !== 0"
+            *ngIf="!clueAvailable()"
+            (click)="askForClue()"
+            class="clue-buttons"
+            style="width: 50%"
+        >
+            {{ "info_panel.hint" | translate }}
         </button>
-        <div *ngIf='clueAvailable()' class='clue-buttons'>
-            <button mat-mini-fab (click)='prevClue()'>
+        <div *ngIf="clueAvailable()" class="clue-buttons">
+            <button mat-mini-fab (click)="prevClue()">
                 <mat-icon>navigate_before</mat-icon>
             </button>
-            <button mat-raised-button (click)='placeClue()'>Confirm</button>
-            <button mat-mini-fab (click)='nextClue()'>
+            <button mat-raised-button (click)="placeClue()">Confirm</button>
+            <button mat-mini-fab (click)="nextClue()">
                 <mat-icon>navigate_next</mat-icon>
             </button>
         </div>
     </div>
-    <div class='players'>
+    <div class="players">
         <button
-            class='player'
-            *ngFor='let playerInfos of players; index as i'
-            [ngClass]='{ active: gameClientService.activePlayer.username === playerInfos.player.user.username }'
-            id='player-1'
+            class="player"
+            *ngFor="let playerInfos of players; index as i"
+            [ngClass]="{ active: gameClientService.activePlayer.username === playerInfos.player.user.username }"
+            id="player-1"
         >
-            <mat-card-title-group class='playerInfo'>
+            <mat-card-title-group class="playerInfo">
                 <mat-card-title>
-                    <img *ngIf='gameClientService.getLocalPlayer().player.type !== PlayerType.Observer'
-                         [src]='userService.getPlayerImage(playerInfos.player)'
-                         class='selector-avatar mat-elevation-z5' />
-                    <img *ngIf='gameClientService.getLocalPlayer().player.type === PlayerType.Observer'
-                         [mat-menu-trigger-for]='player_menu' [src]='userService.getPlayerImage(playerInfos.player)'
-                         class='selector-avatar mat-elevation-z5' />
+                    <img
+                        *ngIf="gameClientService.getLocalPlayer().player.type !== PlayerType.Observer"
+                        [src]="userService.getPlayerImage(playerInfos.player)"
+                        class="selector-avatar mat-elevation-z5"
+                    />
+                    <img
+                        *ngIf="gameClientService.getLocalPlayer().player.type === PlayerType.Observer"
+                        [mat-menu-trigger-for]="player_menu"
+                        [src]="userService.getPlayerImage(playerInfos.player)"
+                        class="selector-avatar mat-elevation-z5"
+                    />
                     <b>
                         {{ playerInfos.player.user.username }}
                     </b>
                 </mat-card-title>
-                <mat-card-subtitle
-                    class='score'
-                >{{ playerInfos.score }} {{ "game_page.informations.points" | translate }}</mat-card-subtitle>
-                <mat-card-subtitle class='rack-letters'
-                                   *ngIf='playerInfos.rack.length < 7'>
+                <mat-card-subtitle class="score">{{ playerInfos.score }} {{ "game_page.informations.points" | translate }}</mat-card-subtitle>
+                <mat-card-subtitle class="rack-letters" *ngIf="playerInfos.rack.length < 7">
                     {{ playerInfos.rack.length }} {{ "game_page.informations.letters_available" | translate }}
                 </mat-card-subtitle>
             </mat-card-title-group>
             <mat-card-content>
                 <div
                     [ngClass]="[gameClientService.timer < 10 ? 'countdown' : 'time']"
-                    id='playerOneTimer'
-                    *ngIf='gameClientService.activePlayer._id === playerInfos.player.user._id'
-                    class='timer'
+                    id="playerOneTimer"
+                    *ngIf="gameClientService.activePlayer._id === playerInfos.player.user._id"
+                    class="timer"
                 >
                     <mat-icon>timer</mat-icon>
                     {{ timer.secondsToMinute(gameClientService.timer) }}
                     :{{ timer.timerToSecond(gameClientService.timer) }}
                 </div>
             </mat-card-content>
-            <mat-menu #player_menu='matMenu'>
-                <button (click)='selectPlayer(playerInfos.player)' mat-menu-item>
+            <mat-menu #player_menu="matMenu">
+                <button (click)="selectPlayer(playerInfos.player)" mat-menu-item>
                     <mat-icon>visibility</mat-icon>
-                    <!-- TODO : Language -->
-                    <span>Voir</span>
+                    <span>{{ "info_panel.see" | translate }}</span>
                 </button>
-                <button (click)='replaceBot(playerInfos)' *ngIf='playerInfos.player.type === PlayerType.Bot'
-                        mat-menu-item>
+                <button (click)="replaceBot(playerInfos)" *ngIf="playerInfos.player.type === PlayerType.Bot" mat-menu-item>
                     <mat-icon>sync</mat-icon>
-                    <!-- TODO : Language-->
-                    <span>Remplacer</span>
+                    <span>{{ "info_panel.replace" | translate }}</span>
                 </button>
             </mat-menu>
         </button>
@@ -153,9 +153,8 @@
     <!--        </mat-expansion-panel>-->
     <!--    </div>-->
 
-    <div id='combined'>
-        <button id='abandonButton' *ngIf='!gameClientService.isGameFinish' (click)='abandonGame()' mat-raised-button
-                color='warn'>
+    <div id="combined">
+        <button id="abandonButton" *ngIf="!gameClientService.isGameFinish" (click)="abandonGame()" mat-raised-button color="warn">
             {{ "action.abandon" | translate }}
         </button>
 
@@ -163,12 +162,12 @@
         <button
             hidden
             mat-fab
-            color='accent'
-            (click)='openHelpDialog()'
-            class='help-button'
+            color="accent"
+            (click)="openHelpDialog()"
+            class="help-button"
             matTooltip="{{ 'main_page.tooltip.game_instructions' | translate }}"
-            matTooltipPosition='right'
-            matTooltipClass='toolMainPage'
+            matTooltipPosition="right"
+            matTooltipClass="toolMainPage"
         >
             <mat-icon>help_outline</mat-icon>
         </button>
