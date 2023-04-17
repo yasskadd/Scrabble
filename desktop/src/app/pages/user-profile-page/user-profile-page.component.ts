@@ -119,4 +119,8 @@ export class UserProfilePageComponent {
             this.router.navigate([AppRoutes.HomePage]).then();
         });
     }
+
+    protected getLanguage() {
+        return this.languageService.language;
+    }
 }

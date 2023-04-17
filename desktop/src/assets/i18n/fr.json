@@ -63,7 +63,8 @@
             "host": "Hôte",
             "state": "État",
             "timer": "Minuterie",
-            "dictionary": "Dictionnaire"
+            "dictionary": "Dictionnaire",
+            "difficulty": "Difficulté"
         },
         "random": "Aléatoire"
     },
@@ -135,7 +136,9 @@
         "no_thanks": "Non merci",
         "ok": "Ok",
         "yes": "Oui",
-        "no": "Non"
+        "no": "Non",
+        "code": "Code de connexion",
+        "confirm": "Confirmer"
     },
     "setting": {
         "theme": "Thème",
@@ -199,6 +202,10 @@
         "join": "REJOINDRE",
         "delete": "EFFACER",
         "leave": "QUITTER",
+        "open_window": "Ouvrir dans une fenêtre",
+        "sortir": "Sortir",
+        "quitter": "Quitter",
+
         "create_room": {
             "create": "Creer un nouveau canal",
             "label": "Création de canal",
@@ -340,7 +347,10 @@
         "new_user": "L'utilisateur n'a pas encore joué de parties",
         "history": "Historique",
         "win": "Victoire",
-        "loss": "Défaite"
+        "loss": "Défaite",
+        "connections": "Connexions",
+        "connection": "Connexion",
+        "logout": "Deconnexion"
     },
 
     "reconnection": {
@@ -366,5 +376,21 @@
         "password": "Mot de passe",
         "confirm_pass": "Confirmer le mot de passe",
         "connect": "Connecter"
+    },
+
+    "forgot-password": {
+        "forgot": "Mot de passe oublié",
+        "message": "Entrez le nom d'utilisateur de votre compte. Un mot de passe temporaire sera envoyé à l'adresse courriel reliée à votre compte",
+        "username_label": "Nom d'utilisateur",
+        "send_email": "Envoyer un courriel",
+        "success": "Le mot de passe temporaire a été envoyé",
+        "error": "Il n'existe pas d'adresse couriel reliée à ce nom d'utilisateur"
+    },
+
+    "end-game": {
+        "victory": "VICTOIRE",
+        "defeat": "DÉFAITE",
+        "win": "A GAGNÉ",
+        "home": "Retour à l'accueil"
     }
 }
