@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { AppRoutes } from '@app/models/app-routes';
 import { Word } from '@common/classes/word.class';
 import { SocketEvents } from '@common/constants/socket-events';
+import { PlayerGameResult } from '@common/interfaces/game-history-info';
 import { GameInfo } from '@common/interfaces/game-state';
 import { Letter } from '@common/interfaces/letter';
 import { PlayerInformation } from '@common/interfaces/player-information';
@@ -31,6 +32,7 @@ export class GameClientService {
     nextTurnSubject: Subject<void>;
     turnFinish: ReplaySubject<boolean>;
     selectedPlayer: PlayerInformation;
+    gameResult: PlayerGameResult;
 
     constructor(
         private clientSocketService: ClientSocketService,
@@ -77,8 +79,8 @@ export class GameClientService {
             this.getAllLetterReserve(letterReserveUpdated);
         });
 
-        this.clientSocketService.on(SocketEvents.GameEnd, () => {
-            this.gameEndEvent();
+        this.clientSocketService.on(SocketEvents.GameEnd, (gameResult: PlayerGameResult) => {
+            this.gameEndEvent(gameResult);
         });
 
         this.clientSocketService.on(SocketEvents.PublicViewUpdate, (info: GameInfo) => {
@@ -194,14 +196,11 @@ export class GameClientService {
         return resultingRack;
     }
 
-    private gameEndEvent() {
-        if (this.winningMessage === '') {
-            this.findWinnerByScore();
-            this.isGameFinish = true;
-        }
+    private gameEndEvent(gameResult: PlayerGameResult) {
+        this.gameResult = gameResult;
         this.quitGameSubject.next();
         this.ngZone.run(() => {
-            this.router.navigate([`${AppRoutes.HomePage}`]).then();
+            this.router.navigate([`${AppRoutes.EndGamePage}`]).then();
         });
     }
 
@@ -212,27 +211,27 @@ export class GameClientService {
         this.updateGameboard(gameInfo.gameboard);
     }
 
-    private findWinnerByScore(): void {
-        let score = this.players[0].score;
-        const differentScores: PlayerInformation[] = this.players.filter((info: PlayerInformation) => info.score !== score);
-        if (differentScores.length > 0) {
-            this.winningMessage = 'game.state.equality';
-            return;
-        }
+    // private findWinnerByScore(): void {
+    //     let score = this.players[0].score;
+    //     const differentScores: PlayerInformation[] = this.players.filter((info: PlayerInformation) => info.score !== score);
+    //     if (differentScores.length > 0) {
+    //         this.winningMessage = 'game.state.equality';
+    //         return;
+    //     }
 
-        let winningPlayer: PlayerInformation;
-        this.players.forEach((info: PlayerInformation) => {
-            if (info.score > score) {
-                score = info.score;
-                winningPlayer = info;
-            }
-        });
+    //     let winningPlayer: PlayerInformation;
+    //     this.players.forEach((info: PlayerInformation) => {
+    //         if (info.score > score) {
+    //             score = info.score;
+    //             winningPlayer = info;
+    //         }
+    //     });
 
-        if (winningPlayer.player.user.username === this.userService.user.username) {
-            this.winningMessage = 'game.state.winned';
-        }
-        this.winner = winningPlayer.player.user.username;
-    }
+    //     if (winningPlayer.player.user.username === this.userService.user.username) {
+    //         this.winningMessage = 'game.state.winned';
+    //     }
+    //     this.winner = winningPlayer.player.user.username;
+    // }
 
     private getAllLetterReserve(lettersReserveUpdated: Letter[]): void {
         let letterString = '';

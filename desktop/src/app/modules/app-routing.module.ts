@@ -4,6 +4,7 @@ import { GenericChatComponent } from '@app/components/chat/generic-chat/generic-
 import { AppRoutes } from '@app/models/app-routes';
 import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
 import { ConnectionPageComponent } from '@app/pages/connection-page/connection-page.component';
+import { EndGameComponent } from '@app/pages/end-game-page/end-game-page.component';
 import { ForgotPasswordPageComponent } from '@app/pages/forgot-password-page/forgot-password-page.component';
 import { GamePageComponent } from '@app/pages/game-page/game-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
@@ -30,6 +31,7 @@ const routes: Routes = [
     { path: `${AppRoutes.Chat}`, component: GenericChatComponent },
     { path: `${AppRoutes.Chat}/:id`, component: GenericChatComponent },
     { path: `${AppRoutes.ForgotPasswordPage}`, component: ForgotPasswordPageComponent },
+    { path: `${AppRoutes.EndGamePage}`, component: EndGameComponent },
     { path: '**', redirectTo: AppRoutes.ConnectionPage },
 ];
 

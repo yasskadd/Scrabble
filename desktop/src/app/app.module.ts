@@ -42,6 +42,8 @@ import { ErrorSnackBarComponent } from './components/snack-bar/error/error-snack
 import { InfoSnackBarComponent } from './components/snack-bar/info/info-snack-bar.component';
 import { AdminPageComponent } from './pages/admin-page/admin-page.component';
 import { ConnectionPageComponent } from './pages/connection-page/connection-page.component';
+import { EndGameComponent } from './pages/end-game-page/end-game-page.component';
+import { ForgotPasswordPageComponent } from './pages/forgot-password-page/forgot-password-page.component';
 import { MainPageComponent } from './pages/main-page/main-page.component';
 import { GameCreationPageComponent } from './pages/multiplayer-create-page/game-creation-page.component';
 import { MultiplayerJoinPageComponent } from './pages/multiplayer-join-page/multiplayer-join-page.component';
@@ -49,7 +51,6 @@ import { SettingsPageComponent } from './pages/settings-page/settings-page.compo
 import { UserCreationPageComponent } from './pages/user-creation-page/user-creation-page.component';
 import { UserProfilePageComponent } from './pages/user-profile-page/user-profile-page.component';
 import { WaitingOpponentPageComponent } from './pages/waiting-opponent-page/waiting-opponent-page.component';
-import { ForgotPasswordPageComponent } from './pages/forgot-password-page/forgot-password-page.component';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(http, '../assets/i18n/', '.json');
@@ -101,6 +102,7 @@ export const HttpLoaderFactory = (http: HttpClient) => new TranslateHttpLoader(h
         DialogBoxCreateChatComponent,
         DialogBoxReconnectionComponent,
         ForgotPasswordPageComponent,
+        EndGameComponent,
     ],
     imports: [
         AppMaterialModule,

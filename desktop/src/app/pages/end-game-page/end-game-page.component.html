@@ -1,0 +1,19 @@
+<div class="encapsulating-div">
+    <app-header></app-header>
+
+    <body class="mat-app-background">
+        <div class="result-container" [ngClass]="{ victory: isWinner, defeat: !isWinner }">
+            <h1>{{ isWinner ? "VICTORY!" : "DEFEAT" }}</h1>
+
+            <div class="winner-info">
+                <img class="profile-picture" [src]="winnerImageURL" />
+                <div class="winner-details">
+                    <h2 class="username">{{ winnerUsername }}</h2>
+                    <p class="info">Score: 450</p>
+                </div>
+            </div>
+        </div>
+    </body>
+
+    <app-footer></app-footer>
+</div>

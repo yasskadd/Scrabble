@@ -1,7 +1,8 @@
 export interface PlayerGameResult {
-    name: string;
+    playerId: string;
     score: number;
 }
+
 
 export interface GameHistoryInfo {
     roomId: string;

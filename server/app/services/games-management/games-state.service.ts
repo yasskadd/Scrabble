@@ -351,7 +351,7 @@ export class GamesStateService {
         gamePlayers.forEach((g: GamePlayer) => {
             const socket = this.socketManager.getSocketFromId(g.player.socketId);
             if (!socket) return;
-            socket.emit(SocketEvents.GameEnd, winningPlayer.getInformation());
+            socket.emit(SocketEvents.GameEnd, winningPlayer.getGameResult());
         });
         this.gamesHandler.removeRoom(roomId);
     }
