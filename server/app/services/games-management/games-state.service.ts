@@ -43,6 +43,7 @@ const ERROR_REPLACING_BOT = 'Error trying to replace the bot';
 @Service()
 export class GamesStateService {
     addBotSubject: Subject<BeginnerBot>;
+    addRealPlayerSubject: Subject<RealPlayer>;
 
     constructor(
         private accountStorage: AccountStorageService,
@@ -54,6 +55,7 @@ export class GamesStateService {
         private historyStorageService: HistoryStorageService, // private virtualPlayerStorage: VirtualPlayersStorageService,
     ) {
         this.addBotSubject = new Subject<BeginnerBot>();
+        this.addRealPlayerSubject = new Subject<RealPlayer>();
     }
 
     initSocketsEvents(): void {
@@ -453,6 +455,7 @@ export class GamesStateService {
             this.gamesHandler.getPlayersInRoom(newPlayer.player.roomId)[0].game.turn.inactivePlayers?.push(observer.player.user);
         }
         this.gamesHandler.addPlayer(newPlayer);
+        this.addRealPlayerSubject.next(newPlayer);
 
         // TODO: Update room with roomID
         server.to(newPlayer.player.roomId).emit(SocketEvents.PublicViewUpdate, {

@@ -176,4 +176,10 @@ export class SettingsPageComponent implements OnInit {
             this.newUsernameConfirmation.addValidators(equalValidatorFn);
         });
     }
+
+    protected redirectProfile() {
+        this.ngZone.run(() => {
+            this.router.navigate([AppRoutes.UserProfilePage]).then();
+        });
+    }
 }

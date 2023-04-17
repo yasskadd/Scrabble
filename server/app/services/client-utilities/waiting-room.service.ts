@@ -1,4 +1,6 @@
 /* eslint-disable max-lines */
+import { BeginnerBot } from '@app/classes/player/beginner-bot.class';
+import { RealPlayer } from '@app/classes/player/real-player.class';
 import { ROOMID_LENGTH, UNAVAILABLE_ELEMENT_INDEX } from '@app/constants/rooms';
 import { VirtualPlayersStorageService } from '@app/services/database/virtual-players-storage.service';
 import { GamesHandlerService } from '@app/services/games-management/games-handler.service';
@@ -24,7 +26,6 @@ import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import * as uuid from 'uuid';
 import { ChatHandlerService } from './chat-handler.service';
-import { BeginnerBot } from '@app/classes/player/beginner-bot.class';
 
 const INDEX_NOT_FOUND = -1;
 
@@ -53,6 +54,11 @@ export class WaitingRoomService {
         });
         this.gameStateService.addBotSubject.subscribe((bot: BeginnerBot) => {
             this.waitingRooms.find((room: GameRoom) => room.id === bot.player.roomId)?.players.push(bot.player);
+            this.socketManager.server.emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
+        });
+
+        this.gameStateService.addRealPlayerSubject.subscribe((realPlayer: RealPlayer) => {
+            this.waitingRooms.find((room: GameRoom) => room.id === realPlayer.player.roomId)?.players.push(realPlayer.player);
             this.socketManager.server.emit(SocketEvents.UpdateGameRooms, this.getClientSafeAvailableRooms());
         });
     }
