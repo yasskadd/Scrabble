@@ -61,9 +61,10 @@
             "name": "Player name",
             "players": "Players",
             "host": "Host",
-            "state": "état",
+            "state": "State",
             "timer": "Timer",
-            "dictionary": "Dictionary"
+            "dictionary": "Dictionary",
+            "difficulty": "Difficulty"
         },
         "random": "Random"
     },
@@ -135,7 +136,9 @@
         "no_thanks": "No thanks",
         "ok": "Ok",
         "yes": "Yes",
-        "no": "No"
+        "no": "No",
+        "code": "Connection code",
+        "confirm": "Confirm"
     },
     "setting": {
         "theme": "Theme",
@@ -199,6 +202,9 @@
         "join": "JOIN",
         "delete": "DELETE",
         "leave": "LEAVE",
+        "open_window": "Open in a new window",
+        "sortir": "Go back",
+        "quitter": "Leave",
         "create_room": {
             "label": "Room creation",
             "hint": "Room name",
@@ -340,7 +346,10 @@
         "new_user": "The user hasn't yet played any games",
         "history": "History",
         "win": "Win",
-        "loss": "Loss"
+        "loss": "Loss",
+        "connections": "Connections",
+        "connection": "Connection",
+        "logout": "Logout"
     },
 
     "reconnection": {
@@ -366,5 +375,21 @@
         "password": "Password",
         "confirm_pass": "Confirm Password",
         "connect": "Connect"
+    },
+
+    "forgot-password": {
+        "forgot": "Forgot Password",
+        "message": "Enter the username associated with your account. An email with a temporary password will be sent to the email address linked to your account.",
+        "username_label": "Username",
+        "send_email": "Send email",
+        "success": "Temporary password has been sent to email",
+        "error": "There is no email linked to the username you provided"
+    },
+
+    "end-game": {
+        "victory": "VICTORY",
+        "defeat": "DEFEAT",
+        "win": "HAS WON",
+        "home": "Return Home Page"
     }
 }

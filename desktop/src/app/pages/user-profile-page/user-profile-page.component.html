@@ -47,13 +47,14 @@
                                 </div>
                             </mat-list>
                         </mat-tab>
-                        <mat-tab label="Connexions">
+                        <mat-tab label="{{ 'profile_settings.connections' | translate }}">
                             <mat-list>
                                 <div *ngFor="let connection of connections">
                                     <mat-list-item>
                                         <div id="list-item-content">
                                             <!-- TODO: language -->
-                                            <span>{{ connection.event }}</span>
+                                            <span *ngIf="connection.event === 'connection'">{{ "profile_settings.connection" | translate }}</span>
+                                            <span *ngIf="connection.event === 'logout'">{{ "profile_settings.logout" | translate }}</span>
                                             <span>{{ connection.date }}</span>
                                         </div>
                                     </mat-list-item>

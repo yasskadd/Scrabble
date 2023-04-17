@@ -63,13 +63,13 @@
             </div>
 
             <div class="container-button">
-                <button class="return-button" mat-icon-button (click)='navigateHome()'>
+                <button class="return-button" mat-icon-button (click)="navigateHome()">
                     <mat-icon>navigate_before</mat-icon>
                 </button>
                 <mat-form-field (keydown.enter)="joinSecretRoom()" appearance="outline">
                     <mat-label>
                         <!-- TODO : Language -->
-                        Code de connexion
+                        {{ "action.code" | translate }}
                     </mat-label>
                     <input matInput [formControl]="roomIdForm" />
                     <button mat-icon-button matSuffix (click)="joinSecretRoom()">
