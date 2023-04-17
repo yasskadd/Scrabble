@@ -70,12 +70,14 @@
         </div>
 
 
-        <button *ngIf='chatIsOpen && !chatboxHandler.chatWindowOpened.getValue()' class='open-chat-button' mat-button color='primary' (click)='drawer.toggle()'
+        <button *ngIf='chatIsOpen && !chatboxHandler.chatWindowOpened.getValue()' class='open-chat-button' mat-button
+                color='primary' (click)='drawer.toggle()'
                 (click)='closeChat()'>
             {{ "main_page.chat.close" | translate }}
             <mat-icon>keyboard_arrow_right</mat-icon>
         </button>
-        <button *ngIf='!chatIsOpen && !chatboxHandler.chatWindowOpened.getValue()' class='open-chat-button' mat-button color='primary' (click)='drawer.toggle()'
+        <button *ngIf='!chatIsOpen && !chatboxHandler.chatWindowOpened.getValue()' class='open-chat-button' mat-button
+                color='primary' (click)='drawer.toggle()'
                 (click)='openChat()'>
             <mat-icon>chat_bubble_outline</mat-icon>
             {{ "main_page.chat.open" | translate }}
